@@ -31,6 +31,8 @@
 4. npm install
 5. cd ../../
 6. 新建.sh脚本（内容如下），执行：
+
+```
 version="{
     \"version\":\"1.8.1\",
     \"platform\":\"{目标平台，例：win-x64}\",
@@ -56,3 +58,4 @@ pkg -t {目标平台与node版本，例：node12-win-x64} package.json
 mv -f mixio ../{编译产物目标文件夹}/mixio
 cd ../
 chmod -R 777 {编译产物目标文件夹}
+```
