@@ -1,0 +1,910 @@
+<html>
+    <head>
+        <title>MixIO逻辑视图API</title>
+        <link rel="shortcut icon" href="img/shortcut.png"/>
+    </head>
+    <body style="display:flex;flex-direction:row;margin:0;padding:0">
+    <div style='min-width:300px;height:100vh;background-color:#4e73df;color:white;display:flex;flex-direction:column;align-items:center'>
+        <img src="img/logo.png" style="width:76px;height:80px;margin:30px" alt="">
+        <style>
+            a{
+                all:unset;
+                margin:5px!important;
+                width:200px;
+                height:30px;
+                cursor:pointer;
+                background-color:rgba(255,255,255,0.4);
+                font-size:1rem;
+                font-weight:bold;
+                margin:0;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                border-radius:20px
+            }
+            a:hover{
+                background-color:rgba(255,255,255,0.6);
+            }
+        </style>
+        <a href="#log">控制台输出</a>
+        <a href="#mqtt">MQTT消息控制</a>
+        <a href="#time">循环与延时</a>
+        <a href="#button">组件：按键/开关</a>
+        <a href="#slider">组件：滑杆</a>
+        <a href="#keyboard">组件：文本输入</a>
+        <a href="#joystick">组件：摇杆手柄</a>
+        <a href="#rgb">组件：RGB色盘</a>
+        <a href="#bulb">组件：指示灯</a>
+        <a href="#text">组件：文本显示屏</a>
+        <a href="#line">组件：折线图表</a>
+        <a href="#bar">组件：柱状图表</a>
+        <a href="#table">组件：数据表格</a>
+        <a href="#dashboard">组件：仪表盘</a>
+        <a href="#datamap">组件：数据地图</a>
+        <a href="#weather">组件：实时气象仪</a>
+        <a href="#var">命名空间</a>
+    </div>
+    <div style='width:100%;height:100vh;overflow:scroll;font-family:monospace;word-break:break-all'>
+        <style>
+            div div p{
+                margin:0;
+                font-size:1rem;
+                padding-left:5px;
+                margin-bottom:5px;
+                
+            }
+            div div{
+                margin:5px;
+                margin-bottom:20px;
+                margin-top:10px;
+            }
+            div div h2{
+                background-image: linear-gradient(to right, #4e73df, #b6c5f2);
+                margin:0;
+                padding-top:8px;
+                padding-bottom:8px;
+                margin-bottom:5px;
+                padding-left:5px;
+                color:white
+            }
+            div div div{
+                border:solid #1cc88a 1px;
+                font-size:0.8rem;
+                padding:5px;
+                color:black;
+                margin-bottom:10px
+            }
+        </style>
+        <h1 style='margin:15px;margin-left:10px'>MixIO Logic API (Release Preview)</h1>
+        <p style="margin:10px;margin-bottom:15px">Last Modified: 2021/11/28 00:56</p>
+        <div>
+            <h2>MixIO</h2>
+            <p>逻辑视图所处的安全命名变量。为方便拼写，可使用全小写的“mixio”间接访问这一变量。</p>
+        </div>
+        <div id="log">
+            <h2>MixIO.log(<i>text</i>)</h2>
+            <p><i><b>text</b></i> - 待输出的文本</p>
+            <p>向逻辑视图的“输出”框中输出指定文本。</p>
+            <div>
+                <p><b>示例程序1</b></p>
+                <p>向“输出”框中输出"Hello world"：</p>
+                <p>MixIO.log("Hello world")</p>
+                <img src="img/eg1.png"></img>
+            </div>
+        </div>
+        <div id="mqtt">
+            <h2>MixIO.onMessage(<i>triggerFunction</i>)</h2>
+            <p><i><b>triggerFunction</b></i> - 希望触发的函数</p>
+            <p>当收到MQTT消息时，执行对应函数。</p>
+            <div>
+                <p><b>示例程序2</b></p>
+                <p>每当收到MQTT消息时，输出其主题和消息体：</p>
+                <p>MixIO.onMessage(function(topic,message){</p>
+                <p>&nbsp;&nbsp;MixIO.log(topic)</p>
+                <p>&nbsp;&nbsp;MixIO.log(message)</p>
+                <p>})</p>
+                <img src="img/eg2.png"></img>
+            </div>
+        </div>
+        <div>
+            <h2>MixIO.publish(<i>topic</i>,<i>message</i>)</h2>
+            <p><i><b>topic</b></i> - 发布消息的主题</p>
+            <p><i><b>message</b></i> - 发布消息的内容</p>
+            <p>在当前项目下，发送一则自定义的MQTT消息。</p>
+            <div>
+                <p><b>示例程序3</b></p>
+                <p>发送一则主题为'greeting',内容为'hello'的消息：</p>
+                <p>MixIO.publish('greeting','hello')</p>
+                <img src="img/eg3.png"></img>
+            </div>
+            <div style='border:solid #e74a3b 1px'>
+                <p><b>警告</b></p>
+                <p>为防止异常递归，发送的最大频率被限制为5次/500ms。超出频率限制的消息会被拦截。</p>
+            </div>
+        </div>
+        <div id="time">
+            <h2>MixIO.setInterval(<i>triggerFunction</i>,<i>time</i>)</h2>
+            <p><i><b>triggerFunction</b></i> - 希望触发的函数</p>
+            <p><i><b>time</b></i> - 触发的循环间隔（单位：ms）</p>
+            <p>间隔指定时间，循环触发指定函数。</p>
+            <div>
+                <p><b>示例程序4</b></p>
+                <p>每隔1s，输出当前时间：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.log(new Date())</p>
+                <p>},1000)</p>
+                <img src="img/eg4.png"></img>
+            </div>
+            <div style='border:solid #e74a3b 1px'>
+                <p><b>警告</b></p>
+                <p>请勿使用JavaScript原生的setInterval()方法。该方法设置的循环触发事件，在项目停止时无法被正确移除。</p>
+            </div>
+        </div>
+        <div>
+            <h2>MixIO.setTimeout(<i>triggerFunction</i>,<i>time</i>)</h2>
+            <p><i><b>triggerFunction</b></i> - 希望触发的函数</p>
+            <p><i><b>time</b></i> - 触发的延迟间隔（单位：ms）</p>
+            <p>延迟指定时间，触发指定函数。</p>
+            <div>
+                <p><b>示例程序5</b></p>
+                <p>10s后，输出'Good night'：</p>
+                <p>MixIO.setTimeout(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.log('Good night')</p>
+                <p>},10000)</p>
+                <img src="img/eg5.png"></img>
+            </div>
+            <div style='border:solid #e74a3b 1px'>
+                <p><b>警告</b></p>
+                <p>请勿使用JavaScript原生的setTimeout()方法。该方法设置的延时触发事件，在项目停止时无法被正确移除。</p>
+            </div>
+        </div>
+        <div>
+            <h2>MixIO.getInstance(<i>name</i>,<i>type</i>)</h2>
+            <p><i><b>name</b></i> - 希望获取的组件名称</p>
+            <p><i><b>type</b></i> - 希望获取的组件类别（必须是MixIO.typeTags中定义的）</p>
+            <p>获取指定的组件实例（在下文中用MixIOUnit表示）。</p>
+            <div style='border:solid #36b9cc 1px'>
+                <p><b>可能出现的异常</b></p>
+                <p>当查询不到项目中存在<i>name</i>,<i>type</i>对应的组件时，<i>throw</i> MixIOLogicError</p>
+                <p>当<i>type</i>不属于MixIO.typeTags中定义的合法值时，<i>throw</i> MixIOLogicError</p>
+            </div>
+        </div>
+        <div>
+            <h2>MixIOUnit</h2>
+            <p>组件类。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,<i>type</i>)创建其子类的实例。此类型实例均具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为组件添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>必须为MixIO.eventTags中定义的合法事件类型，且必须与<i>type</i>相对应。</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发组件事件。</p>
+            <p>其中，<i>actionTag</i>必须为MixIO.actionTags中定义的合法事件类型，且必须与<i>type</i>相对应。</p>
+            <p><i>[actionParams]</i>为事件参数列表。</p>
+        </div>
+        <div id="button">
+            <h2>Button <i>extends</i> MixIOUnit</h2>
+            <p>按键/开关类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.BUTTON)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为按键/开关添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.BUTTON_LOOSED - 开关/按键被松开</p>
+            <p>MixIO.eventTags.BUTTON_PRESSED - 按键被按下</p>
+            <p>MixIO.eventTags.BUTTON_CHANGED - 开关收到消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序6</b></p>
+                <p>当名为“按钮1”的开关或按键被松开时，输出“被松开”：</p>
+                <p>MixIO.getInstance("按钮1",MixIO.typeTags.BUTTON).bind(MixIO.eventTags.BUTTON_LOOSED,function(){</p>
+                <p>&nbsp;&nbsp;MixIO.log('被松开')</p>
+                <p>})</p>
+                <img src="img/eg6.png"></img>
+            </div>
+            <div>
+                <p><b>示例程序7</b></p>
+                <p>当名为“按钮2”的按键被按下时，输出“被按下”：</p>
+                <p>MixIO.getInstance("按钮2",MixIO.typeTags.BUTTON).bind(MixIO.eventTags.BUTTON_PRESSED,function(){</p>
+                <p>&nbsp;&nbsp;MixIO.log('被按下')</p>
+                <p>})</p>
+                <img src="img/eg7.png"></img>
+            </div>
+            <div>
+                <p><b>示例程序8</b></p>
+                <p>当名为“开关1”的开关收到消息时，输出收到的消息：</p>
+                <p>MixIO.getInstance("开关1",MixIO.typeTags.BUTTON).bind(MixIO.eventTags.BUTTON_CHANGED,function(event,message){</p>
+                <p>&nbsp;&nbsp;MixIO.log(message)</p>
+                <p>})</p>
+                <img src="img/eg8.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发按键/开关的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.BUTTON_SWITCH - 切换开关状态</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望切换至的状态（false-关，true-开）。</p>
+            <div>
+                <p><b>示例程序9</b></p>
+                <p>每隔1s，切换一次“开关”的状态：</p>
+                <p>var status = true</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("开关",MixIO.typeTags.BUTTON).trigger(MixIO.actionTags.BUTTON_SWITCH,[status])</p>
+                <p>&nbsp;&nbsp;status = !status</p>
+                <p>},1000)</p>
+                <img src="img/eg9.png"></img>
+            </div>
+            <p><i><b>isOn()</b></i> - 获取开关的当前状态（返回Boolean）。</p>
+            <div>
+                <p><b>示例程序10</b></p>
+                <p>30s后，如果“开关1”没有关闭，则打开“开关2”：</p>
+                <p>MixIO.setTimeout(function(){</p>
+                <p>&nbsp;&nbsp;if(MixIO.getInstance("开关1",MixIO.typeTags.BUTTON).isOn())</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("开关2",MixIO.typeTags.BUTTON).trigger(MixIO.actionTags.BUTTON_SWITCH,[true])</p>
+                <p>},30000)</p>
+                <img src="img/eg10.png"></img>
+            </div>
+        </div>
+        <div id="slider">
+            <h2>Slider <i>extends</i> MixIOUnit</h2>
+            <p>滑杆类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.SLIDER)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为滑杆添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.SLIDER_SLIDED - 滑杆被拖动</p>
+            <p>MixIO.eventTags.SLIDER_CHANGED - 滑杆收到消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序11</b></p>
+                <p>当名为“蓄力”的滑杆被拖动时，打开名为“发射”的开关：</p>
+                <p>MixIO.getInstance("蓄力",MixIO.typeTags.SLIDER).bind(MixIO.eventTags.SLIDER_SLIDED,function(){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("发射",MixIO.typeTags.BUTTON).trigger(MixIO.actionTags.BUTTON_SWITCH,[true])</p>
+                <p>})</p>
+                <img src="img/eg11.png"></img>
+            </div>
+            <div>
+                <p><b>示例程序12</b></p>
+                <p>当名为“进度条”、最大值为10的滑杆收到消息时，输出其当前值占最大值的百分比：</p>
+                <p>MixIO.getInstance("进度条",MixIO.typeTags.SLIDER).bind(MixIO.eventTags.SLIDER_CHANGED,function(event,message){</p>
+                <p>&nbsp;&nbsp;MixIO.log(message*10+"%")</p>
+                <p>})</p>
+                <img src="img/eg12.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发按键/开关的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.SLIDER_SEND - 改变滑杆数值</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望改变至的数值。</p>
+            <div>
+                <p><b>示例程序13</b></p>
+                <p>每隔1s，随机改变名为“进度条”的滑杆的值：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("进度条",MixIO.typeTags.SLIDER).trigger(MixIO.actionTags.SLIDER_SEND,[parseInt(Math.random()*10)])</p>
+                <p>},1000)</p>
+                <img src="img/eg13.png"></img>
+            </div>
+            <p><i><b>getValue()</b></i> - 获取滑杆的当前值</p>
+            <div>
+                <p><b>示例程序14</b></p>
+                <p>每隔1s，输出名为“进度条”的滑杆的值：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.log(MixIO.getInstance("进度条",MixIO.typeTags.SLIDER).getValue())</p>
+                <p>},1000)</p>
+                <img src="img/eg14.png"></img>
+            </div>
+        </div>
+        <div id="keyboard">
+            <h2>Keyboard <i>extends</i> MixIOUnit</h2>
+            <p>文本输入类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.KEYBOARD)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为文本输入添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.KEYBOARD_SENT - 文本输入器点击发送消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序15</b></p>
+                <p>当名为“输入”的文本输入器点击发送消息时，向名为“计数”的滑杆发送消息字符串的长度：</p>
+                <p>MixIO.getInstance("输入",MixIO.typeTags.KEYBOARD).bind(MixIO.eventTags.KEYBOARD_SENT,function(event,message){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("计数",MixIO.typeTags.SLIDER).trigger(MixIO.actionTags.SLIDER_SEND,[message.length])</p>
+                <p>})</p>
+                <img src="img/eg15.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发文本输入的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.KEYBOARD_SEND - 发送文本消息</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望发送的消息。</p>
+            <div>
+                <p><b>示例程序16</b></p>
+                <p>当名为“消息”的文本输入器点击发送消息时，令名为“时钟”的文本输入器发送当前时间：</p>
+                <p>MixIO.getInstance("消息",MixIO.typeTags.KEYBOARD).bind(MixIO.eventTags.KEYBOARD_SENT,function(event,message){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("时钟",MixIO.typeTags.KEYBOARD).trigger(MixIO.actionTags.KEYBOARD_SEND,[new Date().toString()])</p>
+                <p>})</p>
+                <img src="img/eg16.png"></img>
+            </div>
+        </div>
+        <div id="joystick">
+            <h2>Joystick <i>extends</i> MixIOUnit</h2>
+            <p>摇杆手柄类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.JOYSTICK)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为摇杆手柄添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.JOYSTICK_CHANGED - 摇杆手柄被拖动</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序17</b></p>
+                <p>当名为“摇杆”的摇杆手柄被拖动时，向文本输入器“方向”发送当前的手柄方向：</p>
+                <p>MixIO.getInstance("摇杆",MixIO.typeTags.JOYSTICK).bind(MixIO.eventTags.JOYSTICK_CHANGED,function(event,x,y){</p>
+                <p>&nbsp;&nbsp;var direction = (x>0?"右":"左")+(y>0?"上":"下")</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("方向",MixIO.typeTags.KEYBOARD).trigger(MixIO.actionTags.KEYBOARD_SEND,[direction])</p>
+                <p>})</p>
+                <img src="img/eg17.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发摇杆手柄的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.JOYSTICK_SEND - 发送位置消息</p>
+            <p><i>actionParams</i>仅包含2个值，表示期望发送的横坐标和纵坐标。</p>
+            <div>
+                <p><b>示例程序18</b></p>
+                <p>每隔1s，通过名为“摇杆”的摇杆手柄随机发送1个位置消息：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;var randomX = parseInt(Math.random()*200-100)</p>
+                <p>&nbsp;&nbsp;var randomY = parseInt(Math.random()*200-100)</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("摇杆",MixIO.typeTags.JOYSTICK).trigger(MixIO.actionTags.JOYSTICK_SEND,[randomX,randomY])</p>
+                <p>},1000)</p>
+                <img src="img/eg18.png"></img>
+            </div>
+            <p><i><b>getX()</b></i> - 获取摇杆的当前横坐标</p>
+            <p><i><b>getY()</b></i> - 获取摇杆的当前纵坐标</p>
+            <div>
+                <p><b>示例程序19</b></p>
+                <p>每隔1s，获取名为“摇杆”的摇杆手柄的当前横、纵坐标，如果二者绝对值之和大于100，则向主题"加速"发送消息'1'，反之发送'0'：</p>
+                <p>var joystickInstance = MixIO.getInstance("摇杆",MixIO.typeTags.JOYSTICK)</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;if(Math.abs(joystickInstance.getX())+Math.abs(joystickInstance.getY())>100)</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.publish("加速",1)</p>
+                <p>&nbsp;&nbsp;else</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.publish("加速",0)</p>
+                <p>},1000)</p>
+                <img src="img/eg19.png"></img>
+            </div>
+        </div>
+        <div id="rgb">
+            <h2>RGB_PICKER <i>extends</i> MixIOUnit</h2>
+            <p>RGB色盘类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.RGB_PICKER)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为RGB色盘添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.RGB_PICKER_PICKED - 色盘被点击选色</p>
+            <p>MixIO.eventTags.RGB_PICKER_CHANGED - 色盘收到消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序20</b></p>
+                <p>当名为“色盘”的RGB色盘被选色时，通过文本输入器“红”发送当前的R通道颜色值：</p>
+                <p>MixIO.getInstance("色盘",MixIO.typeTags.RGB_PICKER).bind(MixIO.eventTags.RGB_PICKER_PICKED,function(event,r,g,b){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("红",MixIO.typeTags.KEYBOARD).trigger(MixIO.actionTags.KEYBOARD_SEND,[r])</p>
+                <p>})</p>
+                <img src="img/eg20.png"></img>
+            </div>
+            <div>
+                <p><b>示例程序21</b></p>
+                <p>当名为“色盘”的RGB色盘收到消息时，输出收到消息的通道及其值：</p>
+                <p>MixIO.getInstance("色盘",MixIO.typeTags.RGB_PICKER).bind(MixIO.eventTags.RGB_PICKER_CHANGED,function(event,r,g,b){</p>
+                <p>&nbsp;&nbsp;var channel = r!="-1"?"R":(g!="-1"?"G":"B")</p>
+                <p>&nbsp;&nbsp;var value = r!="-1"?r:(g!="-1"?g:b)</p>
+                <p>&nbsp;&nbsp;MixIO.log(channel+" - "+value)</p>
+                <p>})</p>
+                <img src="img/eg21.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发RGB色盘的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.RGB_PICKER_SEND - 发送颜色消息</p>
+            <p><i>actionParams</i>包含3个值，表示期望发送颜色的R通道、G通道、B通道值。</p>
+            <div>
+                <p><b>示例程序22</b></p>
+                <p>每隔1s，通过名为“色盘”的RGB色盘随机发送1个颜色值：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;var randomR = parseInt(Math.random()*255)</p>
+                <p>&nbsp;&nbsp;var randomG = parseInt(Math.random()*255)</p>
+                <p>&nbsp;&nbsp;var randomB = parseInt(Math.random()*255)</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("色盘",MixIO.typeTags.RGB_PICKER).trigger(MixIO.actionTags.RGB_PICKER_SEND,[randomR,randomG,randomB])</p>
+                <p>},1000)</p>
+                <img src="img/eg22.png"></img>
+            </div>
+            <p><i><b>getColor()</b></i> - 获取色盘的当前颜色值（返回一个包含三个通道值的列表）</p>
+            <div>
+                <p><b>示例程序23</b></p>
+                <p>每隔1s，获取名为“色盘”的RGB色盘的当前RGB颜色值，将其转化为HEX字符串并通过名为“16进制颜色”的文本输入器发送：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;var rgbColor = MixIO.getInstance("色盘",MixIO.typeTags.RGB_PICKER).getColor()</p>
+                <p>&nbsp;&nbsp;var hexColor = RGB2Hex(rgbColor[0],rgbColor[1],rgbColor[2])</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("16进制颜色",MixIO.typeTags.KEYBOARD).trigger(MixIO.actionTags.KEYBOARD_SEND,[hexColor])</p>
+                <p>},1000)</p>
+                <img src="img/eg23.png"></img>
+            </div>
+        </div>
+        <div id="bulb">
+            <h2>BULB <i>extends</i> MixIOUnit</h2>
+            <p>指示灯类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.BULB)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为指示灯添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.BULB_CHANGED - 指示灯收到消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序24</b></p>
+                <p>当名为“日光灯”的指示灯被点亮时，打开名为“光敏开关”的开关,反之则关闭：</p>
+                <p>MixIO.getInstance("日光灯",MixIO.typeTags.BULB).bind(MixIO.eventTags.BULB_CHANGED,function(event,message){</p>
+                <p>&nbsp;&nbsp;if(message>0)</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("光敏开关",MixIO.typeTags.BUTTON).trigger(MixIO.actionTags.BUTTON_SWITCH,true)</p>
+                <p>&nbsp;&nbsp;else</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("光敏开关",MixIO.typeTags.BUTTON).trigger(MixIO.actionTags.BUTTON_SWITCH,false)</p>
+                <p>})</p>
+                <img src="img/eg24.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发指示灯的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.BULB_CHANGE - 改变指示灯状态</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望改变至的状态（0-熄灭；1-绿灯；2-黄灯；3-红灯）。</p>
+            <div>
+                <p><b>示例程序25</b></p>
+                <p>设计一个每隔3s切换一次状态的“交通信号灯”：</p>
+                <p>var status = 0</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("交通信号灯",MixIO.typeTags.BULB).trigger(MixIO.actionTags.BULB_CHANGE,[status%3+1])</p>
+                <p>&nbsp;&nbsp;status = status + 1</p>
+                <p>},3000)</p>
+                <img src="img/eg25.png"></img>
+            </div>
+            <p><i><b>getStatus()</b></i> - 获取指示灯的当前状态（0-熄灭；1-绿灯；2-黄灯；3-红灯）。</p>
+            <div>
+                <p><b>示例程序26</b></p>
+                <p>每隔1s，获取名为“交通信号灯”的当前状态，如果为“绿灯”，则打开名为“油门”的开关，否则关闭：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;var status = MixIO.getInstance("交通信号灯",MixIO.typeTags.BULB).getStatus()</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("油门",MixIO.typeTags.BUTTON).trigger(MixIO.actionTags.BUTTON_SWITCH,[status=="1"])</p>
+                <p>},1000)</p>
+                <img src="img/eg26.png"></img>
+            </div>
+        </div>
+        <div id="text">
+            <h2>TEXT_SCREEN <i>extends</i> MixIOUnit</h2>
+            <p>文本显示屏类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.BULB)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为文本显示屏添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.TEXT_SCREEN_CHANGED - 文本显示屏收到消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序27</b></p>
+                <p>当名为“LED”的文本显示屏收到消息时，向名为“文本长度”的滑杆发送消息长度：</p>
+                <p>MixIO.getInstance("LED",MixIO.typeTags.TEXT_SCREEN).bind(MixIO.eventTags.TEXT_SCREEN_CHANGED,function(event,message){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("文本长度",MixIO.typeTags.SLIDER).trigger(MixIO.actionTags.SLIDER_SEND,message.length)</p>
+                <p>})</p>
+                <img src="img/eg27.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发文本显示屏的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.TEXT_SCREEN_CHANGE - 显示文本消息</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望显示的文本。</p>
+            <div>
+                <p><b>示例程序28</b></p>
+                <p>令文本显示屏“LED”循环显示三段不同的文字：</p>
+                <p>var texts = ['空山新雨后，天气晚来秋','小舟从此逝，江海寄余生','夜来南风起，小麦覆垄黄']</p>
+                <p>var index = 0</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("LED",MixIO.typeTags.TEXT_SCREEN).trigger(MixIO.actionTags.TEXT_SCREEN_CHANGE,[texts[index%3]])</p>
+                <p>&nbsp;&nbsp;index = index + 1</p>
+                <p>},1000)</p>
+                <img src="img/eg28.png"></img>
+            </div>
+            <p><i><b>getText()</b></i> - 获取文本显示屏的显示文字。</p>
+            <div>
+                <p><b>示例程序29</b></p>
+                <p>每隔10s，将文本显示屏“LED”的显示更新同步到逻辑视图输出中：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.log(MixIO.getInstance("LED",MixIO.typeTags.TEXT_SCREEN).getText())</p>
+                <p>},10000)</p>
+                <img src="img/eg29.png"></img>
+            </div>
+        </div>
+        <div id="line">
+            <h2>LINE_CHART <i>extends</i> MixIOUnit</h2>
+            <p>折线图表类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.LINE_CHART)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为折线图表添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.LINE_CHART_CHANGED - 折线图表收到消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序30</b></p>
+                <p>当名为“温度监测”的折线图表收到大于80的消息，令“警报”指示灯亮红灯：</p>
+                <p>MixIO.getInstance("温度监测",MixIO.typeTags.LINE_CHART).bind(MixIO.eventTags.LINE_CHART_CHANGED,function(event,time,value){</p>
+                <p>&nbsp;&nbsp;if(parseInt(value)>80)</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("警报",MixIO.typeTags.BULB).trigger(MixIO.actionTags.BULB_CHANGE,[3])</p>
+                <p>&nbsp;&nbsp;else</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("警报",MixIO.typeTags.BULB).trigger(MixIO.actionTags.BULB_CHANGE,[0])</p>
+                <p>})</p>
+                <img src="img/eg30.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发折线图表的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.LINE_CHART_CHANGE - 向折线图表发送消息</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望发送的消息。</p>
+            <div>
+                <p><b>示例程序31</b></p>
+                <p>每隔2秒，将在“签到”主题下收到消息的累计个数发送到“签到统计”折线图表中：</p>
+                <p>var count = 0</p>
+                <p>MixIO.onMessage(function(topic,message){</p>
+                <p>&nbsp;&nbsp;if(topic=='签到')</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;count = count+1</p>
+                <p>})</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance("签到统计",MixIO.typeTags.LINE_CHART).trigger(MixIO.actionTags.LINE_CHART_CHANGE,[count])</p>
+                <p>},2000)</p>
+                <img src="img/eg31.png"></img>
+            </div>
+            <p>MixIO.actionTags.LINE_CHART_CLEAR - 令折线图表清空</p>
+            <p><i>actionParams</i>不包含任何值，可以被省略。</p>
+            <div>
+                <p><b>示例程序32</b></p>
+                <p>当“签到”主题收到消息“finish”时，清空“签到统计”折线图表：</p>
+                <p>MixIO.onMessage(function(topic,message){</p>
+                <p>&nbsp;&nbsp;if(topic=='签到'&&message=='finish')</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("签到统计",MixIO.typeTags.LINE_CHART).trigger(MixIO.actionTags.LINE_CHART_CLEAR)</p>
+                <p>})</p>
+                <img src="img/eg32.png"></img>
+            </div>
+            <p><i><b>getAllMessages()</b></i> - 获取折线图表的全部历史消息。</p>
+            <p><i><b>getLatestMessages(count)</b></i> - 获取折线图表的至多前<i>count</i>条消息。</p>
+            <p><i><b>getLatestMessage</b></i> - 获取折线图表的最新一条消息。</p>
+            <div>
+                <p><b>示例程序33</b></p>
+                <p>每隔5s，输出“签到统计”的至多前3条消息：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.log(JSON.stringify(MixIO.getInstance("签到统计",MixIO.typeTags.LINE_CHART).getLatestMessages(3)))</p>
+                <p>},5000)</p>
+                <img src="img/eg33.png"></img>
+            </div>
+        </div>
+        <div id="bar">
+            <h2>BAR_CHART <i>extends</i> MixIOUnit</h2>
+            <p>柱状图表类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.BAR_CHART)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为柱状图表添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.BAR_CHART_CHANGED - 柱状图表收到消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序34</b></p>
+                <p>当名为“选择题”的柱状图表累计收到等同于班级同学数目的消息数时，令“完成”指示灯亮绿灯：</p>
+                <p>var STUDENT_NUM = 30</p>
+                <p>var count = 0</p>
+                <p>MixIO.getInstance("选择题",MixIO.typeTags.BAR_CHART).bind(MixIO.eventTags.BAR_CHART_CHANGED,function(event,message){</p>
+                <p>&nbsp;&nbsp;count = count+1</p>
+                <p>&nbsp;&nbsp;if(count>=STUDENT_NUM)</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("完成",MixIO.typeTags.BULB).trigger(MixIO.actionTags.BULB_CHANGE,[1])</p>
+                <p>})</p>
+                <img src="img/eg34.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发柱状图表的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.BAR_CHART_CHANGE - 向柱状图表发送消息</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望发送的消息。</p>
+            <div>
+                <p><b>示例程序35</b></p>
+                <p>随机作答选择题30次，在30秒内将这些消息发送给“选择题”柱状图表：</p>
+                <p>var count = 0</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;if(count<30){</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;var seed = Math.random()</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;var option = seed<0.25?"A":(seed<0.5?"B":(seed<0.75?"C":"D"))</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("选择题",MixIO.typeTags.BAR_CHART).trigger(MixIO.actionTags.BAR_CHART_CHANGE,[option])</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;count = count+1</p>
+                <p>&nbsp;&nbsp;}</p>
+                <p>},1000)</p>
+                <img src="img/eg35.png"></img>
+            </div>
+            <p>MixIO.actionTags.BAR_CHART_CLEAR - 令柱状图表清空</p>
+            <p><i>actionParams</i>不包含任何值，可以被省略。</p>
+            <div>
+                <p><b>示例程序36</b></p>
+                <p>当“切换题目”主题收到消息“next”时，清空“选择题”柱状图表：</p>
+                <p>MixIO.onMessage(function(topic,message){</p>
+                <p>&nbsp;&nbsp;if(topic=='切换题目'&&message=='next')</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("选择题",MixIO.typeTags.BAR_CHART).trigger(MixIO.actionTags.BAR_CHART_CLEAR)</p>
+                <p>})</p>
+                <img src="img/eg36.png"></img>
+            </div>
+            <p><i><b>getData()</b></i> - 获取柱状图表的当前数据。</p>
+            <div>
+                <p><b>示例程序37</b></p>
+                <p>每隔5s，输出“选择题”柱状图表的当前数据：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.log(JSON.stringify(MixIO.getInstance("选择题",MixIO.typeTags.BAR_CHART).getData()))</p>
+                <p>},5000)</p>
+                <img src="img/eg37.png"></img>
+            </div>
+        </div>
+        <div id="table">
+            <h2>DATA_TABLE <i>extends</i> MixIOUnit</h2>
+            <p>数据表格类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.DATA_TABLE)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为数据表格添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.DATA_TABLE_CHANGED - 数据表格收到消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序38</b></p>
+                <p>当名为“签到表”的数据表格累计收到等同于班级同学数目的消息数时，令“完成”指示灯亮绿灯：</p>
+                <p>var STUDENT_NUM = 30</p>
+                <p>var count = 0</p>
+                <p>MixIO.getInstance("签到表",MixIO.typeTags.DATA_TABLE).bind(MixIO.eventTags.DATA_TABLE_CHANGED,function(event,message){</p>
+                <p>&nbsp;&nbsp;count = count+1</p>
+                <p>&nbsp;&nbsp;if(count>=STUDENT_NUM)</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("完成",MixIO.typeTags.BULB).trigger(MixIO.actionTags.BULB_CHANGE,[1])</p>
+                <p>})</p>
+                <img src="img/eg38.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发数据表格的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.DATA_TABLE_CHANGE - 向数据表格发送消息</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望发送的消息。</p>
+            <div>
+                <p><b>示例程序39</b></p>
+                <p>每隔1秒，随机生成一个签到信息，发送给“签到表”：</p>
+                <p>function listsGetRandomItem(list, remove) {</p>
+                <p>&nbsp;&nbsp;var x = Math.floor(Math.random() * list.length)</p>
+                <p>&nbsp;&nbsp;if (remove)</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;return list.splice(x, 1)[0]</p>
+                <p>&nbsp;&nbsp;else</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;return list[x]</p>
+                <p>}</p>
+                <p>function getRandomName() {</p>
+                <p>&nbsp;&nbsp;lastNames = '赵,钱,孙,李,周,吴,郑,王'.split(',')</p>
+                <p>&nbsp;&nbsp;firstNames = '明,刚,强,美,丽,光,威,红'.split(',')</p>
+                <p>&nbsp;&nbsp;return String(listsGetRandomItem(lastNames, false)) + String(listsGetRandomItem(firstNames, false))</p>
+                <p>}</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance('签到表',MixIO.typeTags.DATA_TABLE).trigger(MixIO.actionTags.DATA_TABLE_CHANGE,[(getRandomName())])</p>
+                <p>},1000)</p>
+                <img src="img/eg39.png"></img>
+            </div>
+            <p>MixIO.actionTags.DATA_TABLE_CLEAR - 令数据表格清空</p>
+            <p><i>actionParams</i>不包含任何值，可以被省略。</p>
+            <div>
+                <p><b>示例程序40</b></p>
+                <p>当“上课”主题收到消息时，清空“签到表”数据表格：</p>
+                <p>MixIO.onMessage(function(topic,message){</p>
+                <p>&nbsp;&nbsp;if(topic=='上课')</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("签到表",MixIO.typeTags.DATA_TABLE).trigger(MixIO.actionTags.DATA_TABLE_CLEAR)</p>
+                <p>})</p>
+                <img src="img/eg40.png"></img>
+            </div>
+            <p><i><b>getData()</b></i> - 获取数据表格的全部数据。</p>
+            <div>
+                <p><b>示例程序41</b></p>
+                <p>每隔5s，输出“签到表”数据表格的全部数据：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.log(JSON.stringify(MixIO.getInstance("签到表",MixIO.typeTags.DATA_TABLE).getData()))</p>
+                <p>},5000)</p>
+                <img src="img/eg41.png"></img>
+            </div>
+        </div>
+        <div id="dashboard">
+            <h2>DASHBOARD <i>extends</i> MixIOUnit</h2>
+            <p>仪表盘类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.DASHBOARD)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为仪表盘添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.DASHBOARD_CHANGED - 仪表盘收到消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序42</b></p>
+                <p>当名为“CPU温度”的仪表盘收到大于80的消息时，令“警报”指示灯亮红灯：</p>
+                <p>MixIO.getInstance("CPU温度",MixIO.typeTags.DASHBOARD).bind(MixIO.eventTags.DASHBOARD_CHANGED,function(event,message){</p>
+                <p>&nbsp;&nbsp;if(message>80)</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("警报",MixIO.typeTags.BULB).trigger(MixIO.actionTags.BULB_CHANGE,[3])</p>
+                <p>})</p>
+                <img src="img/eg42.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发仪表盘的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.DASHBOARD_CHANGE - 向仪表盘发送消息</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望发送的消息。</p>
+            <div>
+                <p><b>示例程序43</b></p>
+                <p>令“CPU温度”仪表盘归零：</p>
+                <p>MixIO.getInstance("CPU温度",MixIO.typeTags.DASHBOARD).trigger(MixIO.actionTags.DASHBOARD_CHANGE,[0])</p>
+                <img src="img/eg43.png"></img>
+            </div>
+        </div>
+        <div id="datamap">
+            <h2>DATA_MAP <i>extends</i> MixIOUnit</h2>
+            <p>数据地图类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.DATA_MAP)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为数据地图添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.DATA_MAP_CHANGED - 数据地图收到消息</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序44</b></p>
+                <p>当名为“公交车路线”的数据地图收到名为“306路-A”的公交车发来的位置信息时，计算与当前位置的距离，输出在“距离”文本显示器中：</p>
+                <p>var currentPos = [116.397128,39.916527]</p>
+                <p>MixIO.getInstance("公交车路线",MixIO.typeTags.DATA_MAP).bind(MixIO.eventTags.DATA_MAP_CHANGED,function(event,clientid,long,lat,message){</p>
+                <p>&nbsp;&nbsp;if(message[0]['value']>="306路-A"){</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;var busPos = [parseFloat(long),parseFloat(lat)]</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;var x = (busPos[0]-currentPos[0])/0.00001141</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;var y = (busPos[1]-currentPos[1])/0.00000899</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;var distance = Math.sqrt(x*x+y*y)</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("距离",MixIO.typeTags.TEXT_SCREEN).trigger(MixIO.actionTags.TEXT_SCREEN_CHANGE,["当前306路-A公交车与您的距离是"+Math.round(distance)+"米。"])</p>
+                <p>&nbsp;&nbsp;}</p>
+                <p>})</p>
+                <img src="img/eg44.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发数据地图的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.DATA_MAP_CHANGE - 向数据地图发送消息</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望发送的消息。</p>
+            <div>
+                <p><b>示例程序45</b></p>
+                <p>向“定位”数据地图报告自己的当前位置：</p>
+                <p>var currentPos = ["116.397128","39.916527"]</p>
+                <p>var myName = "张三"</p>
+                <p>MixIO.getInstance("定位",MixIO.typeTags.DATA_MAP).trigger(MixIO.actionTags.DATA_MAP_CHANGE,{"long":currentPos[0],"lat":currentPos[1],"clientid":myName,"message":[{"label":"name","value":myName}]})</p>
+                <img src="img/eg45.png"></img>
+            </div>
+            <p>MixIO.actionTags.DATA_TABLE_CLEAR - 令数据表格清空</p>
+            <p><i>actionParams</i>不包含任何值，可以被省略。</p>
+            <div>
+                <p><b>示例程序46</b></p>
+                <p>当“下线”主题收到消息时，清空“定位”数据地图：</p>
+                <p>MixIO.onMessage(function(topic,message){</p>
+                <p>&nbsp;&nbsp;if(topic=='下线')</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;MixIO.getInstance("定位",MixIO.typeTags.DATA_MAP).trigger(MixIO.actionTags.DATA_MAP_CLEAR)</p>
+                <p>})</p>
+                <img src="img/eg46.png"></img>
+            </div>
+        </div>
+        <div id="weather">
+            <h2>WEATHER <i>extends</i> MixIOUnit</h2>
+            <p>实时气象仪类（继承自组件类）。</p>
+            <p>仅可通过MixIO.getInstance(<i>name</i>,MixIO.typeTags.WEATHER)创建此类型的实例。此类型实例具有的方法：</p>
+            <p><i><b>bind(eventTag,triggerFunction)</b></i> - 为实时气象仪添加事件监听器。</p>
+            <p>其中，<i>eventTag</i>可以为：</p>
+            <p>MixIO.eventTags.WEATHER_SYNCED - 气象仪气象信息更新</p>
+            <p>MixIO.eventTags.WEATHER_SENT - 气象仪气象信息下发</p>
+            <p><i>triggerFunction</i>为期望触发的监听方法。</p>
+            <div>
+                <p><b>示例程序47</b></p>
+                <p>当名为“气象站”的气象仪更新气象数据时，向文本显示屏“更新记录”中追加更新时间；当名为“气象站”的气象仪下发气象数据时，向文本显示屏“下发记录”中追加下发时间：</p>
+                <p>var updates = []</p>
+                <p>var sends = []</p>
+                <p>MixIO.getInstance('气象站',MixIO.typeTags.WEATHER).bind(MixIO.eventTags.WEATHER_SYNCED, function(event,district,weather_type,temperature,humidity,wind_dir,wind_class){</p>
+                <p>&nbsp;&nbsp;updates.push(new Date());</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance('更新记录',MixIO.typeTags.TEXT_SCREEN).trigger(MixIO.actionTags.TEXT_SCREEN_CHANGE,(updates.join(',')))</p>
+                <p>})</p>
+                <p>MixIO.getInstance('气象站',MixIO.typeTags.WEATHER).bind(MixIO.eventTags.WEATHER_SENT, function(event,district,weather_type,temperature,humidity,wind_dir,wind_class){</p>
+                <p>&nbsp;&nbsp;sends.push(new Date())</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance('下发记录',MixIO.typeTags.TEXT_SCREEN).trigger(MixIO.actionTags.TEXT_SCREEN_CHANGE,(sends.join(',')))</p>
+                <p>})</p>
+                <img src="img/eg47.png"></img>
+            </div>
+            <p><i><b>trigger(actionTag,[actionParams])</b></i> - 触发实时气象仪的指定事件。</p>
+            <p>其中，<i>actionTag</i>可以为：</p>
+            <p>MixIO.actionTags.WEATHER_SYNC - 更新气象仪信息</p>
+            <p>MixIO.actionTags.WEATHER_SEND - 下发气象仪信息</p>
+            <p><i>actionParams</i>仅包含1个值，表示期望发送的消息。</p>
+            <div>
+                <p><b>示例程序48</b></p>
+                <p>每隔1小时，更新并下发“气象站”的信息：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance('气象站',MixIO.typeTags.WEATHER).trigger(MixIO.actionTags.WEATHER_SYNC)</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance('气象站',MixIO.typeTags.WEATHER).trigger(MixIO.actionTags.WEATHER_SEND)</p>
+                <p>},3600000)</p>
+                <img src="img/eg48.png"></img>
+            </div>
+            <p><i><b>getData(datatype)</b></i> - 获取实时气象仪的某一类别数据。</p>
+            <p><i>datatype</i> - 期望获取的数据类别，可以为：</p>
+            <p>weather_type - 天气类别</p>
+            <p>temperature - 温度</p>
+            <p>humidity - 相对湿度</p>
+            <p>wind_dir - 风向</p>
+            <p>wind_class - 风级</p>
+            <p>district - 数据来源区域</p>
+            <div>
+                <p><b>示例程序49</b></p>
+                <p>每隔1小时，获取“气象仪”的“温度”数据，并发送至“温度”折线图表：</p>
+                <p>MixIO.setInterval(function(){</p>
+                <p>&nbsp;&nbsp;MixIO.getInstance('温度',MixIO.typeTags.LINE_CHART).trigger(MixIO.actionTags.LINE_CHART_CHANGE,MixIO.getInstance('气象站',MixIO.typeTags.WEATHER).getData("temperature"))</p>
+                <p>},3600000)</p>
+                <img src="img/eg49.png"></img>
+            </div>
+        </div>
+        <div id="var">
+            <h2>MixIO.typeTags</h2>
+            <p>全部组件类别标签的集合变量。</p>
+            <p>按键/开关 - MixIO.typeTags.BUTTON</p>
+            <p>滑杆 - MixIO.typeTags.SLIDER</p>
+            <p>文本输入 - MixIO.typeTags.KEYBOARD</p>
+            <p>摇杆手柄 - MixIO.typeTags.JOYSTICK</p>
+            <p>RGB色盘 - MixIO.typeTags.RGB_PICKER</p>
+            <p>指示灯 - MixIO.typeTags.BULB</p>
+            <p>文本显示屏 - MixIO.typeTags.TEXT_SCREEN</p>
+            <p>折线图表 - MixIO.typeTags.LINE_CHART</p>
+            <p>柱状图表 - MixIO.typeTags.BAR_CHART</p>
+            <p>数据表格 - MixIO.typeTags.DATA_TABLE</p>
+            <p>仪表盘 - MixIO.typeTags.DASHBOARD</p>
+            <p>数据地图 - MixIO.typeTags.DATA_MAP</p>
+            <p>实时气象仪 - MixIO.typeTags.WEATHER</p>
+        </div>
+        <div>
+            <h2>MixIO.eventTags</h2>
+            <p>全部组件监听事件标签的集合变量。</p>
+            <p><b>开关</b></p>
+            <p>开关被点按后松开 - MixIO.eventTags.BUTTON_LOOSED</p>
+            <p>开关收到消息 - MixIO.eventTags.BUTTON_CHANGED</p>
+            <p><b>按键</b></p>
+            <p>按键被点按后松开 - MixIO.eventTags.BUTTON_PRESSED</p>
+            <p>按键被点按后松开 - MixIO.eventTags.BUTTON_LOOSED</p>
+            <p>按键收到消息 - MixIO.eventTags.BUTTON_CHANGED</p>
+            <p><b>滑杆</b></p>
+            <p>滑杆被拖动 - MixIO.eventTags.SLIDER_SLIDED</p>
+            <p>滑杆收到消息 - MixIO.eventTags.SLIDER_CHANGED</p>
+            <p><b>文本输入</b></p>
+            <p>文本输入器点击发送消息 - MixIO.eventTags.KEYBOARD_SENT</p>
+            <p><b>摇杆手柄</b></p>
+            <p>摇杆被拖动 - MixIO.eventTags.JOYSTICK_CHANGED</p>
+            <p><b>RGB色盘</b></p>
+            <p>色盘被选色 - MixIO.eventTags.RGB_PICKER_PICKED</p>
+            <p>色盘收到消息 - MixIO.eventTags.RGB_PICKER_CHANGED</p>
+            <p><b>指示灯</b></p>
+            <p>指示灯收到消息 - MixIO.eventTags.BULB_CHANGED</p>
+            <p><b>文本显示屏</b></p>
+            <p>文本显示屏收到消息 - MixIO.eventTags.TEXT_SCREEN_CHANGED</p>
+            <p><b>折线图表</b></p>
+            <p>折线图表收到消息 - MixIO.eventTags.LINE_CHART_CHANGED</p>
+            <p><b>柱状图表</b></p>
+            <p>柱状图表收到消息 - MixIO.eventTags.BAR_CHART_CHANGED</p>
+            <p><b>数据表格</b></p>
+            <p>数据表格收到消息 - MixIO.eventTags.DATA_TABLE_CHANGED</p>
+            <p><b>仪表盘</b></p>
+            <p>仪表盘收到消息 - MixIO.eventTags.DASHBOARD_CHANGED</p>
+            <p><b>数据地图</b></p>
+            <p>数据地图收到消息 - MixIO.eventTags.DATA_MAP_CHANGED</p>
+            <p><b>实时气象仪</b></p>
+            <p>气象仪更新数据 - MixIO.eventTags.WEATHER_SYNCED</p>
+            <p>气象仪发送数据 - MixIO.eventTags.WEATHER_SENT</p>
+        </div>
+        <div>
+            <h2>MixIO.actionTags</h2>
+            <p>全部组件触发事件标签的集合变量。</p>
+            <p><b>开关</b></p>
+            <p>切换开关状态 - MixIO.actionTags.BUTTON_SWITCH</p>
+            <p><b>按键</b></p>
+            <p><i>无</i></p>
+            <p><b>滑杆</b></p>
+            <p>改变滑杆数值 - MixIO.actionTags.SLIDER_SEND</p>
+            <p><b>文本输入</b></p>
+            <p>发送文本消息 - MixIO.actionTags.KEYBOARD_SEND</p>
+            <p><b>摇杆手柄</b></p>
+            <p>发送位置消息 - MixIO.actionTags.JOYSTICK_SEND</p>
+            <p><b>RGB色盘</b></p>
+            <p>发送颜色消息 - MixIO.actionTags.RGB_PICKER_SEND</p>
+            <p><b>指示灯</b></p>
+            <p>切换指示灯状态 - MixIO.actionTags.BULB_CHANGE</p>
+            <p><b>文本显示屏</b></p>
+            <p>显示文本消息 - MixIO.actionTags.TEXT_SCREEN_CHANGE</p>
+            <p><b>折线图表</b></p>
+            <p>发送消息 - MixIO.actionTags.LINE_CHART_CHANGE</p>
+            <p>清空消息 - MixIO.actionTags.LINE_CHART_CLEAR</p>
+            <p><b>柱状图表</b></p>
+            <p>发送消息 - MixIO.actionTags.BAR_CHART_CHANGE</p>
+            <p>清空消息 - MixIO.actionTags.BAR_CHART_CLEAR</p>
+            <p><b>数据表格</b></p>
+            <p>发送消息 - MixIO.actionTags.DATA_TABLE_CHANGE</p>
+            <p>清空消息 - MixIO.actionTags.DATA_TABLE_CLEAR</p>
+            <p><b>仪表盘</b></p>
+            <p>发送数值消息 - MixIO.eventTags.DASHBOARD_CHANGE</p>
+            <p><b>数据地图</b></p>
+            <p>发送消息 - MixIO.actionTags.DATA_MAP_CHANGE</p>
+            <p>清空消息 - MixIO.actionTags.DATA_MAP_CLEAR</p>
+            <p><b>实时气象仪</b></p>
+            <p>更新数据 - MixIO.eventTags.WEATHER_SYNC</p>
+            <p>发送数据 - MixIO.eventTags.WEATHER_SEND</p>
+        </div>
+    </div>
+    </body>
+</html>

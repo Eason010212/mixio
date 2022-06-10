@@ -1,0 +1,90 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>MixIO</title>
+    <link rel="shortcut icon" href="img/shortcut.png"/>
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/nunito.css" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/muuri.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/lang.js?v=6"></script>
+    <script src="js/lang2.js?v=5"></script>
+    <script src="js/tools.js?v=6"></script>
+    <script src="js/verify.js?v=2"></script>
+
+</head>
+
+<body class="bg-gradient-light" style="height:100vh;display:flex;align-items:center;justify-content:center">
+    <style>
+        .translate{
+            width:50px;
+            padding: 0;
+            margin-left:5px;
+        }
+    </style>
+    <div style="position:fixed;right:10px;top:10px;display:flex;align-items:center;justify-content:center">
+        <i class="fa fa-globe" style="color:#4e73df;margin-right:5px;font-size:2rem"></i>
+        <button class="translate btn btn-secondary" id="zh">简</button>
+        <button class="translate btn btn-secondary" id="tw">繁</button>
+        <button class="translate btn btn-secondary" id="en">EN</button>
+    </div>
+    <div class="container">
+
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+
+            <div class="col-xl-10 col-lg-12 col-md-9">
+
+                <div class="card o-hidden border-0 shadow-lg my-5" style="margin-top:0!important">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row">
+                            <div class="col-lg-6 d-none d-lg-block bg-password-image"></div>
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <div class="text-center">
+                                        <h1 class="h4 text-gray-900 mb-2 lang" key="SETQ"></h1>
+                                        <p class="mb-4 lang" key="SETQDES"></p>
+                                    </div>
+                                    <form class="user">
+                                        <div class="form-group">
+                                            <h6 style="text-align: center;color:#437edf"><span class="lang" key="UPEMAIL"></span><%=userName%></h6>
+                                        </div>
+                                        <div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;margin-top:10px;margin-bottom:5px">
+                                            <b style="color:#437edf;margin-left:1rem;font-size:.8rem" id="question"></b>
+                                            <a onclick="changeQuestion()" class="btn btn-sm btn-primary shadow-sm lang" key="CHANGEQ" style="margin-right:1rem;font-size:.8rem"></a>
+                                        </div>
+                                        <input type="text" placeholder="" id="answer" class="form-control form-control-user lang" key="SETANS" style="margin-bottom:10px">
+                                        <a onclick="confirmSet()" class="btn btn-primary btn-user btn-block lang" key="CFMSET" id="send_button">
+                                            
+                                        </a>
+                                    </form>
+                                    <hr>
+                                    
+                                    <div class="text-center">
+                                        <a class="small lang" href="/logout" key="HAVEACC"></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- Custom scripts for all pages-->
+    <script src="js/sb-admin-2.min.js?v=2"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,390 @@
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>MixIO管理后台</title>
+    <link rel="shortcut icon" href="img/shortcut.png"/>
+    <link rel="stylesheet" href="css/farbtastic.css">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/nunito.css" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/muuri.css?v=21">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/lang.js?v=5"></script>
+    <script src="js/lang2.js?v=5"></script>
+    <script src="js/farbtastic.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery.easing.min.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <script src="js/mqtt.min.js"></script>
+    <script src="js/tools.js?v=14"></script>
+</head>
+
+<body id="page-top" class="sidebar-toggled" style="position:relative;overflow-x:hidden;color: black;">
+    <div id="wrapper">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index">
+                <div class="sidebar-brand-icon">
+                    <i class="fa fa-cog"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3" >MixIO Admin</div>
+            </a>
+            <hr class="sidebar-divider my-0">
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading lang" key="MANAGE">
+            </div>
+            <li class="nav-item active" id="view1">
+                <a class="nav-link" onclick="view(1)" style="cursor: pointer;" id="manage_prj">
+                    <i class="fa fa-fw fa-tachometer"></i>
+                    <span class="lang" key="BASICADMIN"></span></a>
+            </li>
+            <li class="nav-item" id="view2">
+                <a class="nav-link" onclick="view(2)" style="cursor: pointer;" id="manage_strg">
+                    <i class="fa fa-fw fa-database"></i>
+                    <span class="lang" key="USERADMIN"></span></a>
+            </li>
+
+
+            <hr class="sidebar-divider">
+        </ul>
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar static-top shadow" style="display:flex;justify-content:space-between" id="project_nav">
+                    <h1 class="d-sm-inline-block h3 mb-0 text-gray-800 lang" key="ADMIN" id="title" style="margin-left:10px;font-size:1.25rem;display:inline-block;"></h1>
+                </nav>
+                <div class="container-fluid" id="detail">
+                    <div id="detail1" class="row">
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card shadow" style="margin-top:1.5rem;border-radius:10px">
+                                <div class="card-body">
+                                    <div class="card border-left-primary h-100 py-2" style="margin-bottom:15px">
+                                        <div class="card-body">
+                                            <div class="row no-gutters align-items-center">
+                                                <div class="col mr-2">
+                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                        当前服务器状态</div>
+                                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><%=status%></div>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <i class="fa fa-history fa-2x text-gray-300"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card border-left-primary h-100 py-2" style="margin-bottom:15px">
+                                        <div class="card-body">
+                                            <div class="row no-gutters align-items-center">
+                                                <div class="col mr-2">
+                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                        版本号</div>
+                                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><%=version%></div>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <i class="fa fa-code fa-2x text-gray-300"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card border-left-primary h-100 py-2">
+                                        <div class="card-body">
+                                            <div class="row no-gutters align-items-center">
+                                                <div class="col mr-2">
+                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                        服务器时钟</div>
+                                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="time"></div>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <i class="fa fa-hourglass-half fa-2x text-gray-300"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="display:flex;align-items:center;justify-content:center">
+                                        <button class="btn btn-lg btn-primary" style="margin-top:20px;margin-right:10px"  onclick="fresh()"><i class="fa fa-refresh"></i> 刷新状态</button>                                
+                                        <% if (status=="运行中") { %>
+                                            <button class="btn btn-lg btn-danger" style="margin-top:20px;margin-left:10px"  onclick="stopServer()"><i class="fa fa-ban"></i> 暂停服务器</button>
+                                        <%} else { %>
+                                            <button class="btn btn-lg btn-success" style="margin-top:20px;margin-left:10px"  onclick="startServer()"><i class="fa fa-play"></i> 启动服务器</button>
+                                        <% } %> 
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 mb-4">
+                        
+                            <div class="card shadow" style="margin-top:1.5rem;border-radius:10px">
+                                <div class="card-body" style="display: flex;align-items: center;justify-content: center;flex-direction: column;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <span>离线模式：</span> 
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" id="OFFLINE_MODE">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>允许自助注册：</span> 
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" id="ALLOW_REGISTER">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>HTTP 端口：</span> 
+                                            </td>
+                                            <td>
+                                                <input type="number" id="MIXIO_HTTP_PORT">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>HTTPS 端口：</span>
+                                            </td>
+                                            <td>
+                                                <input type="number" id="MIXIO_HTTPS_PORT">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>SSL证书私钥：</span>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="HTTPS_PRIVATE_PEM">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>SSL证书公钥：</span>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="HTTPS_CRT_FILE">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>单用户最大项目数：</span>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="MAX_PROJECT_NUM_PER_USER">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>百度地图开发者AK（客户端应用）：</span>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="BAIDU_MAP_AK">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>百度地图开发者AK（服务端应用）：</span>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="BAIDU_MAP_SERVER_AK">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <button class="btn btn-lg btn-success" style="margin-top:20px;"  onclick="saveAndRestart()" id="saveAndRestart"><i class="fa fa-check"></i> 保存设置并重新启动</button>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div id="detail2" hidden>
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card shadow" style="margin-top:1.5rem;border-radius:10px">
+                                <div class="card-body" style="display: flex;align-items: center;justify-content: center;flex-direction: column;">
+                                    <p>格式（每个账号一行）: 账号,密码,密保问题,问题答案</p>
+                                    <textarea name="" id="acc" rows="10" style="margin-bottom: 20px;width:95%">12345@mixly.com,123456,你就读的班级是？,三年二班</textarea>
+                                    <div>
+                                        <button class="btn btn-lg btn-success" onclick="addAcc()"><i class="fa fa-check"></i> 确定添加</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="detail3" hidden>
+
+                    </div> 
+                </div>
+            </div>
+        </div>
+    <style>
+        input{
+            min-width:0!important;
+            height:30px
+        }
+        td{
+            min-height: 30px;
+        }
+    </style>
+    <script>
+        $("#time").html(new Date().toLocaleTimeString())
+        setInterval(() => {
+            $("#time").html(new Date().toLocaleTimeString())
+        }, 1000);
+        var MIXIO_HTTP_PORT = "<%=configs["MIXIO_HTTP_PORT"]%>"
+        var MIXIO_HTTPS_PORT = "<%=configs["MIXIO_HTTPS_PORT"]%>"
+        var HTTPS_PRIVATE_PEM = "<%=configs["HTTPS_PRIVATE_PEM"]%>"
+        var HTTPS_CRT_FILE = "<%=configs["HTTPS_CRT_FILE"]%>"
+        var MAX_PROJECT_NUM_PER_USER = "<%=configs["MAX_PROJECT_NUM_PER_USER"]%>"
+        var ALLOW_REGISTER = <%=configs["ALLOW_REGISTER"]%>
+        var OFFLINE_MODE = <%=configs["OFFLINE_MODE"]%>
+        var BAIDU_MAP_AK = "<%=configs["BAIDU_MAP_AK"]%>"
+        var BAIDU_MAP_SERVER_AK = "<%=configs["BAIDU_MAP_SERVER_AK"]%>"
+        $("#OFFLINE_MODE").bind('change',function(){
+            if($("#OFFLINE_MODE").prop("checked"))
+            {
+                $("#BAIDU_MAP_AK").attr("disabled","true")
+                $("#BAIDU_MAP_SERVER_AK").attr("disabled","true")
+            }
+            else
+            {
+                $("#BAIDU_MAP_AK").removeAttr("disabled")
+                $("#BAIDU_MAP_SERVER_AK").removeAttr("disabled")
+            }
+        })
+        var loadConfig = function(){
+            $("#MIXIO_HTTP_PORT").val(MIXIO_HTTP_PORT)
+            $("#MIXIO_HTTPS_PORT").val(MIXIO_HTTPS_PORT)
+            $("#HTTPS_PRIVATE_PEM").val(HTTPS_PRIVATE_PEM)
+            $("#HTTPS_CRT_FILE").val(HTTPS_CRT_FILE)
+            $("#ALLOW_REGISTER").prop("checked",ALLOW_REGISTER)
+            $("#OFFLINE_MODE").prop("checked",OFFLINE_MODE)
+            $("#BAIDU_MAP_AK").val(BAIDU_MAP_AK)
+            $("#BAIDU_MAP_SERVER_AK").val(BAIDU_MAP_SERVER_AK)
+            $("#MAX_PROJECT_NUM_PER_USER").val(MAX_PROJECT_NUM_PER_USER)
+            if($("#OFFLINE_MODE").prop("checked"))
+            {
+                $("#BAIDU_MAP_AK").attr("disabled","true")
+                $("#BAIDU_MAP_SERVER_AK").attr("disabled","true")
+            }
+            else
+            {
+                $("#BAIDU_MAP_AK").removeAttr("disabled")
+                $("#BAIDU_MAP_SERVER_AK").removeAttr("disabled")
+            }
+        }
+        loadConfig()
+        var saveAndRestart = function(){
+            var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading2+"</p></div>")
+            configs = {}
+            configs["MIXIO_HTTP_PORT"] = parseInt($("#MIXIO_HTTP_PORT").val())
+            configs["MIXIO_HTTPS_PORT"] = parseInt($("#MIXIO_HTTPS_PORT").val())
+            configs["HTTPS_PRIVATE_PEM"] = $("#HTTPS_PRIVATE_PEM").val()
+            configs["HTTPS_CRT_FILE"] = $("#HTTPS_CRT_FILE").val()
+            configs["MAX_PROJECT_NUM_PER_USER"] = parseInt($("#MAX_PROJECT_NUM_PER_USER").val())
+            configs["ALLOW_REGISTER"] = $("#ALLOW_REGISTER").prop("checked")
+            configs["OFFLINE_MODE"] = $("#OFFLINE_MODE").prop("checked")
+            configs["BAIDU_MAP_AK"] = $("#BAIDU_MAP_AK").val()
+            configs["BAIDU_MAP_SERVER_AK"] = $("#BAIDU_MAP_SERVER_AK").val()
+            $.get('/saveAndRestart',{'configs':JSON.stringify(configs,null,2)},function(res){
+                if(res=="1")
+                {
+                    showtext('保存成功, 正在重新启动服务器。')
+                }
+                else
+                    showtext('保存失败')
+                modald.close()
+            })
+        }
+        var stopServer = function(){
+            var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading2+"</p></div>")
+            $.get('/stop',function(res){
+                modald.close()
+                if(res=="1")
+                {
+                    window.location.href = window.location.href
+                }
+                else
+                    showtext('状态异常')
+            })
+        }
+        var startServer = function(){
+            var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading2+"</p></div>")
+            $.get('/start',function(res){
+                modald.close()
+                if(res=="1")
+                {
+                    window.location.href = window.location.href
+                }
+            })
+        }
+        var fresh = function(){
+            window.location.href = window.location.href
+        }
+        var view = function(index){
+            a = [1,2,3]
+            for (i in a){
+                v = a[i]
+                if (index==v){
+                    $("#detail"+v).removeAttr("hidden")
+                    $("#view"+v).addClass("active")
+                }
+                else
+                {
+                    $("#detail"+v).attr("hidden","hidden")
+                    $("#view"+v).removeClass("active")
+                }
+            }
+        }
+        var addAcc = function(){
+            var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading2+"</p></div>")
+            var acc = $("#acc").val()
+            accs = acc.split('\n')
+            acct = []
+            for(acc in accs){
+                if(accs[acc]!="")
+                    acct.push(accs[acc])
+            }
+            var successCount = 0
+            var failCount = 0
+            var failInfo = []
+            for(i in acct){
+                info = acct[i].split(',')
+                if(info.length!=4)
+                {
+                    failCount+=1
+                    failInfo.push({
+                        'account':info[0],
+                        'reason':'格式不正确'
+                    })
+                }
+                else
+                {
+                    $.get('addAccount',{'userName':info[0],'password':info[1],'question':info[2],'answer':info[3]},function(res){
+                        modald.close()
+                        if(res=='1')
+                            successCount+=1
+                        else if(res=='2')
+                        {
+                            failCount+=1
+                            failInfo.push({
+                                'account':info[0],
+                                'reason':'用户已存在'
+                            })
+                        }
+                        else if(res=='3')
+                        {
+                            failCount+=1
+                            failInfo.push({
+                                'account':info[0],
+                                'reason':'连接失败'
+                            })
+                        }
+                        var s = "成功个数："+successCount+"; 失败个数："+failCount+"; 失败原因："+JSON.stringify(failInfo)
+                        showtext(s)
+                    })
+                }
+            }
+        }
+    </script>
+</body>

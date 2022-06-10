@@ -1,0 +1,21 @@
+{
+  "name": "mixio",
+  "version": "1.8.0",
+  "description": "",
+  "main": "mixio.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "forever": "^4.0.3"
+  },
+  "bin": "mixio.js",
+  "pkg": {
+    "assets": [
+      "node_modules/broadway/lib/broadway/plugins/**/*",
+      "node_modules/flatiron/lib/flatiron/plugins/**/*"
+    ]
+  }
+}

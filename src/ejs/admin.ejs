@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>MixIO</title>
+    <link rel="shortcut icon" href="img/shortcut.png"/>
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/nunito.css" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css?v=99" rel="stylesheet">
+    <link rel="stylesheet" href="css/muuri.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/lang.js?v=5"></script>
+    <script src="js/lang2.js?v=5"></script>
+    <script src="js/tools.js?v=2"></script>
+</head>
+
+<body class="bg-gradient-light" style="height:100vh;display:flex;align-items:center;justify-content:center">
+    <style>
+        .translate{
+            width:50px;
+            padding: 0;
+            margin-left:5px;
+        }
+    </style>
+    <div class="container" style="opacity: 0.9;">
+
+        <div class="card o-hidden border-0 shadow-lg my-5" style="margin-top:0!important">
+            <div class="card-body p-0">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+                    <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
+                    <div class="col-lg-7">
+                        <div class="p-5">
+                            <div class="text-center">
+                                <h1 class="h4 text-gray-900 mb-4">登录管理后台</h1>
+                            </div>
+
+                                <div class="form-group">
+                                    <input class="form-control form-control-user"  id="userName" name="userName"
+                                        placeholder="管理员账号">
+                                </div>
+                                <div class="form-group">
+                                        <input type="password" class="form-control form-control-user" name="password"
+                                            id="password" placeholder="管理员密码">
+                                </div>
+                                <button onclick="admin()" class="btn btn-primary btn-user btn-block">
+                                    登录管理后台
+                                </button>
+                                
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="js/sb-admin-2.min.js?v=2"></script>
+    <script>
+        var admin = function(){
+            userName = $("#userName").val()
+            password = $("#password").val()
+            window.location.href = '/admin?userName='+userName+'&password='+password
+        }
+    </script>
+</body>
+
+</html>

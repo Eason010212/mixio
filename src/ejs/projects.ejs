@@ -1,0 +1,851 @@
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>MixIO</title>
+    <link rel="shortcut icon" href="img/shortcut.png"/>
+    <link rel="stylesheet" href="css/farbtastic.css">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/nunito.css" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/muuri.css?v=21">
+    <link rel="stylesheet" href="css/widgets.css">
+    <link rel="stylesheet" href="css/codemirror.css?v=2"/>
+    <script src="js/codemirror.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/lang.js?v=5"></script>
+    <script src="js/lang2.js?v=5"></script>
+    <script src="js/farbtastic.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery.easing.min.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <script src="js/jquery.easyui.min.js"></script>
+    <script src="js/mqtt.min.js"></script>
+    <script src="js/gauge.min.js"></script>
+    <script>var isMixly = <%=isMixly==1%></script>
+    <% if (configs['OFFLINE_MODE']==false) { %>
+        <script type="text/javascript" src="//api.map.baidu.com/getscript?type=webgl&v=3.0&ak=<%=configs['BAIDU_MAP_AK']%>"></script>
+    <% } %>
+    <script src="js/joy.js"></script>
+    <script src="js/districts.js"></script>
+    <link href="css/jsgrid.min.css" rel="stylesheet">
+    <script src="js/jsgrid.min.js"></script>
+    <script src="js/tools.js?v=14"></script>
+    <script src="js/widgets.js?v=73"></script>
+    <script src="blockly/blockly_compressed.js"></script>
+    <script src="blockly/blocks_compressed.js"></script>
+    <script src="blockly/javascript_compressed.js"></script>
+    <script src="blockly/iot/IOT_Blocks.js?v=13"></script>
+    <script src="blockly/iot/IOT_Generate.js?v=13"></script>
+    <script src="blockly/msg/js/zh-hans.js?v=8"></script>
+    <script>var OFFLINE_MODE = <%=configs['OFFLINE_MODE']%></script>
+    <script>var MAX_PROJECT_NUM_PER_USER = <%=configs['MAX_PROJECT_NUM_PER_USER']%></script>
+    <script>var BAIDU_MAP_AK = '<%=configs['BAIDU_MAP_AK']%>'</script>
+    <% if (configs['OFFLINE_MODE']==false) { %>
+        <script src="//pv.sohu.com/cityjson"></script>
+    <% } %>
+    <script src="js/projects.js?v=272"></script>
+    <script src="js/MixIO.js?v=30"></script>
+</head>
+
+<body id="page-top" class="sidebar-toggled" style="position:relative;overflow-x:hidden">
+    <div id="wrapper">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index">
+                <div class="sidebar-brand-icon">
+                    <img src="img/logo.png" style="width:35px" alt="">
+                </div>
+                <div class="sidebar-brand-text mx-3" >MixIO</div>
+            </a>
+            <hr class="sidebar-divider my-0">
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading lang" key="MANAGE">
+            </div>
+            <li class="nav-item active">
+                <a class="nav-link" href="projects" id="manage_prj">
+                    <i class="fa fa-fw fa-tachometer"></i>
+                    <span class="lang" key="PROJECTSMANAGE"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="webapps" id="share_app">
+                    <i class="fa fa-fw fa-share"></i>
+                    <span class="lang" key="SHAREMANAGE"></span></a>
+            </li>
+
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading lang" key="SETTINGS">
+            </div>
+            <li class="nav-item">
+                <a class="nav-link" onclick="uploadProjects()" style="cursor:pointer">
+                    <i class="fa fa-fw fa-upload"></i>
+                    <span class="lang" key="IMPORT"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="exportProjects()" style="cursor:pointer">
+                    <i class="fa fa-fw fa-download"></i>
+                    <span class="lang" key="EXPORT"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="logout">
+                    <i class="fa fa-fw fa-arrow-circle-left"></i>
+                    <span class="lang" key="LOGOUT"></span></a>
+            </li>
+            <hr class="sidebar-divider d-none d-md-block">
+            <div class="sidebar-card d-lg-flex" <%=isMixly?'style="display:none!important"':''%>>
+                <i class="fa fa-user" style="margin-bottom:2px;font-size:1rem"></i>
+                <span class="text-center mb-2" style="word-break:break-all;font-size:12px"><%=userName%></span>
+                <i class="fa fa-lock" style="margin-bottom:2px;font-size:1rem"></i>
+                <span id="prjpass" class="text-center mb-2" style="word-break:break-all;font-size:12px;margin-bottom:0!important" id="card_pass" hidden><%=projectPass%><i onclick="hidePass()" class="fa fa-eye-slash" style="margin-left:3px;cursor:pointer"></i></span>
+                <span id="prjpass_hidden" class="text-center mb-2" style="word-break:break-all;font-size:12px;margin-bottom:0!important;display:flex;flex-direction:row;align-items:center;justify-content:center">********<i onclick="showPass()" class="fa fa-eye" style="margin-left:3px;cursor:pointer;margin-bottom:5px"></i></span>  
+            </div>
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar static-top shadow" style="display:flex;justify-content:space-between" id="project_nav">
+                        <div id="top_titles" style="display:flex">
+                            <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button onclick="exit()" id="top_exit_button" class="btn btn-link rounded-circle mr-3" style="margin-right:5px!important;" hidden>
+                                <i class="fa fa-chevron-left" style="width:16px;height:16px"></i>
+                            </button>
+                            <button onclick="back_to_list()" id="top_back_button" class="btn btn-link rounded-circle mr-3" style="margin-right:5px!important;" hidden>
+                                <i class="fa fa-chevron-left" style="width:16px;height:16px"></i>
+                            </button>
+                            <div style="display:flex;flex-direction:column">
+                                <div>
+                                    <div style='height:40px;display:flex;align-items:center;justify-content:center'>
+                                        <h1 class="d-sm-inline-block h3 mb-0 text-gray-800 lang" key="PROJECTSMANAGE" id="title_phase1" style="margin-left:10px;font-size:1.25rem;display:inline-block;"></h1>
+                                    </div>
+                                    
+                                    <h1 id="title_phase2" class="h3 mb-0 text-gray-800" style="display:inline-block;font-weight:bold;font-size:1.25rem;"></h1>
+                                </div>
+                                    <span style="font-size:0.8rem;color:#858796;cursor:pointer" class="lang" key="CONNECTINGSERVER" id="connect_span" onclick="check_link()" hidden><i class="fa fa-spinner fa-spin" style="margin-right:3px"></i></span>
+                            </div>
+                        </div>
+                        <div style="white-space:nowrap" id="top_func_grp">
+                            
+                            <a onclick="view_code()" id="top_right_button_1_3" class="btn btn-primary btn-circle" hidden><i class="fa fa-code"></i></a> 
+                            <a onclick="add_project()" id="top_right_button_0" class="btn btn-primary btn-circle"><i class="fa fa-plus"></i></a>
+                            <a onclick="import_project()" id="top_right_button_-1" class="btn btn-primary btn-circle" style="margin-right:10px"><i class="fa fa-cloud-download"></i></a>
+                            <a onclick="add_widget()" id="top_right_button_1" class="btn btn-primary btn-circle" hidden><i class="fa fa-plus"></i></a>
+                            <a onclick="save_layout()" id="top_right_button_3" class="btn btn-info btn-circle" hidden><i class="fa fa-save" id="top_right_icon_3"></i></a>
+                            <a onclick="run_project()" id="top_right_button_2_1" class="btn btn-success btn-circle" hidden><i class="fa fa-play" style="margin-left:2px"></i></a>
+                            <a onclick="stop_project()" id="top_right_button_2_2" class="btn btn-danger btn-circle" hidden><i class="fa fa-stop"></i></a> 
+                        </div>
+                </nav>
+                <div class="container-fluid" id="project_list">
+                    
+                    <div class="card shadow mb-4" style="margin-top:1.5rem;border-radius:10px 10px 30px 30px">
+                        <div class="card-body row" style="padding-bottom:0;">
+                            <div class="col-xl-12 col-md-12">
+                                <h4 class="small font-weight-bold"><span class="lang" key="MANAGECOUNT"></span><span class="float-right" id="prj_num"></span></h4>
+                                <div class="progress mb-4">
+                                    <div class="progress-bar bg-warning" role="progressbar" id="prj_num_bar" style="width: 20%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="20"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow mb-4" style="border-radius:10px 10px 30px 30px">
+                        <div class="card-body" style="padding-bottom:1rem">
+                            <div id="prjmr" class="row" style="padding:0;"></div>
+                            <div style="display:flex;align-items:center;justify-content:center">
+                                <a id="prev_page" onclick="prev_page()" class="btn btn-primary lang" key="PREV" style="margin:0 10px"></a>
+                                <b id="page_count">1 / 4</b>
+                                <a id="next_page" onclick="next_page()" class="btn btn-primary lang" key="NEXT" style="margin:0 10px"></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    
+                </div>
+            <div class="container-fluid" id="project_detail">
+                <div class="grid gridbg" id="grid" hidden></div>
+                <div class="grid" id="grid2" hidden></div>
+                <div class="grid" id="grid3" hidden></div> 
+            </div>
+            <div style="transition: all 0.6s;display:flex;align-items:center;justify-content:center;padding:5px;z-index:999;position:fixed;bottom:0;right:0;background-color:white;box-shadow:0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important;border-radius:40px 0 0 40px;padding-left:0" id="bottom_2" hidden>
+                <a class="btn btn-primary btn-circle btn-sm" id="hideOrShowSwitchBar" style='transition: all 0.6s;margin-left:-0.9rem;margin-right:5px;box-shadow:1px 1px 5px #4e73df'><i class="fa fa-chevron-right" id="switchChevron"></i></a>
+                <a class="btn btn-primary btn-block" id="dataMode" style="transition: all 0.3s;margin:5px;border:solid #4e73df 1px;font-size:1rem;display:flex;flex-direction:column;align-items:center;justify-content:space-around;width:4rem;padding:5px 10px 5px 10px"><i class="fa fa-table" id="data_icon" style="font-size:1.5rem;"></i><span class="lang" key="DATA"></span></a>
+                <a class="btn btn-light btn-block" id="projMode" style="transition: all 0.3s;margin:5px;border:solid #4e73df 1px;color:#4e73df;font-size:1rem;display:flex;flex-direction:column;align-items:center;justify-content:space-around;width:4rem;padding:5px 10px 5px 10px"><i class="fa fa-cube" style="font-size:1.5rem"></i><span class="lang" key="PROJ"></a>
+                <a class="btn btn-light btn-block" id="logicMode" style="transition: all 0.3s;margin:5px;border:solid #4e73df 1px;color:#4e73df;font-size:1rem;display:flex;flex-direction:column;align-items:center;justify-content:space-around;width:4rem;padding:5px 10px 5px 10px"><i class="fa fa-code" style="font-size:1.5rem"></i><span class="lang" key="LOGIC"></a>
+            </div>
+    </div>
+    
+    <div id="trashbin" style="width:0;height:0;overflow:hidden">
+
+    </div>
+    
+    <script src="js/sb-admin-2.min.js?v=2"></script>
+    <script>var prjid = '<%=prjid%>'</script>
+    <script>
+        if(prjid!="no")
+        {
+            view_project(prjid,0)
+        }
+    </script>
+<xml id="toolbox" style="display:none">
+
+    <category name="逻辑" colour="210" css-icon="customIcon fa fa-code-fork">
+        <block type="controls_if"></block>
+        <block type="controls_ifelse"></block>
+        <block type="logic_compare"></block>
+        <block type="logic_operation"></block>
+        <block type="logic_negate"></block>
+        <block type="logic_boolean"></block>
+        <block type="logic_null"></block>
+        <block type="logic_ternary"></block>
+    </category>
+
+    <category name="控制" colour="120" css-icon="customIcon fa fa-random">
+        <block type="controls_repeat_ext"></block>
+        <block type="controls_whileUntil"></block>
+        <block type="controls_for"></block>
+        <block type="controls_forEach"></block>
+        <block type="controls_flow_statements"></block>
+        <block type="log_message">
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+
+        <block type="setInterval">
+            <value name="time">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>    
+            </value>
+        </block>
+
+        <block type="setTimeout">
+            <value name="time">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="数学" colour="230" css-icon="customIcon fa fa-superscript">
+        <block type="math_number"></block>
+        <block type="math_arithmetic"></block>
+        <block type="math_single"></block>
+        <block type="math_trig"></block>
+        <block type="math_constant"></block>
+        <block type="math_number_property"></block>
+        <block type="math_round"></block>
+        <block type="math_on_list"></block>
+        <block type="math_modulo"></block>
+        <block type="math_random_int"></block>
+        <block type="math_random_float"></block>
+        <block type="math_parse_int">
+            <value name="name">
+                <shadow type="text">
+                    <field name="TEXT">string</field>
+                </shadow>    
+            </value>
+        </block>
+        <block type="math_parse_float">
+            <value name="name">
+                <shadow type="text">
+                    <field name="TEXT">string</field>
+                </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="文本" colour="160" css-icon="customIcon fa fa-font">
+        <block type="text"></block>
+        <block type="current_time"></block>
+        <block type="text_join"></block>
+        <block type="text_append"></block>
+        <block type="text_length"></block>
+        <block type="text_isEmpty"></block>
+        <block type="text_indexOf"></block>
+        <block type="text_charAt"></block>
+        <block type="text_getSubstring"></block>
+        <block type="text_changeCase"></block>
+        <block type="text_trim"></block>
+        <block type="text_print"></block>
+        <block type="text_prompt_ext"></block>
+        <block type="text_count"></block>
+        <block type="text_replace"></block>
+        <block type="text_reverse"></block>
+        <block type="json2text"></block>
+        <block type="text2json"></block>
+    </category>
+
+    <category name="列表" colour="260" css-icon="customIcon fa fa-list">
+        <block type="lists_create_empty"></block>
+        <block type="lists_create_with"></block>
+        <block type="lists_repeat"></block>
+        <block type="lists_length"></block>
+        <block type="lists_isEmpty"></block>
+        <block type="lists_indexOf"></block>
+        <block type="lists_getIndex"></block>
+        <block type="lists_setIndex"></block>
+        <block type="lists_getSublist"></block>
+        <block type="lists_sort"></block>
+        <block type="lists_split"></block>
+        <block type="lists_reverse"></block>
+    </category>
+
+
+    <category name="字典" colour="345" css-icon="customIcon fa fa-book">
+        <block type="dicts_create_with"></block>
+        <block type="dicts_keys">
+
+        </block>
+        <block type="dicts_get">
+
+        </block>
+
+        <block type="dicts_add_or_change">
+
+        </block>
+        <block type="dicts_delete">
+
+        </block>
+        <block type="dicts_clear">
+
+        </block>
+        <block type="dicts_values">
+
+        </block>
+        <block type="dicts_length">
+
+        </block>
+        <block type="dicts_deldict">
+
+        </block>
+    </category>
+
+
+    <category name="变量" colour="330" custom="VARIABLE" css-icon="customIcon fa fa-cube">
+        
+    </category>
+
+    <category name="函数" colour="290" custom="PROCEDURE" css-icon="customIcon fa fa-cog">
+
+    </category>
+
+
+
+
+    <category name="消息" colour="350" css-icon="customIcon fa fa-envelope">
+        <block type="recieve_any_message"></block>
+        <block type="recieve_topic_message">
+            <value name="topic">
+                <shadow type="text">
+                    <field name="TEXT">topic</field>
+                </shadow>    
+            </value>
+        </block>
+        <block type="publish_message">
+            <value name="topic">
+                <shadow type="text">
+                    <field name="TEXT">topic</field>
+                </shadow>    
+            </value>
+            <value name="message">
+                <shadow type="text">
+                    <field name="TEXT">message</field>
+                </shadow>    
+            </value>
+        </block>
+    </category>
+
+
+    <category name="按键/开关" colour="#CFA45A" css-icon="customIcon fa fa-toggle-on">
+        <block type="button_down">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="button_up">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="button_recieve_message">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="button_switch">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_button_state">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+        
+    <category name="滑杆" colour="#C43C4C" css-icon="customIcon fa fa-sliders">
+        <block type="drag_slider">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="slider_recieve_message">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="change_slider">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="value">
+            <shadow type="math_number">
+                <field name="NUM">value</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_slider_num">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="文本输入" colour="#E89F24" css-icon="customIcon fa fa-i-cursor">
+        <block type="when_textinput_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="through_textinput_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_keyboard_input">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="摇杆手柄" colour="#7D9AC3" css-icon="customIcon fa fa-gamepad">
+        <block type="when_joystick_dragged">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="through_joystick_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="x">
+            <shadow type="math_number">
+                <field name="NUM">x</field>
+            </shadow>    
+            </value>
+            <value name="y">
+            <shadow type="math_number">
+                <field name="NUM">y</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_joystick_x">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_joystick_y">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="RGB色盘" colour="#A3C16B" css-icon="customIcon fa fa-paint-brush">
+        <block type="RGB_selected">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="RGB_recieved">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="through_RGB_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="R">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>    
+            </value>
+            <value name="G">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>    
+            </value>
+            <value name="B">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_RGB_color">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="指示灯" colour="#506AD4" css-icon="customIcon fa fa-lightbulb-o">
+        <block type="bulb_recieved">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="bulb_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_bulb_state">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="文本显示屏" colour="#479DA8" css-icon="customIcon fa fa-tv">
+        <block type="textLED_recieved">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="textLED_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_textLED">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="折线图表" colour="#1D33A8" css-icon="customIcon fa fa-area-chart">
+        <block type="lineChart_recieved">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="lineChart_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="clear_lineChart">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_all_messages">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_N_messages">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="num">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_latest_message">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="柱状图表" colour="#50A876" css-icon="customIcon fa fa-bar-chart">
+        <block type="barChart_recieved">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="barChart_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="clear_barChart">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_now_messages">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="数据表格" colour="#541DA8" css-icon="customIcon fa fa-table">
+        <block type="datasheet_recieved">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="datasheet_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+                <field name="CONTENT">message</field>
+            </value>
+        </block>
+        <block type="clear_datasheet">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_datasheet_all_messages">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="仪表盘" colour="#CC4375" css-icon="customIcon fa fa-dashboard">
+        <block type="dashboard_recieved">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="dashboard_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_dashboard_now_messages">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="数据地图" colour="#DE4E49" css-icon="customIcon fa fa-map">
+        <block type="get_long">
+
+        </block>
+        <block type="get_lati">
+
+        </block>
+        <block type="datamap_recieved">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="datamap_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="long">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>    
+            </value>
+            <value name="lat">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">[{"label":"","value":""},{"label":"","value":""}]</field>
+            </shadow> 
+            </value>
+        </block>
+        <block type="clear_datamap">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="实时气象仪" colour="#E06D39" css-icon="customIcon fa fa-sun-o">
+        <block type="ws_updated">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="ws_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="let_ws_update">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="let_ws_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_ws_para">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    </xml>
+</body>
