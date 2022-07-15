@@ -486,6 +486,10 @@ var JSLang = {
 
     var arrLang = {
         "en": {
+          "TOPIC": "Topic",
+          "MESSAGE": "Message",
+          "TIME":"Time",
+          "DATAMANAGE": "Data",
           "ADMIN":"Admin",
           "BASICADMIN": "Basic",
           "USERADMIN": "Users",
@@ -547,6 +551,10 @@ var JSLang = {
           "CFMSET":"Confirm"
         },
         "zh": {
+          "TOPIC": "主题",
+          "MESSAGE": "消息",
+          "TIME":"时间",
+          "DATAMANAGE": "数据管理",
           "ADMIN":"管理",
           "BASICADMIN": "基础设置",
           "USERADMIN": "批量注册",
@@ -608,6 +616,10 @@ var JSLang = {
           "CFMSET":"确定设置"
         },
         "tw": {
+          "TOPIC": "主題",
+          "MESSAGE": "消息",
+          "TIME":"時間",
+          "DATAMANAGE": "數據管理",
           "ADMIN":"管理",
           "BASICADMIN": "基礎設置",
           "USERADMIN": "批量註冊",

@@ -20,6 +20,7 @@ const path = require('path');
 var VERSION = JSON.parse(fs.readFileSync("../version.json","utf-8"))["version"]
 var configs = fs.readFileSync('./config.json');
 configs = JSON.parse(configs.toString());
+const MAX_MESSAGE_PER_USER = 1000
 
 var serverStatus = true
 
@@ -363,6 +364,64 @@ var mixioServer = function(){
             } else if (topic[2] == '9d634e1a156dc0c1611eb4c3cff57276') {
                 db.run("delete from devices where userName = ? and clientid = ?", [topic[0], payload])
             } 
+            else if(reserveJSON[topic[0]]){
+                var userName = topic[0]
+                var reserveTopic = topic[1] + "/" + topic[2]
+                var hash = 0, i, chr;
+                if (this.length === 0) return hash;
+                for (i = 0; i < userName.length; i++) {
+                    chr   = userName.charCodeAt(i);
+                    hash  = ((hash << 5) - hash) + chr;
+                    hash |= 0;
+                }
+                var targetDB = reserveDBs[hash%8]
+                targetDB.get("select count(*) from 'reserve' where userName = ?", [userName,], function(err, row){
+                    if(err){
+                        console.log(err.message)
+                    }
+                    else{
+                        if(row && row["count(*)"] < MAX_MESSAGE_PER_USER)
+                        {
+                            targetDB.run("insert into 'reserve' (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err){
+                                if(err)
+                                {
+                                    console.log(err.message)
+                                }
+                            })
+                        }
+                        else if(row["count(*)"] >= MAX_MESSAGE_PER_USER)
+                        {
+                            targetDB.get("select id from 'reserve' where userName = ? order by id asc limit 1", [userName,],function(err,row){
+                                if(err)
+                                {
+                                    console.log(err.message)
+                                }
+                                else
+                                {
+                                    if(row&&row["id"])
+                                    {
+                                        targetDB.run("delete from 'reserve' where id = ?",[row["id"],],function(err){
+                                            if(err)
+                                            {
+                                                console.log(err.message)
+                                            }
+                                            else
+                                            {
+                                                targetDB.run("insert into 'reserve' (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err){
+                                                    if(err)
+                                                    {
+                                                        console.log(err.message)
+                                                    }
+                                                })
+                                            }
+                                        })
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+            }
         }
     })
 
@@ -601,6 +660,19 @@ var mixioServer = function(){
             res.redirect('/')
     })
 
+    app.get('/mqttdata', function(req, res){
+        if(req.session.userName){
+            ejs.renderFile(__dirname +'/ejs/data.ejs', {
+                userName: req.session.userName,
+                projectPass: req.session.projectPass,
+                'configs': configs
+            }, function (err, data) {
+                res.send(data)
+            })
+        }else
+            res.redirect('/')
+    })
+
     app.get('/projects-mixly', function (req, res) {
         ejs.renderFile(__dirname +'/ejs/projects.ejs', {
             isMixly: 1,
@@ -649,6 +721,37 @@ var mixioServer = function(){
                 res.send(JSON.stringify(rows))
             })
         }
+    })
+
+    app.get('/getData', function (req, res) {
+        if(req.session.userName)
+        {
+            var userName = req.session.userName
+            var hash = 0, i, chr;
+            if (this.length === 0) return hash;
+            for (i = 0; i < userName.length; i++) {
+                chr   = userName.charCodeAt(i);
+                hash  = ((hash << 5) - hash) + chr;
+                hash |= 0;
+            }
+            reserveDBs[hash%8].all("select * from `reserve` where userName=?", [req.session.userName], function (err, rows) {
+                if(err)
+                {
+                    console.log(err)
+                }
+                else
+                {
+                    if(rows)
+                    {
+                        res.send({
+                            "count":rows.length,
+                            "rows":rows
+                        })
+                    }
+                }
+            })
+        }
+        
     })
 
     app.get('/getProjects', function (req, res) {
@@ -1177,6 +1280,72 @@ var mixioServer = function(){
         else
             res.send('-1')
     })
+
+    app.get('/queryHook', function(req, res){
+        if(req.session.userName)
+        {
+            if(reserveJSON[req.session.userName])
+                res.send('1')
+            else
+                res.send('2')
+        }
+        else
+        {
+            res.send('0')
+        }
+    })
+
+    app.get('/startHook', function(req, res){
+        if(req.session.userName)
+        {
+            reserveJSON[req.session.userName] = true
+            fs.writeFileSync('./reserve/filter.json', JSON.stringify(reserveJSON,false,4))
+            res.send('1')
+        }
+        else
+        {
+            res.send('0')
+        }
+    })
+
+    app.get('/stopHook', function(req, res){
+        if(req.session.userName)
+        {
+            reserveJSON[req.session.userName] = false
+            fs.writeFileSync('./reserve/filter.json', JSON.stringify(reserveJSON,false,4))
+            res.send('1')
+        }
+        else
+        {
+            res.send('0')
+        }
+    })
+
+    app.get('/clearHook', function(req, res){
+        if(req.session.userName)
+        {
+            var userName = req.session.userName
+            var hash = 0, i, chr;
+            if (this.length === 0) return hash;
+            for (i = 0; i < userName.length; i++) {
+                chr   = userName.charCodeAt(i);
+                hash  = ((hash << 5) - hash) + chr;
+                hash |= 0;
+            }
+            reserveDBs[hash%8].run("delete from `reserve` where userName = ?",[userName, ],function(err){
+                if(err)
+                {
+                    console.log(err.message)
+                    res.send('-1')
+                }
+                else
+                    res.send('1')
+            })
+        }
+        else
+            res.send('0')
+    })
+
     app.get('/endHost', function(req,res){
         var userName = req.session.userName
         var projectName = req.query.projectName
@@ -1210,13 +1379,30 @@ var mixioServer = function(){
         sqlite3.OPEN_READWRITE,
         function (err) {
             if (err) {
-                return console.log(err.message)
+                console.log(err.message)
             }
             db.run('delete from devices')
             console.log('[INFO] Database Connected!')
         }
     )
     
+    reserveDBs = []
+    for(var i = 1;i<=8;i = i+1)
+    {
+        reserveDBs.push(
+            new sqlite3.Database(
+                './reserve/'+i+".db",
+                sqlite3.OPEN_READWRITE,
+                function(err){
+                    if(err)
+                        console.log(err.message)
+                }
+            )
+        )
+    }
+
+    var reserveJSON = JSON.parse(fs.readFileSync('./reserve/filter.json'),"utf8")
+
 
     return new Promise(resolve=>{
         plainServer.listen(1883, function () {
