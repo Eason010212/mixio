@@ -209,7 +209,21 @@ var refresh = function(){
 }
 
 var output = function(){
-
+    var jsonData = datatable.data()
+    let str = `topic,message,time\n`;
+      for(let i = 0 ; i < jsonData.length ; i++ ){
+        for(let item in jsonData[i]){
+            str+=`${jsonData[i][item] + '\t'},`;     
+        }
+        str+='\n';
+      }
+      let uri = 'data:text/csv;charset=utf-8,\ufeff' + encodeURIComponent(str);
+      let link = document.createElement("a");
+      link.href = uri;
+      link.download =  "data.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 }
 
 var clearAll = function(){
