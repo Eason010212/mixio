@@ -2,10 +2,10 @@ function get_data(){
     $.get('queryHook',function(res){
         if(res == 1)
         {
-            $("#play").addClass("disabled")
+            $("#play").remove()
         }
         else{
-            $("#stop").addClass("disabled")
+            $("#stop").remove()
         }
         $.getJSON('getData',{
 
@@ -227,7 +227,6 @@ var output = function(){
 }
 
 var clearAll = function(){
-    console.log(111)
     var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading+"</p></div>")
     $.get('clearHook',function(res){
         modald.close()

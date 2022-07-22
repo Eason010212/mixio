@@ -4,7 +4,27 @@ const fs = require("fs")
 var versionInfo = fs.readFileSync("version.json", "utf-8")
 var configInfo = fs.readFileSync("src/config.json", "utf-8")
 var http = require("http")
+var os = require("os")
 var {spawnSync} = require("child_process")
+function getIpAddress() {
+    var ifaces=os.networkInterfaces()
+    var addresses = []
+    for (var dev in ifaces) {
+      let iface = ifaces[dev]
+  
+      for (let i = 0; i < iface.length; i++) {
+        let {family, address, internal} = iface[i]
+  
+        if (family === 'IPv4' && address !== '127.0.0.1' && !internal) {
+          addresses.push(address)
+        }
+      }
+    }
+    return addresses
+  }
+  
+let ipAddress = getIpAddress()
+
 var version = function () {
     console.log(JSON.parse(versionInfo))
 }
@@ -50,6 +70,7 @@ function start() {
         'command': "./loader"
     })
     console.log("Starting MixIO server...")
+    console.log("IP Address: "+ipAddress)
     while (true) {
         var content = fs.readFileSync(process.cwd() + "/logs/" + logFileName, "utf-8")
         var successLog = "[INFO] Database Connected!"
@@ -86,6 +107,7 @@ function debug() {
         'command': "node"
     })
     console.log("Starting MixIO server...")
+    console.log("IP Address: "+ipAddress)
     while (true) {
         var content = fs.readFileSync(process.cwd() + "/logs/" + logFileName, "utf-8")
         var successLog = "[INFO] Database Connected!"

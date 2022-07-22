@@ -68,7 +68,15 @@
         var admin = function(){
             userName = $("#userName").val()
             password = $("#password").val()
-            window.location.href = '/admin?userName='+userName+'&password='+password
+            $.post('/adminLogin',{
+                "userName":userName,
+                "password":password
+            },function(res){
+                if(res == 1)
+                    window.location.href = "./admin"
+                else
+                    showtext(JSLang[lang].wrongAcc)
+            })
         }
     </script>
 </body>

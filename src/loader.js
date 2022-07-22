@@ -96,14 +96,86 @@ async function daemon_start(){
         extended: true
     }));
     app.set('trust proxy', 1)
+    app.use(session({
+        secret: 'mixio',
+        name: 'mixio',
+        resave: false,
+        rolling: true,
+        saveUninitialized: true,
+        cookie: {
+            path: '/',
+            httpOnly: true,
+            maxAge: 1800000
+        }
+    }));
     app.get('/',function(req,res){
         ejs.renderFile(__dirname +'/ejs/admin.ejs', {
         }, function (err, data) {
             res.send(data)
         })
     })
+
+    app.get('/queryData', function(req, res){
+        var data = []
+        var messages = []
+        var cb = function(num,newFunc){
+            if(num>=1)
+            {
+                var next = num - 1
+                reserveDBs[next].all("select userName,count(*) from `reserve` group by userName", function(err,rows){
+                    if(rows)
+                    {
+                        messages.push(...rows)
+                    }
+                    cb(next,newFunc)
+                })
+            }
+            else
+            {
+                newFunc()
+            }
+        }
+        cb(8,function(){
+            db.all("select username from `user`",function(err, rows1){
+                db.all("select userName,count(*) from `project` group by username",function(err, rows2){
+                    for(var i = 0;i<=rows1.length-1;i = i+1)
+                    {
+                        var username = rows1[i]["username"]
+                        var projects = 0
+                        var msgs = 0
+                        for(var j = 0;j<=rows2.length-1;j = j+1)
+                        {
+                            if(rows2[j]["userName"] == username)
+                            {
+                                projects = rows2[j]["count(*)"]
+                                break
+                            }
+                        }
+                        for(var j = 0;j<=messages.length-1;j = j+1)
+                        {
+                            if(messages[j]["userName"] == username)
+                            {
+                                msgs = messages[j]["count(*)"]
+                                break
+                            }
+                        }
+                        data.push({
+                            "username":username,
+                            "projects":projects,
+                            "messages":msgs
+                        })
+                    }
+                    res.send(data)
+                })
+                
+            })
+        })
+        
+        
+    })
+
     app.get('/admin', function (req, res) {
-        if(req.query.userName==(configs["ADMIN_USERNAME"]?configs["ADMIN_USERNAME"]:"admin") &&req.query.password==(configs["ADMIN_PASSWORD"]?configs["ADMIN_PASSWORD"]:"public"))
+        if(req.session.admin)
         {
             ejs.renderFile(__dirname +'/ejs/manage.ejs', {
                 'configs': configs,
@@ -114,8 +186,51 @@ async function daemon_start(){
             })
         }
         else
+            res.redirect('/')
+    })
+
+    app.get('/clearMessage',function(req, res){
+        if(req.session.admin)
         {
-            res.send('账号或密码错误。')
+            var userName = req.query.userName
+            if(userName)
+            {
+                var hash = 0, i, chr;
+                if (this.length === 0) return hash;
+                for (i = 0; i < userName.length; i++) {
+                    chr   = userName.charCodeAt(i);
+                    hash  = ((hash << 5) - hash) + chr;
+                    hash |= 0;
+                }
+                var targetDB = reserveDBs[Math.abs(hash)%8]
+                targetDB.run("delete from `reserve` where userName=?",[userName,],function(err){
+                    if(err)
+                    {
+                        console.log(err.message)
+                        res.send('-1')
+                    }
+                    else
+                    {
+                        res.send('1')
+                    }
+                })
+            }
+            else
+                res.send('-1')
+        }
+        else
+            res.send('-1')
+    })
+
+    app.post('/adminLogin', function(req, res){
+        if(req.body.userName==(configs["ADMIN_USERNAME"]?configs["ADMIN_USERNAME"]:"admin") &&req.body.password==(configs["ADMIN_PASSWORD"]?configs["ADMIN_PASSWORD"]:"public"))
+        {
+            req.session.admin = true
+            res.send('1')
+        }
+        else
+        {
+            res.send('-1')
         }
     })
     
@@ -364,7 +479,7 @@ var mixioServer = function(){
             } else if (topic[2] == '9d634e1a156dc0c1611eb4c3cff57276') {
                 db.run("delete from devices where userName = ? and clientid = ?", [topic[0], payload])
             } 
-            else if(reserveJSON[topic[0]]){
+            else if(configs["ALLOW_HOOK"]&&reserveJSON[topic[0]]&&topic[0]!="$SYS"){
                 var userName = topic[0]
                 var reserveTopic = topic[1] + "/" + topic[2]
                 var hash = 0, i, chr;
@@ -374,7 +489,7 @@ var mixioServer = function(){
                     hash  = ((hash << 5) - hash) + chr;
                     hash |= 0;
                 }
-                var targetDB = reserveDBs[hash%8]
+                var targetDB = reserveDBs[Math.abs(hash)%8]
                 targetDB.get("select count(*) from 'reserve' where userName = ?", [userName,], function(err, row){
                     if(err){
                         console.log(err.message)
@@ -734,7 +849,7 @@ var mixioServer = function(){
                 hash  = ((hash << 5) - hash) + chr;
                 hash |= 0;
             }
-            reserveDBs[hash%8].all("select * from `reserve` where userName=?", [req.session.userName], function (err, rows) {
+            reserveDBs[Math.abs(hash)%8].all("select * from `reserve` where userName=?", [req.session.userName], function (err, rows) {
                 if(err)
                 {
                     console.log(err)
@@ -1332,7 +1447,7 @@ var mixioServer = function(){
                 hash  = ((hash << 5) - hash) + chr;
                 hash |= 0;
             }
-            reserveDBs[hash%8].run("delete from `reserve` where userName = ?",[userName, ],function(err){
+            reserveDBs[Math.abs(hash)%8].run("delete from `reserve` where userName = ?",[userName, ],function(err){
                 if(err)
                 {
                     console.log(err.message)
@@ -1482,6 +1597,12 @@ var MixIOclosure = function(userName,projectName,projectPass,dataStorage,dom){
     var that = this
     this.errorMessage = ""
     this.dataSave = JSON.parse(dataStorage)
+    if(!this.dataSave || !this.dataSave["received"])
+    {
+        this.dataSave = {
+            "received":{}
+        }
+    }
     this.lastPublishTime = [new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0),new Date(0)],
     this.minPublishInterval = 500,
     this.client = mqtt.connect('ws://localhost:8083',{

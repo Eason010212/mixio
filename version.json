@@ -1,5 +1,5 @@
 {
-    "version": "1.7.0",
-    "platform": "linux-x64",
+    "version": "1.9.0",
+    "platform": "win-x64",
     "node-version": "12"
 }

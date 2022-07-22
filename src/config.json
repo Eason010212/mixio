@@ -5,9 +5,8 @@
   "HTTPS_CRT_FILE": "./certs/file.crt",
   "MAX_PROJECT_NUM_PER_USER": 20,
   "ALLOW_REGISTER": true,
+  "ALLOW_HOOK": true,
   "OFFLINE_MODE": true,
   "BAIDU_MAP_AK": "",
-  "BAIDU_MAP_SERVER_AK": "",
-  "ADMIN_USERNAME":"admin",
-  "ADMIN_PASSWORD":"public"
+  "BAIDU_MAP_SERVER_AK": ""
 }

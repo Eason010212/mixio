@@ -756,6 +756,7 @@ function view_project(projectName,projectType){
                         switch_mode()
                         init_codemirror()
                     }
+                    $(".blocklySvg").attr("height","100%")
             })
             $("#bottom_2").removeAttr("hidden")
             var prevLogic = JSON.parse(res)['logicStorage']
