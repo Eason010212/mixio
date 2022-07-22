@@ -12,9 +12,11 @@
 1. 下载mixio_linux_x64.tar.gz
 2. tar -pzxvf mixio_linux_x64.tar.gz
 3. cd mixio_linux_x64
-4. ./mixio start 启动服务器（默认在8080端口）
-5. ./mixio stop 关闭服务器
-6. ./mixio help 查看更多指令
+4. ./install.sh 安装mixio服务
+5. systemctl start mixio 启动服务器
+6. systemctl status mixio 查看服务器状态
+7. systemctl enable mixio 设置服务器开机自启动
+8. systemctl stop mixio 关闭服务器
 ### Mac
 1. 下载mixio_darwin_x64.tar.gz
 2. tar -pzxvf mixio_darwin_x64.tar.gz
