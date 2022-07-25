@@ -29,10 +29,19 @@ MixIOLogicError.prototype = new Error()
 
 var MixIO = {
 
+    preCode:"",
+    triggers:{},
     listeners_to_be_removed: [],
     timers_to_be_removed: [],
     cycles_to_be_removed: [],
 
+    triggersToPreCode:function(){
+        MixIO.preCode = ""
+        for(trigger in MixIO.triggers)
+        {
+            MixIO.preCode = MixIO.preCode + "MixIO.triggers."+trigger+"()\n"
+        }
+    },
     safe_pause:function(){
         for(listener in this.listeners_to_be_removed){
             for(eventIndex in client._events.message)

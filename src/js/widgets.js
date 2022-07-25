@@ -1006,6 +1006,476 @@ function add_bulb(user_title,user_topic,user_content,user_style){
         itemdiv.attr('style',user_style)
 }
 
+function add_timer(user_title,user_topic,user_content,user_style){
+    var isAlive = true
+    var contents = []
+    var title = $("<h4 class='userTitle'>"+user_title+"</h4>")
+    contents.push(title)
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>"+user_topic.split("$$$")[0]+"</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
+    var bulb = $("<img src='icons/timer.svg' style='width:50%;height:50%'></img>")
+    contents.push(bulb)
+    attrs = [['user-type','timer'],['user-title',user_title],['user-topic',user_topic],['user-content',user_content]]
+    var triggerTopic = user_topic.split("$$$")[0]
+    var triggerMessage = user_topic.split("$$$")[1]
+    var triggerInterval = parseInt(user_content.split(",")[0])
+    var triggerTimes = parseInt(user_content.split(",")[1])
+    var itemdiv = add_block(1,1,contents,attrs)
+    MixIO.triggers[title.text()] = function(){
+        var localTime = 0
+        MixIO.setInterval(function(){
+            if(triggerTimes==0 || localTime<triggerTimes)
+            {
+                itemdiv.addClass("triggered")
+                setTimeout(function(){
+                    itemdiv.removeClass("triggered")
+                },150)
+                MixIO.publish(triggerTopic, triggerMessage)
+                localTime = localTime+1
+            }
+        },triggerInterval)
+    }
+    MixIO.triggersToPreCode()
+    MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
+    var tbd = null;
+    var delete_on_click = function(){
+        title.parent().parent().remove();isAlive = false
+        delete MixIO.triggers[title.text()]
+        MixIO.triggersToPreCode()
+        MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
+        if(tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function(){
+        modifyDia.showModal()
+        if(tbd)
+            tbd.remove()
+    }
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/timer.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].triggerTopic+'</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].triggerMessage+'</h5>'))
+    var message_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var message_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    message_input_div.append(message_input)
+    editForm.append(message_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].triggerInterval+'</h5>'))
+    var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var trigger_interval = $("<input type='number' step='100' min='500' max='100000' required class='form-control form-control-user'  style='text-align:center'/>")
+    trigger_interval_div.append(trigger_interval)
+    editForm.append(trigger_interval_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].triggerTimes+'</h5>'))
+    var trigger_times_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var trigger_times = $("<input type='number' step='1' min='0' max='100000' class='form-control form-control-user'  style='text-align:center'/>")
+    trigger_times_div.append(trigger_times)
+    editForm.append(trigger_times_div)
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function(){
+        if(getByteLen(title_input.val())>0&&getByteLen(title_input.val())<11)
+            {
+                var re = /^[a-z0-9]+$/i;
+                if(getByteLen(topic_input.val())>0&&getByteLen(topic_input.val())<11)
+                    if(getByteLen(message_input.val())>0)
+                    {
+                        if(true)
+                        {
+                            if(parseInt(trigger_interval.val()) && parseInt(trigger_interval.val())>=500)
+                            {
+                                if(!isNaN(parseInt(trigger_times.val())) && parseInt(trigger_times.val())>=0)
+                                {
+                                    var oldKey = title.text()
+                                    title.parent().parent().attr('user-title',title_input.val())
+                                    title.parent().parent().attr('user-topic',topic_input.val()+"$$$"+message_input.val())
+                                    title.parent().parent().attr('user-content',trigger_interval.val()+","+trigger_times.val())
+                                    title.text(title_input.val())
+                                    topic.text(topic_input.val())
+                                    triggerTopic = topic_input.val()
+                                    triggerMessage = message_input.val()
+                                    triggerInterval = trigger_interval.val()
+                                    triggerTimes = trigger_times.val()
+                                    if(title.text()!=oldKey)
+                                    {
+                                        MixIO.triggers[title.text()] = MixIO.triggers[oldKey]
+                                        delete MixIO.triggers[oldKey]
+                                    }
+                                    MixIO.triggersToPreCode()
+                                    MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
+                                    modifyDia.close()
+                                }
+                                else
+                                    showtext(JSLang[lang].illegalTimes)
+                            }
+                            else
+                                showtext(JSLang[lang].illegalInterval)
+                        }
+                        else
+                            showtext(JSLang[lang].sameUnit)
+                    }
+                    else
+                        showtext(JSLang[lang].messageLenIllegal)
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            }
+        else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function(){
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content:editForm[0],
+        cancel:false
+    })
+    var showEditBubble = function(event){
+        if(typeof startX !="undefined"&&(startX-endX<5&&endX-startX<5)&&(startY-endY<5&&endY-startY<5))
+        {var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+        var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+        var bubble = $('<div style="text-align:center"/>')
+        bubble.append(topicDiv)
+        var d = dialog({
+            align: 'top',
+            content: bubble[0],
+            quickClose:true
+        });
+        tbd = d;
+        editButton.click(edit_on_click)
+        deleteButton.click(delete_on_click)
+        if(!isRunning)
+        bubble.append(editButton)
+        if(!isRunning)
+        bubble.append(deleteButton)
+        title_input.val(title.text())
+        topic_input.val(topic.text())
+        message_input.val(triggerMessage)
+        trigger_interval.val(triggerInterval)
+        trigger_times.val(triggerTimes)
+        if(!d.open)
+            d.show(itemdiv[0]);
+        else
+            d.close()}
+    }
+    if(window.screen.width>800)
+        itemdiv.click(showEditBubble)
+    else
+        itemdiv[0].addEventListener('touchend',function(event){
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove',function(e){
+        e.preventDefault()
+    })
+    if(user_style!=undefined)
+        itemdiv.attr('style',user_style)
+}
+
+function add_trigger(user_title,user_topic,user_content,user_style){
+    var isAlive = true
+    var contents = []
+    var title = $("<h4 class='userTitle'>"+user_title+"</h4>")
+    contents.push(title)
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>"+user_topic.split("$$$")[0]+"</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
+    var bulb = $("<img src='icons/trigger.svg' style='width:50%;height:50%'></img>")
+    contents.push(bulb)
+    attrs = [['user-type','trigger'],['user-title',user_title],['user-topic',user_topic],['user-content',user_content]]
+    var condition1_1 = user_content.split("$$$")[0]
+    var condition1_2 = user_content.split("$$$")[1]
+    var condition2_1 = user_content.split("$$$")[2]
+    var condition2_2 = user_content.split("$$$")[3]
+    var conditionRelation = user_content.split("$$$")[4]
+    var dstTopic = user_content.split("$$$")[5]
+    var dstMessage = user_content.split("$$$")[6]
+    var itemdiv = add_block(1,1,contents,attrs)
+    var relationLogic = function(message,condition_1,condition_2){
+        if(condition_1 == ">")
+            return message > condition_2
+        else if(condition_1 == "≥")
+            return message >= condition_2
+        else if(condition_1 == "<")
+            return message < condition_2
+        else if(condition_1 == "≤")
+            return message <= condition_2
+        else if(condition_1 == "=")
+            return message == condition_2
+        else if(condition_1 == "≠")
+            return message != condition_2
+        else if(condition_1 == "--")
+            return true
+    }
+    MixIO.triggers[title.text()] = function(){
+        MixIO.onMessage(function(topic1,message){
+            if(topic1 == topic.text())
+            {
+                if(conditionRelation == "AND")
+                {
+                    if(relationLogic(message,condition1_1,condition1_2) && relationLogic(message,condition2_1,condition2_2))
+                    {
+                        
+                        itemdiv.addClass("triggered")
+                        setTimeout(function(){
+                            itemdiv.removeClass("triggered")
+                        },150)
+                        MixIO.publish(dstTopic,dstMessage)
+                    }
+                    else
+                    {
+                        itemdiv.addClass("imtriggered")
+                        setTimeout(function(){
+                            itemdiv.removeClass("imtriggered")
+                        },150)
+                    }
+                }
+                else if(conditionRelation == "OR")
+                {
+                    if(relationLogic(message,condition1_1,condition1_2) || relationLogic(message,condition2_1,condition2_2))
+                    {
+                        itemdiv.addClass("triggered")
+                        setTimeout(function(){
+                            itemdiv.removeClass("triggered")
+                        },150)
+                        MixIO.publish(dstTopic,dstMessage)
+                    }
+                    else
+                    {
+                        itemdiv.addClass("imtriggered")
+                        setTimeout(function(){
+                            itemdiv.removeClass("imtriggered")
+                        },150)
+                    }
+                }
+                else if(conditionRelation == "XOR")
+                {
+                    if(relationLogic(message,condition1_1,condition1_2) ^ relationLogic(message,condition2_1,condition2_2))
+                    {
+                        itemdiv.addClass("triggered")
+                        setTimeout(function(){
+                            itemdiv.removeClass("triggered")
+                        },150)
+                        MixIO.publish(dstTopic,dstMessage)
+                    }
+                    else
+                    {
+                        itemdiv.addClass("imtriggered")
+                        setTimeout(function(){
+                            itemdiv.removeClass("imtriggered")
+                        },150)
+                    }
+                }
+            }
+        })
+    }
+    MixIO.triggersToPreCode()
+    MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
+    var tbd = null;
+    var delete_on_click = function(){
+        title.parent().parent().remove();isAlive = false
+        delete MixIO.triggers[title.text()]
+        MixIO.triggersToPreCode()
+        MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
+        if(tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function(){
+        modifyDia.showModal()
+        if(tbd)
+            tbd.remove()
+    }
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/trigger.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].srcTopic+'</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].condition+'1</h5>'))
+    var condition1_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var condition1_input1 = $("<select class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-right:5px'/>")
+    condition1_input1.append($("<option value='\>'>\></option>"))
+    condition1_input1.append($("<option value='≥'>\≥</option>"))
+    condition1_input1.append($("<option value='\<'>\<</option>"))
+    condition1_input1.append($("<option value='≤'>\≤</option>"))
+    condition1_input1.append($("<option value='\='>\=</option>"))
+    condition1_input1.append($("<option value='≠'>≠</option>"))
+    var condition1_input2 = $("<input class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-left:5px'/>")
+    condition1_input_div.append(condition1_input1)
+    condition1_input_div.append(condition1_input2)
+    editForm.append(condition1_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].condition+'2</h5>'))
+    var condition2_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var condition2_input1 = $("<select class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-right:5px'/>")
+    condition2_input1.append($("<option value='--'>--</option>"))
+    condition2_input1.append($("<option value='\>'>\></option>"))
+    condition2_input1.append($("<option value='≥'>\≥</option>"))
+    condition2_input1.append($("<option value='\<'>\<</option>"))
+    condition2_input1.append($("<option value='≤'>\≤</option>"))
+    condition2_input1.append($("<option value='\='>\=</option>"))
+    condition2_input1.append($("<option value='≠'>≠</option>"))
+    var condition2_input2 = $("<input disabled class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-left:5px'/>")
+    condition2_input_div.append(condition2_input1)
+    condition2_input_div.append(condition2_input2)
+    editForm.append(condition2_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].conditionRelation+'</h5>'))
+    var condition_relation_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var condition_relation = $("<select class='form-control form-control-user'  style='text-align:center'/>")
+    condition_relation.append($("<option value='AND'>AND</option>"))
+    condition_relation.append($("<option value='OR'>OR</option>"))
+    condition_relation.append($("<option value='XOR'>XOR</option>"))
+    condition_relation_div.append(condition_relation)
+    editForm.append(condition_relation_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].dstTopic+'</h5>'))
+    var dstTopic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var dstTopic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    dstTopic_input_div.append(dstTopic_input)
+    editForm.append(dstTopic_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].dstMessage+'</h5>'))
+    var dstMessage_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var dstMessage_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    dstMessage_input_div.append(dstMessage_input)
+    editForm.append(dstMessage_input_div)
+    condition2_input1.bind("change",function(){
+        if(condition2_input1.val()=="--")
+            condition2_input2.attr("disabled","disabled")
+        else
+            condition2_input2.removeAttr("disabled")
+    })
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function(){
+        if(getByteLen(title_input.val())>0&&getByteLen(title_input.val())<11)
+            {
+                var re = /^[a-z0-9]+$/i;
+                if(getByteLen(topic_input.val())>0&&getByteLen(topic_input.val())<11)
+                    if(getByteLen(condition1_input2.val())>0 && (condition2_input1.val()=="--"||getByteLen(condition2_input2.val())>0))
+                    {
+                        if(true)
+                        {
+                            if(getByteLen(dstTopic_input.val())>0)
+                            {
+                                if(getByteLen(dstMessage_input.val())>0)
+                                {
+                                    var oldKey = title.text()
+                                    title.parent().parent().attr('user-title',title_input.val())
+                                    title.parent().parent().attr('user-topic',topic_input.val())
+                                    title.parent().parent().attr('user-content',[condition1_input1.val(),condition1_input2.val(),condition2_input1.val(),condition2_input2.val(),condition_relation.val(),dstTopic_input.val(),dstMessage_input.val()].join("$$$"))
+                                    title.text(title_input.val())
+                                    topic.text(topic_input.val())
+                                    condition1_1 = condition1_input1.val()
+                                    condition1_2 = condition1_input2.val()
+                                    condition2_1 = condition2_input1.val()
+                                    condition2_2 = condition2_input2.val()
+                                    conditionRelation = condition_relation.val()
+                                    dstTopic = dstTopic_input.val()
+                                    dstMessage = dstMessage_input.val()
+                                    if(title.text()!=oldKey)
+                                    {
+                                        MixIO.triggers[title.text()] = MixIO.triggers[oldKey]
+                                        delete MixIO.triggers[oldKey]
+                                    }
+                                    MixIO.triggersToPreCode()
+                                    MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
+                                    modifyDia.close()
+                                }
+                                else
+                                    showtext(JSLang[lang].dstMessageLenIllegal)
+                            }
+                            else
+                                showtext(JSLang[lang].dstTopicLenIllegal)
+                        }
+                        else
+                            showtext(JSLang[lang].sameUnit)
+                    }
+                    else
+                        showtext(JSLang[lang].conditionLenIllegal)
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            }
+        else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function(){
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content:editForm[0],
+        cancel:false
+    })
+    var showEditBubble = function(event){
+        if(typeof startX !="undefined"&&(startX-endX<5&&endX-startX<5)&&(startY-endY<5&&endY-startY<5))
+        {var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+        var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+        var bubble = $('<div style="text-align:center"/>')
+        bubble.append(topicDiv)
+        var d = dialog({
+            align: 'top',
+            content: bubble[0],
+            quickClose:true
+        });
+        tbd = d;
+        editButton.click(edit_on_click)
+        deleteButton.click(delete_on_click)
+        if(!isRunning)
+        bubble.append(editButton)
+        if(!isRunning)
+        bubble.append(deleteButton)
+        title_input.val(title.text())
+        topic_input.val(topic.text())
+        condition1_input1.val(condition1_1)
+        condition1_input2.val(condition1_2)
+        condition2_input1.val(condition2_1)
+        condition2_input2.val(condition2_2)
+        condition_relation.val(conditionRelation)
+        dstTopic_input.val(dstTopic)
+        dstMessage_input.val(dstMessage)
+        if(condition2_input1.val()=="--")
+            condition2_input2.attr("disabled","disabled")
+        else
+            condition2_input2.removeAttr("disabled")
+        if(!d.open)
+            d.show(itemdiv[0]);
+        else
+            d.close()}
+    }
+    if(window.screen.width>800)
+        itemdiv.click(showEditBubble)
+    else
+        itemdiv[0].addEventListener('touchend',function(event){
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove',function(e){
+        e.preventDefault()
+    })
+    if(user_style!=undefined)
+        itemdiv.attr('style',user_style)
+}
+
 function add_rgb(user_title,user_topic,user_content,user_style){
     var isAlive = true
     var contents = []
@@ -2546,9 +3016,6 @@ function add_table(user_title,user_topic,user_content,user_style){
     })   
 }
 
-function add_trigger(){
-    //removed
-}
 last_weather_synced = new Date()
 function add_weather(user_title,user_topic,user_content,user_style){
     var isAlive = true

@@ -1,3 +1,9 @@
+.triggered{
+    box-shadow: #1cc88a 0px 0px 10px;
+}
+.imtriggered{
+    box-shadow: #e74a3b 0px 0px 10px;
+}
 /* Makes our label white. */
 .blocklyToolboxDiv{
     overflow-x:hidden

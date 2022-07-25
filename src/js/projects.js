@@ -107,7 +107,7 @@ function edit_project(prjName,prjType){
             'content':content[0]
         })
         cancelBt.click(function(){
-            d.close()
+            d.close().remove()
         })
         d.showModal();
     })
@@ -161,7 +161,7 @@ function edit_project(prjName,prjType){
             'content':content[0]
         })
         cancelBt.click(function(){
-            d.close()
+            d.close().remove()
         })
         d.showModal();
     })
@@ -208,7 +208,7 @@ function edit_project(prjName,prjType){
                     colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.M
                 })
-                modald.close()
+                modald.close().remove()
                 submitBt.attr("hidden","hidden")
                 cancelBt.css("margin-right","0")
             })
@@ -217,7 +217,7 @@ function edit_project(prjName,prjType){
             'content':content[0]
         })
         cancelBt.click(function(){
-            d.close()
+            d.close().remove()
         })
         d.showModal();
     })
@@ -239,7 +239,7 @@ function edit_project(prjName,prjType){
         'content':content[0]
     })
     cancelBt.click(function(){
-        d.close()
+        d.close().remove()
     })
     d.showModal();
 }
@@ -376,7 +376,7 @@ function get_projects(page){
                 console.log(e)
             }
         }
-        modald.close()
+        modald.close().remove()
         if(count==0&&!isMixly)
             add_project()
     })
@@ -425,7 +425,7 @@ function sync_connect_status(){
     var cancelDiv = $("<div style='width:100%;text-align:center;margin-top:15px'/>")
     var cancelBt = $("<a class='btn btn-success btn-circle' style='box-shadow:1px 1px 5px #1cc88a;margin-bottom:-48px'><i class='fa fa-check'></i></a>")
     cancelBt.click(function(){
-        connectStatusDia.close()
+        connectStatusDia.close().remove()
     })
     cancelDiv.append(cancelBt)
     contentDiv.append(cancelDiv)
@@ -467,7 +467,7 @@ function shareKey(){
             }
             else
                 showtext(res)
-            modald.close()
+            modald.close().remove()
         })
     }
     else
@@ -486,7 +486,7 @@ function shareKey(){
             }
             else
                 showtext(res)
-            modald.close()
+            modald.close().remove()
         })
         
     }
@@ -593,8 +593,11 @@ function view_project(projectName,projectType){
                 media:'blockly/media/'
             }
             );
+            Blockly.Variables.createVariable_(workspace,null,"topic")
+            Blockly.Variables.createVariable_(workspace,null,"message")
             var toJS = function(){
-                MixIO.editor.setValue(Blockly.JavaScript.workspaceToCode(workspace))
+                MixIO.triggersToPreCode()
+                MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
             }
             function ast(event) {
                 toJS()
@@ -709,7 +712,7 @@ function view_project(projectName,projectType){
     var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].downloading+"</p></div>")
     $.post('getProject',{'projectName':projectName},function(res){
         console.log(JSON.parse(res))
-        modald.close()
+        modald.close().remove()
         if(res==0)
         {
             showtext(JSLang[lang].prj404)
@@ -726,8 +729,10 @@ function view_project(projectName,projectType){
                     globalProjectType = PROJ_MODE
                     switch_mode()
                 }
+                $(".blocklyHtmlInput").attr("hidden","hidden")
             })
             $("#dataMode").click(function(){
+                $(".blocklyHtmlInput").attr("hidden","hidden")
                 if(globalProjectType!=DATA_MODE)
                 {
                     $("#data_icon").removeClass("fa-table")
@@ -753,10 +758,13 @@ function view_project(projectName,projectType){
                     if(globalProjectType!=LOGIC_MODE)
                     {
                         globalProjectType = LOGIC_MODE
+                        MixIO.triggersToPreCode()
+                        MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
                         switch_mode()
                         init_codemirror()
                     }
                     $(".blocklySvg").attr("height","100%")
+                    $(".blocklyHtmlInput").removeAttr("hidden")
             })
             $("#bottom_2").removeAttr("hidden")
             var prevLogic = JSON.parse(res)['logicStorage']
@@ -811,7 +819,7 @@ function view_project(projectName,projectType){
                 content:hisDiv[0]
             })
             hisBut.click(function(){
-                d.close()
+                d.close().remove()
             })
             if(history.length>0)
                 d.showModal()
@@ -991,7 +999,8 @@ function view_project(projectName,projectType){
                     'trigger':add_trigger,
                     'table':add_table,
                     'decorate_text':add_decorate_text,
-                    'decorate_pic':add_decorate_pic
+                    'decorate_pic':add_decorate_pic,
+                    'timer':add_timer
                 }
                 toolkits[un.attr('user-type')](un.attr('user-title'),un.attr('user-topic'),un.attr('user-content'),un.attr('style'))
             }
@@ -1450,7 +1459,7 @@ function view_project(projectName,projectType){
             },function(res){
                 if(res!=-1)
                     globalShareKey = JSON.parse(res)['share_key']
-                modaldd.close()
+                modaldd.close().remove()
             })
         }
         window.addEventListener("resize", function() {                
@@ -1494,6 +1503,10 @@ function add_widget(){
     widget_list.append(input_rgb_add)
     var output_bulb_add = $("<div class='widget_div'><div><img src='icons/output_bulb.svg'><span>"+JSLang[lang].bulb+"</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(output_bulb_add)
+    var timer_add = $("<div class='widget_div'><div><img src='icons/timer.svg'><span>"+JSLang[lang].timer+"</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(timer_add)
+    var trigger_add = $("<div class='widget_div'><div><img src='icons/trigger.svg'><span>"+JSLang[lang].trigger+"</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(trigger_add)
     widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>"+JSLang[lang].data+"</h5>"))
     var output_chart_add = $("<div class='widget_div'><div><img src='icons/output_chart.svg'><span>"+JSLang[lang].lineChart+"</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(output_chart_add)
@@ -1518,7 +1531,7 @@ function add_widget(){
     var decorate_pic_add = $("<div class='widget_div'><div><img src='icons/decorate_pic.svg'><span>"+JSLang[lang].picture+"</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(decorate_pic_add)
     input_button_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/input_button.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -1563,7 +1576,7 @@ function add_widget(){
                         if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
                         {
                             add_button(title_input.val(),topic_input.val(),modeCheckbox.prop('checked')?2:0)
-                            modifyDia.close()
+                            modifyDia.close().remove()
                         }
                         else
                             showtext(JSLang[lang].sameUnit)
@@ -1578,7 +1591,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -1591,7 +1604,7 @@ function add_widget(){
     })
 
     input_button_add2.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/input_button2.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -1636,7 +1649,7 @@ function add_widget(){
                         if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
                         {
                             add_button(title_input.val(),topic_input.val(),modeCheckbox.prop('checked')?2:0)
-                            modifyDia.close()
+                            modifyDia.close().remove()
                         }
                         else
                             showtext(JSLang[lang].sameUnit)
@@ -1651,7 +1664,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -1664,7 +1677,7 @@ function add_widget(){
     })
 
     input_slider_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:105px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/input_slider.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -1693,7 +1706,7 @@ function add_widget(){
                                 if(!isNaN(parseFloat(minInput.val()))&&!isNaN(parseFloat(maxInput.val()))&&!isNaN(parseFloat(paceInput.val()))&&(parseFloat(paceInput.val())>0)&&(parseFloat(maxInput.val())>parseFloat(minInput.val()))&&((parseFloat(maxInput.val())-parseFloat(minInput.val()))>parseFloat(paceInput.val())))
                                 {
                                     add_slider(title_input.val(),topic_input.val(),minInput.val()+","+maxInput.val()+","+paceInput.val()+","+minInput.val())
-                                    modifyDia.close()
+                                    modifyDia.close().remove()
                                 }
                                 else{
                                     showtext(JSLang[lang].invalidSlideRange)
@@ -1726,7 +1739,7 @@ function add_widget(){
         maxInput.val(10)
         paceInput.val(1)
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -1739,7 +1752,7 @@ function add_widget(){
     })
     
     input_keyboard_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/input_keyboard.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -1766,7 +1779,7 @@ function add_widget(){
                             if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
                             {
                                 add_keyboard(title_input.val(),topic_input.val(),"")
-                                modifyDia.close()
+                                modifyDia.close().remove()
                             }
                             else
                                 showtext(JSLang[lang].sameUnit)
@@ -1781,7 +1794,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -1794,7 +1807,7 @@ function add_widget(){
     })
 
     input_controller_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/input_controller.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -1821,7 +1834,7 @@ function add_widget(){
                             if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
                             {
                                 add_controller(title_input.val(),topic_input.val())
-                                modifyDia.close()
+                                modifyDia.close().remove()
                             }
                             else
                                 showtext(JSLang[lang].sameUnit)
@@ -1836,7 +1849,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -1849,7 +1862,7 @@ function add_widget(){
     })
 
     input_rgb_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/input_rgb.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -1888,7 +1901,7 @@ function add_widget(){
                             if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
                             {
                                 add_rgb(title_input.val(),Rtopic_input.val()+"/"+Gtopic_input.val()+"/"+Btopic_input.val(),'0,0,0')
-                                modifyDia.close()
+                                modifyDia.close().remove()
                             }
                             else
                                 showtext(JSLang[lang].sameUnit)
@@ -1903,7 +1916,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -1917,7 +1930,7 @@ function add_widget(){
 
     if(!OFFLINE_MODE)
     input_weather_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/input_weather.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -1994,7 +2007,7 @@ function add_widget(){
                                 if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
                                 {
                                     add_weather(title_input.val(),topic_input.val(),placecode)
-                                    modifyDia.close()
+                                    modifyDia.close().remove()
                                 }
                                 else
                                     showtext(JSLang[lang].sameUnit)
@@ -2010,7 +2023,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -2023,7 +2036,7 @@ function add_widget(){
     })
 
     output_bulb_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_bulb.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -2050,7 +2063,7 @@ function add_widget(){
                             if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
                             {
                                 add_bulb(title_input.val(),topic_input.val(),0)
-                                modifyDia.close()
+                                modifyDia.close().remove()
                             }
                             else
                                 showtext(JSLang[lang].sameUnit)
@@ -2065,7 +2078,206 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
+            add_widget()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content:editForm[0],
+            cancel:false
+        })
+        modifyDia.showModal()
+    })
+
+    timer_add.children("a").click(function(){
+        d.close().remove()
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/timer.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].triggerTopic+'</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div.append(topic_input)
+        topic_input.val("timer")
+        editForm.append(topic_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].triggerMessage+'</h5>'))
+        var message_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var message_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        message_input_div.append(message_input)
+        editForm.append(message_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].triggerInterval+'</h5>'))
+        var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var trigger_interval = $("<input type='number' step='100' min='500' max='100000' required class='form-control form-control-user'  style='text-align:center'/>")
+        trigger_interval.val(1000)
+        trigger_interval_div.append(trigger_interval)
+        editForm.append(trigger_interval_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].triggerTimes+'</h5>'))
+        var trigger_times_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var trigger_times = $("<input type='number' step='1' min='0' max='100000' class='form-control form-control-user'  style='text-align:center'/>")
+        trigger_times.val(0)
+        trigger_times_div.append(trigger_times)
+        editForm.append(trigger_times_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function(){
+            if(getByteLen(title_input.val())>0&&getByteLen(title_input.val())<11)
+                {
+                    var re = /^[a-z0-9]+$/i;
+                    if(getByteLen(topic_input.val())>0&&getByteLen(topic_input.val())<11)
+                        if(getByteLen(message_input.val())>0)
+                        {
+                            if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
+                            {
+                                if(parseInt(trigger_interval.val()) && parseInt(trigger_interval.val())>=500)
+                                {
+                                    if(!isNaN(parseInt(trigger_times.val())) && parseInt(trigger_times.val())>=0)
+                                    {
+                                        add_timer(title_input.val(),topic_input.val()+"$$$"+message_input.val(),trigger_interval.val()+","+trigger_times.val())
+                                        modifyDia.close().remove()
+                                    }
+                                    else
+                                        showtext(JSLang[lang].illegalTimes)
+                                }
+                                else
+                                    showtext(JSLang[lang].illegalInterval)
+                            }
+                            else
+                                showtext(JSLang[lang].sameUnit)
+                        }
+                        else
+                            showtext(JSLang[lang].messageLenIllegal)
+                    else
+                        showtext(JSLang[lang].topicLenIllegal)
+                }
+            else
+                showtext(JSLang[lang].nameLenIllegal)
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function(){
+            modifyDia.close().remove()
+            add_widget()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content:editForm[0],
+            cancel:false
+        })
+        modifyDia.showModal()
+    })
+
+    trigger_add.children("a").click(function(){
+        d.close().remove()
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/trigger.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].srcTopic+'</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div.append(topic_input)
+        editForm.append(topic_input_div)
+        topic_input.val("trigger")
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].condition+'1</h5>'))
+        var condition1_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var condition1_input1 = $("<select class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-right:5px'/>")
+        condition1_input1.append($("<option value='\>'>\></option>"))
+        condition1_input1.append($("<option value='≥'>\≥</option>"))
+        condition1_input1.append($("<option value='\<'>\<</option>"))
+        condition1_input1.append($("<option value='≤'>\≤</option>"))
+        condition1_input1.append($("<option value='\='>\=</option>"))
+        condition1_input1.append($("<option value='≠'>≠</option>"))
+        var condition1_input2 = $("<input class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-left:5px'/>")
+        condition1_input_div.append(condition1_input1)
+        condition1_input_div.append(condition1_input2)
+        editForm.append(condition1_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].condition+'2</h5>'))
+        var condition2_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var condition2_input1 = $("<select class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-right:5px'/>")
+        condition2_input1.append($("<option value='--'>--</option>"))
+        condition2_input1.append($("<option value='\>'>\></option>"))
+        condition2_input1.append($("<option value='≥'>\≥</option>"))
+        condition2_input1.append($("<option value='\<'>\<</option>"))
+        condition2_input1.append($("<option value='≤'>\≤</option>"))
+        condition2_input1.append($("<option value='\='>\=</option>"))
+        condition2_input1.append($("<option value='≠'>≠</option>"))
+        var condition2_input2 = $("<input disabled class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-left:5px'/>")
+        condition2_input_div.append(condition2_input1)
+        condition2_input_div.append(condition2_input2)
+        editForm.append(condition2_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].conditionRelation+'</h5>'))
+        var condition_relation_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var condition_relation = $("<select class='form-control form-control-user'  style='text-align:center'/>")
+        condition_relation.append($("<option value='AND'>AND</option>"))
+        condition_relation.append($("<option value='OR'>OR</option>"))
+        condition_relation.append($("<option value='XOR'>XOR</option>"))
+        condition_relation_div.append(condition_relation)
+        editForm.append(condition_relation_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].dstTopic+'</h5>'))
+        var dstTopic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var dstTopic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        dstTopic_input_div.append(dstTopic_input)
+        editForm.append(dstTopic_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">'+JSLang[lang].dstMessage+'</h5>'))
+        var dstMessage_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var dstMessage_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        dstMessage_input_div.append(dstMessage_input)
+        editForm.append(dstMessage_input_div)
+        condition2_input1.bind("change",function(){
+            if(condition2_input1.val()=="--")
+                condition2_input2.attr("disabled","disabled")
+            else
+                condition2_input2.removeAttr("disabled")
+        })
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function(){
+            if(getByteLen(title_input.val())>0&&getByteLen(title_input.val())<11)
+                {
+                    var re = /^[a-z0-9]+$/i;
+                    if(getByteLen(topic_input.val())>0&&getByteLen(topic_input.val())<11)
+                        if(getByteLen(condition1_input2.val())>0 && (condition2_input1.val()=="--"||getByteLen(condition2_input2.val())>0))
+                        {
+                            if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
+                            {
+                                if(getByteLen(dstTopic_input.val())>0)
+                                {
+                                    if(getByteLen(dstMessage_input.val())>0)
+                                    {
+                                        var content = [condition1_input1.val(),condition1_input2.val(),condition2_input1.val(),condition2_input2.val(),condition_relation.val(),dstTopic_input.val(),dstMessage_input.val()].join("$$$")
+                                        add_trigger(title_input.val(),topic_input.val(),content)
+                                        modifyDia.close().remove()
+                                    }
+                                    else
+                                        showtext(JSLang[lang].dstMessageLenIllegal)
+                                }
+                                else
+                                    showtext(JSLang[lang].dstTopicLenIllegal)
+                            }
+                            else
+                                showtext(JSLang[lang].sameUnit)
+                        }
+                        else
+                            showtext(JSLang[lang].conditionLenIllegal)
+                    else
+                        showtext(JSLang[lang].topicLenIllegal)
+                }
+            else
+                showtext(JSLang[lang].nameLenIllegal)
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function(){
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -2078,7 +2290,7 @@ function add_widget(){
     })
 
     output_text_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_text.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -2105,7 +2317,7 @@ function add_widget(){
                             if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
                             {
                                 add_text(title_input.val(),topic_input.val(),'')
-                                modifyDia.close()
+                                modifyDia.close().remove()
                             }
                             else
                                 showtext(JSLang[lang].sameUnit)
@@ -2120,7 +2332,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -2133,7 +2345,7 @@ function add_widget(){
     })
 
     table_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/table.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -2169,7 +2381,7 @@ function add_widget(){
                                 {
                                     var tmpstr = count_input.val().split(',').length+','+count_input.val()
                                     add_table(title_input.val(),topic_input.val(),tmpstr)
-                                    modifyDia.close()
+                                    modifyDia.close().remove()
                                 }
                                 else
                                     showtext(JSLang[lang].columnsSet)
@@ -2187,7 +2399,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -2200,7 +2412,7 @@ function add_widget(){
     })
 
     output_chart_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_chart.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -2238,7 +2450,7 @@ function add_widget(){
                             if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
                             {
                                 add_chart(title_input.val(),topic_input.val(),"0"+(modeCheckbox.prop("checked")?"1":"0"))
-                                modifyDia.close()
+                                modifyDia.close().remove()
                             }
                             else
                                 showtext(JSLang[lang].sameUnit)
@@ -2254,7 +2466,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -2267,7 +2479,7 @@ function add_widget(){
     })
 
     output_bar_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_bar.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -2319,7 +2531,7 @@ function add_widget(){
                                 }
                                 var optionStr = optionList.join(',')
                                 add_bar(title_input.val(),topic_input.val(),"0"+(modeCheckbox.prop("checked")?"1":"0")+optionStr)
-                                modifyDia.close()
+                                modifyDia.close().remove()
                             }
                             else
                                 showtext(JSLang[lang].sameUnit)
@@ -2337,7 +2549,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -2350,7 +2562,7 @@ function add_widget(){
     })
 
     output_dashboard_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_dashboard.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -2389,7 +2601,7 @@ function add_widget(){
                                 if(parseInt(max_input.val())-parseInt(min_input.val())>=5&&(parseInt(max_input.val())-parseInt(min_input.val()))%5==0)
                                 {
                                     add_dashboard(title_input.val(),topic_input.val(),parseInt(min_input.val())+","+parseInt(max_input.val())+","+parseInt(min_input.val()))
-                                    modifyDia.close()
+                                    modifyDia.close().remove()
                                 }
                                 else{
                                     showtext(JSLang[lang].mod5)
@@ -2408,7 +2620,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -2422,7 +2634,7 @@ function add_widget(){
 
     if(!OFFLINE_MODE)
     output_map_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_map.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].unitName+'</h5>'))
@@ -2449,7 +2661,7 @@ function add_widget(){
                             if(countSubstr(grid.html(),'user-title=\"'+title_input.val()+'\"',false)<=0)
                             {
                                 add_map(title_input.val(),topic_input.val(),"")
-                                modifyDia.close()
+                                modifyDia.close().remove()
                             }
                             else
                                 showtext(JSLang[lang].sameUnit)
@@ -2464,7 +2676,7 @@ function add_widget(){
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -2477,7 +2689,7 @@ function add_widget(){
     })
 
     decorate_text_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/decorate_text.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].displayText+'</h5>'))
@@ -2490,11 +2702,11 @@ function add_widget(){
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function(){
             add_decorate_text(undefined,undefined,text_input.val())
-            modifyDia.close()
+            modifyDia.close().remove()
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -2507,7 +2719,7 @@ function add_widget(){
     })
 
     decorate_pic_add.children("a").click(function(){
-        d.close()
+        d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/decorate_pic.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">'+JSLang[lang].imageURL+'</h5>'))
@@ -2520,11 +2732,11 @@ function add_widget(){
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function(){
             add_decorate_pic(undefined,undefined,text_input.val())
-            modifyDia.close()
+            modifyDia.close().remove()
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function(){
-            modifyDia.close()
+            modifyDia.close().remove()
             add_widget()
         })
         bottomDiv.append(cancelEdit)
@@ -2540,7 +2752,7 @@ function add_widget(){
     var exitbutton = $('<a class="btn btn-danger btn-circle btn-lg" style="box-shadow:1px 1px 5px #e74a3b;margin-bottom:-33px"><i class="fa fa-close"></i></a>')
     exitdiv.append(exitbutton)
     exitbutton.click(function(){
-        d.close()
+        d.close().remove()
     })
     var content = $("<div/>")
     content.append(widget_list)
@@ -2603,12 +2815,12 @@ function delete_project(prjName){
                 $.post('deleteProject',{'projectName':prjName},function(res){
                     if(res==1)
                     {
-                        c.close()
+                        c.close().remove()
                         window.location.href="projects"
                     } 
                     else
                     {
-                        c.close()
+                        c.close().remove()
                         var e = dialog({
                             title: JSLang[lang].error,
                             content: JSLang[lang].deleteFail
@@ -2668,7 +2880,7 @@ function listen_project(projectName){
         console.log(res)
         var code = JSON.parse(res)["code"]
         console.log(code)
-        modald.close()
+        modald.close().remove()
         if(code==1)
         {
             window.location.href = window.location.href
@@ -2709,7 +2921,7 @@ function unlisten_project(projectName){
     $.get('/endHost',{
         'projectName':projectName
     },function(res){
-        modald.close()
+        modald.close().remove()
         if(res==1)
         {
             window.location.href = window.location.href
@@ -2767,7 +2979,7 @@ function add_project(){
         'content':content[0]
     })
     cancelBt.click(function(){
-        d.close()
+        d.close().remove()
     })
     d.showModal();
 }
@@ -2799,7 +3011,7 @@ function import_project(){
             $.get('getShare',{
                 shareid:prjName.val()
             },function(res){
-                modald.close()
+                modald.close().remove()
                 if(res==1){
                     window.location.href = window.location.href
                 }
@@ -2817,7 +3029,7 @@ function import_project(){
         'content':content[0]
     })
     cancelBt.click(function(){
-        d.close()
+        d.close().remove()
     })
     d.showModal();
 }
@@ -3000,7 +3212,7 @@ var uploadProjects = function(){
                     showtext("Unknown error")
                 if(res!=1||index==dataJSON.length-1)
                 {
-                    modald.close()
+                    modald.close().remove()
                     window.location.href = window.location.href
                 }
                 else
@@ -3010,7 +3222,7 @@ var uploadProjects = function(){
         insertOne(0)
     })
     cancelEdit.click(function(){
-        modifyDia.close()
+        modifyDia.close().remove()
     })
     bottomDiv.append(confirmEdit)
     bottomDiv.append(cancelEdit)
@@ -3026,7 +3238,7 @@ var uploadProjects = function(){
 var exportProjects = function(){
     var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading+"</p></div>")
     $.getJSON('exportProjects', function(res){
-        modald.close()
+        modald.close().remove()
         if(res!=-1)
         {
             var exportRes = []
