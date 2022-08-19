@@ -4,14 +4,97 @@
 .imtriggered{
     box-shadow: #e74a3b 0px 0px 10px;
 }
-/* Makes our label white. */
-.blocklyToolboxDiv{
-    overflow-x:hidden
-}
-.blocklyTreeLabel {
-    color: white;
-    font-size:1rem;
-    font-weight: 200;
+
+  .blocklyTreeIcon {
+    font-size:1.5rem;
+    text-align: center;
+    width: 23px;
+    height: 1.5rem;
+    margin: 5px 11px 5px 7px;
+  }
+
+  #catControl.blocklyTreeRow > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/ctrl.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catControl.blocklyTreeRow.blocklyTreeSelected > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/ctrl2.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catMath.blocklyTreeRow > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/math.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catMath.blocklyTreeRow.blocklyTreeSelected > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/math2.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catLogic.blocklyTreeRow > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/logic.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catLogic.blocklyTreeRow.blocklyTreeSelected > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/logic2.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catText.blocklyTreeRow > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/text.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catText.blocklyTreeRow.blocklyTreeSelected > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/text2.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catLists.blocklyTreeRow > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/list.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catLists.blocklyTreeRow.blocklyTreeSelected > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/list2.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catDicts.blocklyTreeRow > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/dict.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catDicts.blocklyTreeRow.blocklyTreeSelected > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/dict2.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catVar.blocklyTreeRow > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/var.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catVar.blocklyTreeRow.blocklyTreeSelected > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/var2.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catFun.blocklyTreeRow > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/func.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  #catFun.blocklyTreeRow.blocklyTreeSelected > div.blocklyTreeRowContentContainer > span.blocklyTreeIcon{
+    background:url('../blockly/media/mark/func2.png') no-repeat;
+    background-size: 100% auto;
+  }
+
+  .blocklyToolboxDiv {
+    overflow-x: hidden;
   }
   /* Adds padding around the group of categories and separators. */
   .blocklyToolboxContents {
@@ -20,18 +103,15 @@
   }
   /* Adds space between the categories, rounds the corners and adds space around the label. */
   .blocklyTreeRow {
-    margin-bottom: .5em;
+    margin-bottom: 3px;
     border-radius: 4px;
     padding: 0 5px;
     cursor: pointer;
-  }
-  .blocklyTreeRow:hover {
-    transform: scale(1.1);
-    transition: all 0.2s;
+    color: #000;
   }
   .blocklyTreeRowContentContainer{
     display:flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
   }
   /* Changes color of the icon to white. */

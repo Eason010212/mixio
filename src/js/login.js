@@ -1,3 +1,5 @@
+if(window.location.href == "http://mixio.mixly.cn/"||window.location.href == "http://mixio.mixly.org/")
+    window.location.href = "https://mixio.mixly.cn/"
 function showmodaltext(text){
     var d = dialog({
         content: text
@@ -6,7 +8,7 @@ function showmodaltext(text){
     return d
 }
 $(function(){
-    $("#admin").attr("href","http://"+window.location.href.split("//")[1].split(":")[0]+":18084")
+    $("#admin").attr("href","http://"+window.location.href.split("//")[1].split(":")[0].replace("/","")+":18084")
     fullHeight = $("#cd").height()+"px"
     halfHeight = "calc( "+($("#cd").height()-$("#ref1").height()-$("#reset_text").height()-10)+"px - 1rem)"
     if(window.screen.width<800)

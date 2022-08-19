@@ -3,6 +3,14 @@ function copy(obj){
     return JSON.parse(JSON.stringify(obj))
 }
 $(function(){
+    if ('_cordovaNative' in window) {
+        var scriptcordova = document.createElement('script');
+        scriptcordova.async = false;
+        scriptcordova.src = "https://injection/www/cordova.js";
+        document.head.appendChild(scriptcordova);
+    }
+})
+$(function(){
     get_width();
     activeExit = false;
     currentPage = 0;
@@ -15,6 +23,16 @@ $(function(){
             save_layout();
         }
     };
+    if(Math.random()>0.75)
+    {
+        var d = dialog({
+            title: '限时推广',
+            content: '<div style="width:250px">MixIO正处于不断迭代的阶段，有稳定应用、持续改进、私有部署MixIO平台的一线教师或个人开发者，欢迎加QQ群742608657，以向我们提供建议并得到技术支持，谢谢！</div>',
+            cancelValue: '确定',
+            cancel: function () {}
+        });
+        d.showModal();
+    }
 })
 
 const DATA_MODE = 0;
@@ -245,7 +263,8 @@ function edit_project(prjName,prjType){
 }
 
 function run_project(){
-    
+    if((typeof Notification)!="undefined")
+        Notification.requestPermission();
     isRunning = true
     try{
         var logicFunction = Function(globalCode);
@@ -593,8 +612,8 @@ function view_project(projectName,projectType){
                 media:'blockly/media/'
             }
             );
-            Blockly.Variables.createVariable_(workspace,null,"topic")
-            Blockly.Variables.createVariable_(workspace,null,"message")
+            //Blockly.Variables.createVariable_(workspace,null,"topic")
+            //Blockly.Variables.createVariable_(workspace,null,"message")
             var toJS = function(){
                 MixIO.triggersToPreCode()
                 MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
@@ -1005,7 +1024,7 @@ function view_project(projectName,projectType){
                 toolkits[un.attr('user-type')](un.attr('user-title'),un.attr('user-topic'),un.attr('user-content'),un.attr('style'))
             }
             var topicOuterDiv = $("<div style='width:100%;display:flex;align-items:center;'></div>")
-            var topicDiv = $("<div style='margin:0;display:flex;flex-direction:row;align-items:center;justify-content:center;margin-bottom:20px;width:320px;background-color:white;border-radius:0 0 40px 0;padding-left:10px;padding-right:10px;padding-top:5px;padding-bottom:10px;box-shadow:0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important'></div>")        
+            var topicDiv = $("<div style='z-index:1000;margin:0;display:flex;flex-direction:row;align-items:center;justify-content:center;margin-bottom:20px;width:320px;background-color:white;border-radius:0 0 40px 0;padding-left:10px;padding-right:10px;padding-top:5px;padding-bottom:10px;box-shadow:0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important'></div>")        
             var topicSelect = $("<select class='form-control' style='width:150px;'></select>")
             topicDiv.append($("<span style='font-weight:bold'>"+JSLang[lang].listener+"&nbsp;</span>"))
             topicSelect.append($("<option value='$'>"+JSLang[lang].select+"</option>"))
@@ -1020,7 +1039,7 @@ function view_project(projectName,projectType){
             })
             globalTableProjectInfo.currentTp = '$'
             topicDiv.append(topicSelect)
-            var removeTopicButton = $('<a class="btn btn-primary btn-circle btn-sm" style="margin-left:8px"><i class="fa fa-close"></i></a>')
+            var removeTopicButton = $('<a class="btn btn-danger btn-circle btn-sm" style="margin-left:8px"><i class="fa fa-close"></i></a>')
             topicDiv.append(removeTopicButton)
             removeTopicButton.click(function(){
                 if(globalTableProjectInfo.currentTp!="$")
@@ -1074,7 +1093,7 @@ function view_project(projectName,projectType){
                     for(rname in names)
                     {
                         if(data[row][names[rname]])
-                            str = str+data[row][names[rname]]+","
+                            str = str+stringendecoder.decodeHtml(data[row][names[rname]])+","
                         else
                             str = str+","
                     }
@@ -1101,7 +1120,7 @@ function view_project(projectName,projectType){
             })
             globalTableProjectInfo.currentTp2 = ''
             topicDiv2.append(topicSelect2)
-            var removeTopicButton2 = $('<a class="btn btn-primary btn-circle btn-sm" style="margin-left:8px"><i class="fa fa-close"></i></a>')
+            var removeTopicButton2 = $('<a class="btn btn-danger btn-circle btn-sm" style="margin-left:8px"><i class="fa fa-close"></i></a>')
             topicDiv2.append(removeTopicButton2)
             removeTopicButton2.click(function(){
                 topicSelect2.val("")
@@ -1301,7 +1320,7 @@ function view_project(projectName,projectType){
                     showtext(JSLang[lang].topicUnset)
             })
 
-            var bottomDiv2 = $("<div class='col-xl-6' style='margin-bottom:70px'></div>")
+            var bottomDiv2 = $("<div class='col-xl-6'></div>")
             row2.append(bottomDiv2)
             var bottomCard2 = $('<div class="card shadow mb-4">')
             bottomDiv2.append(bottomCard2)
@@ -3044,14 +3063,14 @@ function add_prjblock(projectName,projectLay,timeStamp,projectType,isTask){
         itemdiv.append(laydiv2)
         itemdiv.append(laydiv3)
         var modifytime = timeStamp.substr(0,16)
-        if(JSON.parse(projectLay).update_time)
+        if(JSON.parse(projectLay.replaceAll(/\\/,"")).update_time)
             modifytime = JSON.parse(projectLay).update_time.substr(0,16)
-        var bottomdiv = $("<div style='display:flex;flex-direction:row;z-index:3;align-items:center;justify-content:space-between;position:absolute;bottom:0;height:70px;background-color:rgba(78,115,223,0.9);width:100%;border-radius:0 0 0.5rem 0.5rem'/>")
+        var bottomdiv = $("<div style='display:flex;flex-direction:row;z-index:3;align-items:center;justify-content:space-between;position:absolute;bottom:0;height:70px;background-color:rgba(78,115,223,0.8);width:100%;border-radius:0 0 0.5rem 0.5rem'/>")
         bottomdiv.append('<div style="display:flex;flex-direction:column;margin-left:16px;max-width:calc(100% - 7.5rem - 45px);"><span style="color:white;font-weight:bold;display:block;overflow:hidden;font-size:1.2rem;white-space: nowrap;max-width:50vw;text-overflow: ellipsis;">'+projectName+'</span><span style="color:white;font-size:0.5rem;white-space: nowrap;text-overflow: ellipsis;max-width:50vw;overflow: hidden;"><i class="fa fa-edit" style="margin-right:3px"></i>'+modifytime.substr(0,16)+'</span></div>')
         var bottomButtonDiv = $("<div style='min-width:calc(7.5rem + 35px)'/>")
         console.log(isTask)
         if(isTask==0)
-            bottomButtonDiv.append('<a title="'+JSLang[lang].backRun+'" onclick="listen_project(\''+projectName+'\',\''+projectType+'\')" class="btn btn-warning btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-play"></i></a>')
+            bottomButtonDiv.append('<a title="'+JSLang[lang].backRun+'" onclick="listen_project(\''+projectName+'\',\''+projectType+'\')" class="btn btn-primary btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-cloud-upload"></i></a>')
         else if(isTask==1)
             bottomButtonDiv.append('<a title="'+JSLang[lang].stopBackRun+'" onclick="unlisten_project(\''+projectName+'\',\''+projectType+'\')" class="btn btn-danger btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-stop"></i></a>')
         else{
@@ -3127,29 +3146,19 @@ class CustomCategory extends Blockly.ToolboxCategory {
         super(categoryDef, toolbox, opt_parent);
     }
     addColourBorder_(colour){
-        this.rowDiv_.style.backgroundColor = colour;
+        super.addColourBorder_(colour);
+        // this.rowDiv_.style.backgroundColor = 'unset';
+        this.iconDom_.style.color = colour;
     }
     setSelected(isSelected){
-        // 使用getElementsByClassName选中类别对应的span元素
-        var labelDom = this.rowDiv_.getElementsByClassName('blocklyTreeLabel')[0];
+        super.setSelected(isSelected);
         if (isSelected) {
-            // 选中的类别背景色设置为白色
-            this.rowDiv_.style.backgroundColor = 'white';
-            // 选中的类别文本设置为原背景色
-            labelDom.style.color = this.colour_;
             // 设置icon的颜色和文本颜色相同
-            this.iconDom_.style.color = this.colour_;     // ====本次新增代码====
+            this.iconDom_.style.color = 'white';     // ====本次新增代码====
         } else {
-            // 未选中的类别背景色设置
-            this.rowDiv_.style.backgroundColor = this.colour_;
-            // 未选中的类别文本设置为白色
-            labelDom.style.color = 'white';
             // 设置icon的颜色和文本颜色相同
-            this.iconDom_.style.color = 'white';      // ====本次新增代码====
+            this.iconDom_.style.color = this.colour_;      // ====本次新增代码====
         }
-        // This is used for accessibility purposes.
-        Blockly.utils.aria.setState(/** @type {!Element} */ (this.htmlDiv_),
-            Blockly.utils.aria.State.SELECTED, isSelected);
     }
 }
 var customTheme = function() {

@@ -216,6 +216,7 @@ window.onerror = function (msg, url, lineNo, columnNo, error) {
     editForm.append($('<div style="margin-top:-63px;margin-left:105px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/crash.svg" style="width:45px;"></div>'))
     editForm.append($('<h3 style="text-align:center;margin-bottom:5px">出错了</h3>'))
     editForm.append($('<h6 style="text-align:center;margin-bottom:10px">请复制以下信息，发送给管理员</h6>'))
+    console.log(msg)
     var string = msg.toLowerCase();
     var substring = "script error";
     if (string.indexOf(substring) > -1) {

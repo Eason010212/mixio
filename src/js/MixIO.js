@@ -30,6 +30,17 @@ MixIOLogicError.prototype = new Error()
 var MixIO = {
 
     preCode:"",
+    alert:function(msg){
+        if((typeof cordova)!="undefined" &&(typeof cordova.plugins)!="undefined" &&(typeof cordova.plugins.notification)!="undefined" )
+        {
+            cordova.plugins.notification.local.schedule({
+                text: String(msg),
+                foreground:true
+            });
+        }
+        else if((typeof Notification)!="undefined")
+            new Notification("Message", {body: msg, tag:"MixIO"})
+    },
     triggers:{},
     listeners_to_be_removed: [],
     timers_to_be_removed: [],

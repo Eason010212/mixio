@@ -337,6 +337,7 @@ var mixioServer = function(){
                 var logicStorage = row["logicStorage"] 
                 var code = ""
                 var dom = ""
+                try{
                 if(projectLayout!=null)
                 {
                     var layoutJSON = JSON.parse(projectLayout)["layout_info"]
@@ -347,6 +348,10 @@ var mixioServer = function(){
                     code = stringendecoder.decodeHtml(JSON.parse(logicStorage)["code"])
                 else
                     code = ""   
+                }
+                catch{
+
+                }
                 var illegalKeywords = ["for","while"]
                 var isIllegal = false
                 for (wordIndex in illegalKeywords){
@@ -1119,7 +1124,7 @@ var mixioServer = function(){
                             if (req.session.salt)
                                 req.session.salt = undefined
                             res.send('1')
-                        } else if (row['verified'] == 0) {
+                        } else{
                             req.session.userName = row['username']
                             req.session.salt = row['salt']
                             res.send('3')
@@ -1439,6 +1444,7 @@ var mixioServer = function(){
     app.get('/clearHook', function(req, res){
         if(req.session.userName)
         {
+            var condition = req.query.condition
             var userName = req.session.userName
             var hash = 0, i, chr;
             if (this.length === 0) return hash;
@@ -1447,7 +1453,7 @@ var mixioServer = function(){
                 hash  = ((hash << 5) - hash) + chr;
                 hash |= 0;
             }
-            reserveDBs[Math.abs(hash)%8].run("delete from `reserve` where userName = ?",[userName, ],function(err){
+            reserveDBs[Math.abs(hash)%8].run("delete from `reserve` where userName = ? and "+ condition,[userName, ],function(err){
                 if(err)
                 {
                     console.log(err.message)
@@ -1570,27 +1576,14 @@ startOnce()
 
 //MixIO
 
-curlong=undefined
-curlati=undefined
-
-if(!configs["OFFLINE_MODE"])
-{
-    $(function(){
-        $.ajax('//api.map.baidu.com/location/ip?ip='+returnCitySN.cip+'&ak='+BAIDU_MAP_AK+'&coor=bd09ll',
-        {
-            dataType: "jsonp", //指定服务器返回的数据类型
-            success: function (res) {
-            curlong = res.content.point.x
-            curlati = res.content.point.y
-            }
-        })
-    })
-}
+curlong=0
+curlati=0
 
 function MixIOLogicError(message){
     this.message = message
     this.name = "MixIOLogicError"
 }
+
 MixIOLogicError.prototype = new Error()
 
 var MixIOclosure = function(userName,projectName,projectPass,dataStorage,dom){
@@ -2441,7 +2434,6 @@ var MixIOclosure = function(userName,projectName,projectPass,dataStorage,dom){
             'table':function(user_title,user_topic,user_content,user_style){
                 var isAlive = true
                 client.on('message',function(topic1, message1){
-                    if(isRunning)
                     if(isAlive&&that.isRunning)
                         if(topic1.split("/")[(isMixly?3:2)]==topic.text()){
                             var message = String(message1).split(',')

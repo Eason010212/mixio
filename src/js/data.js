@@ -13,13 +13,26 @@ function get_data(){
             $("#prj_num").html(res['count']+" / "+1000)
             $("#prj_num_bar").attr("aria-valuenow",res['count'])
             $("#prj_num_bar").css("width",(res['count']*100/1000)+"%")
+            globalRows = res["rows"]
             init_table(res["rows"])
             sync_chart()
         })
     })
     
 }
+var datatable = undefined
+$(function(){
+    datePicker = $("#timeFilter").flatpickr({
+        "mode":"range"
+    })
+})
 function init_table(rows){
+    if(datatable)
+    {
+        datatable.destroy()
+        datatable.clear()
+    }
+    $("#mqttdata").empty()
     for (i in rows)
     {
         let row = rows[i]
@@ -53,7 +66,8 @@ function init_table(rows){
                     "sSortAscending": ": 以升序排列此列",
                     "sSortDescending": ": 以降序排列此列"
                 }
-            }
+            },
+            dom:'lBrtip'
         });
     else if(lang=='tw')
         datatable = $("#apps_table").DataTable({
@@ -81,15 +95,71 @@ function init_table(rows){
                     "sSortAscending": ": 以升序排列此列",
                     "sSortDescending": ": 以降序排列此列"
                 }
-            }
+            },
+            dom:'lBrtip'
         });
     else
         datatable = $("#apps_table").DataTable({
-            "order": [[ 2, "asc" ]]
+            "order": [[ 2, "asc" ]],
+            dom:'lBrtip'
         });
     datatable.on("page",sync_chart)
     datatable.on("length",sync_chart)
     datatable.on("search",sync_chart)
+}
+
+var filter = function(){
+    var newRows = []
+    var selectedDates = datePicker.selectedDates
+    var compareTime = function(time1,time2){
+        if(time1[0]>time2[0])
+            return 1
+        else if(time1[0]==time2[0])
+        {
+            if(time1[1]>time2[1])
+                return 1
+            else if(time1[1]==time2[1])
+            {
+                if(time1[2]>time2[2])
+                    return 1
+                else if(time1[2]==time2[2])
+                    return 0
+                else
+                    return -1
+            }
+            else
+                return -1
+        }
+        else
+            return -1
+    }
+    var startTime = []
+    var endTime = []
+    if(selectedDates.length>0)
+    {
+        startTime = [selectedDates[0].getFullYear(),selectedDates[0].getMonth()+1,selectedDates[0].getDate()]
+        endTime = [selectedDates[1].getFullYear(),selectedDates[1].getMonth()+1,selectedDates[1].getDate()]
+    }
+    for (i in globalRows)
+    {
+        let row = globalRows[i]
+        if(row["topic"].indexOf($("#topicFilter").val())!=-1)
+        {
+            var curTime = [parseInt(row["time"].substr(0,4)),parseInt(row["time"].substr(5,2)),parseInt(row["time"].substr(8,2))]
+            if(selectedDates.length==0||(compareTime(curTime,startTime)>=0&&compareTime(endTime,curTime)>=0))
+                newRows.push(row)
+        }
+            
+    }
+    init_table(newRows)
+    sync_chart()
+}
+
+var undo = function(){
+    init_table(globalRows)
+    sync_chart()
+    $("#topicFilter").val("")
+    datePicker.clear()
 }
 
 var sync_chart = function(){
@@ -98,7 +168,6 @@ var sync_chart = function(){
         page:'current',
         search:'applied'
     }).data()
-    console.log(rows)
     var xis = []
     var srs = []
     for (var i = 0;i<=rows.length - 1;i = i+1)
@@ -228,7 +297,37 @@ var output = function(){
 
 var clearAll = function(){
     var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading+"</p></div>")
-    $.get('clearHook',function(res){
+    var condition = "topic like '%"+$("#topicFilter").val()+"%'"
+    var selectedDates = datePicker.selectedDates
+    if(selectedDates.length>0)
+    {
+        var startStr = ""
+        var startTime = [selectedDates[0].getFullYear(),selectedDates[0].getMonth()+1,selectedDates[0].getDate()]
+        startStr = startStr + startTime[0] + "-"
+        if(startTime[1]>=10)
+            startStr = startStr + startTime[1] + "-"
+        else
+            startStr = startStr + "0" + startTime[1] + "-"
+        if(startTime[2]>=10)
+            startStr = startStr + startTime[2] + " 00:00:00"
+        else
+            startStr = startStr + "0" + startTime[2] + " 00:00:00"
+        var endStr = ""
+        var endTime = [selectedDates[1].getFullYear(),selectedDates[1].getMonth()+1,selectedDates[1].getDate()]
+        endStr = endStr + endTime[0] + "-"
+        if(endTime[1]>=10)
+            endStr = endStr + endTime[1] + "-"
+        else
+            endStr = endStr + "0" + endTime[1] + "-"
+        if(endTime[2]>=10)
+            endStr = endStr + endTime[2] + " 23:59:59"
+        else
+            endStr = endStr + "0" + endTime[2] + " 23:59:59"
+        condition = condition + " and time>='"+startStr + "' and time<='"+endStr+"'"
+    }
+    $.get('clearHook',{
+        "condition":condition
+    },function(res){
         modald.close()
         if(res == 1)
             refresh()

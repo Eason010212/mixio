@@ -279,7 +279,7 @@ function add_button(user_title,user_topic,user_content,user_style){
             var d = dialog({
                 align: 'top',
                 content: bubble[0],
-                quickClose:true
+                quickClose:true,autofocus:false
             });
             tbd = d;
             editButton.click(edit_on_click)
@@ -494,7 +494,7 @@ function add_slider(user_title,user_topic,user_content,user_style){
             var d = dialog({
                 align: 'top',
                 content: bubble[0],
-                quickClose:true
+                quickClose:true,autofocus:false
             });
             tbd = d;
             editButton.click(edit_on_click)
@@ -654,7 +654,7 @@ function add_controller(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -822,7 +822,7 @@ function add_keyboard(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -976,7 +976,7 @@ function add_bulb(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -1151,7 +1151,7 @@ function add_timer(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -1435,7 +1435,7 @@ function add_trigger(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -1689,7 +1689,7 @@ function add_rgb(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -2016,7 +2016,7 @@ function add_bar(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         if(!isRunning)
@@ -2218,7 +2218,7 @@ function add_dashboard(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -2515,7 +2515,7 @@ function add_map(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -2678,7 +2678,7 @@ function add_text(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -2869,7 +2869,7 @@ function add_table(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -3263,7 +3263,7 @@ function add_weather(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -3673,7 +3673,7 @@ function add_chart(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         if(!isRunning)
@@ -3794,7 +3794,7 @@ function add_decorate_text(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
@@ -3889,7 +3889,7 @@ function add_decorate_pic(user_title,user_topic,user_content,user_style){
         var d = dialog({
             align: 'top',
             content: bubble[0],
-            quickClose:true
+            quickClose:true,autofocus:false
         });
         tbd = d;
         editButton.click(edit_on_click)
