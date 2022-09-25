@@ -1,3 +1,58 @@
+network_HUE = 250;
+
+Blockly.Blocks['GET'] = {
+  init: function() {
+      this.setColour(network_HUE);
+      this.appendDummyInput().appendField(Blockly.GETREQ);
+      this.appendValueInput("url").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.WAITREQ);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"data"+","+"status");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  },
+  getVars:function(){
+      return ["data", "status"]
+  }
+};
+
+Blockly.Blocks['GETJSON'] = {
+  init: function() {
+      this.setColour(network_HUE);
+      this.appendDummyInput().appendField(Blockly.GETREQ);
+      this.appendValueInput("url").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.WAITJSONREQ);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"data"+","+"status");
+      //var componentDb = workspace.getComponentDatabase();
+      /*
+      var params = ["data", "status"]
+      if (params.length > 0) {
+        var paramInput = this.appendDummyInput('PARAMETERS')
+                             .appendField(" ")
+                             .setAlign(Blockly.ALIGN_LEFT);
+        var i = 0;
+        for (param in params) {
+          //var field = new Blockly.FieldEventFlydown(param, componentDb, Blockly.FieldFlydown.DISPLAY_BELOW);
+          //paramInput.appendField(field, 'VAR' + i).appendField(" ");
+          i = i+1;
+        }
+      }
+      */
+      
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+      
+  },
+  getVars:function(){
+      return ["data", "status"]
+  }
+};
+
 message_HUE = 350;
 
 Blockly.Blocks['recieve_any_message'] = {
@@ -32,6 +87,20 @@ Blockly.Blocks['recieve_topic_message'] = {
     getVars:function(){
         return ["topic","message"]
     }
+};
+
+Blockly.Blocks['alert'] = {
+  init: function() {
+    this.setColour(message_HUE);
+    this.appendDummyInput().appendField(Blockly.Msg.TEXT_APPEND_TO);
+    this.appendDummyInput().appendField(Blockly.Msg.ALERT_MESSAGE);
+    this.appendValueInput("message").setCheck("String");
+    this.appendDummyInput().appendField(Blockly.MESSAGE);
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);        
+    this.setTooltip("");
+}
 };
 
 Blockly.Blocks['publish_message'] = {

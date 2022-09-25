@@ -2,6 +2,7 @@
 
 'use strict';
 
+Blockly.Msg["ALERT_MESSAGE"] = "通知发布";
 Blockly.Msg["ADD_COMMENT"] = "添加注释";
 Blockly.Msg["CANNOT_DELETE_VARIABLE_PROCEDURE"] = "不能删除变量“%1”，因为它是函数“%2”定义的一部分";
 Blockly.Msg["CHANGE_VALUE_TITLE"] = "更改值：";
@@ -427,6 +428,9 @@ Blockly.RECEIVE="当收到";
 Blockly.ANY_MESSAGE="任意消息时";
 Blockly.TOPIC_MESSAGE="主题消息时";
 Blockly.PUBLISH_MESSAGE="主题发布";
+Blockly.GETREQ="GET请求";
+Blockly.WAITREQ="并等待响应";
+Blockly.WAITJSONREQ="并等待JSON响应";
 
 Blockly.BUTTON_DOWN="按键被按下时";
 Blockly.BUTTON_UP="按键/开关被松开时";

@@ -32,7 +32,8 @@
       "icons/**/*",
       "img/**/*",
       "js/**/*",
-      "node_modules/sqlite3/lib/binding/**/*"
+      "node_modules/sqlite3/lib/binding/**/*",
+      "mixly/**/*"
     ]
   },
   "name": "loader",

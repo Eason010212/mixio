@@ -1,3 +1,39 @@
+Blockly.JavaScript.GET=function(block) {
+    var url = Blockly.JavaScript.valueToCode(this, 'url', Blockly.JavaScript.ORDER_ATOMIC);
+    var statement_code=Blockly.JavaScript.statementToCode(block, "DO0" );
+    var code_piece=[];
+        code_piece=statement_code.split("\n");
+        for(var i=0;i<code_piece.length;i++){
+          if((code_piece[i].indexOf("    ") >= 0)){  
+              code_piece[i]=code_piece[i].replace("    ","        ");
+          }
+        }   
+        statement_code=""
+        for(var i=0;i<code_piece.length;i++){
+            statement_code+=code_piece[i]+'\n'
+        }
+    var code="$.get("+url+", function(data, status){\n\t"+statement_code+"\n"+"})\n"
+    return code;
+};
+
+Blockly.JavaScript.GETJSON=function(block) {
+    var url = Blockly.JavaScript.valueToCode(this, 'url', Blockly.JavaScript.ORDER_ATOMIC);
+    var statement_code=Blockly.JavaScript.statementToCode(block, "DO0" );
+    var code_piece=[];
+        code_piece=statement_code.split("\n");
+        for(var i=0;i<code_piece.length;i++){
+          if((code_piece[i].indexOf("    ") >= 0)){  
+              code_piece[i]=code_piece[i].replace("    ","        ");
+          }
+        }   
+        statement_code=""
+        for(var i=0;i<code_piece.length;i++){
+            statement_code+=code_piece[i]+'\n'
+        }
+    var code="$.getJSON("+url+", function(data, status){\n\t"+statement_code+"\n"+"})\n"
+    return code;
+};
+
 Blockly.JavaScript.recieve_any_message=function(block) {
     var code="MixIO.onMessage(function(topic,message){\n"+Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
     return code;
@@ -18,6 +54,12 @@ Blockly.JavaScript.recieve_topic_message=function(block) {
             statement_code+=code_piece[i]+'\n'
         }
     var code="MixIO.onMessage(function(topic,message){\n\t"+"if(topic === "+topic+"){\n"+statement_code+"\n"+"}})\n"
+    return code;
+};
+
+Blockly.JavaScript.alert=function(block) {
+    var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
+    var code="MixIO.alert("+message+")\n"
     return code;
 };
 

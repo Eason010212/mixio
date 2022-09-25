@@ -42,6 +42,7 @@
     <script src="blockly/iot/IOT_Blocks.js?v=13"></script>
     <script src="blockly/iot/IOT_Generate.js?v=13"></script>
     <script src="blockly/msg/js/zh-hans.js?v=9"></script>
+    
     <script>var OFFLINE_MODE = <%=configs['OFFLINE_MODE']%></script>
     <script>var MAX_PROJECT_NUM_PER_USER = <%=configs['MAX_PROJECT_NUM_PER_USER']%></script>
     <script>var BAIDU_MAP_AK = '<%=configs['BAIDU_MAP_AK']%>'</script>
@@ -377,6 +378,24 @@
             <value name="message">
                 <shadow type="text">
                     <field name="TEXT">message</field>
+                </shadow>    
+            </value>
+        </block>
+    </category>
+
+
+    <category name="网络" colour="250" css-icon="customIcon fa fa-globe">
+        <block type="GET">
+            <value name="url">
+                <shadow type="text">
+                    <field name="TEXT">URL</field>
+                </shadow>    
+            </value>
+        </block>
+        <block type="GETJSON">
+            <value name="url">
+                <shadow type="text">
+                    <field name="TEXT">URL</field>
                 </shadow>    
             </value>
         </block>

@@ -4,8 +4,8 @@
  * @Version 2.9.5
  */
 
-curlong=undefined
-curlati=undefined
+curlong = undefined
+curlati = undefined
 
 if(!OFFLINE_MODE)
 {
@@ -28,7 +28,7 @@ function MixIOLogicError(message){
 MixIOLogicError.prototype = new Error()
 
 var MixIO = {
-
+    
     preCode:"",
     alert:function(msg){
         if((typeof cordova)!="undefined" &&(typeof cordova.plugins)!="undefined" &&(typeof cordova.plugins.notification)!="undefined" )

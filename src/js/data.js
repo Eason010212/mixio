@@ -1,48 +1,49 @@
-function get_data(){
-    $.get('queryHook',function(res){
-        if(res == 1)
-        {
+function get_data() {
+    $.get('queryHook', function(res) {
+        if (res == 1) {
             $("#play").remove()
-        }
-        else{
+        } else {
             $("#stop").remove()
         }
-        $.getJSON('getData',{
+        $.getJSON('getData', {
 
-        },function(res){
-            $("#prj_num").html(res['count']+" / "+1000)
-            $("#prj_num_bar").attr("aria-valuenow",res['count'])
-            $("#prj_num_bar").css("width",(res['count']*100/1000)+"%")
+        }, function(res) {
+            $("#prj_num").html(res['count'] + " / " + 1000)
+            $("#prj_num_bar").attr("aria-valuenow", res['count'])
+            $("#prj_num_bar").css("width", (res['count'] * 100 / 1000) + "%")
             globalRows = res["rows"]
             init_table(res["rows"])
             sync_chart()
         })
     })
-    
+
 }
 var datatable = undefined
-$(function(){
+$(function() {
     datePicker = $("#timeFilter").flatpickr({
-        "mode":"range"
+        "mode": "range"
     })
 })
-function init_table(rows){
-    if(datatable)
-    {
+
+function init_table(rows) {
+    console.log(rows)
+    if (datatable) {
         datatable.destroy()
         datatable.clear()
     }
     $("#mqttdata").empty()
-    for (i in rows)
-    {
+    for (i in rows) {
         let row = rows[i]
-        $("#mqttdata").append("<tr><td>"+row["topic"]+"</td><td>"+row["message"]+"</td><td>"+row["time"]+"</td></tr>")
+        row["time"] = new Date(new Date(row["time"]).getTime() + 480 * 60000).toLocaleString()
+        $("#mqttdata").append("<tr><td>" + row["topic"] + "</td><td>" + row["message"] + "</td><td>" + row["time"] + "</td></tr>")
     }
 
-    
-    if(lang=='zh')
+
+    if (lang == 'zh')
         datatable = $("#apps_table").DataTable({
-            "order": [[ 2, "asc" ]],
+            "order": [
+                [2, "asc"]
+            ],
             language: {
                 "sProcessing": "处理中...",
                 "sLengthMenu": "每页 _MENU_ 项",
@@ -67,11 +68,13 @@ function init_table(rows){
                     "sSortDescending": ": 以降序排列此列"
                 }
             },
-            dom:'lBrtip'
+            dom: 'lBrtip'
         });
-    else if(lang=='tw')
+    else if (lang == 'tw')
         datatable = $("#apps_table").DataTable({
-            "order": [[ 2, "asc" ]],
+            "order": [
+                [2, "asc"]
+            ],
             language: {
                 "sProcessing": "處理中...",
                 "sLengthMenu": "每頁 _MENU_ 項",
@@ -96,240 +99,225 @@ function init_table(rows){
                     "sSortDescending": ": 以降序排列此列"
                 }
             },
-            dom:'lBrtip'
+            dom: 'lBrtip'
         });
     else
         datatable = $("#apps_table").DataTable({
-            "order": [[ 2, "asc" ]],
-            dom:'lBrtip'
+            "order": [
+                [2, "asc"]
+            ],
+            dom: 'lBrtip'
         });
-    datatable.on("page",sync_chart)
-    datatable.on("length",sync_chart)
-    datatable.on("search",sync_chart)
+    datatable.on("page", sync_chart)
+    datatable.on("length", sync_chart)
+    datatable.on("search", sync_chart)
 }
 
-var filter = function(){
+var filter = function() {
     var newRows = []
     var selectedDates = datePicker.selectedDates
-    var compareTime = function(time1,time2){
-        if(time1[0]>time2[0])
+    var compareTime = function(time1, time2) {
+        if (time1[0] > time2[0])
             return 1
-        else if(time1[0]==time2[0])
-        {
-            if(time1[1]>time2[1])
+        else if (time1[0] == time2[0]) {
+            if (time1[1] > time2[1])
                 return 1
-            else if(time1[1]==time2[1])
-            {
-                if(time1[2]>time2[2])
+            else if (time1[1] == time2[1]) {
+                if (time1[2] > time2[2])
                     return 1
-                else if(time1[2]==time2[2])
+                else if (time1[2] == time2[2])
                     return 0
                 else
                     return -1
-            }
-            else
+            } else
                 return -1
-        }
-        else
+        } else
             return -1
     }
     var startTime = []
     var endTime = []
-    if(selectedDates.length>0)
-    {
-        startTime = [selectedDates[0].getFullYear(),selectedDates[0].getMonth()+1,selectedDates[0].getDate()]
-        endTime = [selectedDates[1].getFullYear(),selectedDates[1].getMonth()+1,selectedDates[1].getDate()]
+    if (selectedDates.length > 0) {
+        startTime = [selectedDates[0].getFullYear(), selectedDates[0].getMonth() + 1, selectedDates[0].getDate()]
+        endTime = [selectedDates[1].getFullYear(), selectedDates[1].getMonth() + 1, selectedDates[1].getDate()]
     }
-    for (i in globalRows)
-    {
+    for (i in globalRows) {
         let row = globalRows[i]
-        if(row["topic"].indexOf($("#topicFilter").val())!=-1)
-        {
-            var curTime = [parseInt(row["time"].substr(0,4)),parseInt(row["time"].substr(5,2)),parseInt(row["time"].substr(8,2))]
-            if(selectedDates.length==0||(compareTime(curTime,startTime)>=0&&compareTime(endTime,curTime)>=0))
+        if (row["topic"].indexOf($("#topicFilter").val()) != -1) {
+            var curTime = [parseInt(row["time"].substr(0, 4)), parseInt(row["time"].substr(5, 2)), parseInt(row["time"].substr(8, 2))]
+            if (selectedDates.length == 0 || (compareTime(curTime, startTime) >= 0 && compareTime(endTime, curTime) >= 0))
                 newRows.push(row)
         }
-            
+
     }
     init_table(newRows)
     sync_chart()
 }
 
-var undo = function(){
+var undo = function() {
     init_table(globalRows)
     sync_chart()
     $("#topicFilter").val("")
     datePicker.clear()
 }
 
-var sync_chart = function(){
+var sync_chart = function() {
     var rows = datatable.rows({
-        order:'current',
-        page:'current',
-        search:'applied'
+        order: 'current',
+        page: 'current',
+        search: 'applied'
     }).data()
     var xis = []
     var srs = []
-    for (var i = 0;i<=rows.length - 1;i = i+1)
-    {
-        if(xis.length==0 || xis[xis.length-1] != rows[i][2])
+    for (var i = 0; i <= rows.length - 1; i = i + 1) {
+        if (xis.length == 0 || xis[xis.length - 1] != rows[i][2])
             xis.push(rows[i][2])
         var have = false
-        for(j in srs)
-        {
-            if(srs[j]["name"] == rows[i][0])
+        for (j in srs) {
+            if (srs[j]["name"] == rows[i][0])
                 have = true
         }
-        if(!have)
-        {
+        if (!have) {
             srs.push({
-                name:rows[i][0],
-                data:[],
-                type:"line"
+                name: rows[i][0],
+                data: [],
+                type: "line"
             })
         }
     }
-    for(i in xis)
-    {
+    for (i in xis) {
         var time = xis[i]
-        for(j in srs)
-        {
+        for (j in srs) {
             var name = srs[j]["name"]
             var have = false
-            for(var k = 0;k<=rows.length - 1;k = k+1)
-            {
-                if(rows[k][0] == name && rows[k][2] == time)
-                {
+            for (var k = 0; k <= rows.length - 1; k = k + 1) {
+                if (rows[k][0] == name && rows[k][2] == time) {
                     srs[j]["data"].push(rows[k][1])
                     have = true
                     break
-                }   
+                }
             }
-            if(!have)
+            if (!have)
                 srs[j]["data"].push(NaN)
         }
     }
     option = {
         tooltip: {
             trigger: 'axis'
-          },
+        },
         xAxis: {
-          type: 'category',
-          data: xis
+            type: 'category',
+            data: xis
         },
         yAxis: {
-          type: 'value'
+            type: 'value'
         },
         series: srs
-      };
-      
-      option && myChart.setOption(option, true);
+    };
+
+    option && myChart.setOption(option, true);
 }
-$(function(){
+$(function() {
     var chartDom = document.getElementById('chart');
     myChart = echarts.init(chartDom);
     option = {
         tooltip: {
             trigger: 'axis'
-          },
+        },
         xAxis: {
-          type: 'category',
-          data: []
+            type: 'category',
+            data: []
         },
         yAxis: {
-          type: 'value'
+            type: 'value'
         },
-        series: [
-          {
-            
-          }
-        ]
-      };
-      
-      option && myChart.setOption(option);
-      
+        series: [{
+
+        }]
+    };
+
+    option && myChart.setOption(option);
+
     get_data()
 })
 
-var play = function(){
-    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading+"</p></div>")
-    $.get('startHook',function(res){
+var play = function() {
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].loading + "</p></div>")
+    $.get('startHook', function(res) {
         modald.close()
-        if(res == 1)
+        if (res == 1)
             refresh()
         else
             showtext("unknown error")
     })
 }
 
-var stop = function(){
-    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading+"</p></div>")
-    $.get('stopHook',function(res){
+var stop = function() {
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].loading + "</p></div>")
+    $.get('stopHook', function(res) {
         modald.close()
-        if(res == 1)
+        if (res == 1)
             refresh()
         else
             showtext("unknown error")
     })
 }
 
-var refresh = function(){
+var refresh = function() {
     window.location.href = window.location.href
 }
 
-var output = function(){
+var output = function() {
     var jsonData = datatable.data()
     let str = `topic,message,time\n`;
-      for(let i = 0 ; i < jsonData.length ; i++ ){
-        for(let item in jsonData[i]){
-            str+=`${jsonData[i][item] + '\t'},`;     
+    for (let i = 0; i < jsonData.length; i++) {
+        for (let item in jsonData[i]) {
+            str += `${jsonData[i][item] + '\t'},`;
         }
-        str+='\n';
-      }
-      let uri = 'data:text/csv;charset=utf-8,\ufeff' + encodeURIComponent(str);
-      let link = document.createElement("a");
-      link.href = uri;
-      link.download =  "data.csv";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        str += '\n';
+    }
+    let uri = 'data:text/csv;charset=utf-8,\ufeff' + encodeURIComponent(str);
+    let link = document.createElement("a");
+    link.href = uri;
+    link.download = "data.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
-var clearAll = function(){
-    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading+"</p></div>")
-    var condition = "topic like '%"+$("#topicFilter").val()+"%'"
+var clearAll = function() {
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].loading + "</p></div>")
+    var condition = "topic like '%" + $("#topicFilter").val() + "%'"
     var selectedDates = datePicker.selectedDates
-    if(selectedDates.length>0)
-    {
+    if (selectedDates.length > 0) {
         var startStr = ""
-        var startTime = [selectedDates[0].getFullYear(),selectedDates[0].getMonth()+1,selectedDates[0].getDate()]
+        var startTime = [selectedDates[0].getFullYear(), selectedDates[0].getMonth() + 1, selectedDates[0].getDate()]
         startStr = startStr + startTime[0] + "-"
-        if(startTime[1]>=10)
+        if (startTime[1] >= 10)
             startStr = startStr + startTime[1] + "-"
         else
             startStr = startStr + "0" + startTime[1] + "-"
-        if(startTime[2]>=10)
+        if (startTime[2] >= 10)
             startStr = startStr + startTime[2] + " 00:00:00"
         else
             startStr = startStr + "0" + startTime[2] + " 00:00:00"
         var endStr = ""
-        var endTime = [selectedDates[1].getFullYear(),selectedDates[1].getMonth()+1,selectedDates[1].getDate()]
+        var endTime = [selectedDates[1].getFullYear(), selectedDates[1].getMonth() + 1, selectedDates[1].getDate()]
         endStr = endStr + endTime[0] + "-"
-        if(endTime[1]>=10)
+        if (endTime[1] >= 10)
             endStr = endStr + endTime[1] + "-"
         else
             endStr = endStr + "0" + endTime[1] + "-"
-        if(endTime[2]>=10)
+        if (endTime[2] >= 10)
             endStr = endStr + endTime[2] + " 23:59:59"
         else
             endStr = endStr + "0" + endTime[2] + " 23:59:59"
-        condition = condition + " and time>='"+startStr + "' and time<='"+endStr+"'"
+        condition = condition + " and time>='" + startStr + "' and time<='" + endStr + "'"
     }
-    $.get('clearHook',{
-        "condition":condition
-    },function(res){
+    $.get('clearHook', {
+        "condition": condition
+    }, function(res) {
         modald.close()
-        if(res == 1)
+        if (res == 1)
             refresh()
         else
             showtext("unknown error")
