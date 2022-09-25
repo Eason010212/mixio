@@ -287,6 +287,8 @@ async function daemon_start() {
 
     app.use('/blockly', express.static(path.join(__dirname, 'blockly')));
 
+    app.use('/mixly', express.static(path.join(__dirname, 'mixly')));
+
     app.use('/icons', express.static(path.join(__dirname, 'icons')));
 
     app.use('/documentation', express.static(path.join(__dirname, 'documentation')));
