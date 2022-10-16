@@ -415,7 +415,11 @@ function sync_connect_status() {
         hardware_connection_div.append(hardware_connection_icon)
         hardware_connection_div.append(hardware_connection_descrp)
         for (hardware in connected_hardwares) {
-            var hardName = $("<p style='margin:0;color:#1cc88a;font-size:0.8rem'>" + "<i class='fa fa-microchip' style='margin-right:3px'></i>" + connected_hardwares[hardware] + "</p>")
+            //Modified
+            var iconName = "microchip"
+            if(connected_hardwares[hardware].indexOf("wechat_")!=-1)
+                iconName = "wechat"
+            var hardName = $("<p style='margin:0;color:#1cc88a;font-size:0.8rem'>" + "<i class='fa fa-"+iconName+"' style='margin-right:3px'></i>" + connected_hardwares[hardware] + "</p>")
             contentDiv.append(hardName)
         }
         contentDiv.append("<p style='font-weight:bold;margin-top:10px;margin-bottom:5px;font-size:1rem'>私有凭证 Private Key</p>")
@@ -424,11 +428,14 @@ function sync_connect_status() {
         contentDiv.append("<div style='margin-top:5px;margin-bottom:0px;display:flex;flex-direction:row;align-items:center'><span style='font-weight:bold;font-size:1rem;margin-right:6px'>项目授权码 Share Key</span><a id='shareKey' onclick='shareKey()' class='btn btn-sm btn-secondary' style='padding:3px;padding-left:6px;padding-right:6px;font-size:0.8rem;border-radius:3px'>OFF</a><br></div>")
         sharekey = $("<span style='color:#1cc88a;font-weight:bold;font-size:2rem'></span>")
         contentDiv.append(sharekey)
+        contentDiv.append("<p style='font-weight:bold;margin-top:5px;margin-bottom:5px;font-size:1rem'>共享链接 Share Link</p>")
+        sharelink = $("<a style='font-size:1rem'></a>")
+        contentDiv.append(sharelink)
     }
     var cancelDiv = $("<div style='width:100%;text-align:center;margin-top:15px'/>")
     var cancelBt = $("<a class='btn btn-success btn-circle' style='box-shadow:1px 1px 5px #1cc88a;margin-bottom:-48px'><i class='fa fa-check'></i></a>")
     cancelBt.click(function() {
-        connectStatusDia.close().remove()
+        connectStatusDia.close()
     })
     cancelDiv.append(cancelBt)
     contentDiv.append(cancelDiv)
@@ -443,11 +450,17 @@ function check_share_key() {
         $("#shareKey").removeClass('btn-success')
         $("#shareKey").html("OFF")
         sharekey.html("")
+        sharelink.html("项目未共享授权")
+        sharelink.removeAttr("href")
+        sharelink.css("color","#858796")
     } else {
         $("#shareKey").removeClass('btn-secondary')
         $("#shareKey").addClass('btn-success')
         $("#shareKey").html("ON")
         sharekey.html(globalShareKey)
+        sharelink.html("http://"+window.location.host + "/observe?sid=" + globalShareKey)
+        sharelink.attr("href", "http://"+window.location.host + "/observe?sid=" + globalShareKey)
+        sharelink.css("color","#1cc88a")
     }
 }
 
@@ -464,6 +477,9 @@ function shareKey() {
                 $("#shareKey").html("ON")
                 sharekey.html(res)
                 globalShareKey = res
+                sharelink.html("http://"+window.location.host + "/observe?sid=" + globalShareKey)
+                sharelink.attr("href", "http://"+window.location.host + "/observe?sid=" + globalShareKey)
+                sharelink.css("color","#1cc88a")
             } else
                 showtext(res)
             modald.close().remove()
@@ -480,9 +496,13 @@ function shareKey() {
                 $("#shareKey").html("OFF")
                 sharekey.html("")
                 globalShareKey = undefined
+                sharelink.html("项目未共享授权")
+                sharelink.removeAttr("href")
+                sharelink.css("color","#858796")
             } else
                 showtext(res)
             modald.close().remove()
+            
         })
 
     }

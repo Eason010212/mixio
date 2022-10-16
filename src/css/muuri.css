@@ -464,4 +464,10 @@ input{
       opacity: .6;
     }
   }
+
+.ui-dialog-content{
+    padding: 0px !important;
+    overflow: visible !important;
+}
+
   
