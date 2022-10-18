@@ -21,8 +21,11 @@ var VERSION = JSON.parse(fs.readFileSync("../version.json", "utf-8"))["version"]
 var configs = fs.readFileSync('./config.json');
 configs = JSON.parse(configs.toString());
 const MAX_MESSAGE_PER_USER = 1000
+var minInterval = configs["MIN_PUBLISH_INTERVAL"] ? configs["MIN_PUBLISH_INTERVAL"] : 100
 
 var serverStatus = true
+
+var globalConnectionControl = {}
 
 stringendecoder = function() {
     this.REGX_HTML_ENCODE = /"|&|'|<|>|[\x00-\x20]|[\x7F-\xFF]|[\u0100-\u2700]/g;
@@ -433,7 +436,16 @@ var mixioServer = function() {
         if (client.user != packet.topic.split('/')[0])
             return callback(new Error('wrong topic'))
         else
+        {
+            if(globalConnectionControl[client.id])
+            {
+                if(Date.now() - globalConnectionControl[client.id] < minInterval)
+                {
+                    return callback(new Error('too fast'))
+                }
+            }
             callback(null)
+        }
     }
 
     aedes.authorizeSubscribe = function(client, subscription, callback) {
@@ -444,7 +456,7 @@ var mixioServer = function() {
     }
 
     aedes.on('publish', function(packet, client) {
-
+        globalConnectionControl[client.id] = Date.now()
         var topic = packet.topic.split('/')
         var payload = String(packet.payload)
         if (topic.length == 3) {
@@ -452,6 +464,7 @@ var mixioServer = function() {
                 db.run("insert or ignore into devices (userName, clientid) values (?,?)", [topic[0], payload])
             } else if (topic[2] == '9d634e1a156dc0c1611eb4c3cff57276') {
                 db.run("delete from devices where userName = ? and clientid = ?", [topic[0], payload])
+                delete globalConnectionControl[client.id]
             } else if (configs["ALLOW_HOOK"] && reserveJSON[topic[0]] && topic[0] != "$SYS") {
                 var userName = topic[0]
                 var reserveTopic = topic[1] + "/" + topic[2]
