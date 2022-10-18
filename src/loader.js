@@ -456,7 +456,8 @@ var mixioServer = function() {
     }
 
     aedes.on('publish', function(packet, client) {
-        globalConnectionControl[client.id] = Date.now()
+        if(client)
+            globalConnectionControl[client.id] = Date.now()
         var topic = packet.topic.split('/')
         var payload = String(packet.payload)
         if (topic.length == 3) {

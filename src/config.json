@@ -9,5 +9,7 @@
   "OFFLINE_MODE": true,
   "BAIDU_MAP_AK": "",
   "BAIDU_MAP_SERVER_AK": "",
-  "MIN_PUBLISH_INTERVAL": 100
+  "ADMIN_USERNAME":"admin",
+  "ADMIN_PASSWORD":"public",
+  "MIN_PUBLISH_INTERVAL": 200
 }
