@@ -187,9 +187,7 @@ async function daemon_start() {
         if (req.session.admin) {
             var userName = req.query.userName
             if (userName) {
-                var hash = 0,
-                    i, chr;
-                if (this.length === 0) return hash;
+                var hash = 0,i, chr;
                 for (i = 0; i < userName.length; i++) {
                     chr = userName.charCodeAt(i);
                     hash = ((hash << 5) - hash) + chr;
@@ -433,6 +431,8 @@ var mixioServer = function() {
 
     }
     aedes.authorizePublish = function(client, packet, callback) {
+        if(packet.topic=="$SYS/hello")
+            return callback(null)
         if (client.user != packet.topic.split('/')[0])
             return callback(new Error('wrong topic'))
         else
@@ -449,11 +449,22 @@ var mixioServer = function() {
     }
 
     aedes.authorizeSubscribe = function(client, subscription, callback) {
-        if (client.user != subscription.topic.split('/')[0])
+        if (client.user != subscription.topic.split('/')[0] && subscription.topic!="$SYS/hello")
             return callback(new Error('wrong topic'))
         else
             callback(null, subscription);
     }
+
+    setInterval(function(){
+        aedes.publish({
+            cmd: 'publish',
+            qos: 0,
+            dup: false,
+            topic: '$SYS/hello',
+            payload: Buffer.from(""+Date.now()),
+            retain: false
+        })
+    },10000)
 
     aedes.on('publish', function(packet, client) {
         if(client)
@@ -469,9 +480,7 @@ var mixioServer = function() {
             } else if (configs["ALLOW_HOOK"] && reserveJSON[topic[0]] && topic[0] != "$SYS") {
                 var userName = topic[0]
                 var reserveTopic = topic[1] + "/" + topic[2]
-                var hash = 0,
-                    i, chr;
-                if (this.length === 0) return hash;
+                var hash = 0, i, chr;
                 for (i = 0; i < userName.length; i++) {
                     chr = userName.charCodeAt(i);
                     hash = ((hash << 5) - hash) + chr;
@@ -815,9 +824,7 @@ var mixioServer = function() {
     app.get('/getData', function(req, res) {
         if (req.session.userName) {
             var userName = req.session.userName
-            var hash = 0,
-                i, chr;
-            if (this.length === 0) return hash;
+            var hash = 0, i, chr;
             for (i = 0; i < userName.length; i++) {
                 chr = userName.charCodeAt(i);
                 hash = ((hash << 5) - hash) + chr;
@@ -1390,9 +1397,7 @@ var mixioServer = function() {
         if (req.session.userName) {
             var condition = req.query.condition
             var userName = req.session.userName
-            var hash = 0,
-                i, chr;
-            if (this.length === 0) return hash;
+            var hash = 0,i, chr;
             for (i = 0; i < userName.length; i++) {
                 chr = userName.charCodeAt(i);
                 hash = ((hash << 5) - hash) + chr;
