@@ -8,5 +8,6 @@
   "ALLOW_HOOK": true,
   "OFFLINE_MODE": true,
   "BAIDU_MAP_AK": "",
-  "BAIDU_MAP_SERVER_AK": ""
+  "BAIDU_MAP_SERVER_AK": "",
+  "MIN_PUBLISH_INTERVAL": 100
 }
