@@ -17,7 +17,7 @@ stages:
       - step: build@nodejs
         name: build_nodejs
         displayName: Nodejs 构建
-        nodeVersion: 12.16.1
+        nodeVersion: 16.14.2
         commands:
           - '# 设置NPM源，提升安装速度'
           - npm config set registry https://registry.npmmirror.com

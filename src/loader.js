@@ -2427,3 +2427,19 @@ function timeStamp2String() {
     var second = datetime.getSeconds() < 10 ? "0" + datetime.getSeconds() : datetime.getSeconds();
     return year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
 }
+
+function isJSON(str) {
+    if (typeof str == 'string') {
+        try {
+            var obj = JSON.parse(str);
+            if (typeof obj == 'object' && obj) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (e) {
+            return false;
+        }
+    }
+}
