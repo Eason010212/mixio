@@ -10,7 +10,7 @@ function get_data() {
         }, function(res) {
             $("#prj_num").html(res['count'] + " / " + MAX_MESSAGE_COUNT)
             $("#prj_num_bar").attr("aria-valuenow", res['count'])
-            $("#prj_num_bar").css("width", (res['count'] * 100 / MAX_PROJECT_NUM_PER_USER) + "%")
+            $("#prj_num_bar").css("width", (res['count'] * 100 / MAX_MESSAGE_COUNT) + "%")
             globalRows = res["rows"]
             init_table(res["rows"])
             sync_chart()
