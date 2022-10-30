@@ -20,7 +20,7 @@ const path = require('path');
 var VERSION = JSON.parse(fs.readFileSync("../version.json", "utf-8"))["version"]
 var configs = fs.readFileSync('./config.json');
 configs = JSON.parse(configs.toString());
-const MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_COUNT"] ? configs["MAX_MESSAGE_COUNT"] : 1000
+var MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_COUNT"] ? configs["MAX_MESSAGE_COUNT"] : 1000
 var minInterval = configs["MIN_PUBLISH_INTERVAL"] ? configs["MIN_PUBLISH_INTERVAL"] : 100
 
 var serverStatus = true
