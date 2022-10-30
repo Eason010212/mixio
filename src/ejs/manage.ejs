@@ -194,6 +194,14 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                                <span>单用户最大消息数：</span>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="MAX_MESSAGE_COUNT">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                 <span>百度地图开发者AK（客户端应用）：</span>
                                             </td>
                                             <td>
@@ -294,6 +302,7 @@
         var HTTPS_PRIVATE_PEM = "<%=configs["HTTPS_PRIVATE_PEM"]%>"
         var HTTPS_CRT_FILE = "<%=configs["HTTPS_CRT_FILE"]%>"
         var MAX_PROJECT_NUM_PER_USER = "<%=configs["MAX_PROJECT_NUM_PER_USER"]%>"
+        var MAX_MESSAGE_COUNT = "<%=configs["MAX_MESSAGE_COUNT"]%>"
         var ALLOW_REGISTER = <%=configs["ALLOW_REGISTER"]%>
         var ALLOW_HOOK = <%=configs["ALLOW_HOOK"]%>
         var OFFLINE_MODE = <%=configs["OFFLINE_MODE"]%>
@@ -322,6 +331,7 @@
             $("#BAIDU_MAP_AK").val(BAIDU_MAP_AK)
             $("#BAIDU_MAP_SERVER_AK").val(BAIDU_MAP_SERVER_AK)
             $("#MAX_PROJECT_NUM_PER_USER").val(MAX_PROJECT_NUM_PER_USER)
+            $("#MAX_MESSAGE_COUNT").val(MAX_MESSAGE_COUNT)
             if($("#OFFLINE_MODE").prop("checked"))
             {
                 $("#BAIDU_MAP_AK").attr("disabled","true")
@@ -349,6 +359,7 @@
             configs["OFFLINE_MODE"] = $("#OFFLINE_MODE").prop("checked")
             configs["BAIDU_MAP_AK"] = $("#BAIDU_MAP_AK").val()
             configs["BAIDU_MAP_SERVER_AK"] = $("#BAIDU_MAP_SERVER_AK").val()
+            configs["MAX_MESSAGE_COUNT"] = parseInt($("#MAX_MESSAGE_COUNT").val())
             $.get('/saveAndRestart',{'configs':JSON.stringify(configs,null,2)},function(res){
                 if(res=="1")
                 {
