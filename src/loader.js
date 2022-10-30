@@ -25,6 +25,8 @@ var minInterval = configs["MIN_PUBLISH_INTERVAL"] ? configs["MIN_PUBLISH_INTERVA
 
 var serverStatus = true
 
+var globalWeather = {}
+
 var globalConnectionControl = {}
 
 stringendecoder = function() {
@@ -1251,15 +1253,23 @@ var mixioServer = function() {
 
     app.get('/getWeather', function(req, res) {
         if (req.query.dsc_code && !configs["OFFLINE_MODE"]) {
-            http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req, res2) {
-                var html = ''
-                req.on('data', function(data) {
-                    html += data;
-                });
-                req.on('end', function() {
-                    res.send(html)
-                });
-            })
+            if(globalWeather[req.query.dsc_code] && globalWeather[req.query.dsc_code].time && (new Date().getTime() - globalWeather[req.query.dsc_code].time) < 600000) {
+                res.send(globalWeather[req.query.dsc_code].data)
+            } else {
+                http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
+                    var html = ''
+                    req2.on('data', function(data) {
+                        html += data;
+                    });
+                    req2.on('end', function() {
+                        globalWeather[req.query.dsc_code] = {
+                            time: new Date().getTime(),
+                            data: html
+                        }
+                        res.send(html)
+                    });
+                })
+            }
         } else
             res.send('-1')
     })
