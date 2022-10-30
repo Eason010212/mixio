@@ -224,6 +224,7 @@ async function daemon_start() {
         if (newConfig) {
             fs.writeFileSync('./config.json', newConfig)
             configs = JSON.parse(newConfig)
+            MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_COUNT"] ? configs["MAX_MESSAGE_COUNT"] : 1000
             console.log("[INFO] Shutting down MixIO Server...")
             await mixio.stop();
             serverStatus = false;
@@ -495,17 +496,18 @@ var mixioServer = function() {
                     if (err) {
                         console.log(err.message)
                     } else {
-                        if (row && row["count(*)"] < MAX_MESSAGE_PER_USER) {
+                        if (row && row["count(*)"] < MAX_MESSAGE_PER_USER - 1) {
                             targetDB.run("insert into 'reserve' (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err) {
                                 if (err) {
                                     console.log(err.message)
                                 }
                             })
-                        } else if (row["count(*)"] >= MAX_MESSAGE_PER_USER) {
+                        } else if (row["count(*)"] >= MAX_MESSAGE_PER_USER - 1) {
                             targetDB.get("select id from 'reserve' where userName = ? order by id asc limit 1", [userName, ], function(err, row) {
                                 if (err) {
                                     console.log(err.message)
                                 } else {
+                                    console.log(row)
                                     if (row && row["id"]) {
                                         targetDB.run("delete from 'reserve' where id = ?", [row["id"], ], function(err) {
                                             if (err) {
