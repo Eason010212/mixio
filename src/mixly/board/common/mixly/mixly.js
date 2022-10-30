@@ -6,7 +6,10 @@ goog.provide('Mixly.WebCompiler');
 goog.provide('Mixly.Url');
 goog.provide('Mixly.Config');
 
+
 /* Mixly {object} */
+
+Mixly.files = {};
 
 /**
  * @function 根据传入的相对路径获取文件数据
@@ -15,6 +18,9 @@ goog.provide('Mixly.Config');
  **/
 Mixly.get = (inPath) => {
     let str;
+    if (Mixly.files[inPath]) {
+        return Mixly.files[inPath];
+    }
     if (typeof nw === 'object') {
         const fs = require('fs');
         const path = require('path');
@@ -39,6 +45,7 @@ Mixly.get = (inPath) => {
         });
         $.ajaxSettings.async = true;
     }
+    Mixly.files[inPath] = str;
     return str;
 }
 
@@ -75,7 +82,7 @@ Mixly.require = (requireObj) => {
     Mixly.requireList(nowRequire['common']);
 
     if (window?.process?.versions?.electron)
-        if (SOFTWARE?.nodeServer?.enabled)
+        if (SOFTWARE?.webSocket?.enabled)
             Mixly.requireList([
                 ...nowRequire['web-socket']['common'],
                 ...nowRequire['web-socket']['electron']
@@ -86,7 +93,7 @@ Mixly.require = (requireObj) => {
                 ...nowRequire['web-compiler']['electron']
             ]);
     else
-        if (SOFTWARE?.nodeServer?.enabled)
+        if (SOFTWARE?.webSocket?.enabled)
             Mixly.requireList([
                 ...nowRequire['web-socket']['common'],
                 ...nowRequire['web-socket']['web']
@@ -342,6 +349,29 @@ Url.getIPAddress = () => {
     return null;
 }
 
+/* Mixly.Config {object} */
+
+// 被选中板卡的配置信息
+Config.SELECTED_BOARD = {};
+// 板卡页面的配置信息
+Config.BOARD = {};
+// 软件的配置信息
+Config.SOFTWARE = {};
+
+const URL_DEFAULT_CONFIG = {
+    "thirdPartyBoard": false
+};
+const BOARD_DEFAULT_CONFIG = {
+    "burn": "None",
+    "upload": "None",
+    "nav": "None",
+    "serial": "None",
+    "saveMixWithCode": true
+};
+const SOFTWARE_DEFAULT_CONFIG = {
+    "version": "Mixly2.0"
+};
+
 /**
  * @function 获取对应路径下JSON数据
  * @param inPath {string} JSON文件的相对路径
@@ -365,27 +395,17 @@ Config.get = (inPath, defaultConfig = {}) => {
  * @return {void}
  **/
 Config.init = () => {
-    const urlDefaultConfig = {
-        "thirdPartyBoard": false
-    }
-    let urlConfig = Url.getConfig();
-    urlConfig = Object.assign(urlDefaultConfig, urlConfig);
-    const boardDefaultConfig = {
-        "burn": "None",
-        "upload": "None",
-        "nav": "None",
-        "serial": "None",
-        "saveMixWithCode": true
-    }
-    const swDefaultConfig = {
-        "version": "Mixly2.0"
-    }
-    Config.BOARD = Config.get('./config.json', boardDefaultConfig);
+    const urlConfig = {
+        ...URL_DEFAULT_CONFIG,
+        ...Url.getConfig()
+    };
+    Config.BOARD = Config.get('./config.json', BOARD_DEFAULT_CONFIG);
     if (typeof urlConfig === 'object') {
         let {
             thirdPartyBoard,
             boardImg,
             boardIndex,
+            boardType,
             boardName,
             filePath
         } = urlConfig;
@@ -395,12 +415,14 @@ Config.init = () => {
             thirdPartyBoard,
             boardImg,
             boardIndex,
+            boardType,
             boardName,
             filePath
         };
         delete urlConfig.thirdPartyBoard;
         delete urlConfig.boardImg;
         delete urlConfig.boardIndex;
+        delete urlConfig.boardType;
         delete urlConfig.boardName;
         delete urlConfig.filePath;
     }
@@ -411,7 +433,7 @@ Config.init = () => {
     if (Config.BOARD.thirdPartyBoard)
         pathPrefix = '../../';
 
-    Config.SOFTWARE = Config.get(pathPrefix + '../sw-config.json', swDefaultConfig);
+    Config.SOFTWARE = Config.get(pathPrefix + '../sw-config.json', SOFTWARE_DEFAULT_CONFIG);
     if (typeof urlConfig === 'object')
         Config.SOFTWARE = { ...Config.SOFTWARE, ...urlConfig };
     Config.pathPrefix = pathPrefix;

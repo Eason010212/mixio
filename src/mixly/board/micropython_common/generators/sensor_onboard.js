@@ -89,7 +89,7 @@ Blockly.Python.sensor_mixgo_light= function(){
     return ['mixgo.get_brightness()', Blockly.Python.ORDER_ATOMIC];
     }
     else if (version == "mixgo_ce"){
-    Blockly.Python.definitions_['mixgo_ce'] = 'import mixgo_ce';
+    Blockly.Python.definitions_['import_mixgo_ce'] = 'import mixgo_ce';
     return ['mixgo_ce.get_brightness()', Blockly.Python.ORDER_ATOMIC];
     }
     else if(version == "mpython"){
@@ -448,6 +448,35 @@ Blockly.Python.onboard_RTC_get_time = function () {
   return [code, Blockly.Python.ORDER_ATOMIC];
 };
 
+//mixgo_cc onboard_sensor generators:
+
+Blockly.Python.sensor_mixgo_cc_mmc5603_get_magnetic = function(){   
+    var key = this.getFieldValue('key');
+    var version = Mixly.Boards.getSelectedBoardKey().split(':')[2]
+    Blockly.Python.definitions_['import_'+version+'_onboard_mmc5603'] = "from "+version+" import onboard_mmc5603";
+    if(key == 'all'){
+        var code = 'onboard_mmc5603.getstrength()';
+    return [code, Blockly.Python.ORDER_ATOMIC];
+    }
+    else{
+    var code = 'onboard_mmc5603.getdata()' + key ;
+    return [code, Blockly.Python.ORDER_ATOMIC];
+    }
+};
+
+Blockly.Python.sensor_mixgo_cc_mmc5603_get_angle = function(){
+    var version = Mixly.Boards.getSelectedBoardKey().split(':')[2]
+    Blockly.Python.definitions_['import_'+version+'_onboard_mmc5603'] = "from "+version+" import onboard_mmc5603";
+    var code = 'onboard_mmc5603.getangle()';
+    return [code, Blockly.Python.ORDER_ATOMIC];
+};
+
+Blockly.Python.sensor_mixgo_cc_mmc5603_calibrate_compass= function(){
+    var version = Mixly.Boards.getSelectedBoardKey().split(':')[2]
+    Blockly.Python.definitions_['import_'+version+'_onboard_mmc5603'] = "from "+version+" import onboard_mmc5603";
+    var code = 'onboard_mmc5603.calibrate()\n';
+    return code;
+};
 //mixgo_me onboard_sensor generators:
 
 

@@ -87,10 +87,7 @@ Nav.LEFT_BTN_CONFIG = [
         title: '',
         href: '#',
         onclick: {
-            web: 'Mixly.Web.BU.clickConnect()',
-            webcompiler: {
-                web: 'Mixly.Web.BU.clickConnect()'
-            }
+            web: 'Mixly.Web.BU.clickConnect()'
         }
     }, {
         // 【初始化固件】按钮
@@ -105,13 +102,13 @@ Nav.LEFT_BTN_CONFIG = [
                 c: 'Mixly.Electron.ArduShell.burn()'
             }, 
             web: {
-                mpy: 'Mixly.Web.BU.burn()'
+                mpy: 'Mixly.Web.BU.initBurn()'
             },
             websocket: {
-                mpy: 'Mixly.WebSocket.BU.burn()'
+                mpy: 'Mixly.WebSocket.BU.initBurn()'
             },
             webcompiler: {
-                mpy: 'Mixly.Web.BU.burn()'
+                mpy: 'Mixly.Web.BU.initBurn()'
             }
         }
     }, {
@@ -126,7 +123,7 @@ Nav.LEFT_BTN_CONFIG = [
                 c: 'Mixly.Electron.ArduShell.initCompile()'
             },
             websocket: {
-                c: 'Mixly.WebSocket.ArduShell.compile()'
+                c: 'Mixly.WebSocket.ArduShell.initCompile()'
             },
             webcompiler: {
                 c: 'Mixly.WebCompiler.Compiler.compile()'
@@ -145,15 +142,15 @@ Nav.LEFT_BTN_CONFIG = [
                 mpy: 'Mixly.Electron.BU.initUpload()'
             },
             web: {
-                mpy: 'Mixly.Web.BU.upload()'
+                mpy: 'Mixly.Web.BU.initUpload()'
             },
             webcompiler: {
                 c: 'Mixly.WebCompiler.Compiler.upload()',
-                mpy: 'Mixly.Web.BU.upload()'
+                mpy: 'Mixly.Web.BU.initUpload()'
             },
             websocket: {
-                c: 'Mixly.WebSocket.ArduShell.upload()',
-                mpy: 'Mixly.WebSocket.BU.upload()'
+                c: 'Mixly.WebSocket.ArduShell.initUpload()',
+                mpy: 'Mixly.WebSocket.BU.initUpload()'
             }
         }
     }, {
@@ -255,7 +252,7 @@ Nav.LEFT_BTN_ENV = {
     UNDO: true,
     REDO: true,
     CONNECT: !Env.isElectron && (codeEnv !== 'py' && codeEnv !== 'webpy'),
-    BURN: Nav.CONFIG.burn && !(!Env.isElectron && BOARD?.boardName === "MixGo AI" && !Env.hasSocketServer),
+    BURN: Nav.CONFIG.burn && !(!Env.isElectron && BOARD?.boardType === "MixGo AI" && !Env.hasSocketServer),
     COMPILE: Nav.CONFIG.compile,
     UPLOAD: Nav.CONFIG.upload,
     SIMULATE: Nav.CONFIG.simulate,
@@ -286,9 +283,9 @@ Nav.RIGHT_BTN_CONFIG = [
                 href: '#',
                 onclick: {
                     electron: 'Mixly.Electron.File.newFile()',
-                    web: 'Mixly.NavEvents.onclickNewFile()',
-                    webcompiler: 'Mixly.NavEvents.onclickNewFile()',
-                    websocket: 'Mixly.NavEvents.onclickNewFile()'
+                    web: 'Mixly.Web.File.new()',
+                    webcompiler: 'Mixly.Web.File.new()',
+                    websocket: 'Mixly.Web.File.new()'
                 }
             }, {
                 //【打开】按钮
@@ -310,6 +307,18 @@ Nav.RIGHT_BTN_CONFIG = [
                     }
                 }
             }, {
+                //【从云端打开】按钮
+                type: 'OPEN_FROM_CLOUD',
+                class: 'icon-download-cloud-1',
+                id: 'open-from-cloud-btn',
+                title: '',
+                href: '#',
+                onclick: {
+                    websocket: {
+                        web: 'Mixly.WebSocket.File.openFromCloud()'
+                    }
+                }
+            }, {
                 //【保存】按钮
                 type: 'SAVE_FILE',
                 class: 'icon-floppy',
@@ -319,11 +328,14 @@ Nav.RIGHT_BTN_CONFIG = [
                 onclick: {
                     electron: 'Mixly.Electron.File.save()',
                     websocket: {
-                        electron: 'Mixly.Electron.File.save()'
+                        electron: 'Mixly.Electron.File.save()',
+                        web: 'Mixly.Web.File.save()'
                     },
                     webcompiler: {
-                        electron: 'Mixly.Electron.File.save()'
-                    }
+                        electron: 'Mixly.Electron.File.save()',
+                        web: 'Mixly.Web.File.save()'
+                    },
+                    web: 'Mixly.Web.File.save()'
                 }
             }, {
                 //【另存为】按钮
@@ -335,10 +347,25 @@ Nav.RIGHT_BTN_CONFIG = [
                 onclick: {
                     electron: 'Mixly.Electron.File.saveAs()',
                     websocket: {
-                        electron: 'Mixly.Electron.File.saveAs()'
+                        electron: 'Mixly.Electron.File.saveAs()',
+                        web: 'Mixly.Web.File.saveAs()'
                     },
                     webcompiler: {
-                        electron: 'Mixly.Electron.File.saveAs()'
+                        electron: 'Mixly.Electron.File.saveAs()',
+                        web: 'Mixly.Web.File.saveAs()'
+                    },
+                    web: 'Mixly.Web.File.saveAs()'
+                }
+            }, {
+                //【保存到云端】按钮
+                type: 'SAVE_TO_CLOUD',
+                class: 'icon-upload-cloud-1',
+                id: 'save-to-cloud-btn',
+                title: '',
+                href: '#',
+                onclick: {
+                    websocket: {
+                        web: 'Mixly.WebSocket.File.saveToCloud()'
                     }
                 }
             }, {
@@ -465,7 +492,7 @@ Nav.RIGHT_BTN_CONFIG = [
                 // WebSocket版的【连接】按钮
                 type: 'WS_CONNECT',
                 class: 'icon-link',
-                id: 'socket_connect_btn',
+                id: 'socket-connect-btn',
                 title: '',
                 href: '#',
                 onclick: {
@@ -511,13 +538,15 @@ Nav.RIGHT_BTN_ENV = {
     FILE: true,
     NEW_FILE: true,
     OPEN_FILE: true,
-    SAVE_FILE: true,
-    SAVE_AS_FILE: Env.isElectron,
-    SAVE_XML: !Env.isElectron,
-    SAVE_PY: !Env.isElectron && Nav.CONFIG.save.py,
-    SAVE_INO: !Env.isElectron && Nav.CONFIG.save.ino,
-    SAVE_HEX: !Env.isElectron && Nav.CONFIG.save.py && Nav.CONFIG.save.hex,
-    SAVE_IMG: !Env.isElectron && Nav.CONFIG.save.img,
+    OPEN_FROM_CLOUD: !Env.isElectron && Env.hasSocketServer,
+    SAVE_FILE: Env.isElectron /*!(!Env.isElectron && location.protocol !== 'https:')*/,
+    SAVE_AS_FILE: Env.isElectron /*!(!Env.isElectron && location.protocol !== 'https:')*/,
+    SAVE_XML: !Env.isElectron /*&& location.protocol !== 'https:'*/,
+    SAVE_PY: !Env.isElectron /*&& location.protocol !== 'https:'*/ && Nav.CONFIG.save.py,
+    SAVE_INO: !Env.isElectron /*&& location.protocol !== 'https:'*/ && Nav.CONFIG.save.ino,
+    SAVE_HEX: !Env.isElectron /*&& location.protocol !== 'https:'*/ && Nav.CONFIG.save.py && Nav.CONFIG.save.hex,
+    SAVE_IMG: !Env.isElectron /*&& location.protocol !== 'https:'*/ && Nav.CONFIG.save.img,
+    SAVE_TO_CLOUD: !Env.isElectron && Env.hasSocketServer,
     PYTHON_TO_BLOCKLY: Nav.CONFIG?.setting?.pythonToBlockly && ['mpy', 'py', 'webpy'].includes(codeEnv),
     OPEN_WIKI: Env.isElectron && Nav.CONFIG.setting.wiki,
     FEED_BACK: true
@@ -793,12 +822,14 @@ Mixly.Nav.MsgById = {
     'file-btn': 'file',
     'new-btn': 'new',
     'open-btn': 'open',
+    'open-from-cloud-btn': 'open_from_cloud',
     'save-btn': 'save',
     'save-xml-btn': 'save_blocks',
     'save-ino-btn': 'save_ino',
     'save-img-btn': 'save_img',
     'save-py-btn': 'save_py',
     'save-hex-btn': 'save_hex',
+    'save-to-cloud-btn': 'save_ser',
     'save-as-btn': 'save_as',
     'setting-btn': 'setting',
     'language-btn': 'language',

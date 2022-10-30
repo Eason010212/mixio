@@ -14,13 +14,14 @@ from ubinascii import hexlify,unhexlify
 import network
 
 class ESPNow(espnow.ESPNow):
-    def __init__(self,channel=0):
+    def __init__(self,channel=0,txpower=20):
         super().__init__()
         self.active(True)
         self._channel=channel
         self._nic = network.WLAN(network.AP_IF)
-        self._nic.config(hidden=True,channel=self._channel)
         self._nic.active(True)
+        self._nic.config(hidden=True,channel=self._channel,txpower=txpower)
+
         
     def send(self,peer,msg):
         '''Send data after error reporting and effective processing'''    
@@ -52,9 +53,9 @@ class ESPNow(espnow.ESPNow):
         else :
             return None,None
 
-    def set_channel(self,channel):
+    def set_channel(self,channel,txpower=20):
         self._channel = channel   
-        self._nic.config(hidden=True,channel=self._channel)        
+        self._nic.config(hidden=True,channel=self._channel,txpower=txpower)        
 
     def _cb_handle(self, event_code,data):
         '''Callback processing conversion'''

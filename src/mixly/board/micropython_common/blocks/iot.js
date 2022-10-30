@@ -315,7 +315,7 @@ Blockly.Blocks['iot_mixio_connect'] = {
         .setAlign(Blockly.ALIGN_RIGHT)
     this.appendValueInput('PASSWORD')
         .setCheck(String)
-        .appendField(Blockly.MIXLY_WIFI_PASSWORD)
+        .appendField(Blockly.MIXLY_IOT_PASSWORD)
         .setAlign(Blockly.ALIGN_RIGHT)
     this.appendValueInput('PROJECT')
         .setCheck(String)
@@ -449,7 +449,7 @@ Blockly.Blocks['IOT_EMQX_PING']={
         // this.appendValueInput('VAR')
         //     .setCheck("var")
         this.appendDummyInput()
-            .appendField("MIXIO")
+            .appendField("MixIO")
         this.appendDummyInput()
             .appendField(Blockly.MIXLY_EMQX_PING);   
         this.setInputsInline(true);
@@ -464,7 +464,7 @@ Blockly.Blocks['IOT_MIXIO_NTP']={
         // this.appendValueInput('VAR')
         //     .setCheck("var")
         this.appendDummyInput()
-            .appendField("MIXIO")
+            .appendField("MixIO")
             .appendField(Blockly.MIXLY_GET_NTP)
         this.appendValueInput('addr')
             .appendField(Blockly.blynk_SERVER_ADD);     
@@ -522,6 +522,17 @@ Blockly.Blocks['iot_mixly_key'] = {
     if (this.VISITOR_ID !== nowVisitorId)
       this.setFieldValue(this.VISITOR_ID, 'VISITOR_ID');
   }
+};
+
+Blockly.Blocks['iot_client_onboard'] = {
+    init: function(){
+        this.setColour(Blockly.Blocks.iot.HUE);
+        this.appendDummyInput()
+            .appendField('MixIO')
+            .appendField(MSG.catEthernet_clinet);
+        this.setOutput(true);
+        this.setInputsInline(true);
+    }
 };
 
 Blockly.Blocks['iot_wificonnect'] = Blockly.Blocks['iot_wifi_connect'];

@@ -48,11 +48,6 @@ XML.TEMPLATE_CONFIG = [
         },
         appendToBody: false
     }, {
-        type: 'BOARD_CONFIGURATOR',
-        path: '/board-configurator-div.html',
-        config: {},
-        appendToBody: false
-    }, {
         type: 'BOARD_CONFIG_ELEMENT',
         path: '/board-config-element-div.html',
         config: {
@@ -96,12 +91,18 @@ XML.TEMPLATE_CONFIG = [
             column: indexText['列'],
             unknown: indexText['未知'],
             config: indexText['配置板卡'],
-            selected: indexText['已选择']
+            selected: indexText['已选择'],
+            on: indexText['在']
         },
         appendToBody: false
     }, {
         type: 'BOARD_CONFIG_MENU_DIV',
         path: '/board-config-menu-div.html',
+        config: {},
+        appendToBody: false
+    }, {
+        type: 'EXAMPLE_MENU_DIV',
+        path: '/example-menu-div.html',
         config: {},
         appendToBody: false
     }
@@ -113,7 +114,6 @@ XML.TEMPLATE_ENV = {
     SIMULATOR_DIV: Env.isElectron && BOARD?.nav?.compile,
     BOARD_SELECTOR: true,
     PORT_SELECTOR: !(BOARD?.nav?.run || BOARD?.nav?.cancel || BOARD?.nav?.webrun || BOARD?.nav?.webcancel || (!Env.isElectron && !Env.hasSocketServer)),
-    BOARD_CONFIGURATOR: BOARD?.nav?.compile,
     BOARD_CONFIG_ELEMENT: BOARD?.nav?.compile,
     PARSE_MIX_ERROR_DIV: true,
     READ_BITMAP_DIV: true,
@@ -121,7 +121,8 @@ XML.TEMPLATE_ENV = {
     PROGRESS_BAR_DIV: Env.isElectron && BOARD?.nav?.setting?.thirdPartyLibrary,
     LIB_MANAGER_DIV: Env.isElectron && BOARD?.nav?.setting?.thirdPartyLibrary,
     APP_DIV: true,
-    BOARD_CONFIG_MENU_DIV: true
+    BOARD_CONFIG_MENU_DIV: true,
+    EXAMPLE_MENU_DIV: true
 };
 
 XML.TEMPLATE_STR = {};

@@ -259,80 +259,41 @@
     top: calc((var(--nav-height) - var(--nav-select-height)) / 2);
 }
 
-#boardSelector-div {
-    width: 150px;
-    margin-left: 10px;
-    /*position: absolute;
-    top: 3px;
-    z-index: 2000;*/
-}
-
-.light #boardSelector-div input, .light #portSelector-div input {
+.light #nav input {
     background-color: #009f90;
     border-color: #009f90;
     color: #fff;
 }
 
-.light #boardSelector-div input:hover,
-.light #portSelector-div input:hover,
-.light #boardSelector-div input:focus,
-.light #portSelector-div input:focus {
+.light #nav input:hover,
+.light #nav input:focus {
     border-color: #037a6f !important;
 }
 
-.dark #boardSelector-div input:hover,
-.dark #portSelector-div input:hover,
-.dark #boardSelector-div input:focus,
-.dark #portSelector-div input:focus {
+.dark #nav input:hover,
+.dark #nav input:focus {
     border-color: #1f1f1f !important;
 }
 
-#boardSelector-div input::-webkit-input-placeholder,
-#portSelector-div input::-webkit-input-placeholder {
+#nav input::-webkit-input-placeholder,
+#nav input::-webkit-input-placeholder {
     color: #ddd;
 }
 
-#portSelector-div {
-    width: 100px;
-    margin-left: 5px;
-    margin-right: 3px;
-}
-
-#boardSelector {
-    position: absolute;
-    width: 150px;
-    top: 3px;
-}
-
-#portSelector {
-    position: absolute;
-    width: 100px;
-    top: 3px;
-}
-
-#boardSelector .layui-input,
-#portSelector .layui-input {
+#nav .layui-input {
     border-radius: 3px;
 }
 
-#boardSelector > div > div > input,
-#portSelector > div > div > input {
+#nav .layui-form input {
     height: 24px;
 }
 
-#boardSelector > div > dl,
-#portSelector > div > dl {
+#nav .layui-form dl {
     top: calc(var(--nav-select-height) + (var(--nav-height) - var(--nav-select-height)) / 2);
     padding: 3px 0;
 }
 
-#boardSelector > dl,
-#portSelector > dl {
-    top: 24px;
-}
-
-#boardSelector dl dd,
-#portSelector dl dd {
+#nav .layui-form dl > dd {
     line-height: 30px;
     display: flex;
     flex-direction: row;
@@ -1108,6 +1069,12 @@ body[class="light"] {
     background-size: 100% auto;
 }
 
+.blocklyTreeRow > .blocklyTreeRowContentContainer {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .light ::-webkit-resizer {
     background: url('../../common/media/resize-dark.png') no-repeat;
     background-size: 100% auto;
@@ -1134,4 +1101,38 @@ body[class="light"] {
 .dark .layui-table-tips-main {
     background-color: #8d8888;
     color: #fff;
+}
+
+.light .layui-layer-setwin span {
+    color: #777;
+}
+
+.dark .layui-layer-setwin span {
+    color: #fff;
+}
+
+.light .tippy-box {
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.1);
+    box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 10%);
+    color: #000;
+    border-radius: 0.25rem;
+}
+
+.light .tippy-arrow {
+    color: rgba(255,255,255,.85);
+}
+
+.dark .tippy-box {
+    background-color: #7c7171;
+    background-clip: padding-box;
+    border: 1px solid rgba(255,255,255,.1);
+    box-shadow: 0 0.25rem 0.75rem rgb(255 255 255 / 10%);
+    color: #fff;
+    border-radius: 0.25rem;
+}
+
+.dark .tippy-arrow {
+    color: #7c7171;
 }

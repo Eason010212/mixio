@@ -12,8 +12,6 @@
   <script type="text/javascript" src="../python/others/variables.js"></script>
   <script type="text/javascript" src="../common/blockly-core/procedures.js"></script>
   <script type="text/javascript" src="../python/others/names.js"></script>
-  <script src="./generators/python.js"></script>
-  <script type="text/javascript" src="libraries/company_pin.js"></script>
   <script type="text/javascript" src="../common/mixly/common/code.js"></script>
   <!--------from BlocklyDuino------------>
   <script type="text/javascript" src="../common/js/Blob.js"></script>
@@ -37,6 +35,7 @@
   <script src="./blocks/data.js"></script>
   <script src="../python/blocks/tuple.js"></script>
   <script src="../python/blocks/procedures.js"></script>
+  <script src="../python_mixpy/blocks/algorithm.js"></script>
   <!-- generator file -->
   <script src="./generators/inout.js"></script>
   <script src="./generators/system.js"></script>
@@ -51,6 +50,7 @@
   <script src="./generators/data.js"></script>
   <script src="../python/generators/tuple.js"></script>
   <script src="../python/generators/procedures.js"></script>
+  <script src="../python_mixpy/generators/algorithm.js"></script>
   <script src="../common/js/lib/ace/ace.js" type="application/javascript"></script>
   <script src="../common/js/lib/ace/ext-language_tools.js" type="application/javascript"></script>
   <script src="../python/blocks/utility.js"></script>
@@ -138,8 +138,7 @@
       </block>
       <!-- <block type="raw_block"></block> -->
     </category>
-    <category id="catControl" colour="120">
-      <!-- <block type="controls_end_program"></block> -->
+    <category id="catControl" colour="120">      
       <!-- <block type="controls_type">
               <value name="DATA">
                   <shadow type="math_number">
@@ -188,6 +187,7 @@
         </value>
       </block> -->
       <block type="controls_pass"></block>
+      <block type="controls_end_program"></block>
       <block type="controls_flow_statements"></block>
       <block type="controls_forEach">
         <value name="LIST">
@@ -1493,6 +1493,20 @@
           </shadow>
         </value>
       </block>
+      <block type="hanoi_init">
+      </block>
+      <block type="hanoi_move">
+        <value name="FROM_NUM">
+          <shadow type="math_number">
+            <field name="NUM">0</field>
+          </shadow>
+        </value>
+        <value name="TO_NUM">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+      </block>
     </category>
     <!-- 数据分析模块 -->
     <category id="catData" colour="170">
@@ -1846,6 +1860,25 @@
       -->
 
     </category>
+    <category id="catAlgorithm" colour="#526FC3">
+      <block type="algorithm_prepare"></block>
+      <block type="algorithm_prepare2"></block>
+      <block type="algorithm_prepare3"></block>
+      <block type="algorithm_add_school"></block>
+      <block type="algorithm_find_path"></block>
+      <block type="algorithm_move_recent"></block>
+      <block type="algorithm_current_school"></block>
+      <block type="algorithm_not_home"></block>
+      <block type="algorithm_new_path"></block>
+      <block type="algorithm_void_path"></block>
+      <block type="algorithm_no_path"></block>
+      <block type="algorithm_set_path"></block>
+      <block type="algorithm_add_path"></block>      
+      <block type="algorithm_del_path"></block>
+      <block type="algorithm_return_path"></block>
+      <block type="algorithm_no_left"></block>
+      <block type="algorithm_print_path"></block>
+    </category>  
     <!--
     <category id="catsklearn" colour="80">
       <block type="sklearn_make_classification">

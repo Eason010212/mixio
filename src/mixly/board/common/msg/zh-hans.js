@@ -26,6 +26,7 @@ var MSG = {
     catStorageEEPROM: 'EEPROM',
     catME_GO:"ME GO",
     catAIOT:"智能物联",
+    catAIsensor:"MixGo AI传感器",
     catSensor: "传感器",
     catActuator: "执行器",
     catExternSensor: "外接传感",
@@ -54,6 +55,7 @@ var MSG = {
     catIot: "物联网",
     catSet: "集合",
     catData: "数据分析",
+    catAlgorithm: "算法",
     catCv: "图像处理",
     catHardware: "硬件交互",
     catAI: "人工智能",
@@ -117,7 +119,6 @@ var MSG = {
     stop: "取消",
     fn: "文件名",
     download: "下载",
-    save_ser: "保存到云端",
     choose_theme: "请选择主题：",
     choose_language: "请选择语言：",
     confirm_newfile: "是否希望清除画布所有内容？",
@@ -138,7 +139,8 @@ var MSG = {
     catweather: "心知天气",
     view_btn: "云端文件",
     view_file: "资源",
-    save_ser: "保存到云端",
+    open_from_cloud: "云端打开",
+    save_ser: "云端保存",
     windowSize: "窗口尺寸",
     catRadio: "无线广播",
     catMusic: "音乐",
@@ -170,6 +172,7 @@ var indexText = {
     "烧录成功": "烧录成功",
     "编译成功": "编译成功",
     "上传成功": "上传成功",
+    "烧录失败": "烧录失败",
     "编译失败": "编译失败",
     "上传失败": "上传失败",
     "无可用设备": "无可用设备",
@@ -329,7 +332,39 @@ var indexText = {
     "默认字号": "默认字号",
     "打开串口终端": "打开串口终端",
     "打开串口": "打开串口",
-    "已选择": "已选择"
+    "已选择": "已选择",
+    "在": "在",
+    "关卡": "关卡",
+    "只能在ESP32和ESP32-S2上修改波特率": "只能在ESP32和ESP32-S2上修改波特率",
+    "尝试修改波特率为": "尝试修改波特率为",
+    "已修改波特率为": "已修改波特率为",
+    "写入数据，文件大小：": "写入数据，文件大小：",
+    "写入数据到": "写入数据到",
+    "写入": "写入",
+    "耗时": "耗时",
+    "上传": "上传",
+    "运行": "运行",
+    "正在运行中": "正在运行中",
+    "尝试复位": "尝试复位",
+    "已取消连接": "已取消连接",
+    "固件读取出错": "固件读取出错",
+    "配置文件读取出错": "配置文件读取出错",
+    "读取固件": "读取固件",
+    "路径": "路径",
+    "偏移": "偏移",
+    "即将开始烧录": "即将开始烧录",
+    "无法获取文件，请检查网络": "无法获取文件，请检查网络",
+    "正在连接": "正在连接",
+    "MAC地址": "MAC地址",
+    "正在擦除闪存，请稍等": "正在擦除闪存，请稍等",
+    "擦除完成，擦除耗时": "擦除完成，擦除耗时",
+    "正在烧录固件": "正在烧录固件",
+    "固件获取失败": "固件获取失败",
+    "固件读取中": "固件读取中",
+    "中断失败": "中断失败",
+    "无法进入Raw REPL": "无法进入Raw REPL",
+    "无法退出Raw REPL": "无法退出Raw REPL",
+    "无法退出REPL": "无法退出REPL"
 };
 
 /* 背包 */
@@ -340,7 +375,7 @@ Blockly.Msg.PASTE_ALL_FROM_BACKPACK = '提取背包中的所有图形块';
 Blockly.Msg.REMOVE_FROM_BACKPACK = '从背包中移除';
 
 /* 画布块查找 */
-Blockly.Msg.WORKSPACE_SEARCH_OPEN = '查找图形块';
+Blockly.Msg.WORKSPACE_SEARCH_OPEN = '查找块';
 
 /* Blockly.FieldBitmap文本翻译 */
 Blockly.Msg.RANDOM = '随机';
@@ -757,8 +792,8 @@ Blockly.MIXLY_ATTACHPININTERRUPT_PIN = '软件中断 管脚 #';
 Blockly.MIXLY_DETACHPININTERRUPT_PIN = '取消软件中断 管脚 #';
 Blockly.MIXLY_MODE = '模式';
 Blockly.MIXLY_DO = '执行';
-Blockly.MIXLY_BUILDIN_LED = '内嵌LED灯';
-Blockly.MIXLY_EXTERN_LED = 'LED灯';
+Blockly.MIXLY_BUILDIN_LED = '内嵌LED';
+Blockly.MIXLY_EXTERN_LED = 'LED';
 Blockly.MIXLY_STAT = '设为';
 Blockly.MIXLY_DIGITALWRITE_PIN = '数字输出 管脚 #';
 Blockly.MIXLY_DIGITALREAD_PIN = '数字输入 管脚 #';
@@ -1477,6 +1512,7 @@ Blockly.MIXLY_MICROBIT_JS_GET_GESTURE = '所有识别的';
 Blockly.MIXLY_MICROBIT_JS_CURRENT_GESTURE = '当前';
 Blockly.MIXLY_MICROBIT_JS_GESTURE = '手势';
 Blockly.MIXLY_MICROBIT_JS_FIELD_STRENGTH = '磁场强度';
+Blockly.MIXLY_MICROBIT_JS_FIELD_STRENGTH_ALL = '综合强度';
 Blockly.MIXLY_MICROBIT_JS_IS_COMPASS_CALIBRATED = '指南针已经校正？';
 Blockly.MIXLY_IS_TOUCHED = '被触摸';
 Blockly.MIXLY_WAS_PRESSED = '被按下？';
@@ -2161,6 +2197,7 @@ Blockly.MIXLY_RTC_TIME = "设置RTC时钟";
 Blockly.blockpy_REQUESTS_GET = '发起get请求 接收为变量';
 Blockly.blockpy_REQUESTS_GET_TOOLTIP = '利用HTTP协议向指定域名发起get请求，将响应结果赋予变量';
 Blockly.blockpy_REQUESTS_GET_ATTR_STATUS_CODE = '状态码';
+Blockly.blockpy_REQUESTS_GET_ATTR_HEADER = '消息头';
 Blockly.blockpy_REQUESTS_GET_ATTR_TEXT = '响应内容';
 Blockly.blockpy_REQUESTS_GET_ATTR_CONTENT = '二进制内容';
 Blockly.blockpy_REQUESTS_GET_ATTR_COOKIES = 'cookies';
@@ -2263,12 +2300,12 @@ Blockly.MIXLY_ESP32_OW_SELECT = "通过ROM代码选择特定的设备";
 Blockly.MIXLY_ESP32_OW_RESET = "重置总线";
 Blockly.MIXLY_ESP32_SERVO_MOVE = '设置舵机的旋转角度（0~180°)';
 Blockly.MIXLY_ESP32_SERVO_SPEED_TOOLIPS = '设置舵机的旋转速度(-100~100%)';
-Blockly.MIXLY_ESP32_LED_SETONOFF = "设置内嵌LED灯的状态";
-Blockly.MIXLY_ESP32_LED_GETONOFF = "获取内嵌LED灯当前的状态";
-Blockly.MIXLY_ESP32_LED_SETBRIGHT = "设置内嵌LED灯的当前亮度（0~65535）";
-Blockly.MIXLY_ESP32_EXTERN_LED_SETONOFF = "设置LED灯的状态";
-Blockly.MIXLY_ESP32_EXTERN_LED_GETONOFF = "获取LED灯当前的状态";
-Blockly.MIXLY_ESP32_EXTERN_LED_SETBRIGHT = "设置LED灯的当前亮度（0~65535）";
+Blockly.MIXLY_ESP32_LED_SETONOFF = "设置内嵌LED的状态";
+Blockly.MIXLY_ESP32_LED_GETONOFF = "获取内嵌LED当前的状态";
+Blockly.MIXLY_ESP32_LED_SETBRIGHT = "设置内嵌LED的当前亮度（0~65535）";
+Blockly.MIXLY_ESP32_EXTERN_LED_SETONOFF = "设置LED的状态";
+Blockly.MIXLY_ESP32_EXTERN_LED_GETONOFF = "获取LED当前的状态";
+Blockly.MIXLY_ESP32_EXTERN_LED_SETBRIGHT = "设置LED的当前亮度（0~65535）";
 Blockly.MIXLY_ESP32_MUSIC_PLAYSHOW = "播放音符列表，并显示对应音符";
 Blockly.MIXLY_ESP32_MUSIC_SET_TEMPO = "设置播放音乐的分辨率和速度";
 Blockly.MIXLY_ESP32_MUSIC_GET_TEMPO = "获取音乐当前的节奏";
@@ -3177,7 +3214,7 @@ Blockly.MIXLY_I2C_TRY_TO_OCCUPY_THE_BUS = "占用总线";
 Blockly.MIXLY_I2C_RELEASE_BUS = "释放总线";
 Blockly.MIXLY_SPIC_WRITE_NUM = "写入数字";
 Blockly.MIXLY_SPIC_READ_NUM = "读取数字";
-Blockly.MIXLY_ESP32S2_LED_SETBRIGHT = "设置内嵌LED灯的当前亮度（0~65535）";
+Blockly.MIXLY_ESP32S2_LED_SETBRIGHT = "设置内嵌LED的当前亮度（0~65535）";
 Blockly.MIXLY_PYTHON_NAME_MAIN = "作为主程序运行";
 Blockly.MIXLY_GET_TEMPRATURE = "获取温度传感器的值";
 Blockly.MIXLY_GET_IRREMOTE_VALUE = "获取红外接收值"
@@ -3220,6 +3257,7 @@ Blockly.MIXLY_EMQX_QOS = '服务质量';
 Blockly.MIXLY_WIFI_CONNECT = '连接Wi-Fi';
 Blockly.MIXLY_WIFI_USERNAME = '用户名';
 Blockly.MIXLY_WIFI_PASSWORD = '密码';
+Blockly.MIXLY_IOT_PASSWORD = '密钥';
 Blockly.MIXLY_SSL_DEFAULT = 'SSL默认上下文';
 Blockly.MIXLY_CREATE_SOCKETPOOL = '为Wi-Fi创建连接池';
 Blockly.MIXLY_EMQX_SUBSCRIBE = '订阅';
@@ -3381,8 +3419,8 @@ Blockly.MIXLY_MACHINE_FEED='进行喂食'
 Blockly.MIXLY_MACHINE_WDT_FEED_TOOLTIP='需要定时喂食（调用），一旦超过间隔时间，将重启'
 Blockly.MIXLY_MACHINE_RESET='复位重置设备'
 Blockly.MIXLY_MACHINE_RESET_TOOLTIP='以类似于按下外部重置按钮的方式重置设备'
-Blockly.MIXLY_MP_ESPNOW_INIT_TOOLTIP= '初始化ESPNow并设置频道，频道范围0-13';
-Blockly.MIXLY_MP_ESPNOW_RADIO_INIT_TOOLTIP= '广播频道范围0-13';
+Blockly.MIXLY_MP_ESPNOW_INIT_TOOLTIP= '初始化ESPNow并设置频道，频道范围0-13，功率范围2-21db';
+Blockly.MIXLY_MP_ESPNOW_RADIO_INIT_TOOLTIP= '广播频道范围0-13，功率范围2-21db';
 Blockly.MIXLY_MP_ESPNOW_RADIO_INIT= '设置无线广播频道为';
 Blockly.MIXLY_MP_ESPNOW_RADIO= '无线广播';
 Blockly.MIXLY_MP_ESPNOW_RADIO_MSG_RECEIVED= '当无线广播接收到消息时';
@@ -3616,3 +3654,89 @@ Blockly.MIXLY_GET_NTP = '获取网络时间';
 Blockly.MIXLY_ME_GO_CAR_SENSOR_ONBOARD_AUTO_CHANGE = '巡线/避障/追光自动切换';
 Blockly.MIXLY_ME_GO_CAR_LIGHT_SEEKING_ONLY = '只使用追光';
 Blockly.MIXLY_ME_GO_CAR_LIGHT_SEEKING_SENSOR = '追光传感器';
+Blockly.MIXLY_OTHER = '其他';
+Blockly.MIXLY_CONCENTRATION = '浓度';
+Blockly.MIXLY_PM_CONCENTRATION_TOOLTIP = '浓度单位ug/m³';
+Blockly.MIXLY_QR_CODE_RECOGNTITION = '二维码识别';
+Blockly.MIXLY_QR_CODE_ANALYSIS = '二维码解析';
+Blockly.MIXLY_QR_CODE = '二维码';
+Blockly.MIXLY_POSITION_XY = '坐标';
+Blockly.MIXLY_AI_SENSOR_QR_CODE_TOOLTIP = '获取二维码对象的相应信息';
+Blockly.MIXLY_AI_SENSOR_QR_CODE_RECOGNTITION_TOOLTIP = '使用MixGo AI摄像头识别二维码，返回包含所有识别结果对象的列表';
+Blockly.MIXLY_AI_SENSOR_CONFIG_TOOLTIP = '设置MixGo AI与主板交互的端口';
+Blockly.MIXLY_BAR_CODE = '条形码';
+Blockly.MIXLY_BAR_CODE_RECOGNTITION = '条形码识别';
+Blockly.MIXLY_BAR_CODE_ANALYSIS = '条形码解析';
+Blockly.MIXLY_AI_SENSOR_BAR_CODE_TOOLTIP = '获取条形码对象的相应信息';
+Blockly.MIXLY_AI_SENSOR_BAR_CODE_RECOGNTITION_TOOLTIP = '使用MixGo AI摄像头识别条形码，返回包含所有识别结果对象的列表';
+Blockly.MIXLY_TAG = '标签码';
+Blockly.MIXLY_TAG_RECOGNTITION = '标签码识别';
+Blockly.MIXLY_TAG_ANALYSIS = '标签码解析';
+Blockly.MIXLY_AI_SENSOR_TAG_TOOLTIP = '获取标签码对象的相应信息';
+Blockly.MIXLY_AI_SENSOR_TAG_RECOGNTITION_TOOLTIP = '使用MixGo AI摄像头识别标签码，返回包含所有识别结果对象的列表';
+Blockly.MIXLY_LINE = '直线';
+Blockly.MIXLY_LINE_RECOGNTITION = '直线识别';
+Blockly.MIXLY_LINE_ANALYSIS = '直线解析';
+Blockly.MIXLY_AI_SENSOR_LINE_TOOLTIP = '获取直线对象的相应信息';
+Blockly.MIXLY_AI_SENSOR_LINE_RECOGNTITION_TOOLTIP = '使用MixGo AI摄像头识别直线，返回包含所有识别结果对象的列表';
+Blockly.MIXLY_LINE_RECOGNTITION_ANGLE = '合并角度';
+Blockly.MIXLY_LINE_RECOGNTITION_SLOPE = '合并斜率';
+Blockly.MIXLY_LINE_ANGLE = '线角度';
+Blockly.MIXLY_CIRCLE = '圆形';
+Blockly.MIXLY_CIRCLE_RECOGNTITION = '圆形识别';
+Blockly.MIXLY_CIRCLE_ANALYSIS = '圆形解析';
+Blockly.MIXLY_AI_SENSOR_CIRCLE_TOOLTIP = '获取圆形对象的相应信息';
+Blockly.MIXLY_AI_SENSOR_CIRCLE_RECOGNTITION_TOOLTIP = '使用MixGo AI摄像头识别圆形，返回包含所有识别结果对象的列表';
+Blockly.MIXLY_CIRCLE_RECOGNTITION_MAX = '合并最小半径';
+Blockly.MIXLY_CIRCLE_RECOGNTITION_MIN = '合并最大半径';
+Blockly.MIXLY_CIRCLE_AREA = '面积';
+Blockly.MIXLY_RECT = '矩形';
+Blockly.MIXLY_RECT_RECOGNTITION = '矩形识别';
+Blockly.MIXLY_RECT_ANALYSIS = '矩形解析';
+Blockly.MIXLY_AI_SENSOR_RECT_TOOLTIP = '获取矩形对象的相应信息';
+Blockly.MIXLY_AI_SENSOR_RECT_RECOGNTITION_TOOLTIP = '使用MixGo AI摄像头识别矩形，返回包含所有识别结果对象的列表';
+Blockly.MIXLY_COLOR_RECOGNTITION = '颜色识别';
+Blockly.MIXLY_COLOR_ANALYSIS = '颜色解析';
+Blockly.MIXLY_AI_SENSOR_COLOR_TOOLTIP = '获取颜色对象的相应信息';
+Blockly.MIXLY_AI_SENSOR_COLOR_RECOGNTITION_TOOLTIP = '使用MixGo AI摄像头识别颜色，返回包含所有识别结果对象的列表';
+Blockly.MIXLY_COLOR_LAB = '色域';
+Blockly.MIXLY_AI_SENSOR_COLOR_THRESHOLD = 'LAB阈值缩放范围';
+Blockly.MIXLY_COLOR_CHASE = '颜色追踪';
+Blockly.MIXLY_COLOR_CHASE_ANALYSIS = '颜色追踪';
+Blockly.MIXLY_COLOR_CHASE_MERGE = '合并';
+Blockly.MIXLY_COLOR_CHASE_ANALYSIS = '解析';
+Blockly.MIXLY_AI_SENSOR_RGB_TOOLTIP = '分别设置MixGo AI摄像头两个RGB灯的色值（0~255），参数为包含三项的序列';
+Blockly.MIXLY_LOCAL_TRAIN = '自模型训练';
+Blockly.MIXLY_OBJECT_LIST = '物品列表';
+Blockly.MIXLY_MODEL_NAME = '模型名称';
+Blockly.MIXLY_TRAIN_TIME = '训练次数';
+Blockly.MIXLY_AI_SENSOR_LOCAL_TRAIN_TOOLTIP = '利用摄像头获取图像进行模型训练，模型训练过程中停止通信';
+Blockly.MIXLY_LOCAL_CLASS = '自模型识别';
+Blockly.MIXLY_CONFIDENCE_DEGREE = '置信度';
+Blockly.MIXLY_AI_SENSOR_LOCAL_CLASS_TOOLTIP = '获取自模型识别结果对象的相应信息';
+Blockly.MIXLY_MUSIC_RECORD = '音频录制';
+Blockly.MIXLY_MUSIC_PLAY = '音频播放';
+Blockly.MIXLY_AI_SENSOR_MUSIC_RECORD_TOOLTIP = '利用MixGo AI摄像头录制音频，录制过程程序不阻塞';
+Blockly.MIXLY_YOLO_RECOGNIZE = '外部模型加载';
+Blockly.MIXLY_ANCHOR = '锚点参数';
+Blockly.MIXLY_MODEL_PATH = '模型路径';
+Blockly.MIXLY_AI_SENSOR_YOLO_RECOGNIZE_TOOLTIP = '利用摄像头读取SD卡中的模型文件进行物品识别，返回包含所有识别结果对象的列表';
+Blockly.MIXLY_AI_SENSOR_YOLO_RECOGNIZE_RESULT_TOOLTIP = '获取外部模型加载结果对象的相应信息';
+Blockly.MIXLY_MIXPY_ALGORITHM_PREPARE = '加载地图';
+Blockly.MIXLY_MIXPY_ALGORITHM_PREPARE2 = '加载施工后的地图';
+Blockly.MIXLY_MIXPY_ALGORITHM_PREPARE3 = '加载路线图';
+Blockly.MIXLY_MIXPY_ALGORITHM_ADD_SCHOOL = '将当前位置设为学校并加入路线中';
+Blockly.MIXLY_MIXPY_ALGORITHM_GET_CURRENT_LOCATION = '获取当前位置';
+Blockly.MIXLY_MIXPY_ALGORITHM_CURRENT_SCHOOL = '当前位置是学校';
+Blockly.MIXLY_MIXPY_ALGORITHM_NOT_HOME = '没到小欣家';
+Blockly.MIXLY_MIXPY_ALGORITHM_MOVE_RECENT = '移动到距离当前位置最近的岔路口';
+Blockly.MIXLY_MIXPY_ALGORITHM_FIND_PATH = '查找从当前位置是否有路直接通向未送走的同学家，并且这条路之前没有尝试过';
+Blockly.MIXLY_MIXPY_ALGORITHM_NEW_PATH = '有这样的位置和路';
+Blockly.MIXLY_MIXPY_ALGORITHM_VOID_PATH = '当前位置为空';
+Blockly.MIXLY_MIXPY_ALGORITHM_NO_PATH = '输出没有符合条件的路线';
+Blockly.MIXLY_MIXPY_ALGORITHM_SET_PATH = '将当前位置设为这条路通向的同学家';
+Blockly.MIXLY_MIXPY_ALGORITHM_ADD_PATH = '将当前位置加入路线';
+Blockly.MIXLY_MIXPY_ALGORITHM_DEL_PATH = '将当前位置从路线中删除';
+Blockly.MIXLY_MIXPY_ALGORITHM_RETURN_PATH = '回退到上一个位置';
+Blockly.MIXLY_MIXPY_ALGORITHM_NO_LEFT = '所有同学都被送回家啦';
+Blockly.MIXLY_MIXPY_ALGORITHM_PRINT_PATH = '显示路线';

@@ -5,9 +5,10 @@
             "path":"/electron/arduino-shell.js",
             "require":[
                 "layui",
+                "Blockly",
                 "Mixly.Modules",
                 "Mixly.Env",
-                "Mixly.LayerExtend",
+                "Mixly.LayerExt",
                 "Mixly.Config",
                 "Mixly.StatusBar",
                 "Mixly.StatusBarPort",
@@ -43,10 +44,11 @@
                 "Mixly.StatusBar",
                 "Mixly.StatusBarPort",
                 "Mixly.Modules",
-                "Mixly.LayerExtend",
+                "Mixly.LayerExt",
                 "Mixly.Env",
                 "Mixly.Boards",
                 "Mixly.MFile",
+                "Mixly.MString",
                 "Mixly.Electron.Serial"
             ],
             "provide":[
@@ -86,7 +88,7 @@
             ]
         },
         {
-            "path":"/electron/example.js",
+            "path":"/electron/example-ext.js",
             "require":[
                 "layui",
                 "Mixly.Env",
@@ -95,11 +97,12 @@
                 "Mixly.MFile",
                 "Mixly.Title",
                 "Mixly.XML",
+                "Mixly.Example",
                 "Mixly.Electron.BU",
                 "Mixly.Electron.File"
             ],
             "provide":[
-                "Mixly.Electron.Example"
+                "Mixly.Electron.ExampleExt"
             ]
         },
         {
@@ -107,7 +110,7 @@
             "require":[
                 "Mixly.Modules",
                 "Mixly.Env",
-                "Mixly.LayerExtend",
+                "Mixly.LayerExt",
                 "Mixly.Config",
                 "Mixly.Title",
                 "Mixly.MFile",
@@ -133,7 +136,7 @@
                 "Mixly.ScriptLoader",
                 "Mixly.CssLoader",
                 "Mixly.Boards",
-                "Mixly.LayerExtend",
+                "Mixly.LayerExt",
                 "Mixly.Config",
                 "Mixly.CloudDownload",
                 "Mixly.Nav"
@@ -178,7 +181,7 @@
                 "Mixly.Config",
                 "Mixly.Tools",
                 "Mixly.Env",
-                "Mixly.LayerExtend",
+                "Mixly.LayerExt",
                 "Mixly.XML",
                 "Mixly.MArray"
             ],
@@ -200,21 +203,6 @@
             ]
         },
         {
-            "path":"/common/boards.js",
-            "provide":[
-                "Mixly.Boards"
-            ],
-            "require":[
-                "layui",
-                "Mixly.LayerExtend",
-                "Mixly.Config",
-                "Mixly.XML",
-                "Mixly.Env",
-                "Mixly.ToolboxSearcher",
-                "Mixly.Modules"
-            ]
-        },
-        {
             "path":"/common/interface.js",
             "provide":[
                 "Mixly.Interface"
@@ -232,31 +220,13 @@
                 "Mixly.ToolboxSearcher",
                 "Mixly.Drag",
                 "Mixly.Editor",
+                "Mixly.LevelSelector",
                 "WorkspaceSearch",
                 "Backpack",
                 "Mixly.Electron",
                 "Mixly.Electron.LibManager",
                 "Mixly.Electron.WikiManager",
-                "Mixly.Electron.Example"
-            ]
-        },
-        {
-            "path":"/common/nav-events.js",
-            "provide":[
-                "Mixly.NavEvents"
-            ],
-            "require":[
-                "layui",
-                "Mixly.LayerExtend",
-                "Mixly.Config",
-                "Mixly.XML",
-                "Mixly.Env",
-                "Mixly.ScriptLoader",
-                "Mixly.Modules",
-                "Mixly.Theme",
-                "Mixly.Boards",
-                "Mixly.Editor",
-                "Mixly.Electron.BU"
+                "Mixly.Electron.ExampleExt"
             ]
         },
         {
@@ -275,6 +245,9 @@
         {
             "path":"/web/ampy.js",
             "require":[
+                "Mixly.MString",
+                "Mixly.StatusBar",
+                "Mixly.Web"
             ],
             "provide":[
                 "Mixly.Web.Ampy"
@@ -284,12 +257,16 @@
             "path":"/web/burn-upload.js",
             "require":[
                 "Mixly.StatusBar",
-                "Mixly.Web.Serial",
-                "Mixly.Web.Esptool",
-                "Mixly.LayerExtend",
+                "Mixly.StatusBarPort",
+                "Mixly.LayerExt",
                 "Mixly.Config",
                 "Mixly.MFile",
-                "Mixly.Boards"
+                "Mixly.Boards",
+                "Mixly.Web.Serial",
+                "Mixly.Web.Esptool",
+                "Mixly.Web.USB",
+                "Mixly.Web.SerialPort",
+                "Mixly.Web.Ampy"
             ],
             "provide":[
                 "Mixly.Web.BU"
@@ -305,12 +282,24 @@
         {
             "path":"/web/esptool.js",
             "require":[
-                "Mixly.Web.Utilities",
                 "Mixly.StatusBar",
-                "Mixly.Config"
+                "Mixly.Web.Utilities",
+                "Mixly.Web.SerialPort"
             ],
             "provide":[
                 "Mixly.Web.Esptool"
+            ]
+        },
+        {
+            "path":"/web/example-ext.js",
+            "require":[
+                "Mixly.Config",
+                "Mixly.MJSON",
+                "Mixly.Example",
+                "Mixly.Boards"
+            ],
+            "provide":[
+                "Mixly.Web.ExampleExt"
             ]
         },
         {
@@ -318,7 +307,8 @@
             "require":[
                 "Mixly.MFile",
                 "Mixly.Editor",
-                "Mixly.Drag"
+                "Mixly.Drag",
+                "Mixly.LayerExt"
             ],
             "provide":[
                 "Mixly.Web.File"
@@ -336,9 +326,15 @@
             "require":[
                 "Mixly.Charts",
                 "Mixly.StatusBar",
-                "Mixly.LayerExtend",
+                "Mixly.StatusBarPort",
                 "Mixly.Config",
-                "Mixly.MFile"
+                "Mixly.Tools",
+                "Mixly.Env",
+                "Mixly.LayerExt",
+                "Mixly.XML",
+                "Mixly.MArray",
+                "Mixly.Web.USB",
+                "Mixly.Web.SerialPort"
             ],
             "provide":[
                 "Mixly.Web.Serial"
@@ -347,13 +343,16 @@
         {
             "path":"/web/serialport.js",
             "require":[
+                "Mixly.Web.Ampy"
             ],
             "provide":[
+                "Mixly.Web.SerialPort"
             ]
         },
         {
             "path":"/web/usb.js",
             "require":[
+                "Mixly.Web.Ampy"
             ],
             "provide":[
                 "Mixly.Web.USB"
@@ -365,21 +364,6 @@
             ],
             "provide":[
                 "Mixly.Web.Utilities"
-            ]
-        },
-        {
-            "path":"/common/boards.js",
-            "provide":[
-                "Mixly.Boards"
-            ],
-            "require":[
-                "layui",
-                "Mixly.LayerExtend",
-                "Mixly.Config",
-                "Mixly.XML",
-                "Mixly.Env",
-                "Mixly.ToolboxSearcher",
-                "Mixly.Modules"
             ]
         },
         {
@@ -400,27 +384,10 @@
                 "Mixly.ToolboxSearcher",
                 "Mixly.Drag",
                 "Mixly.Editor",
+                "Mixly.LevelSelector",
                 "WorkspaceSearch",
-                "Backpack"
-            ]
-        },
-        {
-            "path":"/common/nav-events.js",
-            "provide":[
-                "Mixly.NavEvents"
-            ],
-            "require":[
-                "layui",
-                "Mixly.LayerExtend",
-                "Mixly.Config",
-                "Mixly.XML",
-                "Mixly.Env",
-                "Mixly.ScriptLoader",
-                "Mixly.Modules",
-                "Mixly.Theme",
-                "Mixly.Boards",
-                "Mixly.Editor",
-                "Mixly.Web.BU"
+                "Backpack",
+                "Mixly.Web.ExampleExt"
             ]
         },
         {
@@ -439,21 +406,6 @@
     "web-socket":{
         "electron":[
             {
-                "path":"/common/boards.js",
-                "provide":[
-                    "Mixly.Boards"
-                ],
-                "require":[
-                    "layui",
-                    "Mixly.LayerExtend",
-                    "Mixly.Config",
-                    "Mixly.XML",
-                    "Mixly.Env",
-                    "Mixly.ToolboxSearcher",
-                    "Mixly.Modules"
-                ]
-            },
-            {
                 "path":"/common/interface.js",
                 "provide":[
                     "Mixly.Interface"
@@ -471,26 +423,11 @@
                     "Mixly.ToolboxSearcher",
                     "Mixly.Drag",
                     "Mixly.Editor",
+                    "Mixly.LevelSelector",
                     "WorkspaceSearch",
-                    "Backpack"
-                ]
-            },
-            {
-                "path":"/common/nav-events.js",
-                "provide":[
-                    "Mixly.NavEvents"
-                ],
-                "require":[
-                    "layui",
-                    "Mixly.LayerExtend",
-                    "Mixly.Config",
-                    "Mixly.XML",
-                    "Mixly.Env",
-                    "Mixly.ScriptLoader",
-                    "Mixly.Modules",
-                    "Mixly.Theme",
-                    "Mixly.Boards",
-                    "Mixly.Editor"
+                    "Backpack",
+                    "Mixly.WebSocket.Socket",
+                    "Mixly.Web.ExampleExt"
                 ]
             },
             {
@@ -507,21 +444,6 @@
         ],
         "web":[
             {
-                "path":"/common/boards.js",
-                "provide":[
-                    "Mixly.Boards"
-                ],
-                "require":[
-                    "layui",
-                    "Mixly.LayerExtend",
-                    "Mixly.Config",
-                    "Mixly.XML",
-                    "Mixly.Env",
-                    "Mixly.ToolboxSearcher",
-                    "Mixly.Modules"
-                ]
-            },
-            {
                 "path":"/common/interface.js",
                 "provide":[
                     "Mixly.Interface"
@@ -539,26 +461,11 @@
                     "Mixly.ToolboxSearcher",
                     "Mixly.Drag",
                     "Mixly.Editor",
+                    "Mixly.LevelSelector",
                     "WorkspaceSearch",
-                    "Backpack"
-                ]
-            },
-            {
-                "path":"/common/nav-events.js",
-                "provide":[
-                    "Mixly.NavEvents"
-                ],
-                "require":[
-                    "layui",
-                    "Mixly.LayerExtend",
-                    "Mixly.Config",
-                    "Mixly.XML",
-                    "Mixly.Env",
-                    "Mixly.ScriptLoader",
-                    "Mixly.Modules",
-                    "Mixly.Theme",
-                    "Mixly.Boards",
-                    "Mixly.Editor"
+                    "Backpack",
+                    "Mixly.WebSocket.Socket",
+                    "Mixly.Web.ExampleExt"
                 ]
             },
             {
@@ -578,8 +485,18 @@
             {
                 "path":"/web-socket/arduino-shell.js",
                 "require":[
+                    "layui",
+                    "Mixly.Modules",
+                    "Mixly.Env",
+                    "Mixly.LayerExt",
+                    "Mixly.Config",
                     "Mixly.StatusBar",
                     "Mixly.StatusBarPort",
+                    "Mixly.Title",
+                    "Mixly.Boards",
+                    "Mixly.MFile",
+                    "Mixly.MArray",
+                    "Mixly.WebSocket.Socket",
                     "Mixly.WebSocket.Serial"
                 ],
                 "provide":[
@@ -589,23 +506,52 @@
             {
                 "path":"/web-socket/burn-upload.js",
                 "require":[
-                    "Mixly.Tools",
-                    "Mixly.WebSocket.Socket",
+                    "layui",
+                    "Mixly.Config",
                     "Mixly.StatusBar",
-                    "Mixly.StatusBarPort"
+                    "Mixly.StatusBarPort",
+                    "Mixly.LayerExt",
+                    "Mixly.Env",
+                    "Mixly.Boards",
+                    "Mixly.MFile",
+                    "Mixly.MString",
+                    "Mixly.WebSocket.Serial",
+                    "Mixly.WebSocket.Socket"
                 ],
                 "provide":[
                     "Mixly.WebSocket.BU"
                 ]
             },
             {
+                "path":"/web-socket/file.js",
+                "require":[
+                    "layui",
+                    "Blockly",
+                    "Mixly.XML",
+                    "Mixly.Editor",
+                    "Mixly.MFile",
+                    "Mixly.Boards",
+                    "Mixly.LayerExt",
+                    "Mixly.WebSocket.Socket"
+                ],
+                "provide":[
+                    "Mixly.WebSocket.File"
+                ]
+            },
+            {
                 "path":"/web-socket/serial.js",
                 "require":[
-                    "Mixly.WebSocket.Socket",
+                    "Mixly.Modules",
                     "Mixly.Charts",
                     "Mixly.StatusBar",
                     "Mixly.StatusBarPort",
-                    "Mixly.Config"
+                    "Mixly.Config",
+                    "Mixly.Tools",
+                    "Mixly.Env",
+                    "Mixly.LayerExt",
+                    "Mixly.XML",
+                    "Mixly.MArray",
+                    "Mixly.WebSocket.Socket"
                 ],
                 "provide":[
                     "Mixly.WebSocket.Serial"
@@ -614,13 +560,14 @@
             {
                 "path":"/web-socket/socket.js",
                 "require":[
+                    "Mixly.Env",
                     "Mixly.Config",
-                    "Mixly.WebSocket.BU",
-                    "Mixly.WebSocket.Serial",
-                    "Mixly.WebSocket.ArduShell",
+                    "Mixly.Boards",
                     "Mixly.Charts",
                     "Mixly.StatusBar",
-                    "Mixly.StatusBarPort"
+                    "Mixly.StatusBarPort",
+                    "Mixly.Command",
+                    "Mixly.WebSocket"
                 ],
                 "provide":[
                     "Mixly.WebSocket.Socket"
@@ -630,21 +577,6 @@
     },
     "web-compiler":{
         "electron":[
-            {
-                "path":"/common/boards.js",
-                "provide":[
-                    "Mixly.Boards"
-                ],
-                "require":[
-                    "layui",
-                    "Mixly.LayerExtend",
-                    "Mixly.Config",
-                    "Mixly.XML",
-                    "Mixly.Env",
-                    "Mixly.ToolboxSearcher",
-                    "Mixly.Modules"
-                ]
-            },
             {
                 "path":"/common/interface.js",
                 "provide":[
@@ -663,26 +595,10 @@
                     "Mixly.ToolboxSearcher",
                     "Mixly.Drag",
                     "Mixly.Editor",
+                    "Mixly.LevelSelector",
                     "WorkspaceSearch",
-                    "Backpack"
-                ]
-            },
-            {
-                "path":"/common/nav-events.js",
-                "provide":[
-                    "Mixly.NavEvents"
-                ],
-                "require":[
-                    "layui",
-                    "Mixly.LayerExtend",
-                    "Mixly.Config",
-                    "Mixly.XML",
-                    "Mixly.Env",
-                    "Mixly.ScriptLoader",
-                    "Mixly.Modules",
-                    "Mixly.Theme",
-                    "Mixly.Boards",
-                    "Mixly.Editor"
+                    "Backpack",
+                    "Mixly.Web.ExampleExt"
                 ]
             },
             {
@@ -699,21 +615,6 @@
         ],
         "web":[
             {
-                "path":"/common/boards.js",
-                "provide":[
-                    "Mixly.Boards"
-                ],
-                "require":[
-                    "layui",
-                    "Mixly.LayerExtend",
-                    "Mixly.Config",
-                    "Mixly.XML",
-                    "Mixly.Env",
-                    "Mixly.ToolboxSearcher",
-                    "Mixly.Modules"
-                ]
-            },
-            {
                 "path":"/common/interface.js",
                 "provide":[
                     "Mixly.Interface"
@@ -731,26 +632,10 @@
                     "Mixly.ToolboxSearcher",
                     "Mixly.Drag",
                     "Mixly.Editor",
+                    "Mixly.LevelSelector",
                     "WorkspaceSearch",
-                    "Backpack"
-                ]
-            },
-            {
-                "path":"/common/nav-events.js",
-                "provide":[
-                    "Mixly.NavEvents"
-                ],
-                "require":[
-                    "layui",
-                    "Mixly.LayerExtend",
-                    "Mixly.Config",
-                    "Mixly.XML",
-                    "Mixly.Env",
-                    "Mixly.ScriptLoader",
-                    "Mixly.Modules",
-                    "Mixly.Theme",
-                    "Mixly.Boards",
-                    "Mixly.Editor"
+                    "Backpack",
+                    "Mixly.Web.ExampleExt"
                 ]
             },
             {
@@ -779,11 +664,13 @@
                 "require":[
                     "Mixly.Url",
                     "Mixly.StatusBar",
+                    "Mixly.StatusBarPort",
                     "Mixly.Config",
-                    "Mixly.LayerExtend",
+                    "Mixly.LayerExt",
                     "Mixly.Boards",
                     "Mixly.MFile",
-                    "Mixly.Web.BU"
+                    "Mixly.Web.BU",
+                    "Mixly.Web.Serial"
                 ],
                 "provide":[
                     "Mixly.WebCompiler.Compiler"
@@ -792,6 +679,23 @@
         ]
     },
     "common":[
+        {
+            "path":"/common/boards.js",
+            "require":[
+                "tippy",
+                "layui",
+                "Mixly.LayerExt",
+                "Mixly.Config",
+                "Mixly.XML",
+                "Mixly.Env",
+                "Mixly.ToolboxSearcher",
+                "Mixly.Modules",
+                "Mixly.MString"
+            ],
+            "provide":[
+                "Mixly.Boards"
+            ]
+        },
         {
             "path":"/common/code.js",
             "require":[
@@ -829,7 +733,8 @@
             "path":"/common/dom-operator.js",
             "require":[
                 "Mixly.Config",
-                "Mixly.XML"
+                "Mixly.XML",
+                "Mixly.Env"
             ],
             "provide":[
                 "Mixly.DomOperator"
@@ -851,10 +756,24 @@
                 "Blockly",
                 "Mixly.Config",
                 "Mixly.Nav",
-                "Mixly.XML"
+                "Mixly.XML",
+                "Mixly.Boards"
             ],
             "provide":[
                 "Mixly.Editor"
+            ]
+        },
+        {
+            "path":"/common/example.js",
+            "require":[
+                "tippy",
+                "layui",
+                "Mixly.MFile",
+                "Mixly.Title",
+                "Mixly.XML"
+            ],
+            "provide":[
+                "Mixly.Example"
             ]
         },
         {
@@ -867,7 +786,7 @@
             ]
         },
         {
-            "path":"/common/layer-extend.js",
+            "path":"/common/layer-ext.js",
             "require":[
                 "layui",
                 "Mixly.Env",
@@ -875,7 +794,17 @@
                 "Mixly.Config"
             ],
             "provide":[
-                "Mixly.LayerExtend"
+                "Mixly.LayerExt"
+            ]
+        },
+        {
+            "path":"/common/level-selector.js",
+            "require":[
+                "layui",
+                "Mixly"
+            ],
+            "provide":[
+                "Mixly.LevelSelector"
             ]
         },
         {
@@ -919,7 +848,7 @@
                 "Mixly.MArray",
                 "Mixly.Boards",
                 "Mixly.XML",
-                "Mixly.LayerExtend",
+                "Mixly.LayerExt",
                 "Mixly.MicrobitFs",
                 "Mixly.Editor",
                 "Mixly.Drag"
@@ -956,6 +885,33 @@
             ],
             "provide":[
                 "Mixly.MJSON"
+            ]
+        },
+        {
+            "path":"/common/mstring.js",
+            "require":[
+                "Mixly"
+            ],
+            "provide":[
+                "Mixly.MString"
+            ]
+        },
+        {
+            "path":"/common/nav-events.js",
+            "require":[
+                "layui",
+                "Mixly.LayerExt",
+                "Mixly.Config",
+                "Mixly.XML",
+                "Mixly.Env",
+                "Mixly.ScriptLoader",
+                "Mixly.Modules",
+                "Mixly.Theme",
+                "Mixly.Boards",
+                "Mixly.Editor"
+            ],
+            "provide":[
+                "Mixly.NavEvents"
             ]
         },
         {
@@ -1003,13 +959,6 @@
             ],
             "provide":[
                 "Mixly.StatusBar"
-            ]
-        },
-        {
-            "path":"/common/store.modern.min.js",
-            "require":[
-            ],
-            "provide":[
             ]
         },
         {
@@ -1063,13 +1012,6 @@
             ],
             "provide":[
                 "Mixly.XML"
-            ]
-        },
-        {
-            "path":"/common/xscrollbar.js",
-            "require":[
-            ],
-            "provide":[
             ]
         }
     ]

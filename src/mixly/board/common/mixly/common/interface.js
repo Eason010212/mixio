@@ -12,6 +12,7 @@ goog.require('Mixly.Modules');
 goog.require('Mixly.ToolboxSearcher');
 goog.require('Mixly.Drag');
 goog.require('Mixly.Editor');
+goog.require('Mixly.LevelSelector');
 goog.require('WorkspaceSearch');
 goog.require('Backpack');
 goog.provide('Mixly.Interface');
@@ -21,9 +22,26 @@ Mixly.require({
         "Mixly.Electron",
         "Mixly.Electron.LibManager",
         "Mixly.Electron.WikiManager",
-        "Mixly.Electron.Example"
+        "Mixly.Electron.ExampleExt"
     ],
-    "web": [],
+    "web": [
+        "Mixly.Web.ExampleExt"
+    ],
+    "web-socket": {
+        "electron": [],
+        "web": [],
+        "common": [
+            "Mixly.WebSocket.Socket",
+            "Mixly.Web.ExampleExt"
+        ]
+    },
+    "web-compiler": {
+        "electron": [],
+        "web": [],
+        "common": [
+            "Mixly.Web.ExampleExt"
+        ]
+    },
     "common": []
 });
 
@@ -40,18 +58,17 @@ const {
     Env,
     ToolboxSearcher,
     Drag,
-    Editor
+    Editor,
+    LevelSelector
 } = Mixly;
 
 const { BOARD } = Config;
 
 Interface.init = () => {
     $('body').append(XML.TEMPLATE_DOM['APP_DIV']);
-    if (Env.isElectron) {
-        const { Electron } = Mixly;
-        const { Example = undefined } = Electron;
-        if (typeof Example === 'object')
-            Example.init();
+    const { ExampleExt } = Env.isElectron? Mixly.Electron : Mixly.Web;
+    if (ExampleExt instanceof Object) {
+        ExampleExt.obj = new ExampleExt('mixly-footer', 'mixly-examples');
     }
     Nav.init();
     Code.init();
@@ -67,12 +84,27 @@ Interface.init = () => {
         Env.defaultXML = $('#toolbox').html();
     }
     const selectedBoardName = Boards.getSelectedBoardName();
+    Boards.changeTo(selectedBoardName);
     Boards.updateCategories(selectedBoardName);
     Editor.init();
     window.addEventListener('resize', Interface.onresize, false);
     Interface.onresize();
     Drag.init();
-    auto_save_and_restore_blocks();
+    if (BOARD.nav.levelSelector) {
+        LevelSelector.init();
+        const $loading = $('.loading');
+        const toolboxWidth = $('.blocklyToolboxDiv').width();
+        $loading.children('.left-div').animate({
+          width: toolboxWidth + 'px'
+        }, () => {
+            $loading.fadeOut("fast", () => {
+                $loading.remove();
+            });
+        });
+        LevelSelector.xmlToWorkspace(1);
+    } else {
+        auto_save_and_restore_blocks();
+    }
     NavEvents.init();
     StatusBar.init();
     ToolboxSearcher.init();
@@ -97,6 +129,10 @@ Interface.init = () => {
         weight: 200
     };
     Blockly.ContextMenuRegistry.registry.register(workspaceSearchOpen);
+    if (Env.hasSocketServer) {
+        const { Socket } = Mixly.WebSocket;
+        Socket.init();
+    }
 }
 
 Interface.onresize = (event) => {
@@ -146,7 +182,7 @@ Interface.onbeforeunload = (reload = false) => {
             window.location.reload(true);
         }
     }
-    let href = Config.pathPrefix + '../index.html?' + Url.jsonToUrl({ boardName: BOARD.boardName });
+    let href = Config.pathPrefix + '../index.html?' + Url.jsonToUrl({ boardType: BOARD.boardType });
     pageReload(href);
 }
 

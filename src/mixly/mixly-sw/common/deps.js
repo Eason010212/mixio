@@ -30,7 +30,7 @@ Deps.DEPENDENCY = {
             "provide": ['layui.loading'],
             "require": ['layui']
         }, {
-            "path": '/../board/common/mixly/common/lazyload.js',
+            "path": '/../board/common/mixly/common/modules/lazyload.js',
             "provide": ['LazyLoad'],
             "require": []
         }, {
@@ -46,8 +46,8 @@ Deps.DEPENDENCY = {
             "provide": ['Mixly.MJSON'],
             "require": ['Mixly']
         }, {
-            "path": '/../board/common/mixly/common/layer-extend.js',
-            "provide": ['Mixly.LayerExtend'],
+            "path": '/../board/common/mixly/common/layer-ext.js',
+            "provide": ['Mixly.LayerExt'],
             "require": ['layui', 'Mixly.Env', 'Mixly.Config', 'Mixly.DomOperator']
         }, {
             "path": '/../board/common/mixly/common/dom-operator.js',

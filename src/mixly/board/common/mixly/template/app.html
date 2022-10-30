@@ -146,6 +146,7 @@
                     flex-direction: row;
                     flex-wrap: nowrap;
                     align-items: center;
+                    margin-left: 15px;
                 "
             >
                 <div style="display: inline-flex;">
@@ -177,11 +178,10 @@
             <div style="
                     display: inline-flex;
                     flex-direction: row;
-                    margin:0px 15px 0px 0px;
+                    margin: 15px;
                 "
             >
                 <a
-                    href='javascript:;'
                     class='icon-code'
                     style="color: #fff;"
                 ></a>
@@ -195,7 +195,6 @@
             >
                 <a
                     id="mixly-footer-boardname"
-                    href="javascript:;"
                     class="icon-microchip"
                     style="color:#fff;font-size:12px;line-height:12px;"
                 ></a>
@@ -203,32 +202,34 @@
             <div style="
                     display: inline-flex;
                     flex-direction: row;
-                    margin:0px 15px 0px 0px;
+                    margin-right:15px;
                 "
             >
                 <a
-                    href='javascript:;'
                     class='icon-microchip'
                     style="color: #fff;"
                 ></a>
                 <p id="mixly-footer-boardname"></p>
+                <div id="mixly-footer-port-div" style="display: none;">
+                    <p>&nbsp{{d.on}}&nbsp</p>
+                    <p id="mixly-footer-port"></p>
+                </div>
             </div>
             <button
                 id="mixly-board-config"
                 type="button"
                 class="layui-btn layui-btn-xs layui-btn-primary m-btn"
                 style="
-                    cursor:pointer;
-                    border:none;
-                    margin:0px 10px 0px 0px;
-                    padding:0px 5px;
-                    display:inline-flex;
-                    align-items:center;
+                    cursor: pointer;
+                    border: none;
+                    margin-right: 12px;
+                    padding: 3px;
+                    display: inline-flex;
+                    align-items: center;
                 "
             >
                 <a
-                    id="mixly-footer-boardname"
-                    href="javascript:;"
+                    id="mixly-footer-boardconfig"
                     class="icon-cog"
                     style="color:#fff;font-size:12px;line-height:12px;"
                 >{{ d.config }}</a>

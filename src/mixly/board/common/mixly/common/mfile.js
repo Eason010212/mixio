@@ -7,7 +7,7 @@ goog.require('Mixly.Config');
 goog.require('Mixly.MArray');
 goog.require('Mixly.Boards');
 goog.require('Mixly.XML');
-goog.require('Mixly.LayerExtend');
+goog.require('Mixly.LayerExt');
 goog.require('Mixly.MicrobitFs');
 goog.require('Mixly.Editor');
 goog.require('Mixly.Drag');
@@ -20,7 +20,7 @@ const {
     MArray,
     Boards,
     XML,
-    LayerExtend,
+    LayerExt,
     MicrobitFs,
     Editor,
     Drag,
@@ -137,28 +137,24 @@ MFile.loadHex = (hexStr) => {
 MFile.getMix = () => {
     const mixDom = $(Blockly.Xml.workspaceToDom(Editor.blockEditor)),
     version = SOFTWARE?.version ?? 'Mixly 2.0',
-    board = BOARD?.boardName ?? 'default',
     boardName = Boards.getSelectedBoardName(),
+    board = BOARD?.boardType ?? 'default',
     config = Boards.getSelectedBoardConfig(true);
     mixDom.removeAttr('xmlns')
           .attr('version', version)
           .attr('board', board + '@' + boardName);
     let xmlStr = mixDom[0].outerHTML;
     let code = MFile.getCode();
-    const configDom = config && $('<config></config>'),
-    codeDom = BOARD.saveMixWithCode && $('<code></code>');
-    if (configDom) {
+    if (config) {
         try {
-            configDom.html(JSON.stringify(config));
-            xmlStr += configDom[0].outerHTML;
+            xmlStr += `<config>${JSON.stringify(config)}</config>`;
         } catch (error) {
             console.log(error);
         }
     }
-    if (codeDom) {
+    if (BOARD.saveMixWithCode) {
         code = Base64.encode(code);
-        codeDom.html(code);
-        xmlStr += codeDom[0].outerHTML;
+        xmlStr += `<code>${code}</code>`;
     }
     return xmlStr;
 }
@@ -385,13 +381,13 @@ MFile.showParseMixErrorDialog = (xml, undefinedBlocks, endFunc = () => {}) => {
         btn2Name: indexText['忽略未定义块'],
         btn3Name: indexText['读取代码']
     })
-    LayerExtend.open({
+    LayerExt.open({
         title: indexText['一些图形化模块尚未定义'],
         id: 'parse-mix-error-layer',
         area: ['50%', '250px'],
         max: ['500px', '250px'],
         min: ['350px', '100px'],
-        shade: LayerExtend.shade,
+        shade: LayerExt.SHADE_ALL,
         content: renderStr,
         borderRadius: '5px',
         success: (layero, index) => {

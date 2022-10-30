@@ -3,16 +3,16 @@ Bluetooth-Central
 
 Micropython  library for the Bluetooth-Central
 =======================================================
-#Preliminary composition	       202200329
+#Preliminary composition	       20221018
 #https://github.com/micropython/micropython/tree/master/examples/bluetooth
 
 dahanzimin From the Mixly Team 
 """
+import time,gc
 import bluetooth
-import time
-
-from ble_advertising import decode_services, decode_name
 from micropython import const
+from ubinascii import hexlify,unhexlify
+from ble_advertising import decode_services, decode_name
 
 _IRQ_CENTRAL_CONNECT = const(1)
 _IRQ_CENTRAL_DISCONNECT = const(2)
@@ -47,9 +47,9 @@ _UART_TX_CHAR_UUID = bluetooth.UUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 class BLESimpleCentral:
 	def __init__(self):
 		self._ble = bluetooth.BLE()
+		self._scan_flg = True
 		self._ble.active(True)
 		self._ble.irq(self._irq)
-
 		self._reset()
 		self.scan()
 
@@ -58,17 +58,15 @@ class BLESimpleCentral:
 		self._name = None
 		self._addr_type = None
 		self._addr = None
-		self._info = {}
-		self._flg = True
 
 		# Callbacks for completion of various operations.
 		# These reset back to None after being invoked.
-		self._scan_callback = None
 		self._conn_callback = None
 		self._read_callback = None
 
 		# Persistent callback for when new data is notified from the device.
 		self._notify_callback = None
+		self._write_data=None
 
 		# Connected device.
 		self._conn_handle = None
@@ -86,14 +84,16 @@ class BLESimpleCentral:
 				self._addr_type = addr_type
 				self._addr = bytes(addr)  # Note: addr buffer is owned by caller so need to copy it.
 				self._name = decode_name(adv_data) or "?"
-				if self._name in self._info.keys():
-					#print(self._info)
+				if self._addr in self._info[2]:
 					self._ble.gap_scan(None)
 				else:
-					self._info[self._name]=(self._addr_type,self._addr,rssi)
-			
+					self._info[0].append(self._name)
+					self._info[1].append(self._addr_type)
+					self._info[2].append(self._addr)
+					self._info[3].append(rssi)
+		
 		elif event == _IRQ_SCAN_DONE:
-			self._flg = False
+			self._scan_flg = False
 
 		elif event == _IRQ_PERIPHERAL_CONNECT:
 			# Connect successful.
@@ -149,31 +149,41 @@ class BLESimpleCentral:
 		elif event == _IRQ_GATTC_NOTIFY:
 			conn_handle, value_handle, notify_data = data
 			if conn_handle == self._conn_handle and value_handle == self._tx_handle:
+				try:
+					self._write_data=bytes(notify_data).decode().strip()
+				except:
+					self._write_data=bytes(notify_data)				
 				if self._notify_callback:
-					self._notify_callback(bytes(notify_data).decode().strip())
+					self._notify_callback(self._write_data)
 
 	# Returns true if we've successfully connected and discovered characteristics.
 	def is_connected(self):
-		return (
-			self._conn_handle is not None
-			and self._tx_handle is not None
-			and self._rx_handle is not None
-		)
+		return (self._conn_handle is not None and self._tx_handle is not None and self._rx_handle is not None)
 
 	# Find a device advertising the environmental sensor service.
 	def scan(self):
-		self._ble.gap_scan(0, 30000, 30000)
-		while self._flg:
+		self._info = [[],[],[],[]]
+		self._ble.gap_scan(10000, 30000, 30000)
+		while self._scan_flg:
 			time.sleep_ms(10)
-		self._flg = True
-		return self._info
+		self._scan_flg = True
+		info=[]
+		for i in range(len(self._info[0])):
+			info.append([self._info[0][i],self._info[1][i],hexlify(self._info[2][i]).decode(),self._info[3][i]])
+		return info
 
 	# Connect to the specified device (otherwise use cached address from a scan).
-	def connect(self, name=None, callback=None):
-		if name not in self._info.keys():
+	def connect(self, name=None,mac=None, callback=None):
+		if mac and unhexlify(mac) in self._info[2]:
+			index=self._info[2].index(unhexlify(mac))
+			self._addr_type=self._info[1][index]
+			self._addr=unhexlify(mac)
+		elif name and name in self._info[0]:
+			index=self._info[0].index(name)
+			self._addr_type=self._info[1][index]
+			self._addr=self._info[2][index]
+		else:
 			raise ValueError("Bluetooth was not found")
-		self._addr_type = self._info[name][0]
-		self._addr = self._info[name][1]
 		self._conn_callback = callback
 		self._ble.gap_connect(self._addr_type, self._addr)
 		return True
@@ -184,6 +194,7 @@ class BLESimpleCentral:
 			return
 		self._ble.gap_disconnect(self._conn_handle)
 		self._reset()
+		gc.collect()
 
 	# Send data over the UART
 	def send(self, v, response=False):
@@ -192,7 +203,15 @@ class BLESimpleCentral:
 		self._ble.gattc_write(self._conn_handle, self._rx_handle, v, 1 if response else 0)
 
 	# Set handler for when data is received over the UART.
-	def recv(self, callback):
-		self._notify_callback = callback
+	def recv(self, callback= None):
+		if callback:
+			self._notify_callback = callback
+		else:
+			write_data=self._write_data
+			self._write_data=None
+			return write_data		
 
-
+	@property 
+	def mac(self):
+		'''Get mac address'''
+		return hexlify(self._ble.config('mac')[1]).decode()

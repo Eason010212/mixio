@@ -31,8 +31,8 @@ function backup_blocks() {
     }
 
     if ('localStorage' in window && window['localStorage'] != null) {
-        window.localStorage.setItem(Mixly.Config.BOARD.boardName, xml);
-        window.localStorage.setItem(Mixly.Config.BOARD.boardName + ".openedPath", Mixly.Title.getFilePath());
+        window.localStorage.setItem(Mixly.Config.BOARD.boardType, xml);
+        window.localStorage.setItem(Mixly.Config.BOARD.boardType + ".openedPath", Mixly.Title.getFilePath());
     } else {
         //当同时打开打开两个以上（含两个）的Mixly窗口时，只有第一个打开的窗口才有window.localStorage对象，怀疑是javafx的bug.
         //其他的窗口得通过java写cache文件来实现，否则这些窗口在普通、高级视图中进行切换时，无法加载切换之前的块
@@ -40,18 +40,18 @@ function backup_blocks() {
     }
 
     if ('localStorage' in window && window['localStorage'] != null && Mixly.Editor.selected === 'CODE') {
-        window.localStorage.setItem(Mixly.Config.BOARD.boardName + ".code", Mixly.Editor.codeEditor.getValue());
-        window.localStorage.setItem(Mixly.Config.BOARD.boardName + ".loadCode", "true");
+        window.localStorage.setItem(Mixly.Config.BOARD.boardType + ".code", Mixly.Editor.codeEditor.getValue());
+        window.localStorage.setItem(Mixly.Config.BOARD.boardType + ".loadCode", "true");
     } else {
-        window.localStorage.setItem(Mixly.Config.BOARD.boardName + ".loadCode", "false");
+        window.localStorage.setItem(Mixly.Config.BOARD.boardType + ".loadCode", "false");
     }
 }
 
 function clear_blocks_from_storage() {
     var itl = setInterval(function () {
         if (window) {
-            if ('localStorage' in window && window['localStorage'] != null && window.localStorage[Mixly.Config.BOARD.boardName]) {
-                window.localStorage.removeItem(Mixly.Config.BOARD.boardName);
+            if ('localStorage' in window && window['localStorage'] != null && window.localStorage[Mixly.Config.BOARD.boardType]) {
+                window.localStorage.removeItem(Mixly.Config.BOARD.boardType);
             }
             Blockly.mainWorkspace.clear();
             clearInterval(itl);
@@ -78,24 +78,25 @@ function restore_blocks() {
     if (!('localStorage' in window && window['localStorage'] != null)) {
         return;
     }
-    if (window.localStorage[BOARD.boardName + '.filePath'] && Env.isElectron) {
+    if (window.localStorage[BOARD.boardType + '.filePath'] && Env.isElectron) {
         const { File } = Electron;
-        File.openFile(window.localStorage[BOARD.boardName + '.filePath']);
-        window.localStorage[BOARD.boardName + '.filePath'] = '';
-    } else if (window.localStorage[BOARD.boardName]) {
+        File.openFile(window.localStorage[BOARD.boardType + '.filePath']);
+        window.localStorage[BOARD.boardType + '.filePath'] = '';
+    } else if (window.localStorage[BOARD.boardType]) {
         let xml;
         try {
-            xml = Blockly.Xml.textToDom(window.localStorage[Mixly.Config.BOARD.boardName]);
-            if (document.getElementById("boards-type")) {
-                var boardType = window.localStorage[Mixly.Config.BOARD.boardName].match(/(?<=board[\s]*=[\s]*\")[^\n\"]+(?=\")/g);
-                console.log(boardType);
-                Boards.setSelectedBoard(boardType);
-                profile['default'] = profile[boardType] ?? profile['default'];
-                if (Electron?.BU) {
-                    Electron.BU.readConfigAndSet();
-                } else if (Web?.BU) {
-                    Web.BU.readConfigAndSet();
+            xml = Blockly.Xml.textToDom(window.localStorage[BOARD.boardType]);
+            if ($("#boards-type").length) {
+                const boardNameList = window.localStorage[BOARD.boardType].match(/(?<=board[\s]*=[\s]*\")[^\n\"]+(?=\")/g);
+                let boardName = boardNameList.length? boardNameList[0] : '';
+                if (BOARD.boardName
+                 && boardName !== BOARD.boardName
+                 && BOARD.board
+                 && BOARD.board[BOARD.boardName]) {
+                    boardName = BOARD.boardName;
                 }
+                Boards.setSelectedBoard(boardName);
+                profile['default'] = profile[boardName] ?? profile['default'];
             }
             Blockly.Xml.domToWorkspace(xml, Blockly.mainWorkspace);
             Blockly.mainWorkspace.scrollCenter();
@@ -104,17 +105,17 @@ function restore_blocks() {
             console.log(e);
             clear_blocks_from_storage();
         }
-        if (window.localStorage[BOARD.boardName + ".loadCode"]
-            && window.localStorage[BOARD.boardName + ".loadCode"] == "true") {
-            if (window.localStorage[BOARD.boardName + ".code"]) {
+        if (window.localStorage[BOARD.boardType + ".loadCode"]
+            && window.localStorage[BOARD.boardType + ".loadCode"] == "true") {
+            if (window.localStorage[BOARD.boardType + ".code"]) {
                 Drag.items.vDrag.full('NEGATIVE'); // 完全显示代码编辑器
-                Editor.codeEditor.setValue(window.localStorage[BOARD.boardName + ".code"], -1);
+                Editor.codeEditor.setValue(window.localStorage[BOARD.boardType + ".code"], -1);
             }
         }
-        if (window.localStorage[BOARD.boardName + ".openedPath"]
-            && window.localStorage[BOARD.boardName + ".openedPath"] !== 'null'
+        if (window.localStorage[BOARD.boardType + ".openedPath"]
+            && window.localStorage[BOARD.boardType + ".openedPath"] !== 'null'
             && Env.isElectron) {
-            const filePath = window.localStorage[BOARD.boardName + ".openedPath"];
+            const filePath = window.localStorage[BOARD.boardType + ".openedPath"];
             const { File } = Electron;
             const { path } = Modules;
             File.openedFilePath = filePath;
@@ -499,8 +500,6 @@ mixlyjs.renderXml = function (xmlContent) {
             if (profile[$("#boards-type").find("option:selected").text()] != undefined) {
                 profile['default'] = profile[$("#boards-type").find("option:selected").text()];
             }
-            if (Mixly?.Electron?.BU)
-                Mixly.Electron.BU.readConfigAndSet();
         }
     } catch (e) {
         console.log(e);
@@ -812,7 +811,7 @@ mixlyjs.viewfile = function (type) {
 };
 
 mixlyjs.getCodeContent = function () {
-    Mixly.MFile.getCode();
+    return Mixly.MFile.getCode();
 };
 
 mixlyjs.getXmlContent = function (xmlType) {

@@ -22,10 +22,15 @@ const config = {
         /*"./common/serial-charts.js"*/
         "./common/env.js",
         "./common/deps.js",
-        "./common/base64.min.js",
-        "./common/sortable.min.js",
-        "./common/microbit-fs.umd.min.js",
-        "./common/lazyload.js"
+        "./common/modules/base64.min.js",
+        "./common/modules/lazyload.js",
+        "./common/modules/microbit-fs.umd.min.js",
+        "./common/modules/notify.js",
+        "./common/modules/popper.min.js",
+        "./common/modules/sortable.min.js",
+        "./common/modules/store.modern.min.js",
+        "./common/modules/tippy-bundle.umd.min.js",
+        "./common/modules/xscrollbar.js"
     ]
 };
 

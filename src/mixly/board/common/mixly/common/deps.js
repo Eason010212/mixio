@@ -16,8 +16,8 @@ let { fs } = Modules;
 if (Env.isElectron && BOARD?.filePath && BOARD?.filePath !== "None") {
     let mixStr = fs.readFileSync(BOARD.filePath, "utf8");
     if ('localStorage' in window && window['localStorage'] != null) {
-        window.localStorage.setItem(BOARD.boardName, mixStr);
-        window.localStorage.setItem(BOARD.boardName + ".filePath", BOARD.filePath);
+        window.localStorage.setItem(BOARD.boardType, mixStr);
+        window.localStorage.setItem(BOARD.boardType + ".filePath", BOARD.filePath);
     }
     history.replaceState({}, "", Url.changeURLArg(window.location.href, "filePath", "None"));
 }
@@ -96,29 +96,37 @@ Deps.DEPENDENCY = {
             "provide": ['Backpack'],
             "require": ['Blockly']
         },{
-            "path": '/common/lazyload.js',
+            "path": '/common/modules/lazyload.js',
             "provide": ['LazyLoad'],
             "require": []
         },{
-            "path": '/common/microbit-fs.umd.min.js',
+            "path": '/common/modules/microbit-fs.umd.min.js',
             "provide": ['microbitFs'],
             "require": []
         },{
-            "path": '/common/base64.min.js',
+            "path": '/common/modules/base64.min.js',
             "provide": ['Base64'],
             "require": []
         },{
-            "path": '/common/sortable.min.js',
+            "path": '/common/modules/sortable.min.js',
             "provide": ['Sortable'],
             "require": []
         },{
-            "path": '/common/store.modern.min.js',
+            "path": '/common/modules/store.modern.min.js',
             "provide": ['store'],
             "require": []
         },{
-            "path": '/common/xscrollbar.js',
+            "path": '/common/modules/xscrollbar.js',
             "provide": ['XScrollbar'],
             "require": []
+        },{
+            "path": '/common/modules/popper.min.js',
+            "provide": ['Popper'],
+            "require": []
+        },{
+            "path": '/common/modules/tippy-bundle.umd.min.js',
+            "provide": ['tippy'],
+            "require": ['Popper']
         }
     ]
 };
@@ -148,6 +156,26 @@ Deps.DEPENDENCY["web-socket"]["common"] = [
 Deps.DEPENDENCY["web-compiler"]["common"] = [
     ...Deps.DEPENDENCY["web-compiler"]["common"],
     ...depsJson["web-compiler"]["common"]
+];
+
+Deps.DEPENDENCY["web-socket"]["electron"] = [
+    ...Deps.DEPENDENCY["web-socket"]["electron"],
+    ...depsJson["web-socket"]["electron"]
+];
+
+Deps.DEPENDENCY["web-compiler"]["electron"] = [
+    ...Deps.DEPENDENCY["web-compiler"]["electron"],
+    ...depsJson["web-compiler"]["electron"]
+];
+
+Deps.DEPENDENCY["web-socket"]["web"] = [
+    ...Deps.DEPENDENCY["web-socket"]["web"],
+    ...depsJson["web-socket"]["web"]
+];
+
+Deps.DEPENDENCY["web-compiler"]["web"] = [
+    ...Deps.DEPENDENCY["web-compiler"]["web"],
+    ...depsJson["web-compiler"]["web"]
 ];
 
 Deps.addDependency = (dependencyList) => {
@@ -219,7 +247,10 @@ if (Env.isElectron) {
     goog.require('Mixly.Electron.Loader');
     goog.require('Mixly.Electron.File');
     if (Env.hasSocketServer) {
-        goog.require('Mixly.WebSocket.Socket');
+        goog.require('Mixly.WebSocket.BU');
+        goog.require('Mixly.WebSocket.ArduShell');
+        goog.require('Mixly.WebSocket.Serial');
+        goog.require('Mixly.WebSocket.File');
     } else if (Env.hasCompiler) {
         goog.require('Mixly.WebCompiler.Compiler');
         goog.require('AvrUploader');
@@ -232,7 +263,10 @@ if (Env.isElectron) {
     }
 } else {
     if (Env.hasSocketServer) {
-        goog.require('Mixly.WebSocket.Socket');
+        goog.require('Mixly.WebSocket.BU');
+        goog.require('Mixly.WebSocket.ArduShell');
+        goog.require('Mixly.WebSocket.Serial');
+        goog.require('Mixly.WebSocket.File');
     } else {
         if (Env.hasCompiler) {
             goog.require('Mixly.WebCompiler.Compiler');

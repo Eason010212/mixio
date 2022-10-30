@@ -55,6 +55,12 @@ Env.pyFilePath = null;
 Env.indexPath = null;
 
 /**
+  * 资源文件夹所在路径
+  * @type {String} 
+  */
+Env.srcPath = null;
+
+/**
   * 获取板卡index或主页面index的缩放比例
   * @type {String} 
   */
@@ -114,19 +120,15 @@ if (Env.isElectron) {
         Env.clientPath = path.resolve(app.getPath("exe"), '../');
     }
     Env.pyFilePath = path.resolve(Env.clientPath, 'mixpyBuild/mixly.py');
-    if (Env.currentPlatform == "darwin" || Env.currentPlatform == "linux") {
-        Env.python3Path = '/usr/bin/python3';
-        if (fs_extend.isfile('/usr/local/bin/python3')) {
-            Env.python3Path = '/usr/local/bin/python3';
-        }
-    } else {
-        Env.python3Path = Env.clientPath + '/mixpyBuild/win_python3/python3.exe';
-    }
     if (Env.currentPlatform === 'win32') {
         Env.python3Path = path.resolve(Env.clientPath, 'mixpyBuild/win_python3/python3.exe');
     } else {
         Env.python3Path = '/usr/bin/python3';
+        if (fs_extend.isfile('/usr/local/bin/python3')) {
+            Env.python3Path = '/usr/local/bin/python3';
+        }
     }
     Env.indexPath = __dirname;
+    Env.srcPath = path.resolve(Env.indexPath, Config.pathPrefix, '../');
 }
 })();

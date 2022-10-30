@@ -471,7 +471,7 @@ Blockly.Blocks['sensor_aht11_extern'] = {
         this.appendDummyInput("")
         .appendField(new Blockly.FieldDropdown([
             [Blockly.MIXLY_GETTEMPERATUE, "temperature"],
-            [Blockly.MIXLY_GETHUMIDITY, "relative_humidity"]
+            [Blockly.MIXLY_GETHUMIDITY, "humidity"]
             ]), "key");
         this.setOutput(true, Number);
         this.setInputsInline(true);
@@ -495,9 +495,9 @@ Blockly.Blocks['sensor_hp203_extern'] = {
             .setCheck("var");
         this.appendDummyInput("")
         .appendField(new Blockly.FieldDropdown([
-            [Blockly.MIXLY_GETPRESSURE, "p_data()"],
-            [Blockly.MIXLY_GETTEMPERATUE, "t_data()"],
-            [Blockly.MIXLY_GET_ALTITUDE, "h_data()"],
+            [Blockly.MIXLY_GETPRESSURE, "pressure()"],
+            [Blockly.MIXLY_GETTEMPERATUE, "temperature()"],
+            [Blockly.MIXLY_GET_ALTITUDE, "altitude()"],
             ]), "key");
         this.setOutput(true, Number);
         this.setInputsInline(true);
@@ -1199,3 +1199,44 @@ Blockly.Blocks.PS2_stk_new={
     this.setTooltip('');
   }
 };
+
+Blockly.Blocks.sensor_use_uart_init = {
+    init: function () {
+        this.setColour(Blockly.Blocks.sensor_extern.HUE);
+        this.appendDummyInput("")
+            .appendField(Blockly.Msg.CONTROLS_FOR_INPUT_WITH+"uart")
+            .appendField(new Blockly.FieldDropdown([
+                ["uart1", "uart1"],         
+                ["uart2","uart2"]
+                ]), "key");
+        this.appendValueInput('SUB')
+            .appendField(Blockly.MIXLY_MICROPYTHON_SOCKET_MAKE)
+            .setCheck("var");
+        this.appendDummyInput("")
+            .appendField(Blockly.MIXLY_SETUP + Blockly.Msg.LISTS_SET_INDEX_INPUT_TO + 'PM2.5' + MSG.catSensor)
+            
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+    }
+};
+
+Blockly.Blocks.pm25_get_data = {
+    init: function () {
+        this.setColour(Blockly.Blocks.sensor_extern.HUE);
+        this.appendValueInput('SUB')
+            .appendField('PM2.5' + MSG.catSensor)
+        this.appendDummyInput()
+            .appendField(Blockly.MIXLY_GET)
+            .appendField(new Blockly.FieldDropdown([
+                ['PM2.5', "[0]"],
+                ['PM10', "[1]"],
+                ['(PM2.5, PM10)', ""],   
+                ]), "pm")
+        this.appendDummyInput()
+            .appendField(Blockly.MIXLY_CONCENTRATION)    
+        this.setOutput(true);
+        this.setInputsInline(true);
+        this.setTooltip(Blockly.MIXLY_PM_CONCENTRATION_TOOLTIP);
+    }
+}

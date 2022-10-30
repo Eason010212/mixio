@@ -9,7 +9,7 @@ goog.require('Mixly.XML');
 goog.require('Mixly.ScriptLoader');
 goog.require('Mixly.CssLoader');
 goog.require('Mixly.Boards');
-goog.require('Mixly.LayerExtend');
+goog.require('Mixly.LayerExt');
 goog.require('Mixly.Config');
 goog.require('Mixly.CloudDownload');
 goog.require('Mixly.Nav');
@@ -23,7 +23,7 @@ const {
     ScriptLoader,
     CssLoader,
     Boards,
-    LayerExtend,
+    LayerExt,
     Config,
     CloudDownload,
     Nav
@@ -240,6 +240,7 @@ LibManager.reloadThirdPartyLibs = () => {
     LibManager.loadLibsAndUpdateJsCssList(function() {
         // Blockly.fireUiEvent(window, 'resize');
         const board = Boards.getSelectedBoardName();
+        // Boards.changeTo(Boards.INFO[board].key);
         Boards.updateCategories(board, true);
     });
 }
@@ -380,11 +381,11 @@ LibManager.showManageDialog = () => {
         openFolder: indexText['打开对应文件夹'],
         del: indexText['删除']
     });
-    LayerExtend.open({
+    LayerExt.open({
         title: [indexText['库管理器'], '35px'],
         id: 'lib-manage-layer',
         content: htmlStr,
-        shade: LayerExtend.shade,
+        shade: LayerExt.SHADE_ALL,
         area: ['60%', '60%'],
         min: ['400px', '200px'],
         max: ['800px', '400px'],
@@ -426,7 +427,7 @@ LibManager.onclickImportLibs = () => {
         title: indexText['云端库'],
         cols: [[
             { type: 'checkbox', unresize: false, align: "center" },
-            { field: 'status', title: indexText['状态'], unresize: false, align: "center", minWidth: 100 },
+            { field: 'status', title: indexText['状态'], sort: true, unresize: false, align: "center", minWidth: 100 },
             { field: 'name', title: indexText['名称'], sort: true, unresize: false, align: "center", minWidth: 200 },
             { field: 'version', title: indexText['版本'], unresize: false, align: "center", minWidth: 80 },
             { field: 'desc', title: indexText['介绍'], unresize: false, align: "center", minWidth: 250 }
@@ -655,7 +656,7 @@ LibManager.showLocalImportDialog = (type) => {
                 id: "import-local-lib-layer",
                 title: indexText["导入中"] + "...",
                 content: $('#mixly-loader-div'),
-                shade: LayerExtend.shade,
+                shade: LayerExt.SHADE_ALL,
                 closeBtn: 0,
                 success: function (layero) {
                     $("#mixly-loader-btn").css('display', 'none');
@@ -858,7 +859,7 @@ LibManager.showDelLibsProgress = (sucFunc) => {
         id: "del-local-lib-layer",
         title: indexText["删除中"] + "...",
         content: $('#mixly-loader-div'),
-        shade: LayerExtend.shade,
+        shade: LayerExt.SHADE_ALL,
         closeBtn: 0,
         success: function (layero, index) {
             $("#mixly-loader-btn").css('display', 'none');
@@ -960,11 +961,11 @@ LibManager.showCloudImportProgress = (importList, endFunc = (errorMessages) => {
     parentDom.append(childDom);
     $('body').append(parentDom);
     element.render('progress');
-    LayerExtend.open({
+    LayerExt.open({
         title: indexText['导入中'] + '...',
         id: 'setting-menu-layer1',
         content: parentDom,
-        shade: LayerExtend.shade,
+        shade: LayerExt.SHADE_ALL,
         area: ['40%', '60%'],
         max: ['800px', (importList.length * 106 + 42) + 'px'],
         min: ['500px', '100px'],

@@ -20,12 +20,13 @@
     "webSocket": {
         "enabled": false,
         "port": 8082,
-        "protocol": "ws:"
+        "protocol": "wss:"
     },
     "webCompiler": {
         "enabled": false,
-        "port": 8082,
-        "protocol": "http:"
+        "port": 8083,
+        "protocol": "https:",
+        "domain": ""
     },
     "debug": false
 }

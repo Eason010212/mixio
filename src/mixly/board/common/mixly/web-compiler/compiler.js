@@ -2,12 +2,14 @@
 
 goog.require('Mixly.Url');
 goog.require('Mixly.StatusBar');
+goog.require('Mixly.StatusBarPort');
 goog.require('Mixly.Config');
-goog.require('Mixly.LayerExtend');
+goog.require('Mixly.LayerExt');
 goog.require('Mixly.Url');
 goog.require('Mixly.Boards');
 goog.require('Mixly.MFile');
 goog.require('Mixly.Web.BU');
+goog.require('Mixly.Web.Serial');
 goog.provide('Mixly.WebCompiler.Compiler');
 
 const {
@@ -16,42 +18,46 @@ const {
     Boards,
     MFile,
     StatusBar,
+    StatusBarPort,
     Config,
-    LayerExtend,
+    LayerExt,
     Web
 } = Mixly;
 const { SOFTWARE, BOARD } = Config;
 const { Compiler } = WebCompiler;
-const { BU } = Web;
+const { BU, Serial } = Web;
 
 const DEFAULT_CONFIG = {
     "enabled": true,
     "port": 8082,
     "protocol": "http:",
     "ip": "localhost"
-}
+};
+
 Compiler.CONFIG = { ...DEFAULT_CONFIG, ...(SOFTWARE?.webCompiler ?? {}) };
 const { CONFIG } = Compiler;
-Compiler.URL = CONFIG.protocol + '//' + CONFIG.ip + ':' + CONFIG.port + '/';
+CONFIG.ip = (CONFIG.ip === 'localhost'? window.location.hostname : CONFIG.ip);
+Compiler.URL = CONFIG.protocol + '//' + (CONFIG.domain? CONFIG.domain : (CONFIG.ip + ':' + CONFIG.port))  + '/';
 
 Compiler.compile = () => {
     StatusBar.show(1);
     StatusBar.setValue('');
-    Compiler.generateCommand('compile', (error, data, layerNum) => {
+    Compiler.generateCommand('compile', (error, obj, layerNum) => {
         layer.close(layerNum);
+        let message = indexText["编译成功"];
         if (error) {
-            layer.msg('编译失败', { time: 1000 });
-        } else {
-            layer.msg('编译成功', { time: 1000 });
+            message = indexText["编译失败"];
         }
+        layer.msg(message, { time: 1000 });
+        StatusBar.addValue("==" + message + "(" + indexText["用时"] + " " + obj.timeCost + ")==\n");
     });
 }
 
 Compiler.upload = async () => {
     StatusBar.show(1);
     StatusBar.setValue('');
-    BU.burning = true;
-    BU.uploading = false;
+    BU.burning = false;
+    BU.uploading = true;
     const board = Boards.getSelectedBoardKey();
     const boardParam = board.split(':');
     if (boardParam[1] === 'avr') {
@@ -75,19 +81,18 @@ Compiler.upload = async () => {
             await AvrUploader.connect(boardUpload, {});
             Compiler.generateCommand('upload', BU.uploadWithAvrUploader);
         } catch (error) {
-            StatusBar.addValue(error.toString() + '\n', true);
+            StatusBar.addValue(error.toString() + '\n');
         }
     } else {
-        try {
-            await BU.justConnect();
-        } catch (e) {
-            console.log(e);
-            StatusBar.addValue("已取消上传\n", true);
-            BU.burning = false;
-            BU.uploading = false;
-            return;
-        }
-        Compiler.generateCommand('upload', BU.uploadWithEsptool);
+        const portName = 'web-serial';
+        Serial.connect(portName, 115200, async (port) => {
+            if (!port) {
+                layer.msg(indexText['已取消连接'], { time: 1000 });
+                return;
+            }
+            StatusBarPort.tabChange('output');
+            Compiler.generateCommand('upload', BU.uploadWithEsptool);
+        });
     }
 }
 
@@ -102,13 +107,13 @@ Compiler.generateCommand = (operate, endFunc = (errorMessage, data, layerNum) =>
         operate
     };
     let commandStr = Compiler.URL + '/?' + Url.jsonToUrl(command);
-    StatusBar.setValue('send -> ' + commandStr + '\n', true);
+    StatusBar.setValue('send -> ' + commandStr + '\n');
     console.log('send -> ', commandStr);
     const compileLayer = layer.open({
         type: 1,
         title: indexText["编译中"] + "...",
         content: $('#mixly-loader-div'),
-        shade: LayerExtend.shadeWithHeight,
+        shade: LayerExt.SHADE_NAV,
         closeBtn: 0,
         success: function () {
             $(".layui-layer-page").css("z-index", "198910151");
@@ -145,17 +150,19 @@ Compiler.sendCommand = (layerType, command, endFunc = (errorMessage, data, layer
         credentials: 'omit', // 设置不传递cookie
         mode: 'cors', // 设置请求不允许跨域
     }).then(res => {
-        console.log(res)
         return res.text();
     }).then((data) => {
         const dataObj = JSON.parse(data);
         console.log(dataObj);
         if (dataObj.error) {
-            StatusBar.addValue(decodeURIComponent(dataObj.error), true);
+            StatusBar.addValue(decodeURIComponent(dataObj.error));
             endFunc(true, null, layerType);
         } else {
-            StatusBar.addValue(decodeURIComponent(dataObj.compileMessage), true);
-            endFunc(false, dataObj.data, layerType);
+            StatusBar.addValue(decodeURIComponent(dataObj.compileMessage));
+            endFunc(false, {
+                data: dataObj.data,
+                timeCost: decodeURIComponent(dataObj.timeCost)
+            }, layerType);
         } 
     })
     .catch((error) => {

@@ -26,6 +26,7 @@ var MSG = {
     catStorageEEPROM: 'EEPROM',
     catME_GO:"ME GO",
     catAIOT:"Intelligent IOT",
+    catAIsensor:"MixGo AI Sensor",
     catSensor: "Sensor",
     catActuator: "Actuator",
     catExternSensor: "External Sensor",
@@ -52,6 +53,7 @@ var MSG = {
     catIot: "IOT",
     catSet: "Set",
     catData: "Data",
+    catAlgorithm: "Algorithm",
     catHardware: "Hardware",
     catAI: "AI",
     catHear: "machine Hear",
@@ -134,6 +136,7 @@ var MSG = {
     catweather: "Seniverse weather",
     view_btn: "Cloud File",
     view_file: "Resources",
+    open_from_cloud: "Open from the cloud",
     save_ser: "Save to the cloud",
     windowSize: "Window size",
     catRadio: "Radio",
@@ -160,13 +163,14 @@ var indexText = {
     "烧录中": "Burning",
     "编译中": "Compiling",
     "上传中": "Uploading",
-    "已取消烧录": "Burning has been cancelled",
-    "已取消编译": "Compilation cancelled",
-    "已取消上传": "Uploading cancelled",
-    "烧录成功": "Burning successfully",
-    "编译成功": "Compiled successfully",
-    "上传成功": "Uploaded successfully",
-    "编译失败": "Compilation failed",
+    "已取消烧录": "Burn cancelled",
+    "已取消编译": "Compile cancelled",
+    "已取消上传": "Upload cancelled",
+    "烧录成功": "Burn successfully",
+    "编译成功": "Compile successfully",
+    "上传成功": "Upload successfully",
+    "烧录失败": "Burn failed",
+    "编译失败": "Compile failed",
     "上传失败": "Upload failed",
     "无可用设备": "No device available",
     "检测到多个串口，请选择：": "Multiple serial ports detected, please select:",
@@ -325,7 +329,39 @@ var indexText = {
     "默认字号": "Default font size",
     "打开串口终端": "Open terminal",
     "打开串口": "Open serial port",
-    "已选择": "Selected"
+    "已选择": "Selected",
+    "在": "on",
+    "关卡": "Level",
+    "只能在ESP32和ESP32-S2上修改波特率": "Baud rate can only change on ESP32 and ESP32-S2",
+    "尝试修改波特率为": "Attempting to change baud rate to ",
+    "已修改波特率为": "Changed baud rate to ",
+    "写入数据，文件大小：": "Write data, file size:",
+    "写入数据到": "Writing data to",
+    "写入": "write",
+    "耗时": "time cost",
+    "上传": "upload",
+    "运行": "run",
+    "正在运行中": "Running",
+    "尝试复位": "Try to reset",
+    "已取消连接": "Connection canceled",
+    "固件读取出错": "Error reading firmware",
+    "配置文件读取出错": "Error reading configuration file",
+    "读取固件": "Reading firmware",
+    "路径": "path",
+    "偏移": "offset",
+    "即将开始烧录": "Start burning",
+    "无法获取文件，请检查网络": "Could not get file, please check network",
+    "正在连接": "Connecting",
+    "MAC地址": "MAC address",
+    "正在擦除闪存，请稍等": "Erasing flash, please wait",
+    "擦除完成，擦除耗时": "Erasing completed, erasing time",
+    "正在烧录固件": "Burning firmware",
+    "固件获取失败": "Firmware acquisition failed",
+    "固件读取中": "Reading firmware",
+    "中断失败": "Interrupt failed",
+    "无法进入Raw REPL": "Unable to enter Raw REPL",
+    "无法退出Raw REPL": "Unable to exit Raw REPL",
+    "无法退出REPL": "Unable to exit REPL"
 };
 
 /* 背包 */
@@ -1471,6 +1507,7 @@ Blockly.MIXLY_MICROBIT_JS_GET_GESTURE = 'get gesture';
 Blockly.MIXLY_MICROBIT_JS_CURRENT_GESTURE = 'current gesture';
 Blockly.MIXLY_MICROBIT_JS_GESTURE = 'gesture';
 Blockly.MIXLY_MICROBIT_JS_FIELD_STRENGTH = 'field strength';
+Blockly.MIXLY_MICROBIT_JS_FIELD_STRENGTH_ALL = 'synthetical strength';
 Blockly.MIXLY_MICROBIT_JS_IS_COMPASS_CALIBRATED = 'is compass calibrated';
 Blockly.MIXLY_IS_TOUCHED = 'is touched';
 Blockly.MIXLY_WAS_PRESSED = 'was pressed?';
@@ -3203,6 +3240,7 @@ Blockly.MIXLY_EMQX_QOS = 'service quality';
 Blockly.MIXLY_WIFI_CONNECT = 'connect Wi Fi';
 Blockly.MIXLY_WIFI_USERNAME = 'user name';
 Blockly.MIXLY_WIFI_PASSWORD = 'password';
+Blockly.MIXLY_IOT_PASSWORD = 'key';
 Blockly.MIXLY_SSL_DEFAULT = 'ssl default context';
 Blockly.MIXLY_CREATE_SOCKETPOOL = 'create connection pool for Wi Fi';
 Blockly.MIXLY_EMQX_SUBSCRIBE = 'subscribe';
@@ -3359,8 +3397,8 @@ Blockly.MIXLY_MACHINE_FEED='feeding'
 Blockly.MIXLY_MACHINE_WDT_FEED_TOOLTIP='regular feeding (call) is required. Once the interval is exceeded, it will be restarted'
 Blockly.MIXLY_MACHINE_RESET='RESET'
 Blockly.MIXLY_MACHINE_RESET_TOOLTIP='resets the device in a manner similar to pushing the external RESET button'
-Blockly.MIXLY_MP_ESPNOW_INIT_TOOLTIP= 'Initialize ESPNow and set channel 0-13';
-Blockly.MIXLY_MP_ESPNOW_RADIO_INIT_TOOLTIP= 'channel 0-13';
+Blockly.MIXLY_MP_ESPNOW_INIT_TOOLTIP= 'Initialize ESPNow and set channel 0-13, power 2-21db';
+Blockly.MIXLY_MP_ESPNOW_RADIO_INIT_TOOLTIP= 'channel 0-13, power 2-21db';
 Blockly.MIXLY_MP_ESPNOW_RADIO_INIT= 'set the radio channel to';
 Blockly.MIXLY_MP_ESPNOW_RADIO= 'radio';
 Blockly.MIXLY_MP_ESPNOW_RADIO_MSG_RECEIVED= 'When a message is received by radio';
@@ -3514,3 +3552,71 @@ Blockly.MIXLY_GET_NTP = 'get network time';
 Blockly.MIXLY_ME_GO_CAR_SENSOR_ONBOARD_AUTO_CHANGE = 'Auto changed';
 Blockly.MIXLY_ME_GO_CAR_LIGHT_SEEKING_ONLY = 'Use light chasing only';
 Blockly.MIXLY_ME_GO_CAR_LIGHT_SEEKING_SENSOR = 'light chasing sensor';
+Blockly.MIXLY_OTHER = 'other';
+Blockly.MIXLY_CONCENTRATION = 'concentration';
+Blockly.MIXLY_PM_CONCENTRATION_TOOLTIP = 'Concentration unit ug/m³';
+Blockly.MIXLY_QR_CODE_RECOGNTITION = "QR code Tag code";
+Blockly.MIXLY_QR_CODE_ANALYSIS = "QR code analysis";
+Blockly.MIXLY_QR_CODE = "QR code";
+Blockly.MIXLY_POSITION_XY = "coordinate";
+Blockly.MIXLY_AI_SENSOR_QR_CODE_TOOLTIP = "Obtain the corresponding information of the QR code object";
+Blockly.MIXLY_AI_SENSOR_QR_CODE_RECOGNTITION_TOOLTIP = "Use the MixGo AI camera to identify the QR code, and return a list containing all the identification result objects";
+Blockly.MIXLY_AI_SENSOR_CONFIG_TOOLTIP = "Set the port where MixGo AI interacts with the board";
+Blockly.MIXLY_BAR_CODE = "bar code";
+Blockly.MIXLY_BAR_CODE_RECOGNTITION = "Barcode recognition";
+Blockly.MIXLY_BAR_CODE_ANALYSIS = "Barcode analysis";
+Blockly.MIXLY_AI_SENSOR_BAR_CODE_TOOLTIP = "Get the corresponding information of the barcode object";
+Blockly.MIXLY_AI_SENSOR_BAR_CODE_RECOGNTITION_TOOLTIP = "Use the MixGo AI camera to identify barcode and return a list containing all the identified result objects";
+Blockly.MIXLY_TAG = "Tag code";
+Blockly.MIXLY_TAG_RECOGNTITION = "Tag code recognition";
+Blockly.MIXLY_TAG_ANALYSIS = "Label code analysis";
+Blockly.MIXLY_AI_SENSOR_TAG_TOOLTIP = "Obtain the corresponding information of the label code object";
+Blockly.MIXLY_AI_SENSOR_TAG_RECOGNTITION_TOOLTIP = "Use MixGo AI camera identification tag code to return a list containing all identification result objects";
+Blockly.MIXLY_LINE = "straight line";
+Blockly.MIXLY_LINE_RECOGNTITION = "Line recognition";
+Blockly.MIXLY_LINE_ANALYSIS = "Straight line analysis";
+Blockly.MIXLY_AI_SENSOR_LINE_TOOLTIP = "Get the corresponding information of line objects";
+Blockly.MIXLY_AI_SENSOR_LINE_RECOGNTITION_TOOLTIP = "Use the MixGo AI camera to recognize straight lines and return a list containing all the objects identified";
+Blockly.MIXLY_LINE_RECOGNTITION_ANGLE = "Merge Angle";
+Blockly.MIXLY_LINE_RECOGNTITION_SLOPE = "Merge slope";
+Blockly.MIXLY_LINE_ANGLE = "Line angle";
+Blockly.MIXLY_CIRCLE = "circular";
+Blockly.MIXLY_CIRCLE_RECOGNTITION = "Circle recognition";
+Blockly.MIXLY_CIRCLE_ANALYSIS = "Circular analysis";
+Blockly.MIXLY_AI_SENSOR_CIRCLE_TOOLTIP = "Get the corresponding information of the circular object";
+Blockly.MIXLY_AI_SENSOR_CIRCLE_RECOGNTITION_TOOLTIP = "Use the MixGo AI camera to identify circles and return a list containing all the objects identified";
+Blockly.MIXLY_CIRCLE_RECOGNTITION_MAX = "Merge Minimum Radius";
+Blockly.MIXLY_CIRCLE_RECOGNTITION_MIN = "Merge maximum radius";
+Blockly.MIXLY_CIRCLE_AREA = "the measure of area";
+Blockly.MIXLY_RECT = "rectangle";
+Blockly.MIXLY_RECT_RECOGNTITION = "Rectangle recognition";
+Blockly.MIXLY_RECT_ANALYSIS = "Rectangular analysis";
+Blockly.MIXLY_AI_SENSOR_RECT_TOOLTIP = "Get the corresponding information of the rectangular object";
+Blockly.MIXLY_AI_SENSOR_RECT_RECOGNTITION_TOOLTIP = "Use MixGo AI camera to recognize rectangle, and return a list containing all recognition result objects";
+Blockly.MIXLY_COLOR_RECOGNTITION = "Color recognition";
+Blockly.MIXLY_COLOR_ANALYSIS = "Color analysis";
+Blockly.MIXLY_AI_SENSOR_COLOR_TOOLTIP = "Get the corresponding information of the color object";
+Blockly.MIXLY_AI_SENSOR_COLOR_RECOGNTITION_TOOLTIP = "Use the MixGo AI camera to identify colors, and return a list containing all the objects identified";
+Blockly.MIXLY_COLOR_LAB = "Gamut";
+Blockly.MIXLY_AI_SENSOR_COLOR_THRESHOLD = "LAB threshold zoom range";
+Blockly.MIXLY_COLOR_CHASE = "Color Tracking";
+Blockly.MIXLY_COLOR_CHASE_ANALYSIS = "Color Tracking";
+Blockly.MIXLY_COLOR_CHASE_MERGE = "merge";
+Blockly.MIXLY_COLOR_CHASE_ANALYSIS = "analysis";
+Blockly.MIXLY_AI_SENSOR_RGB_TOOLTIP = "Set the color values (0~255) of the two RGB lights of the MixGo AI camera respectively, and the parameters are sequences containing three items";
+Blockly.MIXLY_LOCAL_TRAIN = "Self model training";
+Blockly.MIXLY_OBJECT_LIST = "Item List";
+Blockly.MIXLY_MODEL_NAME = "Model name";
+Blockly.MIXLY_TRAIN_TIME = "Training times";
+Blockly.MIXLY_AI_SENSOR_LOCAL_TRAIN_TOOLTIP = "Use the camera to acquire images for model training, and stop communication during model training";
+Blockly.MIXLY_LOCAL_CLASS = "Self model recognition";
+Blockly.MIXLY_CONFIDENCE_DEGREE = "Confidence";
+Blockly.MIXLY_AI_SENSOR_LOCAL_CLASS_TOOLTIP = "Obtain the corresponding information from the model recognition result object";
+Blockly.MIXLY_MUSIC_RECORD = "audio recording";
+Blockly.MIXLY_MUSIC_PLAY = "Audio play";
+Blockly.MIXLY_AI_SENSOR_MUSIC_RECORD_TOOLTIP = "Use MixGo AI camera to record audio without blocking the recording process";
+Blockly.MIXLY_YOLO_RECOGNIZE = "External model loading";
+Blockly.MIXLY_ANCHOR = "Anchor parameters";
+Blockly.MIXLY_MODEL_PATH = "Model Path";
+Blockly.MIXLY_AI_SENSOR_YOLO_RECOGNIZE_TOOLTIP = "Use the camera to read the model file in the SD card for item identification, and return a list containing all the identification result objects";
+Blockly.MIXLY_AI_SENSOR_YOLO_RECOGNIZE_RESULT_TOOLTIP = "Get the corresponding information of the external model loading result object";

@@ -7,7 +7,7 @@ goog.require('Mixly.StatusBarPort');
 goog.require('Mixly.Config');
 goog.require('Mixly.Tools');
 goog.require('Mixly.Env');
-goog.require('Mixly.LayerExtend');
+goog.require('Mixly.LayerExt');
 goog.require('Mixly.XML');
 goog.require('Mixly.MArray');
 goog.provide('Mixly.Electron.Serial');
@@ -21,7 +21,7 @@ const {
     Config,
     Tools,
     Env,
-    LayerExtend,
+    LayerExt,
     XML,
     MArray
 } = Mixly;
@@ -339,7 +339,7 @@ Serial.getPorts = (ports, portSelect) => {
     let newPorts = [];
     if (typeof portSelect === 'string' && portSelect === 'all') {
         for (let i = 0; i < ports.length; i++) {
-            let port = ports[i];
+            let port = { ...ports[i] };
             if (Env.currentPlatform !== 'linux') {
                 if (!port.vendorId)
                     port.vendorId = 'None';
@@ -354,7 +354,7 @@ Serial.getPorts = (ports, portSelect) => {
         }
     } else if (typeof portSelect === 'object') {
         for (let i = 0; i < ports.length; i++) {
-            let port = ports[i];
+            let port = { ...ports[i] };
             for (let j = 0; j < portSelect.length; j++) {
                 if (portSelect[j].vendorId
                  && portSelect[j].productId
@@ -393,8 +393,17 @@ Serial.refreshPorts = () => {
             } else {
                 Serial.uploadPorts = [];
             }
-            let allPorts = [ ...Serial.burnPorts, ...Serial.uploadPorts ];
-            allPorts =  MArray.unique(allPorts);
+            let allPorts = [ ...Serial.burnPorts ];
+            let usedPorts = [];
+            for (let value of allPorts) {
+                usedPorts.push(value.name);
+            }
+            for (let value of Serial.uploadPorts) {
+                if (usedPorts.includes(value.name)) {
+                    continue;
+                }
+                allPorts.push({ ...value });
+            }
             Serial.refreshPortOperator(allPorts);
             Serial.refreshUploadPortSelectBox(allPorts);
         }
@@ -414,6 +423,13 @@ Serial.refreshUploadPortSelectBox = (ports) => {
             portSelectBoxDom.append($(`<option value="${name}">${name}</option>`));
     });
     form.render('select', 'ports-type-filter');
+    if (ports.length) {
+        $('#mixly-footer-port-div').css('display', 'inline-flex');
+        $('#mixly-footer-port').html(Serial.getSelectedPortName());
+    } else {
+        $('#mixly-footer-port-div').hide();
+        $('#mixly-footer-port').html('');
+    }
 }
 
 Serial.refreshToolPortSelectBox = (ports) => {
@@ -593,7 +609,7 @@ Serial.openTool = () => {
     }
     let toolDom = portObj.dom;
     if (!portObj.dom) {
-        toolDom = LayerExtend.openSerialTool(toolConfig, successFunc, endFunc);
+        toolDom = LayerExt.openSerialTool(toolConfig, successFunc, endFunc);
     } else {
         toolDom.updateTool(toolConfig);
         toolDom.open(successFunc, endFunc);
@@ -1311,9 +1327,9 @@ Serial.connect = function (port = null, baud = null, endFunc = (code) => {}) {
                     newPortObj.serialport.close();
                     StatusBarPort.tabChange("output");
                     if (StatusBar.getValue().lastIndexOf("\n") != StatusBar.getValue().length - 1) {
-                        StatusBar.addValue('\n' + indexText['已关闭串口'] + portName + '\n', true);
+                        StatusBar.addValue('\n' + indexText['已关闭串口'] + portName + '\n');
                     } else {
-                        StatusBar.addValue(indexText['已关闭串口'] + portName + '\n', true);
+                        StatusBar.addValue(indexText['已关闭串口'] + portName + '\n');
                     }
                 }
             });

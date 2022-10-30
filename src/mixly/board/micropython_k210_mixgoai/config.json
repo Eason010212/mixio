@@ -1,11 +1,21 @@
 {
+    "board": {
+        "MixGo AI": "MixGo AI",
+        "MixGo AI sensor": "MixGo AI sensor"
+    },
     "language": "MicroPython",
     "burn": {
+        "type": "command",
         "portSelect": "all",
-        "command": "\"{kflash}\" --port {com} --baudrate 1500000 -n \"{indexPath}/build/MixGo_AI-ASR_V2.0.kfpkg\""
+        "MixGo AI": {
+            "command": "\"{kflash}\" --port {com} --baudrate 1500000 -n \"{indexPath}/build/MixGo_AI-ASR_V2.0.kfpkg\""
+        },
+        "MixGo AI sensor":{
+            "command": "\"{kflash}\" --port {com} --baudrate 1500000 -n \"{indexPath}/build/MixGo_AI-Sensor_V1.0.kfpkg\""
+        }
     },
     "upload": {
-        "type": "ampy",
+        "type": "command",
         "portSelect": "all",
         "command": "\"{ampy}\" -p {com} -d 1 -r \"{reset}\" put \"{indexPath}/build/upload\"",
         "filePath": "{indexPath}/build/upload/main.py",
@@ -42,5 +52,8 @@
         "rts": false,
         "dtr": false
     },
-    "pythonToBlockly": false
+    "pythonToBlockly": false,
+    "web": {
+        "com": "serial"
+    }
 }
