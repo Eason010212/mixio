@@ -8,9 +8,9 @@ function get_data() {
         $.getJSON('getData', {
 
         }, function(res) {
-            $("#prj_num").html(res['count'] + " / " + 1000)
+            $("#prj_num").html(res['count'] + " / " + MAX_MESSAGE_COUNT)
             $("#prj_num_bar").attr("aria-valuenow", res['count'])
-            $("#prj_num_bar").css("width", (res['count'] * 100 / 1000) + "%")
+            $("#prj_num_bar").css("width", (res['count'] * 100 / MAX_PROJECT_NUM_PER_USER) + "%")
             globalRows = res["rows"]
             init_table(res["rows"])
             sync_chart()
