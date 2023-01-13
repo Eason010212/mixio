@@ -1198,6 +1198,7 @@ function add_trigger(user_title, user_topic, user_content, user_style) {
     var dstMessage = user_content.split("$$$")[6]
     var itemdiv = add_block(1, 1, contents, attrs)
     var relationLogic = function(message, condition_1, condition_2) {
+        var condition_2 = parseFloat(condition_2)
         if (condition_1 == ">")
             return message > condition_2
         else if (condition_1 == "≥")
@@ -1215,10 +1216,10 @@ function add_trigger(user_title, user_topic, user_content, user_style) {
     }
     MixIO.triggers[title.text()] = function() {
         MixIO.onMessage(function(topic1, message) {
+            var message = String(message)
             if (topic1 == topic.text()) {
                 if (conditionRelation == "AND") {
                     if (relationLogic(message, condition1_1, condition1_2) && relationLogic(message, condition2_1, condition2_2)) {
-
                         itemdiv.addClass("triggered")
                         setTimeout(function() {
                             itemdiv.removeClass("triggered")
@@ -2265,8 +2266,9 @@ function add_map(user_title, user_topic, user_content, user_style) {
             if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
 
                 var label = (new Date().getHours() + ":" + (new Date().getMinutes() < 10 ? "0" : "") + new Date().getMinutes() + ":" + (new Date().getSeconds() < 10 ? "0" : "") + new Date().getSeconds())
-                if (isJSON(String(message1)) && JSON.parse(String(message1)).long && JSON.parse(String(message1)).lat && JSON.parse(String(message1)).clientid) {
+                if (isJSON(String(message1)) && ("long" in JSON.parse(String(message1))) && ("lat" in JSON.parse(String(message1))) && JSON.parse(String(message1)).clientid) {
                     var jsonMessage = JSON.parse(String(message1))
+                    console.log(jsonMessage)
                     itemdiv.trigger(MixIO.eventTags.DATA_MAP_CHANGED, [jsonMessage.clientid, jsonMessage.long, jsonMessage.lat, jsonMessage.message])
                     var newOrNot = true
                     var markerIndex = -1
@@ -2279,6 +2281,8 @@ function add_map(user_title, user_topic, user_content, user_style) {
                     }
                     if (newOrNot) {
                         var msgstr = ""
+                        if (typeof jsonMessage.message == "string")
+                            jsonMessage.message = JSON.parse(jsonMessage.message)
                         for (msg in jsonMessage.message) {
                             msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
                         }
@@ -2287,6 +2291,7 @@ function add_map(user_title, user_topic, user_content, user_style) {
                         markerIndex = markers.length
                         var bubble = create_a_map_bubble(msgstr, label, point)
                         newMarker.bubble = bubble
+                        console.log(msgstr)
                         markers.push({
                             "clientid": jsonMessage.clientid,
                             "long": jsonMessage.long,
@@ -2310,6 +2315,8 @@ function add_map(user_title, user_topic, user_content, user_style) {
                     } else {
                         markers[markerIndex].time = label
                         var msgstr = ""
+                        if (typeof jsonMessage.message == "string")
+                            jsonMessage.message = JSON.parse(jsonMessage.message)
                         for (msg in jsonMessage.message) {
                             msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
                         }

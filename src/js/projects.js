@@ -23,15 +23,17 @@ $(function() {
                 save_layout();
             }
     };
-    if (Math.random() > 0.75) {
+    /*
+    if (Math.random() > 0.6) {
         var d = dialog({
             title: '限时推广',
-            content: '<div style="width:250px">MixIO正处于不断迭代的阶段，有稳定应用、持续改进、私有部署MixIO平台的一线教师或个人开发者，欢迎加QQ群742608657，以向我们提供建议并得到技术支持，谢谢！</div>',
-            cancelValue: '确定',
+            content: '<div style="width:250px">尊敬的MixIO用户，您好！<br>现邀请您参与《MixIO平台技术接受度调查》，共计10题，预计用时5-8分钟。您的作答数据将被用于科学研究和平台改进设计，感谢您的参与！ <a href="https://wj.qq.com/s2/11118283/89a9/">点击此处进入调查</a></div>',
+            cancelValue: '我知道了',
             cancel: function() {}
         });
         d.showModal();
     }
+    */
 })
 
 const DATA_MODE = 0;
@@ -893,6 +895,25 @@ function view_project(projectName, projectType) {
                 } else if (topic1.split('/').length == 3 && !isMixly) {
                     var tp = stringendecoder.encodeHtml(topic1.split('/')[2])
                     var ms = message1.toString()
+                    if(isJSON(ms))
+                    {   
+                        var msJSON = JSON.parse(ms)
+                        if(("clientid" in msJSON)&&("long" in msJSON)&&("lat" in msJSON)&&("message" in msJSON))
+                        {
+                            var newJSON = {}
+                            var clientid = msJSON["clientid"]
+                            newJSON[clientid+"-"+"long"] = msJSON["long"]
+                            newJSON[clientid+"-"+"lat"] = msJSON["lat"]
+                            var msg = msJSON["message"]
+                            if(typeof msg == "string")
+                                msg = JSON.parse(msg)
+                            for(item of msg)
+                            {
+                                newJSON[clientid+"-"+item["label"]] = item["value"]
+                            }
+                            ms = JSON.stringify(newJSON)
+                        }
+                    }
                     if (globalTableProjectInfo.received[tp]) {
                         globalTableProjectInfo.received[tp].unshift({
                             '时间': timeStamp2String(),
@@ -917,6 +938,25 @@ function view_project(projectName, projectType) {
                 } else if (topic1.split('/').length == 4 && isMixly) {
                     var tp = stringendecoder.encodeHtml(topic1.split('/')[3])
                     var ms = message1.toString()
+                    if(isJSON(ms))
+                    {   
+                        var msJSON = JSON.parse(ms)
+                        if(("clientid" in msJSON)&&("long" in msJSON)&&("lat" in msJSON)&&("message" in msJSON))
+                        {
+                            var newJSON = {}
+                            var clientid = msJSON["clientid"]
+                            newJSON[clientid+"-"+"long"] = msJSON["long"]
+                            newJSON[clientid+"-"+"lat"] = msJSON["lat"]
+                            var msg = msJSON["message"]
+                            if(typeof msg == "string")
+                                msg = JSON.parse(msg)
+                            for(item of msg)
+                            {
+                                newJSON[clientid+"-"+item["label"]] = item["value"]
+                            }
+                            ms = JSON.stringify(newJSON)
+                        }
+                    }
                     if (globalTableProjectInfo.received[tp]) {
                         globalTableProjectInfo.received[tp].unshift({
                             '时间': timeStamp2String(),
@@ -1074,6 +1114,19 @@ function view_project(projectName, projectType) {
             grid2.append(topicOuterDiv2)
             var dataset = []
             chart = echarts.init(rightCardBodyDiv[0])
+            chart.setOption({
+                tooltip:{
+                    trigger: "axis",
+                    formatter: function(params){
+                        let str = '';
+                        params.forEach((item, idx) => {
+                            str += "<div style='margin:0;display:flex;justify-content:space-between;align-items:center'><div>" + `${item.marker}${item.seriesName}:&nbsp;&nbsp;&nbsp;</div><b>${chart.getOption().series[item.seriesIndex].oriData[item.dataIndex]}</b>` + "</div>"
+                            
+                        })
+                        return str
+                    }
+                }
+            })
             init_table = function() {
                 var fields = ["时间"]
                 for (dataitem in dataset) {
@@ -1168,7 +1221,8 @@ function view_project(projectName, projectType) {
                         type: 'line',
                         name: tableFields[tableField].name,
                         data: [],
-                        connectNulls: true,
+                        oriData:[],
+                        connectNulls: true
                     })
                 }
                 for (dataitem in dataset) {
@@ -1179,18 +1233,27 @@ function view_project(projectName, projectType) {
                             var seryName = series[sery].name
                             if (seryName != JSLang[lang].time)
                                 if (json_parsed[seryName] || json_parsed[seryName] === 0) {
-                                    series[sery].data.unshift(json_parsed[seryName])
+                                    series[sery].data.unshift(parseFloat(json_parsed[seryName]))
+                                    series[sery].oriData.unshift(json_parsed[seryName])
                                 } else
+                                {
                                     series[sery].data.unshift(NaN)
+                                    series[sery].oriData.unshift("-")
+                                }
                         }
                     } else {
                         for (sery in series) {
                             var seryName = series[sery].name
                             if (seryName != JSLang[lang].time)
-                                if (seryName == JSLang[lang].value)
-                                    series[sery].data.unshift(dataset[dataitem][JSLang[lang].value])
+                                if (seryName == JSLang[lang].value){
+                                    series[sery].data.unshift(parseFloat(dataset[dataitem][JSLang[lang].value]))
+                                    series[sery].oriData.unshift(dataset[dataitem][JSLang[lang].value])
+                                }
                                 else
+                                {
                                     series[sery].data.unshift(NaN)
+                                    series[sery].oriData.unshift("-")
+                                }
                         }
                     }
                 }
@@ -1203,9 +1266,19 @@ function view_project(projectName, projectType) {
                     xAxis: xAxis,
                     yAxis: yAxis,
                     series: series,
-                    tooltip: {
-                        trigger: 'axis'
-                    }
+
+                        tooltip:{
+                            trigger: "axis",
+                            formatter: function(params){
+                                let str = '';
+                                params.forEach((item, idx) => {
+                                    str += "<div style='margin:0;display:flex;justify-content:space-between;align-items:center'><div>" + `${item.marker}${item.seriesName}:&nbsp;&nbsp;&nbsp;</div><b>${chart.getOption().series[item.seriesIndex].oriData[item.dataIndex]}</b>` + "</div>"
+                                    
+                                })
+                                return str
+                            }
+                        }
+
                 })
                 sync_export()
             }
@@ -1218,6 +1291,7 @@ function view_project(projectName, projectType) {
             var bottomCardTitle = $('<div class="card-header py-3" style="display:flex">')
             bottomCard.append(bottomCardTitle)
             bottomCardTitle.append($('<h6 class="m-0 font-weight-bold text-primary">' + JSLang[lang].sendString + '</h6>'))
+            bottomCardTitle.append($('<input type="checkbox" id="sendClear" style="min-width:0px!important;margin-left:20px;margin-right:3px"/><label style="margin:0;padding:0;font-size:small">发送后清空</label>'))
             var bottomCardBody = $('<div class="card-body">')
             bottomCard.append(bottomCardBody)
             var bottomCardBodyDiv = $('<div style="display:flex;align-items:center"></div>')
@@ -1226,7 +1300,9 @@ function view_project(projectName, projectType) {
             messageInput.bind('input', function() {
                 globalTableProjectInfo['toBeSent'] = stringendecoder.encodeHtml(messageInput.val())
             })
-            var messageSendButton = $('<a class="btn btn-primary btn-circle btn-lg" style="margin-left:10px"><i class="fa fa-paper-plane" style="margin-right:3px"></i></a>')
+            var messageSendButton = $('<a class="btn btn-primary btn-circle btn-lg" style="margin-left:10px"></a>')
+            var messageSendIcon = $('<i class="fa fa-paper-plane" style="margin-right:3px"></i>')
+            messageSendButton.append(messageSendIcon)
             bottomCardBodyDiv.append(messageInput)
             bottomCardBodyDiv.append(messageSendButton)
             messageSendButton.click(function() {
@@ -1234,6 +1310,14 @@ function view_project(projectName, projectType) {
                     publish(stringendecoder.decodeHtml(globalTableProjectInfo.currentTp2), messageInput.val(), true)
                 else
                     showtext(JSLang[lang].topicUnset)
+                messageSendButton.removeClass("btn-primary")
+                messageSendButton.addClass("btn-success")
+                setTimeout(function(){
+                    messageSendButton.addClass("btn-primary")
+                    messageSendButton.removeClass("btn-success") 
+                },200)
+                if($("#sendClear").prop("checked"))
+                    messageInput.val("")
             })
 
             var bottomDiv2 = $("<div class='col-xl-6'></div>")
@@ -1449,7 +1533,6 @@ function add_widget() {
     widget_list.append(input_keyboard_add)
     var output_text_add = $("<div class='widget_div'><div><img src='icons/output_text.svg'><span>" + JSLang[lang].screen + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(output_text_add)
-    widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].decorate + "</h5>"))
     var decorate_text_add = $("<div class='widget_div'><div><img src='icons/decorate_text.svg'><span>" + JSLang[lang].label + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(decorate_text_add)
     var decorate_pic_add = $("<div class='widget_div'><div><img src='icons/decorate_pic.svg'><span>" + JSLang[lang].picture + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")

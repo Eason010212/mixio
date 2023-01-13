@@ -20,7 +20,7 @@ const path = require('path');
 var VERSION = JSON.parse(fs.readFileSync("../version.json", "utf-8"))["version"]
 var configs = fs.readFileSync('./config.json');
 configs = JSON.parse(configs.toString());
-var MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_COUNT"] ? configs["MAX_MESSAGE_COUNT"] : 1000
+const MAX_MESSAGE_PER_USER = 1000
 var minInterval = configs["MIN_PUBLISH_INTERVAL"] ? configs["MIN_PUBLISH_INTERVAL"] : 100
 
 var serverStatus = true
@@ -224,7 +224,6 @@ async function daemon_start() {
         if (newConfig) {
             fs.writeFileSync('./config.json', newConfig)
             configs = JSON.parse(newConfig)
-            MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_COUNT"] ? configs["MAX_MESSAGE_COUNT"] : 1000
             console.log("[INFO] Shutting down MixIO Server...")
             await mixio.stop();
             serverStatus = false;
@@ -294,6 +293,7 @@ async function daemon_start() {
     app.use('/icons', express.static(path.join(__dirname, 'icons')));
 
     app.use('/documentation', express.static(path.join(__dirname, 'documentation')));
+    
     app.listen(18084, function() {
         console.log("[INFO] MixIO Admin server listening on port", 18084)
     })
@@ -416,6 +416,7 @@ var mixioServer = function() {
         server: httpsServer
     }, aedes.handle)
 
+
     aedes.authenticate = function(client, username, password, callback) {
         if (username == "MixIO_public" && password == "MixIO_public") {
             client.user = "MixIO"
@@ -440,15 +441,13 @@ var mixioServer = function() {
             return callback(new Error('wrong topic'))
         else
         {
-            /*
-            if(globalConnectionControl[client.id])
+            /*if(globalConnectionControl[client.id])
             {
                 if(Date.now() - globalConnectionControl[client.id] < minInterval)
                 {
                     return callback(new Error('too fast'))
                 }
-            }
-            */
+            }*/
             callback(null)
         }
     }
@@ -472,8 +471,12 @@ var mixioServer = function() {
     },10000)
 
     aedes.on('publish', function(packet, client) {
+        
         if(client)
+        {
             globalConnectionControl[client.id] = Date.now()
+        }
+            
         var topic = packet.topic.split('/')
         var payload = String(packet.payload)
         if (topic.length == 3) {
@@ -485,7 +488,7 @@ var mixioServer = function() {
             } else if (configs["ALLOW_HOOK"] && reserveJSON[topic[0]] && topic[0] != "$SYS") {
                 var userName = topic[0]
                 var reserveTopic = topic[1] + "/" + topic[2]
-                var hash = 0, i, chr;
+                var hash = 0,i, chr;
                 for (i = 0; i < userName.length; i++) {
                     chr = userName.charCodeAt(i);
                     hash = ((hash << 5) - hash) + chr;
@@ -496,18 +499,17 @@ var mixioServer = function() {
                     if (err) {
                         console.log(err.message)
                     } else {
-                        if (row && row["count(*)"] < MAX_MESSAGE_PER_USER - 1) {
+                        if (row && row["count(*)"] < MAX_MESSAGE_PER_USER) {
                             targetDB.run("insert into 'reserve' (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err) {
                                 if (err) {
                                     console.log(err.message)
                                 }
                             })
-                        } else if (row["count(*)"] >= MAX_MESSAGE_PER_USER - 1) {
+                        } else if (row["count(*)"] >= MAX_MESSAGE_PER_USER) {
                             targetDB.get("select id from 'reserve' where userName = ? order by id asc limit 1", [userName, ], function(err, row) {
                                 if (err) {
                                     console.log(err.message)
                                 } else {
-                                    console.log(row)
                                     if (row && row["id"]) {
                                         targetDB.run("delete from 'reserve' where id = ?", [row["id"], ], function(err) {
                                             if (err) {
@@ -830,7 +832,7 @@ var mixioServer = function() {
     app.get('/getData', function(req, res) {
         if (req.session.userName) {
             var userName = req.session.userName
-            var hash = 0, i, chr;
+            var hash = 0,i, chr;
             for (i = 0; i < userName.length; i++) {
                 chr = userName.charCodeAt(i);
                 hash = ((hash << 5) - hash) + chr;
@@ -2371,9 +2373,51 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
                         ['user-content', user_content]
                     ]
                     var itemdiv = add_block(2, 2, contents, attrs)
+                    var sync_weather = function(){
+                        var dsc_code = title.parent().parent().attr('user-content').split(',')[0].split('w')[0]
+                        if(globalWeather[dsc_code] && globalWeather[dsc_code].time && (new Date().getTime() - globalWeather[dsc_code].time) < 600000) {
+                            var result = globalWeather[dsc_code].data
+                            var resJSON = JSON.parse(result)
+                            weather_type = resJSON.result.now.text
+                            temperature = resJSON.result.now.temp
+                            humidity = resJSON.result.now.rh
+                            wind_dir = resJSON.result.now.wind_dir                                
+                            wind_class = resJSON.result.now.wind_class
+                            district = resJSON.result.location.name
+                            title.parent().parent().attr('user-content', [title.parent().parent().attr('user-content').split(',')[0], district, weather_type, temperature, humidity, wind_dir, wind_class].join(','))
+                            itemdiv.trigger(MixIO.eventTags.WEATHER_SYNCED, [district, weather_type, temperature, humidity, wind_dir, wind_class])
+                        } else {
+                            http.get('http://api.map.baidu.com/weather/v1/?district_id=' + dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
+                                var html = ''
+                                req2.on('data', function(data) {
+                                    html += data;
+                                });
+                                req2.on('end', function() {
+                                    globalWeather[dsc_code] = {
+                                        time: new Date().getTime(),
+                                        data: html
+                                    }
+                                    var result = html
+                                    var resJSON = JSON.parse(result)
+                                    if(resJSON.result && resJSON.result.now)
+                                    {
+                                        weather_type = resJSON.result.now.text
+                                        temperature = resJSON.result.now.temp
+                                        humidity = resJSON.result.now.rh
+                                        wind_dir = resJSON.result.now.wind_dir
+                                        wind_class = resJSON.result.now.wind_class
+                                        district = resJSON.result.location.name
+                                        title.parent().parent().attr('user-content', [title.parent().parent().attr('user-content').split(',')[0], district, weather_type, temperature, humidity, wind_dir, wind_class].join(','))
+                                        itemdiv.trigger(MixIO.eventTags.WEATHER_SYNCED, [district, weather_type, temperature, humidity, wind_dir, wind_class])
+                                    }
+                                });
+                            })
+                        }
+                    }
                     itemdiv.bind(MixIO.actionTags.WEATHER_SYNC, function() {
-
+                        sync_weather()
                     })
+                    sync_weather()
                     itemdiv.bind(MixIO.actionTags.WEATHER_SEND, function() {
                         var weather = {
                             'district': district,
@@ -2383,7 +2427,8 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
                             'wind_dir': wind_dir,
                             'wind_class': wind_class
                         }
-                        publish(topic.text(), JSON.stringify(weather))
+                        MixIO.publish(topic.text(), JSON.stringify(weather))
+                        itemdiv.trigger(MixIO.eventTags.WEATHER_SENT, [district, weather_type, temperature, humidity, wind_dir, wind_class])
                     })
                 },
                 'trigger': function() {
