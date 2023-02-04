@@ -20,8 +20,10 @@ const path = require('path');
 var VERSION = JSON.parse(fs.readFileSync("../version.json", "utf-8"))["version"]
 var configs = fs.readFileSync('./config.json');
 configs = JSON.parse(configs.toString());
-var MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_COUNT"] ? configs["MAX_MESSAGE_COUNT"] : 1000
-var minInterval = configs["MIN_PUBLISH_INTERVAL"] ? configs["MIN_PUBLISH_INTERVAL"] : 100
+
+
+var MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_PER_USER"]
+var MAX_MESSAGE_PER_SECOND = configs["MAX_MESSAGE_PER_SECOND"]
 
 var serverStatus = true
 
@@ -224,7 +226,6 @@ async function daemon_start() {
         if (newConfig) {
             fs.writeFileSync('./config.json', newConfig)
             configs = JSON.parse(newConfig)
-            MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_COUNT"] ? configs["MAX_MESSAGE_COUNT"] : 1000
             console.log("[INFO] Shutting down MixIO Server...")
             await mixio.stop();
             serverStatus = false;
@@ -294,7 +295,6 @@ async function daemon_start() {
     app.use('/icons', express.static(path.join(__dirname, 'icons')));
 
     app.use('/documentation', express.static(path.join(__dirname, 'documentation')));
-    
     app.listen(18084, function() {
         console.log("[INFO] MixIO Admin server listening on port", 18084)
     })
@@ -303,10 +303,14 @@ async function daemon_start() {
 var mixioServer = function() {
     var privateKey = fs.readFileSync(configs['HTTPS_PRIVATE_PEM'], 'utf8');
     var certificate = fs.readFileSync(configs['HTTPS_CRT_FILE'], 'utf8');
+    
     var credentials = {
         key: privateKey,
         cert: certificate
     };
+    if(fs.existsSync("./certs/chain.crt"))
+        credentials['ca'] = fs.readFileSync("./certs/chain.crt", 'utf8')
+
     aedes = aedesmodule()
     const httpServer = http.createServer()
     var tasks = {};
@@ -442,13 +446,19 @@ var mixioServer = function() {
             return callback(new Error('wrong topic'))
         else
         {
-            /*if(globalConnectionControl[client.id])
+            if(globalConnectionControl[client.id])
             {
-                if(Date.now() - globalConnectionControl[client.id] < minInterval)
+                if(Date.now() - globalConnectionControl[client.id][0] > 1000)
                 {
+                    globalConnectionControl[client.id][0] = Date.now()
+                    globalConnectionControl[client.id][1] = 0
+                }
+                else if(globalConnectionControl[client.id][1] > MAX_MESSAGE_PER_SECOND)
+                {
+                    delete globalConnectionControl[client.id]
                     return callback(new Error('too fast'))
                 }
-            }*/
+            }
             callback(null)
         }
     }
@@ -475,7 +485,10 @@ var mixioServer = function() {
         
         if(client)
         {
-            globalConnectionControl[client.id] = Date.now()
+            if(globalConnectionControl[client.id])
+                globalConnectionControl[client.id][1] = globalConnectionControl[client.id][1] + 1
+            else
+                globalConnectionControl[client.id] = [Date.now(),1]
         }
             
         var topic = packet.topic.split('/')
@@ -507,25 +520,26 @@ var mixioServer = function() {
                                 }
                             })
                         } else if (row["count(*)"] >= MAX_MESSAGE_PER_USER) {
-                            targetDB.get("select id from 'reserve' where userName = ? order by id asc limit 1", [userName, ], function(err, row) {
-                                if (err) {
-                                    console.log(err.message)
-                                } else {
-                                    if (row && row["id"]) {
-                                        targetDB.run("delete from 'reserve' where id = ?", [row["id"], ], function(err) {
-                                            if (err) {
-                                                console.log(err.message)
-                                            } else {
-                                                targetDB.run("insert into 'reserve' (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err) {
-                                                    if (err) {
-                                                        console.log(err.message)
-                                                    }
-                                                })
-                                            }
-                                        })
+                                targetDB.get("select id from 'reserve' where userName = ? order by id asc limit 1", [userName, ], function(err, row) {
+                                    if (err) {
+                                        console.log(err.message)
+                                    } else {
+                                        if (row && row["id"]) {
+                                            targetDB.run("delete from 'reserve' where id = ?", [row["id"], ], function(err) {
+                                                if (err) {
+                                                    console.log(err.message)
+                                                }
+                                                else{
+                                                    targetDB.run("insert into 'reserve' (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err) {
+                                                        if (err) {
+                                                            console.log(err.message)
+                                                        }
+                                                    })
+                                                }
+                                            })
+                                        }
                                     }
-                                }
-                            })
+                                })   
                         }
                     }
                 })
@@ -557,11 +571,21 @@ var mixioServer = function() {
     app.set('trust proxy', 1)
 
     app.get('/', function(req, res) {
-        res.sendFile(__dirname + "/" + "ejs/index.html");
+        ejs.renderFile(__dirname + '/ejs/index.ejs', {
+            'main':fs.existsSync(__dirname + "/certs/chain.crt"),
+            'mixly':fs.existsSync(__dirname + "/mixly")
+        }, function(err, data) {
+            res.send(data)
+        })
     })
 
     app.get('/index', function(req, res) {
-        res.sendFile(__dirname + "/" + "ejs/index.html");
+        ejs.renderFile(__dirname + '/ejs/index.ejs', {
+            'main':fs.existsSync(__dirname + "/certs/chain.crt"),
+            'mixly':fs.existsSync(__dirname + "/mixly")
+        }, function(err, data) {
+            res.send(data)
+        })
     })
 
     app.get('/observe', function(req, res) {
@@ -846,7 +870,8 @@ var mixioServer = function() {
                     if (rows) {
                         res.send({
                             "count": rows.length,
-                            "rows": rows
+                            "rows": rows,
+                            "max": configs['MAX_MESSAGE_PER_USER']
                         })
                     }
                 }
@@ -1457,7 +1482,10 @@ var mixioServer = function() {
 
     app.use('/documentation', express.static(path.join(__dirname, 'documentation')));
 
-    app.use('/mixly', express.static(path.join(__dirname, 'mixly')));
+    
+    if(fs.existsSync('./mixly')){
+        app.use('/mixly', express.static(path.join(__dirname, 'mixly')));
+    }
 
     db = new sqlite3.Database(
         './mixio.db',
@@ -1505,14 +1533,19 @@ var mixioServer = function() {
                                     return new Promise(resolve => {
                                         //MQTT
                                         plainServer.close(function() {
+                                            console.log("[INFO] Plain MQTT server closed")
                                             //MQTT Websocket
                                             httpServer.close(function() {
+                                                console.log("[INFO] WebSocket MQTT server closed")
                                                 //MixIO HTTP
                                                 httpServer2.close(function() {
+                                                    console.log("[INFO] MixIO server closed")
                                                     //MQTT WebsocketS
                                                     httpsServer.close(function() {
+                                                        console.log("[INFO] WebSocketS MQTT server closed")
                                                         //MixIO HTTPS
                                                         httpsServer2.close(function() {
+                                                            console.log("[INFO] MixIO server (HTTPS) closed")
                                                             resolve("1")
                                                         })
                                                     })

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>爱上米思齐（MixIO）</title>
+    <link rel="shortcut icon" href="img/shortcut.png"/>
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/nunito.css" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css?v=2" rel="stylesheet">
+    <link rel="stylesheet" href="css/muuri.css?v=2">
+    <link rel="preload" href="fonts/fontawesome-webfont.ttf" as="font" type="font/woff" crossorigin="anonymous">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/lang.js?v=5"></script>
+    <script src="js/lang2.js?v=5"></script>
+    <script src="js/tools.js?v=10"></script>
+    <script src="js/login.js?v=22"></script>
+</head>
+
+<body id="body" class="bg-gradient-light" style="height:100vh">
+    <style>
+        .translate{
+            width:50px;
+            padding: 0;
+            margin-left:5px;
+        }
+    </style>
+    <div style="position:fixed;right:10px;top:10px;display:flex;align-items:center;justify-content:center">
+        <i class="fa fa-globe" style="color:#4e73df;margin-right:5px;font-size:2rem"></i>
+        <button class="translate btn btn-secondary" id="zh">简</button>
+        <button class="translate btn btn-secondary" id="tw">繁</button>
+        <button class="translate btn btn-secondary" id="en">EN</button>
+    </div>
+    <div style="height:calc(100vh - 40px);display:flex;align-items:center;justify-content:center">
+    <div class="container" style="opacity: 0.9;margin-top:20px">
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+
+            <div class="col-xl-10 col-lg-12 col-md-9">
+
+                <div id="cd" class="card o-hidden border-0 shadow-lg my-5" style="margin-top:0!important">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row">
+                            <div class="d-md-none" style="display: flex;width:100%;align-items: center;justify-content: center;margin-top:25px;margin-bottom:-0.5rem">
+                                <img src="img/shortcut.png" style="width:40px" alt="">
+                                <span style="font-size:30px;font-weight:bold;color:#4e73df;margin-left:10px">MixIO</span>
+                            </div>
+                            <div id="lg_img" class="col-lg-6 d-none d-lg-block bg-login-image" style="margin-right:-0.375rem"></div>
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <div style="margin-left:-1rem;margin-right:-1rem;margin-top:-1.5rem;display:flex;margin-bottom:1.5rem;justify-content:center">
+                                            <a class="btn btn-lg btn-primary btn-circle" style="border:solid #d1d3e2 1px;margin-right:.5rem" id="switch1" onclick="mixioLogin()">
+                                                <i class="fa fa-user-o"></i>
+                                            </a>
+                                            <a class="btn btn-lg btn-light btn-circle" style="border:solid #d1d3e2 1px;margin-left:.5rem;margin-right:.5rem" id="switch2" onclick="mixlyLogin()">
+                                                <i class="fa fa-key"></i>
+                                            </a>
+                                            <a class="btn btn-lg btn-light btn-circle" style="border:solid #d1d3e2 1px;margin-left:.5rem" id="switch3" onclick="projLogin()">
+                                                <i class="fa fa-cube"></i>
+                                            </a>
+                                    </div>
+                                    <form class="user" id="form_login" method="post">
+                                        <div class="form-group">
+                                            <input type="email" class="form-control form-control-user lang" key="EMAIL"
+                                                 aria-describedby="emailHelp" name="userName" style="min-width:0;text-align:center;"
+                                                placeholder="请输入电子邮箱地址">
+                                        </div>
+                                        <div class="form-group" id="ref1">
+                                            <input type="password" name="password" class="form-control form-control-user lang" key="PASSWORD" style="min-width:0;text-align:center;"
+                                                 placeholder="请输入密码">
+                                        </div>
+                                        <div style="display:flex;align-items: center;justify-content: center;">
+                                            <button type="submit" class="btn btn-primary btn-icon-split"><span class="icon"><i class="fa fa-arrow-right" style="margin-top:5px;width:1rem;height:1rem"></i></span><span class="text lang" key="LOGIN" style="margin-top:1px">登录MixIO</span></button>
+                                        </div>
+                                        
+                                    </form>
+                                    <form class="user" id="form_login_2" method="post" hidden>
+                                        <div class="form-group">
+                                            <input class="form-control form-control-user lang" key="MIXLYKEY"
+                                                 aria-describedby="emailHelp" name="userName" style="min-width:0;text-align:center;"
+                                                placeholder="请输入Mixly Key">
+                                        </div>
+                                        <div style="display:flex;align-items: center;justify-content: center;">
+                                            <button type="submit" class="btn btn-primary btn-icon-split"><span class="icon"><i class="fa fa-arrow-right" style="margin-top:5px;width:1rem;height:1rem"></i></span><span class="text lang" style="margin-top:1px" key="LOGIN2">登录MixIO</span></button>
+                                        </div>
+                                        
+                                    </form>
+                                    <div class="user" id="form_login_3" hidden>
+                                        <div class="form-group">
+                                            <input class="form-control form-control-user lang" key="VFCODE"
+                                                 aria-describedby="emailHelp" id="vfCode" name="vfCode" style="min-width:0;text-align:center;font-size: .8rem;border-radius: 10rem;padding: 1.5rem 1rem;"
+                                                placeholder="请输入项目授权码">
+                                        </div>
+                                        <div style="display:flex;align-items: center;justify-content: center;">
+                                            <button id="submit3" onclick="guestLogin()" class="btn btn-primary btn-icon-split"><span class="icon"><i class="fa fa-arrow-right" style="margin-top:5px;width:1rem;height:1rem"></i></span><span class="text lang" style="margin-top:1px" key="BROWSE">访问MixIO项目</span></button>
+                                        </div>
+                                        
+                                    </div>
+                                    <hr>
+                                    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:-1.5rem">
+                                        <div class="text-center" style="margin-bottom:10px;padding-left: 5px;padding-right: 5px;" id="reset_text">
+                                            <a class="btn btn-light btn-icon-split" href="forgot"><span class="icon"><i class="fa fa-refresh" style="margin-top:5px;width:1rem;height:1rem"></i></span><span class="text lang" style="margin-top:1px" key="RESET">重置密码</span></a>
+                                        </div>
+                                        <div class="text-center" style="margin-bottom:10px;padding-left: 5px;padding-right: 5px;" id="register_text">
+                                            <a class="btn btn-light btn-icon-split" href="register" ><span class="icon"><i class="fa fa-flag" style="margin-top:5px;width:1rem;height:1rem"></i></span><span class="text lang" style="margin-top:1px" key="SIGNUP">注册账号</span></a>
+                                        </div>
+                                        <div class="text-center" style="margin-bottom:10px;padding-left: 5px;padding-right: 5px;" id="documentation_text">
+                                            <a class="btn btn-light btn-icon-split" href="documentation/"><span class="icon"><i class="fa fa-compass" style="margin-top:5px;width:1rem;height:1rem"></i></span><span class="text lang" style="margin-top:1px" key="GUIDE">入门指南</span></a>
+                                        </div>
+                                        <div class="text-center" style="margin-bottom:10px;padding-left: 5px;padding-right: 5px;" id="android_text">
+                                            <a class="btn btn-light btn-icon-split" href="android"><span class="icon"><i class="fa fa-android" style="margin-top:5px;width:1rem;height:1rem"></i></span><span class="text lang" style="margin-top:1px" key="ANDROID">安卓微端</span></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        
+
+    </div>
+    </div>
+    <footer id="footer" style="height:40px;font-size:0.8rem;text-align:center">
+        <% if (main) { %>
+            <a href="https://beian.miit.gov.cn/">京ICP备13037033号-1</a>&nbsp;
+        <% } %>
+        <% if (mixly) { %>
+            <a href="/mixly">Mixly Lite</a>&nbsp;
+        <% } %>
+        <a href="https://gitee.com/mixly2/mixio" class="lang" key="OPENSRC"></a>&nbsp;
+        <a id="admin" class="lang" key="ADMINDASH"></a>
+        &nbsp;MixIO © Mixly Team
+    </footer>
+    <!-- Bootstrap core JavaScript-->
+</body>
+
+</html>

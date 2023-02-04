@@ -8,9 +8,11 @@ function get_data() {
         $.getJSON('getData', {
 
         }, function(res) {
-            $("#prj_num").html(res['count'] + " / " + MAX_MESSAGE_COUNT)
+            var max = res["max"]
+            $("#prj_num").html(res['count'] + " / " + max)
             $("#prj_num_bar").attr("aria-valuenow", res['count'])
-            $("#prj_num_bar").css("width", (res['count'] * 100 / MAX_MESSAGE_COUNT) + "%")
+            $("#prj_num_bar").attr("aria-valuemax", max)
+            $("#prj_num_bar").css("width", (res['count'] * 100 / max) + "%")
             globalRows = res["rows"]
             init_table(res["rows"])
             sync_chart()
