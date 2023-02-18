@@ -1,6 +1,6 @@
 {
   "MIXIO_HTTP_PORT": 8080,
-  "MIXIO_HTTPS_PORT": 443,
+  "MIXIO_HTTPS_PORT": 8081,
   "HTTPS_PRIVATE_PEM": "./certs/private.pem",
   "HTTPS_CRT_FILE": "./certs/file.crt",
   "MAX_PROJECT_NUM_PER_USER": 20,

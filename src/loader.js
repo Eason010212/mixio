@@ -17,8 +17,16 @@ const { execPath } = require('process');
 var { JSLang, arrLang, lang } = require("./js/lang.js")
 const path = require('path');
 
-var VERSION = JSON.parse(fs.readFileSync("../version.json", "utf-8"))["version"]
-var configs = fs.readFileSync('./config.json');
+var versionPath = "../version.json"
+if(!fs.existsSync(versionPath)){
+    versionPath = path.join(__dirname,"../version.json")
+}
+var VERSION = JSON.parse(fs.readFileSync(versionPath), "utf-8")["version"]
+var configPath = "./config.json"
+if(!fs.existsSync(configPath)){
+    configPath = path.join(__dirname,"./config.json")
+}
+var configs = fs.readFileSync(configPath);
 configs = JSON.parse(configs.toString());
 
 
@@ -224,7 +232,7 @@ async function daemon_start() {
     app.get('/saveAndRestart', async function(req, res) {
         newConfig = req.query.configs
         if (newConfig) {
-            fs.writeFileSync('./config.json', newConfig)
+            fs.writeFileSync(configPath, newConfig)
             configs = JSON.parse(newConfig)
             console.log("[INFO] Shutting down MixIO Server...")
             await mixio.stop();
@@ -301,15 +309,25 @@ async function daemon_start() {
 }
 
 var mixioServer = function() {
-    var privateKey = fs.readFileSync(configs['HTTPS_PRIVATE_PEM'], 'utf8');
-    var certificate = fs.readFileSync(configs['HTTPS_CRT_FILE'], 'utf8');
+    var keyPath = "./certs/private.pem"
+    if(!fs.existsSync(keyPath))
+        keyPath = path.join(__dirname,"./certs/private.pem")
+    var crtPath = "./certs/file.crt"
+    if(!fs.existsSync(crtPath))
+        crtPath = path.join(__dirname,"./certs/file.crt")
+    var privateKey = fs.readFileSync(keyPath, 'utf8');
+    var certificate = fs.readFileSync(crtPath, 'utf8');
     
     var credentials = {
         key: privateKey,
         cert: certificate
     };
-    if(fs.existsSync("./certs/chain.crt"))
-        credentials['ca'] = fs.readFileSync("./certs/chain.crt", 'utf8')
+
+    var chainPath = "./certs/chain.crt"
+    if(!fs.existsSync(chainPath))
+        chainPath = path.join(__dirname,"./certs/chain.crt")
+    if(fs.existsSync(chainPath))
+        credentials['ca'] = fs.readFileSync(chainPath, 'utf8')
 
     aedes = aedesmodule()
     const httpServer = http.createServer()
@@ -1415,10 +1433,13 @@ var mixioServer = function() {
         }
     })
 
+    var filterPath = "./reserve/filter.json"
+    if(!fs.existsSync(filterPath)) 
+        filterPath = path.join(__dirname,'./reserve/filter.json')
     app.get('/startHook', function(req, res) {
         if (req.session.userName) {
             reserveJSON[req.session.userName] = true
-            fs.writeFileSync('./reserve/filter.json', JSON.stringify(reserveJSON, false, 4))
+            fs.writeFileSync(filterPath, JSON.stringify(reserveJSON, false, 4))
             res.send('1')
         } else {
             res.send('0')
@@ -1428,7 +1449,7 @@ var mixioServer = function() {
     app.get('/stopHook', function(req, res) {
         if (req.session.userName) {
             reserveJSON[req.session.userName] = false
-            fs.writeFileSync('./reserve/filter.json', JSON.stringify(reserveJSON, false, 4))
+            fs.writeFileSync(filterPath, JSON.stringify(reserveJSON, false, 4))
             res.send('1')
         } else {
             res.send('0')
@@ -1482,13 +1503,20 @@ var mixioServer = function() {
 
     app.use('/documentation', express.static(path.join(__dirname, 'documentation')));
 
-    
-    if(fs.existsSync('./mixly')){
-        app.use('/mixly', express.static(path.join(__dirname, 'mixly')));
+    var mixlyPath = "./mixly"
+    if(!fs.existsSync(mixlyPath)) {
+        mixlyPath = path.join(__dirname,'./mixly')
+    }
+    if(fs.existsSync(mixlyPath)){
+        app.use('/mixly', express.static(mixlyPath));
     }
 
+    var dbPath = "./mixio.db"
+    if(!fs.existsSync(dbPath)) {
+        dbPath = path.join(__dirname,'./mixio.db')
+    }
     db = new sqlite3.Database(
-        './mixio.db',
+        dbPath,
         sqlite3.OPEN_READWRITE,
         function(err) {
             if (err) {
@@ -1501,9 +1529,13 @@ var mixioServer = function() {
 
     reserveDBs = []
     for (var i = 1; i <= 8; i = i + 1) {
+        var dbPath = "./reserve/" + i + ".db"
+        if(!fs.existsSync(dbPath)) {
+            dbPath = path.join(__dirname,'./reserve/' + i + ".db")
+        }
         reserveDBs.push(
             new sqlite3.Database(
-                './reserve/' + i + ".db",
+                dbPath,
                 sqlite3.OPEN_READWRITE,
                 function(err) {
                     if (err)
@@ -1512,8 +1544,7 @@ var mixioServer = function() {
             )
         )
     }
-
-    var reserveJSON = JSON.parse(fs.readFileSync('./reserve/filter.json'), "utf8")
+    var reserveJSON = JSON.parse(fs.readFileSync(filterPath), "utf8")
 
 
     return new Promise(resolve => {
