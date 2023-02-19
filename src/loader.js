@@ -1387,7 +1387,10 @@ var mixioServer = function() {
 
     app.get('/time.php', function(req, res) {
         var date = new Date()
-        res.send([date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), date.getDay()].join(','))
+        var day = date.getDay() - 1
+        if (day < 0)
+            day = 6
+        res.send([date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), day].join(','))
     })
 
     app.get('/mixio-php/sharekey.php', function(req, res) {
