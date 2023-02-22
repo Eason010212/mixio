@@ -220,6 +220,40 @@ async function daemon_start() {
             res.send('-1')
     })
 
+    app.get('/clearProject', function(req, res){
+        if(req.session.admin){
+            var userName = req.query.userName
+            if(userName){
+                db.run("delete from `project` where userName=?", [userName, ], function(err){
+                    if(err){
+                        console.log(err.message)
+                        res.send('-1')
+                    }else{
+                        res.send('1')
+                    }
+                })
+            }else
+                res.send('-1')
+        }
+    })
+
+    app.get('/clearUser', function(req, res){
+        if(req.session.admin){
+            var userName = req.query.userName
+            if(userName){
+                db.run("delete from `user` where username=?", [userName, ], function(err){
+                    if(err){
+                        console.log(err.message)
+                        res.send('-1')
+                    }else{
+                        res.send('1')
+                    }
+                })
+            }else
+                res.send('-1')
+        }
+    })
+
     app.post('/adminLogin', function(req, res) {
         if (req.body.userName == (configs["ADMIN_USERNAME"] ? configs["ADMIN_USERNAME"] : "admin") && req.body.password == (configs["ADMIN_PASSWORD"] ? configs["ADMIN_PASSWORD"] : "public")) {
             req.session.admin = true
