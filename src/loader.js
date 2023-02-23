@@ -663,11 +663,33 @@ var mixioServer = function() {
                 if (err)
                     console.log(err)
                 else
+                {
+                    for(i in rows){
+                        console.log(rows[i])
+                        var tmp = new Date(new Date(rows[i]['timeStamp']).getTime() + 28800000)
+                        rows[i]['timeStamp'] = ""+tmp.getFullYear()+"-"
+                        if(tmp.getMonth()<9)
+                            rows[i]['timeStamp'] += "0"
+                        rows[i]['timeStamp'] += (tmp.getMonth()+1)+"-"
+                        if(tmp.getDate()<10)
+                            rows[i]['timeStamp'] += "0"
+                        rows[i]['timeStamp'] += tmp.getDate()+" "
+                        if(tmp.getHours()<10)
+                            rows[i]['timeStamp'] += "0"
+                        rows[i]['timeStamp'] += tmp.getHours()+":"
+                        if(tmp.getMinutes()<10)
+                            rows[i]['timeStamp'] += "0"
+                        rows[i]['timeStamp'] += tmp.getMinutes()+":"
+                        if(tmp.getSeconds()<10)
+                            rows[i]['timeStamp'] += "0"
+                        rows[i]['timeStamp'] += tmp.getSeconds()
+                    }
                     ejs.renderFile(__dirname + '/ejs/apps.ejs', {
                         'rows': rows
                     }, function(err, data) {
                         res.send(data)
                     })
+                }
             })
 
         } else
