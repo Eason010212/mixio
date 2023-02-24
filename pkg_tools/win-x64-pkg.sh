@@ -21,7 +21,7 @@ pkg -t node16-win-x64 package.json
 mv -f loader ../../mixio_win_x64/src/loader
 cp -r certs ../../mixio_win_x64/src
 cp config.json ../../mixio_win_x64/src/config.json
-cd pkg_tools
+cd ../pkg_tools
 cp mixio.empty.db ../../mixio_win_x64/src/mixio.db
 cp -r reserve ../../mixio_win_x64/src
 cd ../
