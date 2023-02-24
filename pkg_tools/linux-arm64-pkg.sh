@@ -11,8 +11,8 @@ echo "${version}" > version.json
 mkdir src
 mkdir logs
 cd ../
-chmod -R 777 mixio_server_latest
-cd mixio_server_latest
+chmod -R 777 mixio
+cd mixio
 cd node_modules/cliff/node_modules/linuxston/lib/linuxston
 find -name 'common.js' | xargs perl -pi -e 's|target.padLevels|false|g'
 cd ../../../../../../
