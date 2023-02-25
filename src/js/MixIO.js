@@ -4,22 +4,8 @@
  * @Version 2.9.5
  */
 
-curlong = undefined
-curlati = undefined
-
-if(!OFFLINE_MODE)
-{
-    $(function(){
-        $.ajax('//api.map.baidu.com/location/ip?ip='+returnCitySN.cip+'&ak='+BAIDU_MAP_AK+'&coor=bd09ll',
-        {
-            dataType: "jsonp", //指定服务器返回的数据类型
-            success: function (res) {
-            curlong = res.content.point.x
-            curlati = res.content.point.y
-            }
-        })
-    })
-}
+curlong = 0
+curlati = 0
 
 function MixIOLogicError(message){
     this.message = message

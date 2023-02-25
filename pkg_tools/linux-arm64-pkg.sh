@@ -13,7 +13,7 @@ mkdir logs
 cd ../
 chmod -R 777 mixio
 cd mixio
-cd node_modules/cliff/node_modules/linuxston/lib/linuxston
+cd node_modules/cliff/node_modules/winston/lib/winston
 find -name 'common.js' | xargs perl -pi -e 's|target.padLevels|false|g'
 cd ../../../../../../
 cd src
@@ -29,3 +29,4 @@ pkg -t node16-linux-arm64 package.json
 mv -f mixio ../mixio_linux_arm64/mixio
 cd ../
 chmod -R 777 mixio_linux_arm64
+tar -pzcvf mixio_linux_arm64.tar.gz mixio_linux_arm64

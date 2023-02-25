@@ -2838,6 +2838,13 @@ function add_project() {
     content.append($("<p style='text-align:center;font-size:1.5rem;margin-bottom:15px'>" + JSLang[lang].createPrj + "</p>"))
     var form = $("<form method='post' style='margin:0'>");
     content.append(form)
+    // replace enter key trigger of form
+    form.keypress(function(e) {
+        if (e.which == 13) {
+            e.preventDefault();
+            submitBt.click()
+        }
+    })
     var formDiv = $("<div class='col-xs-9'/>")
     form.append(formDiv)
     var formGrp = $("<div class='form-group'>")
