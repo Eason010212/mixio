@@ -1,19 +1,10 @@
 const forever = require("forever")
 const args = process.argv.slice(2)
-const fs = require("fs")    
-const path = require("path")
-var versionPath = "version.json"
-var configPath = "src/config.json"
-if(!fs.existsSync(versionPath))
-{
-    versionPath = path.join(__dirname,versionPath)
-}
-if(!fs.existsSync(configPath))
-{
-    configPath = path.join(__dirname,configPath)
-}
-var versionInfo = fs.readFileSync(versionPath, "utf-8")
-var configInfo = fs.readFileSync(configPath, "utf-8")
+const fs = require("fs")
+//get parameters
+console.log(process.argv)
+var versionInfo = fs.readFileSync("version.json", "utf-8")
+var configInfo = fs.readFileSync("src/config.json", "utf-8")
 var http = require("http")
 var os = require("os")
 var {spawnSync} = require("child_process")
