@@ -1,8 +1,8 @@
 const forever = require("forever")
 const args = process.argv.slice(2)
 const fs = require("fs")
-//get parameters
-console.log(process.argv)
+var arg0 = process.argv[0]
+process.chdir(arg0)
 var versionInfo = fs.readFileSync("version.json", "utf-8")
 var configInfo = fs.readFileSync("src/config.json", "utf-8")
 var http = require("http")
