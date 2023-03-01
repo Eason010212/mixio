@@ -1,7 +1,7 @@
 const forever = require("forever")
 const args = process.argv.slice(2)
 const fs = require("fs")    
-
+const path = require("path")
 var versionPath = "version.json"
 var configPath = "src/config.json"
 if(!fs.existsSync(versionPath))
