@@ -29,6 +29,15 @@ if(!fs.existsSync(configPath)){
 var configs = fs.readFileSync(configPath);
 configs = JSON.parse(configs.toString());
 
+var STORAGE_ENGINE = configs["STORAGE_ENGINE"]
+
+
+var mysql = require('mysql8');
+var MYSQL_HOST = configs["MYSQL_HOST"]
+var MYSQL_USER = configs["MYSQL_USER"]
+var MYSQL_PASS = configs["MYSQL_PASS"]
+var MYSQL_DB = configs["MYSQL_DB"]
+var MYSQL_PORT = configs["MYSQL_PORT"]
 
 var MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_PER_USER"]
 var MAX_MESSAGE_PER_SECOND = configs["MAX_MESSAGE_PER_SECOND"]
@@ -547,7 +556,10 @@ var mixioServer = function() {
         var payload = String(packet.payload)
         if (topic.length == 3) {
             if (topic[2] == 'b640a0ce465fa2a4150c36b305c1c11b') {
-                db.run("insert or ignore into devices (userName, clientid) values (?,?)", [topic[0], payload])
+                if(STORAGE_ENGINE == "sqlite")
+                    db.run("insert or ignore into devices (userName, clientid) values (?,?)", [topic[0], payload])
+                else if(STORAGE_ENGINE == "mysql")
+                    db.run("insert ignore into devices (userName, clientid) values (?,?)", [topic[0], payload])
             } else if (topic[2] == '9d634e1a156dc0c1611eb4c3cff57276') {
                 db.run("delete from devices where userName = ? and clientid = ?", [topic[0], payload])
                 delete globalConnectionControl[client.id]
@@ -1569,22 +1581,89 @@ var mixioServer = function() {
     if(fs.existsSync(mixlyPath)){
         app.use('/mixly', express.static(mixlyPath));
     }
-
-    var dbPath = "./mixio.db"
-    if(!fs.existsSync(dbPath)) {
-        dbPath = path.join(__dirname,'./mixio.db')
+    
+    if(STORAGE_ENGINE == 'sqlite'){
+        var dbPath = "./mixio.db"
+        if(!fs.existsSync(dbPath)) {
+            dbPath = path.join(__dirname,'./mixio.db')
+        }
+        db = new sqlite3.Database(
+            dbPath,
+            sqlite3.OPEN_READWRITE,
+            function(err) {
+                if (err) {
+                    console.log(err.message)
+                }
+                db.run('delete from devices')
+                console.log('[INFO] Storage Engine: SQLite')
+                console.log('[INFO] Database Connected!')
+            }
+        )
     }
-    db = new sqlite3.Database(
-        dbPath,
-        sqlite3.OPEN_READWRITE,
-        function(err) {
+    else if(STORAGE_ENGINE == 'mysql'){
+        db = mysql.createConnection({
+            host: MYSQL_HOST,
+            port: MYSQL_PORT,
+            user: MYSQL_USER,
+            password: MYSQL_PASS
+        })
+        
+        db.get = function(sql, params, callback) {
+            db.query(sql, params, function(err, rows) {
+                if (err) {
+                    callback(err, null)
+                } else {
+                    callback(null, rows[0])
+                }
+            })
+        }
+        db.run = function(sql, params, callback) {
+            db.query(sql, params, function(err, result) {
+                if(err)
+                {
+                    if(callback)
+                    {
+                        callback(err)
+                    }
+                }
+                else if(callback)
+                    callback()
+            })
+        }
+        db.all = function(sql, params, callback) {
+            db.query(sql, params, function(err, rows) {
+                if (err) {
+                    callback(err, null)
+                } else {
+                    callback(null, rows)
+                }
+            })
+        }
+        // create database if not exists
+        db.query('create database if not exists ' + MYSQL_DB, function(err) {
             if (err) {
                 console.log(err.message)
             }
-            db.run('delete from devices')
-            console.log('[INFO] Database Connected!')
-        }
-    )
+            db.query('use ' + MYSQL_DB, function(err) {
+                if (err) {
+                    console.log(err.message)
+                }
+                init_mysql(function(status,reason){
+                    if(status == "error")
+                        console.log(reason)
+                    else if(status == "success")
+                    {
+                        console.log("[INFO] Database Initialized!")
+                        
+                        db.query('delete from devices')
+                        console.log('[INFO] Storage Engine: MySQL (' + MYSQL_HOST + ')')
+                        console.log('[INFO] Database Connected!')
+                    }
+                })
+            })
+        })
+        
+    }
 
     reserveDBs = []
     for (var i = 1; i <= 8; i = i + 1) {
@@ -1652,6 +1731,83 @@ var mixioServer = function() {
         })
     })
 
+}
+
+function init_mysql(cb){
+    db.query(`CREATE TABLE IF NOT EXISTS devices (
+        userName	VARCHAR(255),
+        clientid	VARCHAR(255),
+        timestamp	timestamp DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY(clientid)
+    )`, function(err, result) {
+        if (err) {
+            cb("error", err)
+        }
+        else {
+            db.query(`CREATE TABLE IF NOT EXISTS project (
+                projectName	VARCHAR(255),
+                userName	VARCHAR(255),
+                projectLayout	MEDIUMTEXT,
+                dataStorage	MEDIUMTEXT,
+                logicStorage	MEDIUMTEXT,
+                timestamp	timestamp DEFAULT CURRENT_TIMESTAMP,
+                projectType	INTEGER
+            )`, function(err, result) {
+                if (err) {
+                    cb("error", err)
+                }
+                else {
+                    db.query(`CREATE TABLE IF NOT EXISTS share (
+                        shareid VARCHAR(255),
+                        userName	VARCHAR(255),
+                        projectName	VARCHAR(255),
+                        projectLayout	MEDIUMTEXT,
+                        dataStorage	MEDIUMTEXT,
+                        logicStorage	MEDIUMTEXT,
+                        timeStamp timestamp DEFAULT CURRENT_TIMESTAMP,
+                        status	INTEGER DEFAULT 1,
+                        shareCount	INTEGER DEFAULT 0
+                    )`, function(err, result) {
+                        if (err) {
+                            cb("error", err)
+                        }
+                        else {
+                            db.query(`CREATE TABLE IF NOT EXISTS share_key (
+                                userName	VARCHAR(255),
+                                projectPass	VARCHAR(255),
+                                projectName	VARCHAR(255),
+                                share_key	VARCHAR(255)
+                            )`, function(err, result) {
+                                if (err) {
+                                    cb("error", err)
+                                }
+                                else {
+                                    db.query(`CREATE TABLE IF NOT EXISTS user (
+                                        id	INTEGER AUTO_INCREMENT,
+                                        username	VARCHAR(255),
+                                        password	VARCHAR(255),
+                                        salt	VARCHAR(255),
+                                        is_superuser	INTEGER DEFAULT 0,
+                                        verified	INTEGER DEFAULT 1,
+                                        question	VARCHAR(255),
+                                        answer	VARCHAR(255),
+                                        PRIMARY KEY(id)
+                                    )`, function(err, result) {
+                                        if(err){
+                                            cb("error", err)
+                                        }
+                                        else{
+                                            cb("success", null)
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
+    })
 }
 
 daemon_start()

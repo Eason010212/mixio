@@ -12,5 +12,11 @@
   "BAIDU_MAP_AK": "",
   "BAIDU_MAP_SERVER_AK": "",
   "ADMIN_USERNAME":"admin",
-  "ADMIN_PASSWORD":"public"
+  "ADMIN_PASSWORD":"public",
+  "STORAGE_ENGINE":"sqlite",
+  "MYSQL_HOST":"localhost",
+  "MYSQL_PORT":3306,
+  "MYSQL_USER":"",
+  "MYSQL_PASS":"",
+  "MYSQL_DB":"mixio"
 }
