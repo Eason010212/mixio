@@ -573,28 +573,28 @@ var mixioServer = function() {
                     hash |= 0;
                 }
                 var targetDB = reserveDBs[Math.abs(hash) % 8]
-                targetDB.get("select count(*) from 'reserve' where userName = ?", [userName, ], function(err, row) {
+                targetDB.get("select count(*) from `reserve` where userName = ?", [userName, ], function(err, row) {
                     if (err) {
                         console.log(err.message)
                     } else {
                         if (row && row["count(*)"] < MAX_MESSAGE_PER_USER) {
-                            targetDB.run("insert into 'reserve' (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err) {
+                            targetDB.run("insert into `reserve` (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err) {
                                 if (err) {
                                     console.log(err.message)
                                 }
                             })
                         } else if (row["count(*)"] >= MAX_MESSAGE_PER_USER) {
-                                targetDB.get("select id from 'reserve' where userName = ? order by id asc limit 1", [userName, ], function(err, row) {
+                                targetDB.get("select id from `reserve` where userName = ? order by id asc limit 1", [userName, ], function(err, row) {
                                     if (err) {
                                         console.log(err.message)
                                     } else {
                                         if (row && row["id"]) {
-                                            targetDB.run("delete from 'reserve' where id = ?", [row["id"], ], function(err) {
+                                            targetDB.run("delete from `reserve` where id = ?", [row["id"], ], function(err) {
                                                 if (err) {
                                                     console.log(err.message)
                                                 }
                                                 else{
-                                                    targetDB.run("insert into 'reserve' (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err) {
+                                                    targetDB.run("insert into `reserve` (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err) {
                                                         if (err) {
                                                             console.log(err.message)
                                                         }
@@ -1599,6 +1599,23 @@ var mixioServer = function() {
                 console.log('[INFO] Database Connected!')
             }
         )
+        reserveDBs = []
+        for (var i = 1; i <= 8; i = i + 1) {
+            var dbPath = "./reserve/" + i + ".db"
+            if(!fs.existsSync(dbPath)) {
+                dbPath = path.join(__dirname,'./reserve/' + i + ".db")
+            }
+            reserveDBs.push(
+                new sqlite3.Database(
+                    dbPath,
+                    sqlite3.OPEN_READWRITE,
+                    function(err) {
+                        if (err)
+                            console.log(err.message)
+                    }
+                )
+            )
+        }
     }
     else if(STORAGE_ENGINE == 'mysql'){
         db = mysql.createConnection({
@@ -1607,7 +1624,6 @@ var mixioServer = function() {
             user: MYSQL_USER,
             password: MYSQL_PASS
         })
-        
         db.get = function(sql, params, callback) {
             db.query(sql, params, function(err, rows) {
                 if (err) {
@@ -1654,7 +1670,6 @@ var mixioServer = function() {
                     else if(status == "success")
                     {
                         console.log("[INFO] Database Initialized!")
-                        
                         db.query('delete from devices')
                         console.log('[INFO] Storage Engine: MySQL (' + MYSQL_HOST + ')')
                         console.log('[INFO] Database Connected!')
@@ -1662,26 +1677,10 @@ var mixioServer = function() {
                 })
             })
         })
-        
+        reserveDBs = [db, db, db, db, db, db, db, db]
     }
 
-    reserveDBs = []
-    for (var i = 1; i <= 8; i = i + 1) {
-        var dbPath = "./reserve/" + i + ".db"
-        if(!fs.existsSync(dbPath)) {
-            dbPath = path.join(__dirname,'./reserve/' + i + ".db")
-        }
-        reserveDBs.push(
-            new sqlite3.Database(
-                dbPath,
-                sqlite3.OPEN_READWRITE,
-                function(err) {
-                    if (err)
-                        console.log(err.message)
-                }
-            )
-        )
-    }
+    
     var reserveJSON = JSON.parse(fs.readFileSync(filterPath), "utf8")
 
 
@@ -1797,7 +1796,21 @@ function init_mysql(cb){
                                             cb("error", err)
                                         }
                                         else{
-                                            cb("success", null)
+                                            db.query(`CREATE TABLE IF NOT EXISTS reserve (
+                                                id	INTEGER AUTO_INCREMENT,
+                                                userName	VARCHAR(255),
+                                                topic	VARCHAR(255),
+                                                message	VARCHAR(1023),
+                                                time timestamp DEFAULT CURRENT_TIMESTAMP,
+                                                PRIMARY KEY(id)
+                                            )`,function(err, result) {
+                                                if(err){
+                                                    cb("error", err)
+                                                }
+                                                else{
+                                                    cb("success", null)
+                                                }
+                                            })
                                         }
                                     })
                                 }
