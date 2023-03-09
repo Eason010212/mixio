@@ -1313,6 +1313,18 @@ var mixioServer = function() {
             res.redirect('/')
     })
 
+    app.post('/updateShareContent', function(req, res) {
+        if (req.session.userName && req.body.shareid && req.body.projectName && req.body.projectLayout && req.body.dataStorage && req.body.logicStorage) {
+            db.run("update `share` set projectLayout=?, dataStorage=?, logicStorage=?, projectName=? where shareid=? and userName=?", [req.body.projectLayout, req.body.dataStorage, req.body.logicStorage, req.body.projectName, req.body.shareid, req.session.userName], function(err) {
+                if (err)
+                    console.log(err)
+                else
+                    res.send('1')
+            })
+        } else
+            res.redirect('/')
+    })
+
     app.get('/addShareKey', function(req, res) {
         var rString = randomString(6, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
         if (req.session.userName && req.query.projectName && req.query.projectPass) {

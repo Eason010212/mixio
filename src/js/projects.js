@@ -2692,10 +2692,30 @@ function save_layout(exit) {
     var logic_JSON = JSON.stringify(globalLogicInfo)
     $.post('saveProject', { 'layout': layout_JSON, 'dataStorage': data_JSON, 'logicStorage': logic_JSON, 'projectName': globalProjectName, 'projectType': globalProjectType }, function(res) {
         if (res == 1) {
-            $("#top_right_icon_3").attr('class', 'fa fa-save')
-            showtext(JSLang[lang].saveSuccess)
-            if (exit)
-                window.location.href = 'logout'
+            if(typeof globalShareKey != 'undefined')
+            {
+                $.post('updateShareContent', { 'shareid':globalShareKey, 'projectName': globalProjectName, 'projectLayout':layout_JSON, 'dataStorage': data_JSON, 'logicStorage': logic_JSON }, function(res) {
+                    if(res == 1)
+                    {
+                        $("#top_right_icon_3").attr('class', 'fa fa-save')
+                        showtext(JSLang[lang].saveSuccess)
+                        if (exit)
+                            window.location.href = 'logout'
+                    }
+                    else
+                    {
+                        $("#top_right_icon_3").attr('class', 'fa fa-save')
+                        showtext(JSLang[lang].saveFail + res)
+                    }
+                })
+            }
+            else
+            {
+                $("#top_right_icon_3").attr('class', 'fa fa-save')
+                showtext(JSLang[lang].saveSuccess)
+                if (exit)
+                    window.location.href = 'logout'
+            }
         } else {
             $("#top_right_icon_3").attr('class', 'fa fa-save')
             showtext(JSLang[lang].saveFail + res)
