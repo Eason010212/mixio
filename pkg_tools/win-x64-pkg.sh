@@ -5,6 +5,10 @@ version="{
     \"platform\":\"win-x64\",
     \"node-version\":\"16\"
 }"
+gitignore="config
+logs
+storage
+"
 cd ../../
 rm -rf mixio_win_x64
 mkdir mixio_win_x64
@@ -12,6 +16,7 @@ cd mixio_win_x64
 git init
 git remote add origin https://gitee.com/mixly2/mixio_win_x64.git
 echo "${version}" > version.json
+echo "${gitignore}" > .gitignore
 mkdir logs
 mkdir storage
 mkdir config

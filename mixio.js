@@ -1938,6 +1938,37 @@ if (args.length != 1) {
             }
         }
     }
+    else if (args[0] == "version")
+    {
+        console.log(fs.readFileSync("version.json", "utf8"))
+    }
+    else if (args[0] == "update")
+    {
+        // use git
+        console.log("Updating MixIO server...")
+        exec('git pull', function(err, stdout, stderr) {
+            if (err) {
+                console.log(err)
+            }
+            else
+            {
+                console.log("Update finished.")
+            }
+        })
+    }
+    else if (args[0] == "help")
+    {
+        console.log("MixIO server help:")
+        console.log("mixio start: start MixIO server in background.")
+        console.log("mixio stop: stop MixIO server.")
+        console.log("mixio debug: start MixIO server in foreground.")
+        console.log("mixio version: show MixIO server version.")
+        console.log("mixio update: update MixIO server.")
+    }
+    else
+    {
+        console.log("Invalid parameter(s). Use \"mixio help\" for help.")
+    }
 }
 
 
