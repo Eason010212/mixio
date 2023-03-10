@@ -5,9 +5,9 @@ version="{
     \"platform\":\"win-x64\",
     \"node-version\":\"16\"
 }"
-gitignore="config
-logs
-storage
+gitignore="config/*
+logs/*
+storage/*
 "
 cd ../../
 rm -rf mixio_win_x64
