@@ -10,7 +10,7 @@
 7. 运行autoStart.bat添加开机自启动
 8. 运行removeAutoStart.bat取消开机自启动
 ## Linux-arm64发行版
-1. 下载https://gitee.com/bnu_mixly/mixio-linux-arm64-dist.git
+1. 下载https://gitee.com/bnu_mixly/mixio-linux-arm64-dist
 2. cd mixio_linux_x64 
 3. ./mixio start 启动服务器（默认在8080端口）
 4. ./mixio stop 关闭服务器
