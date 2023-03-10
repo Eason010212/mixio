@@ -1909,7 +1909,7 @@ if (args.length != 1) {
             else
             {
                 console.log("Shutting down MixIO server...")
-                exec('killall node', function(err, stdout, stderr) {
+                exec('pkill node', function(err, stdout, stderr) {
                     if (err) {
                         console.log(err)
                     }
@@ -1930,7 +1930,7 @@ if (args.length != 1) {
             else
             {
                 console.log("Shutting down MixIO server...")
-                exec('killall mixio', function(err, stdout, stderr) {
+                exec('pkill mixio', function(err, stdout, stderr) {
                     if (err) {
                         console.log(err)
                     }
