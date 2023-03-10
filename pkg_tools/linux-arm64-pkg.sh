@@ -1,36 +1,36 @@
 curpath=$(cd "$(dirname "$0")"; pwd)
 cd ${curpath}
 version="{
-    \"version\":\"1.9.6\",
+    \"version\":\"1.10.0\",
     \"platform\":\"linux-arm64\",
     \"node-version\":\"16\"
 }"
+gitignore="config
+logs
+storage
+"
 cd ../../
 rm -rf mixio_linux_arm64
 mkdir mixio_linux_arm64
 cd mixio_linux_arm64
+git init
+git remote add origin https://gitee.com/mixly2/mixio_linux_arm64.git
 echo "${version}" > version.json
-mkdir src
+echo "${gitignore}" > .gitignore
 mkdir logs
+mkdir storage
+mkdir config
 cd ../
 chmod -R 777 mixio
 cd mixio
 npm install
-cd node_modules/cliff/node_modules/winston/lib/winston
-find -name 'common.js' | xargs perl -pi -e 's|target.padLevels|false|g'
-cd ../../../../../../
-cd src
-npm install
 pkg -t node16-linux-arm64 package.json
-mv -f loader ../../mixio_linux_arm64/src/loader
-cp -r certs ../../mixio_linux_arm64/src
-cp config.json ../../mixio_linux_arm64/src/config.json
-cd ../pkg_tools
-cp mixio.empty.db ../../mixio_linux_arm64/src/mixio.db
-cp -r reserve ../../mixio_linux_arm64/src
-cd ../
-pkg -t node16-linux-arm64 package.json
-mv -f mixio ../mixio_linux_arm64/mixio
-cd ../
+mv -f mixio ../mixio_linux_arm64/
+cp -r config ../mixio_linux_arm64/
+cd pkg_tools
+cp linux/install.sh ../../mixio_linux_arm64/
+cp mixio.empty.db ../../mixio_linux_arm64/storage/mixio.db
+cp -r reserve ../../mixio_linux_arm64/storage/
+cd ../../
 chmod -R 777 mixio_linux_arm64
 tar -pzcvf mixio_linux_arm64.tar.gz mixio_linux_arm64
