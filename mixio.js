@@ -8,7 +8,7 @@ if (process.argv[0].indexOf("node") != -1) {
         process.chdir(process.argv[0].replace("mixio.exe",""))
     }
     if(process.platform == "linux") {
-        process.chdir(process.argv[0].replace("mixio",""))
+        process.chdir(process.argv[0].slice(0,process.argv[0].lastIndexOf("/")) + "/")
     }
 }
 var spawnTime = new Date()
