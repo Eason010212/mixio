@@ -14,7 +14,7 @@ rm -rf mixio_linux_arm64
 mkdir mixio_linux_arm64
 cd mixio_linux_arm64
 git init
-git remote add origin https://gitee.com/mixly2/mixio_linux_arm64.git
+git remote add origin https://gitee.com/bnu_mixly/mixio-linux-arm64-dist.git
 echo "${version}" > version.json
 echo "${gitignore}" > .gitignore
 mkdir logs
