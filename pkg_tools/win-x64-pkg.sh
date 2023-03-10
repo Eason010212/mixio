@@ -9,6 +9,8 @@ cd ../../
 rm -rf mixio_win_x64
 mkdir mixio_win_x64
 cd mixio_win_x64
+git init
+git remote add origin https://gitee.com/mixly2/mixio_win_x64.git
 echo "${version}" > version.json
 mkdir logs
 mkdir storage
