@@ -567,7 +567,8 @@ var mixioServer = function() {
                     db.run("insert ignore into devices (userName, clientid) values (?,?)", [topic[0], payload])
             } else if (topic[2] == '9d634e1a156dc0c1611eb4c3cff57276') {
                 db.run("delete from devices where userName = ? and clientid = ?", [topic[0], payload])
-                delete globalConnectionControl[client.id]
+                if(client)
+                    delete globalConnectionControl[client.id]
             } else if (configs["ALLOW_HOOK"] && reserveJSON[topic[0]] && topic[0] != "$SYS") {
                 var userName = topic[0]
                 var reserveTopic = topic[1] + "/" + topic[2]
@@ -682,7 +683,6 @@ var mixioServer = function() {
                 else
                 {
                     for(i in rows){
-                        console.log(rows[i])
                         var tmp = new Date(new Date(rows[i]['timeStamp']).getTime() + 28800000)
                         rows[i]['timeStamp'] = ""+tmp.getFullYear()+"-"
                         if(tmp.getMonth()<9)
