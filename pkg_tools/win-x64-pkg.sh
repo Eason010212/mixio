@@ -13,8 +13,6 @@ cd ../../
 rm -rf mixio_win_x64
 mkdir mixio_win_x64
 cd mixio_win_x64
-git init
-git remote add origin https://gitee.com/bnu_mixly/mixio-win32-x86-dist.git
 echo "${version}" > version.json
 echo "${gitignore}" > .gitignore
 mkdir logs
