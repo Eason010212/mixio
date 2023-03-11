@@ -1,3 +1,5 @@
+var VERSION = "1.10.0"
+
 // change pwd to src
 if (process.argv[0].indexOf("node") != -1) {
     // exec from source
@@ -16,7 +18,7 @@ var logFileName = "logs/" + [
     [spawnTime.getFullYear(), spawnTime.getMonth() + 1, spawnTime.getDate()].join("-"), [spawnTime.getHours() >= 10 ? spawnTime.getHours() : ("0" + spawnTime.getHours()), spawnTime.getMinutes() >= 10 ? spawnTime.getMinutes() : ("0" + spawnTime.getMinutes()), spawnTime.getSeconds() >= 10 ? spawnTime.getSeconds() : ("0" + spawnTime.getSeconds())].join("-")
 ].join("-") + ".log"
 const { spawn, exec } = require('child_process');
-var fs = require('fs')
+var fs = require('fs-extra')
 var express = require('express');
 var session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
@@ -33,26 +35,211 @@ var jq = require("jquery");
 const mqtt = require('mqtt');
 var { JSLang, arrLang, lang } = require("./js/lang.js")
 const path = require('path');
+var readline = require('readline');
+var iconv = require('iconv-lite');
 
-var versionPath = "version.json"
-var VERSION = JSON.parse(fs.readFileSync(versionPath), "utf-8")["version"]
-var configPath = "config/config.json"
-var configs = fs.readFileSync(configPath);
-configs = JSON.parse(configs.toString());
-
-var STORAGE_ENGINE = configs["STORAGE_ENGINE"]
-
+function init(cb){
+    if (!fs.existsSync("logs")) {
+        fs.mkdirSync("logs")
+    }
+    if (!fs.existsSync("config")) {
+        fs.mkdirSync("config")
+        var defaultConfig = `{
+            "MIXIO_HTTP_PORT": 8080,
+            "MIXIO_HTTPS_PORT": 8443,
+            "MAX_PROJECT_NUM_PER_USER": 20,
+            "MAX_MESSAGE_PER_USER": 1000,
+            "MAX_MESSAGE_PER_SECOND": 5,
+            "ALLOW_REGISTER": true,
+            "ALLOW_HOOK": true,
+            "OFFLINE_MODE": true,
+            "BAIDU_MAP_AK": "",
+            "BAIDU_MAP_SERVER_AK": "",
+            "ADMIN_USERNAME":"admin",
+            "ADMIN_PASSWORD":"public",
+            "STORAGE_ENGINE":"sqlite",
+            "MYSQL_HOST":"localhost",
+            "MYSQL_PORT":3306,
+            "MYSQL_USER":"",
+            "MYSQL_PASS":"",
+            "MYSQL_DB":"mixio"
+          }`
+        fs.writeFileSync("config/config.json", defaultConfig)
+        fs.mkdirSync("config/certs")
+        var defaultCrt = 
+`-----BEGIN CERTIFICATE-----
+MIICRDCCAa0CFCVQzFjsGbbYOOlCxMGn1sZyBzwVMA0GCSqGSIb3DQEBCwUAMGEx
+CzAJBgNVBAYTAkNOMRAwDgYDVQQIDAdCZWlqaW5nMRAwDgYDVQQHDAdCZWlqaW5n
+MQ4wDAYDVQQKDAVNaXhseTEOMAwGA1UECwwFTWl4SU8xDjAMBgNVBAMMBU1peElP
+MB4XDTIyMDEyOTA4MDE0MVoXDTIzMDEyOTA4MDE0MVowYTELMAkGA1UEBhMCQ04x
+EDAOBgNVBAgMB0JlaWppbmcxEDAOBgNVBAcMB0JlaWppbmcxDjAMBgNVBAoMBU1p
+eGx5MQ4wDAYDVQQLDAVNaXhJTzEOMAwGA1UEAwwFTWl4SU8wgZ8wDQYJKoZIhvcN
+AQEBBQADgY0AMIGJAoGBAM3xzY1n5V05vAZbYniDbMoNXCzgL5puebmV2mIkMAHv
+QnhMZHv2O938ezFae0l3A6zRkhWgX4XLmGUwKria3xCC9E0soF2wM0JfIFpDIQ5g
+WnixtCiI8MjV8hXQ0Nh1hJ0MMwEX6g72N/YyH5Y/P9lsmr6OiG7dXe4oyaROY/U5
+AgMBAAEwDQYJKoZIhvcNAQELBQADgYEASvGJMK+h09mGCsza7h2ieVe75ogbG/nK
++c7KYYOBR2OXTNk90Od+2tJog5hJl8M1nRDHdOEPgTPDYKVz0hXjJBZnM5NtcoYS
+pq6vf83MtY8polmly/EZsZqiVPaEsH97nniRoMOP4JdyKlqU2g94yFDUiTTZW4cS
+iURo4pW8gRE=
+-----END CERTIFICATE-----
+`
+        fs.writeFileSync("config/certs/file.crt", defaultCrt)
+        var defaultPem = 
+`-----BEGIN PRIVATE KEY-----
+MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAM3xzY1n5V05vAZb
+YniDbMoNXCzgL5puebmV2mIkMAHvQnhMZHv2O938ezFae0l3A6zRkhWgX4XLmGUw
+Kria3xCC9E0soF2wM0JfIFpDIQ5gWnixtCiI8MjV8hXQ0Nh1hJ0MMwEX6g72N/Yy
+H5Y/P9lsmr6OiG7dXe4oyaROY/U5AgMBAAECgYB8zETFpeoF/lCEgahAY1PvdP0g
+bJIsQToeTkLSKh+1bGmZQKG7xNEuiiuVEsGXGTnu5ehilpaMG340A2ZADAmTf552
+Zr7AHSWmg4YEEykihSoJ2owfmqamm5Fsyoe/oxijsWwXAiZIv6VkDznchnQ+1I/w
+Ioyigp+dHbHS3OjiAQJBAOaDx0XjofpJQe4oCufTIqltomRtxtP4fFbeEbmQrXRt
+zNvH6QeKeanA+F4JQGVKcDSt6rz5yi8MqukOpZKBcdkCQQDktp4hfgvCQN8U50t+
+izZVImXGb47tfNKCWkNdrVnMI597ad3Qx+NV41oohMV4SFNCA8VgTq2onkhBbRjP
+YSJhAkBp9n2t5Nvan75M6d9JfcbbN2iE3emeGwWdMOvY72astKSNCzJVoxQWMnx5
+TatqZHN7486aHAES67HM/EykMhjRAkArlooog+clzEs3pqUCpvFh5D5VRSmOJT3R
+TfaMwd7dQuTAFnsJsS6oTb3+/t7Lf60uZZ2WLyh1fET1Ax+5Vh/BAkEAlNxqK/DI
+Fu1JviGs33vE55YHu4F0u822PUT9XN8NNzFhsvK5Oza+O7Tyyq7WJejR7I8IjzOb
+RvSzVsDN3/+4ug==
+-----END PRIVATE KEY-----
+`
+        fs.writeFileSync("config/certs/private.pem", defaultPem)
+    }
+    if (!fs.existsSync("storage")) {
+        fs.mkdirSync("storage")
+        var newDB = new sqlite3.Database("storage/mixio.db", sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function(err) {
+            if (err) {
+                console.log(err)
+                cb(false)
+            }
+            else{
+                newDB.run(`CREATE TABLE "devices" (
+                    "userName"	TEXT,
+                    "clientid"	TEXT,
+                    "timestamp"	INTEGER DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY("clientid")
+                )`,function(err){
+                    if(err){
+                        console.log(err)
+                        cb(false)
+                    }
+                    else
+                    {
+                        newDB.run(`CREATE TABLE "project" (
+                            "projectName"	TEXT,
+                            "userName"	TEXT,
+                            "projectLayout"	TEXT,
+                            "dataStorage"	TEXT,
+                            "logicStorage"	TEXT,
+                            "timestamp"	INTEGER DEFAULT CURRENT_TIMESTAMP,
+                            "projectType"	INTEGER
+                        )`, function(err){
+                            if(err){
+                                console.log(err)
+                                cb(false)
+                            }
+                            else
+                            {
+                                newDB.run(`CREATE TABLE "share" (
+                                    "shareid"	TEXT,
+                                    "userName"	TEXT,
+                                    "projectName"	TEXT,
+                                    "projectLayout"	TEXT,
+                                    "dataStorage"	TEXT,
+                                    "logicStorage"	TEXT,
+                                    "timeStamp"	INTEGER DEFAULT CURRENT_TIMESTAMP,
+                                    "status"	INTEGER DEFAULT 1,
+                                    "shareCount"	INTEGER DEFAULT 0
+                                )`, function(err){
+                                    if(err){
+                                        console.log(err)
+                                        cb(false)
+                                    }
+                                    else
+                                    {
+                                        newDB.run(`CREATE TABLE "share_key" (
+                                            "userName"	TEXT,
+                                            "projectPass"	TEXT,
+                                            "projectName"	TEXT,
+                                            "share_key"	TEXT
+                                        )`, function(err){
+                                            if(err)
+                                            {
+                                                console.log(err)
+                                                cb(false)
+                                            }
+                                            else
+                                            {
+                                                newDB.run(`CREATE TABLE "user" (
+                                                    "id"	INTEGER,
+                                                    "username"	TEXT,
+                                                    "password"	TEXT,
+                                                    "salt"	TEXT,
+                                                    "is_superuser"	INTEGER DEFAULT 0,
+                                                    "verified"	INTEGER DEFAULT 1,
+                                                    "question"	TEXT,
+                                                    "answer"	TEXT,
+                                                    PRIMARY KEY("id" AUTOINCREMENT)
+                                                )`, function(err){
+                                                    if(err)
+                                                    {
+                                                        console.log(err)
+                                                        cb(false)
+                                                    }
+                                                    else
+                                                    {
+                                                        newDB.close()
+                                                        fs.mkdirSync("storage/reserve")
+                                                        fs.writeFileSync("storage/reserve/filter.json", "{}")
+                                                        var newDB1 = new sqlite3.Database("storage/reserve/1.db", sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function(err) {
+                                                            if(err)
+                                                            {
+                                                                console.log(err)
+                                                                cb(false)
+                                                            }
+                                                            else
+                                                            {
+                                                                newDB1.run(`CREATE TABLE "reserve" (
+                                                                    "id"	INTEGER,
+                                                                    "userName"	TEXT NOT NULL,
+                                                                    "topic"	TEXT NOT NULL,
+                                                                    "message"	TEXT NOT NULL,
+                                                                    "time" INTEGER DEFAULT CURRENT_TIMESTAMP,
+                                                                    PRIMARY KEY("id" AUTOINCREMENT)
+                                                                )`, function(err){
+                                                                    if(err)
+                                                                    {
+                                                                        console.log(err)
+                                                                        cb(false)
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        newDB1.close()
+                                                                        for(var i = 2;i<=8;i = i+1){
+                                                                            fs.copyFileSync("storage/reserve/1.db","storage/reserve/" + i + ".db")
+                                                                        }
+                                                                        cb(true)
+                                                                    }
+                                                                })
+                                                            }
+                                                        })
+                                                    }
+                                                })
+                                            }
+                                        })
+                                    }
+                                })
+                            }
+                        })
+                    }
+                })
+            }
+        })
+    }
+    else
+        cb(true)
+}
 
 var mysql = require('mysql8');
-var MYSQL_HOST = configs["MYSQL_HOST"]
-var MYSQL_USER = configs["MYSQL_USER"]
-var MYSQL_PASS = configs["MYSQL_PASS"]
-var MYSQL_DB = configs["MYSQL_DB"]
-var MYSQL_PORT = configs["MYSQL_PORT"]
-
-var MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_PER_USER"]
-var MAX_MESSAGE_PER_SECOND = configs["MAX_MESSAGE_PER_SECOND"]
-
 var serverStatus = true
 
 var globalWeather = {}
@@ -1845,131 +2032,237 @@ async function startOnce() {
 }
 
 const args = process.argv.slice(2)
-if (args.length != 1) {
-    console.log("Invalid parameter(s). Use \"mixio help\" for help.")
-} else {
-    if (args[0] == "debug")
-    {
-        daemon_start()
-        startOnce()
-    }
-    else if (args[0] == "start")
-    {   
-        var parent_exit = function(child){
-            var logFile = fs.openSync(logFileName, 'r')
-            while(true){
-                // check log file for database connection
-                var data = fs.readFileSync(logFile, 'utf8')
-                if(data[data.length-1] == "\n")
-                    data = data.slice(0, -1)
-                if(data!="")
-                    console.log(data)
-                if(data.toString().indexOf("Database Connected!") != -1)
-                {
-                    console.log("MixIO server is running now.")
-                    child.unref()
-                    process.exit()
-                }
-                else if(data.toString().indexOf("Error") != -1)
-                {   
-                    console.error("An error occured while initializing MixIO server. Log file: " + process.cwd() + logFileName)
-                    child.unref()
-                    process.exit()
-                }
-            }
-        }
-        // child process to run 'mixio' in background
-        var logFile = fs.openSync(logFileName, 'a')
-        if(process.argv[0].indexOf("node") != -1)
-        {
-            var child = spawn(process.argv[0], [process.argv[1], "debug"], { detached: true , stdio:['ignore', logFile, logFile]})
-            parent_exit(child)
-        }
-        else
-        {
-            var child = spawn(process.argv[0], [process.argv[1], "debug"], { detached: true , stdio:['ignore', logFile, logFile]})
-            parent_exit(child)
-        }
 
-    }
-    else if (args[0] == "stop")
-    {
-        // kill 'mixio' process if it is running
-        if(process.argv[0].indexOf("node") != -1)
-        {
-            if(process.platform == "win32")
+var startMixIO = function(){
+    var parent_exit = function(child){
+        var logFile = fs.openSync(logFileName, 'r')
+        while(true){
+            // check log file for database connection
+            var data = fs.readFileSync(logFile, 'utf8')
+            if(data[data.length-1] == "\n")
+                data = data.slice(0, -1)
+            if(data!="")
+                console.log(data)
+            if(data.toString().indexOf("Database Connected!") != -1)
             {
-                console.log("Shutting down MixIO server...")
-                exec('taskkill /F /IM node.exe', function(err, stdout, stderr) {
-                    if (err) {
-                        console.log(err)
-                    }   
-                })
+                console.log("MixIO server is running now.")
+                child.unref()
+                for (var t = Date.now(); Date.now() - t <= 2000;);
+                process.exit()
             }
-            else
-            {
-                console.log("Shutting down MixIO server...")
-                exec('pkill node', function(err, stdout, stderr) {
-                    if (err) {
-                        console.log(err)
-                    }
-                })
-            }
-        }
-        else
-        {
-            if(process.platform == "win32")
-            {
-                console.log("Shutting down MixIO server...")
-                exec('taskkill /F /IM mixio.exe', function(err, stdout, stderr) {
-                    if (err) {
-                        console.log(err)
-                    }
-                })
-            }
-            else
-            {
-                console.log("Shutting down MixIO server...")
-                exec('pkill mixio', function(err, stdout, stderr) {
-                    if (err) {
-                        console.log(err)
-                    }
-                })
+            else if(data.toString().indexOf("Error") != -1)
+            {   
+                console.error("An error occured while initializing MixIO server. Log file: " + process.cwd() + logFileName)
+                child.unref()
+                for (var t = Date.now(); Date.now() - t <= 2000;);
+                process.exit()
             }
         }
     }
-    else if (args[0] == "version")
+    // child process to run 'mixio' in background
+    var logFile = fs.openSync(logFileName, 'a')
+    if(process.argv[0].indexOf("node") != -1)
     {
-        console.log(fs.readFileSync("version.json", "utf8"))
-    }
-    else if (args[0] == "update")
-    {
-        // use git
-        console.log("Updating MixIO server...")
-        exec('git pull', function(err, stdout, stderr) {
-            if (err) {
-                console.log(err)
-            }
-            else
-            {
-                console.log("Update finished.")
-            }
-        })
-    }
-    else if (args[0] == "help")
-    {
-        console.log("MixIO server help:")
-        console.log("mixio start: start MixIO server in background.")
-        console.log("mixio stop: stop MixIO server.")
-        console.log("mixio debug: start MixIO server in foreground.")
-        console.log("mixio version: show MixIO server version.")
-        console.log("mixio update: update MixIO server.")
+        var child = spawn(process.argv[0], [process.argv[1], "debug"], { detached: true , stdio:['ignore', logFile, logFile]})
+        parent_exit(child)
     }
     else
     {
-        console.log("Invalid parameter(s). Use \"mixio help\" for help.")
+        var child = spawn(process.argv[0], [process.argv[1], "debug"], { detached: true , stdio:['ignore', logFile, logFile]})
+        parent_exit(child)
     }
 }
+
+var stopMixIO = function(){
+    // kill 'mixio' process if it is running
+    if(process.argv[0].indexOf("node") != -1)
+    {
+        if(process.platform == "win32")
+        {
+            console.log("Shutting down MixIO server...")
+            exec('taskkill /F /IM node.exe', function(err, stdout, stderr) {
+                if (err) {
+                    console.log(err)
+                }   
+            })
+        }
+        else
+        {
+            console.log("Shutting down MixIO server...")
+            exec('pkill node', function(err, stdout, stderr) {
+                if (err) {
+                    console.log(err)
+                }
+            })
+        }
+    }
+    else
+    {
+        if(process.platform == "win32")
+        {
+            console.log("Shutting down MixIO server...")
+            exec('taskkill /F /IM mixio.exe', function(err, stdout, stderr) {
+                if (err) {
+                    console.log(err)
+                }
+            })
+        }
+        else
+        {
+            console.log("Shutting down MixIO server...")
+            exec('pkill mixio', function(err, stdout, stderr) {
+                if (err) {
+                    console.log(err)
+                }
+            })
+        }
+    }
+}
+
+init(function(res){
+    if(res)
+    {   
+        configPath = "config/config.json"
+        configs = fs.readFileSync(configPath);
+        configs = JSON.parse(configs.toString());
+
+        STORAGE_ENGINE = configs["STORAGE_ENGINE"]
+
+
+        MYSQL_HOST = configs["MYSQL_HOST"]
+        MYSQL_USER = configs["MYSQL_USER"]
+        MYSQL_PASS = configs["MYSQL_PASS"]
+        MYSQL_DB = configs["MYSQL_DB"]
+        MYSQL_PORT = configs["MYSQL_PORT"]
+
+        MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_PER_USER"]
+        MAX_MESSAGE_PER_SECOND = configs["MAX_MESSAGE_PER_SECOND"]
+        if (args.length > 1 || (args.length == 0 && process.platform != "win32")) {
+            console.log("Invalid parameter(s). Use \"mixio help\" for help.")
+        } else {
+            var show = function(){
+                if(args.length == 0){
+                    // wait for user input, 1 for start, 2 for stop, 3 for autoStart, 4 for remove autoStart
+                    console.log("1. Start MixIO server")
+                    console.log("2. Stop MixIO server")
+                    console.log("3. Set MixIO server to auto start")
+                    console.log("4. Remove MixIO server from auto start")
+                    console.log("5. Exit")
+                    var rl = readline.createInterface({
+                        input: process.stdin,
+                        output: process.stdout
+                    })
+                    rl.question("Please select an option: ", function(answer) {
+                        rl.close()
+                        if (answer == "1") {
+                            startMixIO()
+                        } else if (answer == "2") {
+                            stopMixIO()
+                        } else if (answer == "3") {
+                            var child = spawn("schtasks", ["/create", "/sc", "onlogon", "/tn", "MixIO", "/tr", process.execPath + " start", "/rl", "highest", "/f"])
+                            child.stdout.on('data', function(data) {
+                                // encode to ANSI
+                                console.log(iconv.decode(data, 'cp936').toString())
+                            })
+                            child.stderr.on('data', function(data) {
+                                // encode to ANSI
+                                console.log(iconv.decode(data, 'cp936').toString())
+                            })
+                            child.on("close", function() {
+                                show();
+                            })
+
+
+                        } else if (answer == "4") {
+                            var child = spawn("schtasks", ["/delete", "/tn", "MixIO", "/f"])
+                            child.stdout.on('data', function(data) {
+                                // encode to ANSI
+                                console.log(iconv.decode(data, 'cp936').toString())
+                            })
+                            child.stderr.on('data', function(data) {
+                                // encode to ANSI
+                                console.log(iconv.decode(data, 'cp936').toString())
+                            })
+                            child.on("close", function() {
+                                show();
+                            })
+                        } else if (answer == "5") {
+                            process.exit()
+                        } else {
+                            console.log("Invalid option.")
+                        }
+                    })
+                }
+                else if (args[0] == "debug")
+                {   
+                    if(res){
+                        daemon_start()
+                        startOnce()
+                    }
+                }
+                else if (args[0] == "start")
+                {   
+                    startMixIO()
+            
+                }
+                else if (args[0] == "stop")
+                {
+                    stopMixIO()
+                }
+                else if (args[0] == "version")
+                {
+                    console.log(VERSION)
+                }
+                else if (args[0] == "install" && process.platform == "linux")
+                {
+                    var install_shell = `
+                        service="
+                        [UNIT]
+                        Description=MixIO.Service
+                        After=network.target
+                        StartLimitIntervalSec=0
+                        
+                        [Service]
+                        Type=forking
+                        Restart=always
+                        RestartSec=1
+                        WorkingDirectory="`+ process.argv[0].slice(0,process.argv[0].lastIndexOf("/"))+`"
+                        ExecStart=`+ process.argv[0].slice(0,process.argv[0].lastIndexOf("/"))+`/mixio start
+                        ExecStop=`+ process.argv[0].slice(0,process.argv[0].lastIndexOf("/"))+`/mixio stop
+                        
+                        [Install]
+                        WantedBy=multi-user.target
+                        "
+                        echo "${service}" > /etc/systemd/system/mixio.service
+                    `
+                    //exec shell
+                    exec(install_shell, function(err, stdout){
+                        if(err)
+                            console.log(err)
+                        else
+                            console.log(stdout)
+                    })
+                }
+                else if (args[0] == "help")
+                {
+                    console.log("MixIO server help:")
+                    console.log("mixio start: start MixIO server in background.")
+                    console.log("mixio stop: stop MixIO server.")
+                    console.log("mixio debug: start MixIO server in foreground.")
+                    console.log("mixio version: show MixIO server version.")
+                    if(process.platform == "linux")
+                        console.log("mixio install: install MixIO service.")
+                }
+                else
+                {
+                    console.log("Invalid parameter(s). Use \"mixio help\" for help.")
+                }
+            }
+            show();
+        }
+    }
+})
+
 
 
 //MixIO
