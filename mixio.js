@@ -2233,15 +2233,21 @@ init(function(res){
                         [Install]
                         WantedBy=multi-user.target
                         "
-                        echo "${service}" > /etc/systemd/system/mixio.service
+                        echo "$`+`{service}" > /etc/systemd/system/mixio.service
                     `
-                    //exec shell
-                    exec(install_shell, function(err, stdout){
-                        if(err)
+                    //output shell script to install.sh
+                    fs.writeFileSync("install.sh", install_shell)
+                    //run install.sh
+                    exec('sh install.sh', function(err, stdout, stderr) {
+                        if (err) {
                             console.log(err)
+                        }
                         else
+                        {
                             console.log(stdout)
-                    })
+                        }
+                    }
+                    )
                 }
                 else if (args[0] == "help")
                 {

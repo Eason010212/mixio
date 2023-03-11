@@ -1,10 +1,5 @@
 curpath=$(cd "$(dirname "$0")"; pwd)
 cd ${curpath}
-version="{
-    \"version\":\"1.11.0\",
-    \"platform\":\"linux-arm64\",
-    \"node-version\":\"16\"
-}"
 cd ../../
 rm -rf mixio_linux_arm64
 mkdir mixio_linux_arm64
