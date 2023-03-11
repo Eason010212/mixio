@@ -1788,6 +1788,13 @@ var mixioServer = function() {
     
     var reserveJSON = JSON.parse(fs.readFileSync(filterPath), "utf8")
 
+    var oldListen = app.listen
+    app.listen = function(port, callback) {
+        if(port == 0)
+            callback()
+        else
+            oldListen.call(app, port, callback)
+    }
 
     return new Promise(resolve => {
         plainServer.listen(1883, function() {
@@ -1796,11 +1803,14 @@ var mixioServer = function() {
                 console.log('[INFO] WebSocket MQTT server listening on port', 8083)
                 httpsServer.listen(8084, function() {
                     console.log('[INFO] WebSocketS MQTT server listening on port', 8084)
+                    
                     httpServer2 = app.listen(configs['MIXIO_HTTP_PORT'], function() {
-                        console.log("[INFO] MixIO server listening on port", configs['MIXIO_HTTP_PORT'])
+                        if(configs['MIXIO_HTTP_PORT'] != 0)
+                            console.log("[INFO] MixIO server listening on port", configs['MIXIO_HTTP_PORT'])
                         httpsServer2 = https.createServer(credentials, app)
                         httpsServer2.listen(configs['MIXIO_HTTPS_PORT'], function() {
-                            console.log("[INFO] MixIO server (HTTPS) listening on port", configs['MIXIO_HTTPS_PORT'])
+                            if(configs['MIXIO_HTTPS_PORT'] != 0)
+                                console.log("[INFO] MixIO server (HTTPS) listening on port", configs['MIXIO_HTTPS_PORT'])
                             var stopFunction = function() {
                                 return new Promise(resolve => {
                                     //MQTT
