@@ -27,4 +27,5 @@ https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
 
 ## 从源码构建
 编译脚本见pkg_tools/
+
 基本环境：node16(windows7为node12), python3, cmake, pkg.
