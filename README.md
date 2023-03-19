@@ -30,7 +30,7 @@ https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
 2. node mixio.js debug
 
 ## 从源码构建
-1. 这里是列表文本
+1. 编译脚本见pkg_tools/
 2. 基本环境：node16(windows7为node12), python3, cmake, pkg.
 
 ## 安卓端运行服务器（experimental）
