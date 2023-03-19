@@ -25,7 +25,23 @@ https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
 4. Windows版可直接双击mixio.exe查看更多选项
 5. Linux/MacOS版 可mixio install将mixio添加到systemctl中
 
-## 从源码构建
-编译脚本见pkg_tools/
+## 从源码运行（debug模式）
+1. git clone https://gitee.com/mixly2/mixio.git
+2. node mixio.js debug
 
-基本环境：node16(windows7为node12), python3, cmake, pkg.
+## 从源码构建
+1. 这里是列表文本
+2. 基本环境：node16(windows7为node12), python3, cmake, pkg.
+
+## 安卓端运行服务器（experimental）
+1. 安装termux（https://termux.dev/en/）
+2. apt update
+3. apt upgrade
+4. pkg install nodejs-lts
+5. pkg install python
+6. pkg install binutils
+7. pkg install git
+8. git clone https://gitee.com/mixly2/mixio.git
+9. cd mixio
+10. npm i
+11. node mixio.js debug
