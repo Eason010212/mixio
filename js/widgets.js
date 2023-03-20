@@ -718,21 +718,38 @@ function add_keyboard(user_title, user_topic, user_content, user_style) {
     sendIcon.bind('mouseup', function(event) {
         event.stopPropagation()
     })
-    sendIcon.bind('click', function(event) {
-        event.stopPropagation()
-        publish(topic.text(), messDiv.val())
-        sendIcon.removeClass("btn-primary")
-        sendIcon.addClass("btn-success")
-        sendIcon.children().removeClass('fa-paper-plane')
-        sendIcon.children().addClass("fa-check")
-        setTimeout(function() {
-            sendIcon.removeClass("btn-success")
-            sendIcon.addClass("btn-primary")
-            sendIcon.children().removeClass('fa-check')
-            sendIcon.children().addClass("fa-paper-plane")
-        }, 300)
-        itemdiv.trigger(MixIO.eventTags.KEYBOARD_SENT, messDiv.val())
-    })
+    if (window.screen.width > 800)
+        sendIcon.bind('click', function(event) {
+            event.stopPropagation()
+            publish(topic.text(), messDiv.val())
+            sendIcon.removeClass("btn-primary")
+            sendIcon.addClass("btn-success")
+            sendIcon.children().removeClass('fa-paper-plane')
+            sendIcon.children().addClass("fa-check")
+            setTimeout(function() {
+                sendIcon.removeClass("btn-success")
+                sendIcon.addClass("btn-primary")
+                sendIcon.children().removeClass('fa-check')
+                sendIcon.children().addClass("fa-paper-plane")
+            }, 300)
+            itemdiv.trigger(MixIO.eventTags.KEYBOARD_SENT, messDiv.val())
+        })
+    else
+        sendIcon.bind('touchend', function(event) {
+            event.stopPropagation()
+            publish(topic.text(), messDiv.val())
+            sendIcon.removeClass("btn-primary")
+            sendIcon.addClass("btn-success")
+            sendIcon.children().removeClass('fa-paper-plane')
+            sendIcon.children().addClass("fa-check")
+            setTimeout(function() {
+                sendIcon.removeClass("btn-success")
+                sendIcon.addClass("btn-primary")
+                sendIcon.children().removeClass('fa-check')
+                sendIcon.children().addClass("fa-paper-plane")
+            }, 300)
+            itemdiv.trigger(MixIO.eventTags.KEYBOARD_SENT, messDiv.val())
+        })
     contents.push(keyDiv)
     var itemdiv = add_block(3, 1, contents, attrs)
     itemdiv.bind(MixIO.actionTags.KEYBOARD_SEND, function(event, message) {
