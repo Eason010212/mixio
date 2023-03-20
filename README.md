@@ -9,7 +9,6 @@
 </p>
 
 ![MIT协议](https://img.shields.io/badge/license-MPL-red)
-
 ![version](https://img.shields.io/badge/version-1.10.0-green)
 
 ---
