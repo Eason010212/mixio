@@ -1,5 +1,12 @@
-# MixIO - 米思齐开源物联网服务器
-![输入图片说明](img/shortcut.png)
+<p align="center">
+  <a href="https://mixio.mixly.cn">
+    <img src="img/shortcut.png" width="100" alt="MixIO">
+  </a>
+</p>
+<h2 align="center">MixIO</h2>
+<p align="center">
+  面向自主可控信息科技教育的开源物联网服务器
+</p>
 
 ## 发行版-v1.10.0
 
