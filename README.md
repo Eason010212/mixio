@@ -7,10 +7,10 @@
 <p align="center">
   面向自主可控信息科技教育的开源物联网服务器
 </p>
-<p align="center">
+<div align="center">
 ![MIT协议](https://img.shields.io/badge/license-MPL-red)
 ![version](https://img.shields.io/badge/version-1.10.0-green)
-</p>
+</dic>
 ---
 
 ## 主站（免费使用）
