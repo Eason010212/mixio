@@ -3,7 +3,7 @@
     <img src="img/shortcut.png" width="100" alt="MixIO">
   </a>
 </p>
-<h2 align="center">MixIO</h2>
+<h2 align="center" style="margin-top:5px">MixIO</h2>
 <p align="center">
   面向自主可控信息科技教育的开源物联网服务器
 </p>
