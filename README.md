@@ -9,8 +9,8 @@
 </p>
 
 <div align="center">
-![MIT协议](https://img.shields.io/badge/license-MPL-red)
-![version](https://img.shields.io/badge/version-1.10.0-green)
+    <img src="https://img.shields.io/badge/license-MPL-red">
+    <img src="https://img.shields.io/badge/version-1.10.0-green">
 </div>
 
 ---
