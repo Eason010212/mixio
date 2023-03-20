@@ -11,6 +11,7 @@
 <div align="center">
     <img src="https://img.shields.io/badge/license-MPL-red">
     <img src="https://img.shields.io/badge/version-1.10.0-green">
+    <img src="https://img.shields.io/badge/nodejs-16.17.0-blue">
 </div>
 
 ---
