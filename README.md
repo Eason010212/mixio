@@ -1,5 +1,5 @@
 # MixIO - 米思齐开源物联网服务器
-![输入图片说明](img/logo.png)
+![输入图片说明](img/shortcut.png)
 
 ## 发行版-v1.10.0
 
