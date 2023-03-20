@@ -3,12 +3,17 @@
     <img src="img/shortcut.png" width="100" alt="MixIO">
   </a>
 </p>
-<h2 align="center" style="margin-top:5px">MixIO</h2>
+<h2 align="center">MixIO</h2>
 <p align="center">
   面向自主可控信息科技教育的开源物联网服务器
 </p>
 
-## 发行版-v1.10.0
+---
+
+## 主站（免费使用）
+https://mixio.mixly.cn
+
+## 私有部署发行版-v1.10.0
 
 ### Windows-x64发行版（win10及以上）
 https://gitee.com/bnu_mixly/mixio-win32-x86-dist/blob/master/mixio.exe
