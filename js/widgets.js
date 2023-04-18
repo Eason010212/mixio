@@ -1015,6 +1015,129 @@ function add_bulb(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
+function add_magic(user_title, user_topic, user_content, user_style) {
+    var isAlive = true
+    var contents = []
+    var bgColor = user_content
+    var title = $("<h4 class='userTitle' style='background-color: " + bgColor + ";color:white;text-align:center;width:100%;position:absolute;top:0;left:0;height:40px;font-size:1.25rem;padding-top:10px;box-shadow:0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important'>" + user_title + "</h4>")
+    var transparentDiv = $('<div style="width:100%;height:100%;position:absolute;top:0;left:0;background-color:rgba(0,0,0,0);z-index:-9999"/>')
+    contents.push(title)
+    contents.push(transparentDiv)
+    attrs = [
+        ['user-type', 'magic'],
+        ['user-title', user_title],
+        ['user-topic', user_topic],
+        ['user-content', user_content]
+    ]
+    var itemdiv = add_block(5, 5, contents, attrs)
+    itemdiv.css('background-color', 'rgba(0,0,0,0)')
+    itemdiv.css('box-shadow', user_content + ' 10px 10px 20px')
+    var tbd = null;
+    var delete_on_click = function() {
+        title.parent().parent().remove();
+        isAlive = false
+        if (tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function() {
+        modifyDia.showModal()
+        if (tbd)
+            tbd.remove()
+    }
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/magic.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="text-align:center;margin-top:15px">' + JSLang[lang].color + '</h5>'))
+    var color_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var color_select = $('<select class="form-control form-control-user" style="text-align:center"/>')
+    color_select.append($('<option value="#4e73df">' + JSLang[lang].blue + '</option>'))
+    color_select.append($('<option value="#1cc88a">' + JSLang[lang].green + '</option>'))
+    color_select.append($('<option value="#36b9cc">' + JSLang[lang].cyan + '</option>'))
+    color_select.append($('<option value="#f6c23e">' + JSLang[lang].yellow + '</option>'))
+    color_select.append($('<option value="#e74a3b">' + JSLang[lang].red + '</option>'))
+    color_select.append($('<option value="#858796">' + JSLang[lang].gray + '</option>'))
+    color_input_div.append(color_select)
+    editForm.append(color_input_div)
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function() {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            var re = /^[a-z0-9]+$/i;
+            if (true)
+                if (true) {
+                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                        title.parent().parent().attr('user-title', title_input.val())
+                        title.parent().parent().attr('user-topic', "")
+                        title.parent().parent().attr('user-content', color_select.val())
+                        bgColor = color_select.val()
+                        title.css('background-color', bgColor)
+                        itemdiv.css('box-shadow', bgColor + ' 10px 10px 20px')
+                        title.text(title_input.val())
+                        modifyDia.close()
+                    } else
+                        showtext(JSLang[lang].sameUnit)
+                } else
+                    showtext("")
+            else
+                showtext(JSLang[lang].topicLenIllegal)
+        } else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function() {
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content: editForm[0],
+        cancel: false
+    })
+    var showEditBubble = function(event) {
+        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+            var bubble = $('<div style="text-align:center"/>')
+            var d = dialog({
+                align: 'top',
+                content: bubble[0],
+                quickClose: true,
+                autofocus: false
+            });
+            tbd = d;
+            editButton.click(edit_on_click)
+            deleteButton.click(delete_on_click)
+            if (!isRunning)
+                bubble.append(editButton)
+            if (!isRunning)
+                bubble.append(deleteButton)
+            title_input.val(title.text())
+            color_select.val(bgColor)
+            if (!d.open)
+                d.show(itemdiv[0]);
+            else
+                d.close()
+        }
+    }
+    if (window.screen.width > 800)
+        itemdiv.click(showEditBubble)
+    else
+        itemdiv[0].addEventListener('touchend', function(event) {
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove', function(e) {
+        e.preventDefault()
+    })
+    if (user_style != undefined)
+        itemdiv.attr('style', user_style)
+}
+
 function add_timer(user_title, user_topic, user_content, user_style) {
     var isAlive = true
     var contents = []

@@ -1004,6 +1004,7 @@ function view_project(projectName, projectType) {
                     'output_map': add_map,
                     'input_weather': add_weather,
                     'trigger': add_trigger,
+                    'magic': add_magic,
                     'table': add_table,
                     'decorate_text': add_decorate_text,
                     'decorate_pic': add_decorate_pic,
@@ -1497,7 +1498,9 @@ function isJSON(str) {
 }
 
 function add_widget() {
-    var widget_list = $("<div class='widget_list nnt' style='display:flex;max-width:560px;align-items:center;justify-content:center;flex-direction:row;flex-wrap:wrap;padding:10px'/>")
+    var widget_list = $("<div class='widget_list nnt' style='display:flex;max-width:810px;align-items:center;justify-content:center;flex-direction:row;flex-wrap:wrap;padding:10px'/>")
+    var title = $("<div style='display:flex;align-items:center;justify-content:center;font-size:1.8rem!important;width:100%;text-align:center;margin-bottom:15px;margin-top:5px;color:#4e73df;font-size:1.3rem;font-weight:bold'><i class='fa fa-cube' style='margin-right:5px;font-size:2rem'></i><p style='margin:0'>" + JSLang[lang].widget + "</p><a class='btn btn-primary btn-block' style='width:90px;margin-left:8px;padding:2px' href='./documentation' target='_blank'>" + JSLang[lang].guide + "</a></div>")
+    widget_list.append(title)
     widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:5px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].control + "</h5>"))
     var input_button_add = $("<div class='widget_div'><div><img src='icons/input_button.svg'><span>" + JSLang[lang].switch+"</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(input_button_add)
@@ -1515,6 +1518,8 @@ function add_widget() {
     widget_list.append(timer_add)
     var trigger_add = $("<div class='widget_div'><div><img src='icons/trigger.svg'><span>" + JSLang[lang].trigger + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(trigger_add)
+    var ble_add = $("<div class='widget_div'><div><img src='icons/ble.svg'><span>" + JSLang[lang].ble + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(ble_add)
     widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].data + "</h5>"))
     var output_chart_add = $("<div class='widget_div'><div><img src='icons/output_chart.svg'><span>" + JSLang[lang].lineChart + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(output_chart_add)
@@ -1533,10 +1538,14 @@ function add_widget() {
     widget_list.append(input_keyboard_add)
     var output_text_add = $("<div class='widget_div'><div><img src='icons/output_text.svg'><span>" + JSLang[lang].screen + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(output_text_add)
+    var output_pixel_add = $("<div class='widget_div'><div><img src='icons/output_pixel.svg'><span>" + JSLang[lang].pixel + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(output_pixel_add)
     var decorate_text_add = $("<div class='widget_div'><div><img src='icons/decorate_text.svg'><span>" + JSLang[lang].label + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(decorate_text_add)
     var decorate_pic_add = $("<div class='widget_div'><div><img src='icons/decorate_pic.svg'><span>" + JSLang[lang].picture + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(decorate_pic_add)
+    var magic_add = $("<div class='widget_div'><div><img src='icons/magic.svg'><span>" + JSLang[lang].magic + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(magic_add)
     input_button_add.children("a").click(function() {
         d.close().remove()
         var editForm = $('<div class="nnt"/>')
@@ -2230,6 +2239,47 @@ function add_widget() {
                 showtext(JSLang[lang].nameLenIllegal)
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function() {
+            modifyDia.close().remove()
+            add_widget()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content: editForm[0],
+            cancel: false
+        })
+        modifyDia.showModal()
+    })
+
+    magic_add.children("a").click(function() {
+        d.close().remove()
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/magic.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="text-align:center;margin-top:15px">' + JSLang[lang].color + '</h5>'))
+        var color_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var color_select = $('<select class="form-control form-control-user" style="text-align:center"/>')
+        color_select.append($('<option value="#4e73df">' + JSLang[lang].blue + '</option>'))
+        color_select.append($('<option value="#1cc88a">' + JSLang[lang].green + '</option>'))
+        color_select.append($('<option value="#36b9cc">' + JSLang[lang].cyan + '</option>'))
+        color_select.append($('<option value="#f6c23e">' + JSLang[lang].yellow + '</option>'))
+        color_select.append($('<option value="#e74a3b">' + JSLang[lang].red + '</option>'))
+        color_select.append($('<option value="#858796">' + JSLang[lang].gray + '</option>'))
+        color_input_div.append(color_select)
+        editForm.append(color_input_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function() {
+            add_magic(title_input.val(), undefined, color_select.val())
+            modifyDia.close().remove()
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function() {
             modifyDia.close().remove()
             add_widget()
