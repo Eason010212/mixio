@@ -18,6 +18,26 @@ Blockly.Blocks['GET'] = {
   }
 };
 
+Blockly.Blocks['POST'] = {
+  init: function() {
+      this.setColour(network_HUE);
+      this.appendDummyInput().appendField(Blockly.POSTREQ);
+      this.appendValueInput("url").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.USEDATA);
+      this.appendValueInput("data").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.WAITREQ);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"data"+","+"status");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  },
+  getVars:function(){
+      return ["data", "status"]
+  }
+};
+
 Blockly.Blocks['GETJSON'] = {
   init: function() {
       this.setColour(network_HUE);

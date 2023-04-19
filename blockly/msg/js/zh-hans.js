@@ -429,6 +429,8 @@ Blockly.ANY_MESSAGE="任意消息时";
 Blockly.TOPIC_MESSAGE="主题消息时";
 Blockly.PUBLISH_MESSAGE="主题发布";
 Blockly.GETREQ="GET请求";
+Blockly.POSTREQ="POST请求";
+Blockly.USEDATA="使用数据";
 Blockly.WAITREQ="并等待响应";
 Blockly.WAITJSONREQ="并等待JSON响应";
 

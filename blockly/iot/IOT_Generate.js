@@ -16,6 +16,25 @@ Blockly.JavaScript.GET=function(block) {
     return code;
 };
 
+Blockly.JavaScript.POST=function(block) {
+    var url = Blockly.JavaScript.valueToCode(this, 'url', Blockly.JavaScript.ORDER_ATOMIC);
+    var data = Blockly.JavaScript.valueToCode(this, 'data', Blockly.JavaScript.ORDER_ATOMIC);
+    var statement_code=Blockly.JavaScript.statementToCode(block, "DO0" );
+    var code_piece=[];
+        code_piece=statement_code.split("\n");
+        for(var i=0;i<code_piece.length;i++){
+          if((code_piece[i].indexOf("    ") >= 0)){  
+              code_piece[i]=code_piece[i].replace("    ","        ");
+          }
+        }   
+        statement_code=""
+        for(var i=0;i<code_piece.length;i++){
+            statement_code+=code_piece[i]+'\n'
+        }
+    var code="$.post("+url+", " + data + ", function(data, status){\n\t"+statement_code+"\n"+"})\n"
+    return code;
+};
+
 Blockly.JavaScript.GETJSON=function(block) {
     var url = Blockly.JavaScript.valueToCode(this, 'url', Blockly.JavaScript.ORDER_ATOMIC);
     var statement_code=Blockly.JavaScript.statementToCode(block, "DO0" );
