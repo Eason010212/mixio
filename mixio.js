@@ -1391,26 +1391,52 @@ var mixioServer = function() {
     app.get('/login', function(req, res) {
         var userName = req.query.userName
         var password = req.query.password
+        var directLogin = req.query.directLogin
         if (userName && password)
-            db.get("select * from `user` where username=?", [userName], function(err, row) {
-                if (row) {
-                    if (row['password'] == md5(password + row['salt'])) {
-                        if (row['verified'] == 1) {
-                            req.session.userName = row['username']
-                            req.session.projectPass = row['password']
-                            if (req.session.salt)
-                                req.session.salt = undefined
-                            res.send('1')
-                        } else {
-                            req.session.userName = row['username']
-                            req.session.salt = row['salt']
-                            res.send('3')
-                        }
+            if(directLogin)
+            {
+                db.get("select * from `user` where username=?", [userName], function(err, row) {
+                    if (row) {
+                        if (row['password'] == md5(password + row['salt'])) {
+                            if (row['verified'] == 1) {
+                                req.session.userName = row['username']
+                                req.session.projectPass = row['password']
+                                if (req.session.salt)
+                                    req.session.salt = undefined
+                                res.redirect('/projects')
+                            } else {
+                                req.session.userName = row['username']
+                                req.session.salt = row['salt']
+                                res.redirect('/verify')
+                            }
+                        } else
+                            res.send('Invalid Username or Password')
+                    } else
+                        res.send('Invalid Username or Password')
+                })
+            }
+            else
+            {
+                db.get("select * from `user` where username=?", [userName], function(err, row) {
+                    if (row) {
+                        if (row['password'] == md5(password + row['salt'])) {
+                            if (row['verified'] == 1) {
+                                req.session.userName = row['username']
+                                req.session.projectPass = row['password']
+                                if (req.session.salt)
+                                    req.session.salt = undefined
+                                res.send('1')
+                            } else {
+                                req.session.userName = row['username']
+                                req.session.salt = row['salt']
+                                res.send('3')
+                            }
+                        } else
+                            res.send('2')
                     } else
                         res.send('2')
-                } else
-                    res.send('2')
-            })
+                })
+            }
         else
             res.send('2')
     })
