@@ -1045,6 +1045,80 @@ var mixioServer = function() {
         }
     })
 
+    app.post('/addAccount', function(req, res) {
+        if (req.body.userName && req.body.password && req.body.question && req.body.answer) {
+            db.get("select * from `user` where username=?", [req.body.userName], function(err, row) {
+                if (err)
+                    res.send("Internal Error", 500)
+                else {
+                    if (row) {
+                        res.send({
+                            "status": "failed",
+                            "reason": "user already exists"
+                        })
+                    } else {
+                        var salt = randomString(16, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+                        var password = md5(req.body.password + salt)
+                        db.run("insert into `user` (username, password, salt, verified, question, answer) values(?,?,?,1,?,?)", [req.body.userName, password, salt, req.body.question, req.body.answer], function(err) {
+                            if (err)
+                                res.send("Internal Error", 500)
+                            else
+                                res.send({
+                                    "status": "success"
+                                })
+                        })
+                    }
+                }
+            })
+        }
+        else
+            res.send({
+                "status": "failed",
+                "reason": "bad request"
+            })
+    })
+
+    app.post('/resetPassword', function(req, res) {
+        if (req.body.userName && req.body.password && req.body.question && req.body.answer) {
+            db.get("select * from `user` where username=?", [req.body.userName], function(err, row) {
+                if (err)
+                    res.send("Internal Error", 500)
+                else {
+                    if (row) {
+                        if(row["question"] == req.body.question && row["answer"] == req.body.answer)
+                        {
+                            var salt = randomString(16, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+                            var password = md5(req.body.password + salt)
+                            db.run("update `user` set password=?,salt=? where username=?", [password, salt, req.body.userName], function(err) {
+                                if (err)
+                                    res.send("Internal Error", 500)
+                                else
+                                    res.send({
+                                        "status": "success"
+                                    })
+                            })
+                        }
+                        else
+                            res.send({
+                                "status": "failed",
+                                "reason": "wrong answer"
+                            })
+                    } else {
+                        res.send({
+                            "status": "failed",
+                            "reason": "user not found"
+                        })
+                    }
+                }
+            })
+        }
+        else
+            res.send({
+                "status": "failed",
+                "reason": "bad request"
+            })
+    })
+
     app.get('/getDevices', function(req, res) {
         if (req.session.userName && req.query.userName) {
             var userName = req.query.userName
