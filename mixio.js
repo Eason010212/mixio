@@ -1046,7 +1046,7 @@ var mixioServer = function() {
     })
 
     app.post('/addAccount', function(req, res) {
-        if (req.body.userName && req.body.password && req.body.question && req.body.answer) {
+        if (req.body.userName && req.body.password) {
             db.get("select * from `user` where username=?", [req.body.userName], function(err, row) {
                 if (err)
                     res.send("Internal Error", 500)
@@ -1057,9 +1057,11 @@ var mixioServer = function() {
                             "reason": "user already exists"
                         })
                     } else {
+                        var question = req.body.question ? req.body.question : ""
+                        var answer = req.body.answer ? req.body.answer : ""
                         var salt = randomString(16, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
                         var password = md5(req.body.password + salt)
-                        db.run("insert into `user` (username, password, salt, verified, question, answer) values(?,?,?,1,?,?)", [req.body.userName, password, salt, req.body.question, req.body.answer], function(err) {
+                        db.run("insert into `user` (username, password, salt, verified, question, answer) values(?,?,?,1,?,?)", [req.body.userName, password, salt, question, answer], function(err) {
                             if (err)
                                 res.send("Internal Error", 500)
                             else
@@ -1079,16 +1081,16 @@ var mixioServer = function() {
     })
 
     app.post('/resetPassword', function(req, res) {
-        if (req.body.userName && req.body.password && req.body.question && req.body.answer) {
+        if (req.body.userName && req.body.oldPassword && req.body.newPassword) {
             db.get("select * from `user` where username=?", [req.body.userName], function(err, row) {
                 if (err)
                     res.send("Internal Error", 500)
                 else {
                     if (row) {
-                        if(row["question"] == req.body.question && row["answer"] == req.body.answer)
+                        if(row["password"] == md5(req.body.oldPassword + row["salt"]))
                         {
                             var salt = randomString(16, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-                            var password = md5(req.body.password + salt)
+                            var password = md5(req.body.newPassword + salt)
                             db.run("update `user` set password=?,salt=? where username=?", [password, salt, req.body.userName], function(err) {
                                 if (err)
                                     res.send("Internal Error", 500)
@@ -1101,7 +1103,7 @@ var mixioServer = function() {
                         else
                             res.send({
                                 "status": "failed",
-                                "reason": "wrong answer"
+                                "reason": "wrong password"
                             })
                     } else {
                         res.send({
@@ -1118,6 +1120,7 @@ var mixioServer = function() {
                 "reason": "bad request"
             })
     })
+
 
     app.get('/getDevices', function(req, res) {
         if (req.session.userName && req.query.userName) {
