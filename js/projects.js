@@ -1158,7 +1158,7 @@ function view_project(projectName, projectType) {
                 }
                 var tableFields = []
                 for (field in fields) {
-                    var cvtName = fields[field]
+                    let cvtName = fields[field]
                     if (cvtName == "时间")
                         cvtName = JSLang[lang].time
                     else if (cvtName == "值")
@@ -1166,7 +1166,10 @@ function view_project(projectName, projectType) {
                     tableFields.push({
                         name: cvtName,
                         type: 'text',
-                        align: 'center'
+                        align: 'center',
+                        itemTemplate: function(value, item) {
+                            return item[cvtName]
+                        }
                     })
                 }
                 var parsedDataset = []
