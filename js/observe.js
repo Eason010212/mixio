@@ -73,7 +73,7 @@ $(function(){
                 'input_weather':add_weather,
                 'table':add_table,
                 'decorate_text':add_decorate_text,
-                'decorate_pic':add_decorate_pic,
+                'decorate_pic':function(){},
                 'magic':add_magic
             }
             console.log(un.attr('user-type'))
