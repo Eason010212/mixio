@@ -470,3 +470,29 @@ input{
   padding:0 !important;
   overflow: visible !important;
 }
+
+.pixel{
+  width: 18px;
+  height: 18px;
+  margin:1px;
+  background-color:#eeeeee;
+}
+
+.pixelrow{
+  display:flex;
+  flex-direction:row;
+  width: 100%;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.pixelDiv{
+  display:flex;
+  flex-direction:column;
+  align-items: stretch;
+  justify-content: space-between;
+  width: 100%;
+  padding:10px;
+  padding-top:0;
+  padding-bottom: 0;
+}
