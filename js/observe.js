@@ -74,7 +74,9 @@ $(function(){
                 'table':add_table,
                 'decorate_text':add_decorate_text,
                 'decorate_pic':function(){},
-                'magic':add_magic
+                'magic':add_magic,
+                'ble': add_ble,
+                'pixel': add_pixel
             }
             console.log(un.attr('user-type'))
             toolkits[un.attr('user-type')](un.attr('user-title'),un.attr('user-topic'),un.attr('user-content'),un.attr('style'));

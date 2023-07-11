@@ -1,5 +1,5 @@
 var globalVer = "MixIO ver 1.11.24"
-
+var globalBLE = {}
 function copy(obj) {
     return JSON.parse(JSON.stringify(obj))
 }
@@ -920,7 +920,8 @@ function view_project(projectName, projectType) {
                             '值': stringendecoder.encodeHtml(ms)
                         })
                     } else {
-                        topicSelect.append($("<option value='" + tp + "'>" + tp + "</option>"))
+                        for(topicSelect of topicSelects)
+                            topicSelect.append($("<option value='" + tp + "'>" + tp + "</option>"))
                         globalTableProjectInfo.received[tp] = []
                         globalTableProjectInfo.received[tp].unshift({
                             '时间': timeStamp2String(),
@@ -932,8 +933,17 @@ function view_project(projectName, projectType) {
                         topicSelect.val(stringendecoder.decodeHtml(tp))
                     }
                     if (globalTableProjectInfo.currentTp == tp) {
-                        dataset = copy(globalTableProjectInfo.received[tp])
-                        init_table()
+                        fresh(true)
+                    }
+                    else
+                    {
+                        for(topic = 0; topic<= globalTableProjectInfo.currentTp.split(',,').length; topic = topic + 1) {
+                            if(tp == globalTableProjectInfo.currentTp.split(',,')[topic])
+                            {
+                                fresh(true)
+                                break
+                            }
+                        }
                     }
                 } else if (topic1.split('/').length == 4 && isMixly) {
                     var tp = stringendecoder.encodeHtml(topic1.split('/')[3])
@@ -963,7 +973,8 @@ function view_project(projectName, projectType) {
                             '值': stringendecoder.encodeHtml(ms)
                         })
                     } else {
-                        topicSelect.append($("<option value='" + tp + "'>" + tp + "</option>"))
+                        for(topicSelect of topicSelects)
+                            topicSelect.append($("<option value='" + tp + "'>" + tp + "</option>"))
                         globalTableProjectInfo.received[tp] = []
                         globalTableProjectInfo.received[tp].unshift({
                             '时间': timeStamp2String(),
@@ -975,8 +986,17 @@ function view_project(projectName, projectType) {
                         topicSelect.val(stringendecoder.decodeHtml(tp))
                     }
                     if (globalTableProjectInfo.currentTp == tp) {
-                        dataset = copy(globalTableProjectInfo.received[tp])
-                        init_table()
+                        fresh(true)
+                    }
+                    else
+                    {
+                        for(topic = 0; topic<= globalTableProjectInfo.currentTp.split(',,').length; topic = topic + 1) {
+                            if(tp == globalTableProjectInfo.currentTp.split(',,')[topic])
+                            {
+                                fresh(true)
+                                break
+                            }
+                        }
                     }
                 }
 
@@ -1005,40 +1025,129 @@ function view_project(projectName, projectType) {
                     'input_weather': add_weather,
                     'trigger': add_trigger,
                     'magic': add_magic,
+                    'pixel': add_pixel,
                     'table': add_table,
                     'decorate_text': add_decorate_text,
                     'decorate_pic': add_decorate_pic,
-                    'timer': add_timer
+                    'timer': add_timer,
+                    'ble': add_ble
                 }
                 toolkits[un.attr('user-type')](un.attr('user-title'), un.attr('user-topic'), un.attr('user-content'), un.attr('style'))
             }
             var topicOuterDiv = $("<div style='width:100%;display:flex;align-items:center;'></div>")
-            var topicDiv = $("<div style='z-index:1000;margin:0;display:flex;flex-direction:row;align-items:center;justify-content:center;margin-bottom:20px;width:320px;background-color:white;border-radius:0 0 40px 0;padding-left:10px;padding-right:10px;padding-top:5px;padding-bottom:10px;box-shadow:0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important'></div>")
+            var topicDiv = $("<div style='z-index:1000;margin:0;display:flex;flex-direction:row;align-items:center;justify-content:center;margin-bottom:20px;width:320px;background-color:white;border-radius:0 0 40px 0;padding-left:10px;padding-right:10px;padding-top:5px;padding-bottom:10px;box-shadow:0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important;flex-wrap:wrap'></div>")
             var topicSelect = $("<select class='form-control' style='width:150px;'></select>")
+            var topicSelects = []
+            topicSelects.push(topicSelect)
             topicDiv.append($("<span style='font-weight:bold'>" + JSLang[lang].listener + "&nbsp;</span>"))
             topicSelect.append($("<option value='$'>" + JSLang[lang].select + "</option>"))
-            topicSelect.bind('change', function() {
-                chart.clear()
-                globalTableProjectInfo.currentTp = stringendecoder.encodeHtml(topicSelect.val())
-                if (globalTableProjectInfo.currentTp != "$")
-                    dataset = copy(globalTableProjectInfo.received[globalTableProjectInfo.currentTp])
-                else
+            fresh = function(clear){
+                if(!clear)
+                    chart.clear()
+                var tmpArr = []
+                for(var i=0;i<topicSelects.length;i++)
+                {
+                    tmpArr.push(topicSelects[i].val())
+                }
+                globalTableProjectInfo.currentTp = tmpArr.join(',,')
+                var toBeMerge = []
+                for(var i=0;i<topicSelects.length;i++)
+                {
+                    if(topicSelects[i].val()!='$')
+                        toBeMerge.push(copy(globalTableProjectInfo.received[topicSelects[i].val()]))
+                }
+                if(toBeMerge.length>1)
+                {
+                    var allTime = []
+                    for(var i=0;i<toBeMerge.length;i++)
+                    {
+                        for(var j=0;j<toBeMerge[i].length;j++)
+                        {
+                            var time = toBeMerge[i][j][JSLang[lang].time]
+                            if(allTime.indexOf(time)==-1 && time!=undefined)
+                                allTime.push(time)
+                        }
+                    }
+                    // sort allTime from small to big
+                    allTime.sort(function(a,b){
+                        return new Date(b) - new Date(a)
+                    })
+                    console.log(allTime)
+                    // merge all data
                     dataset = []
+                    for(var i=0;i<allTime.length;i++)
+                    {
+                        var tmp = {}
+                        tmp[JSLang[lang].time] = allTime[i]
+                        tmp[JSLang[lang].value] = {}
+                        for(var j=0;j<toBeMerge.length;j++)
+                        {
+                            for(var k=0;k<toBeMerge[j].length;k++)
+                            {
+                                if(toBeMerge[j][k][JSLang[lang].time]==allTime[i])
+                                {
+                                    if(isJSON(stringendecoder.decodeHtml(toBeMerge[j][k][JSLang[lang].value])))
+                                    {
+                                        toBeMerge[j][k][JSLang[lang].value] = JSON.parse(stringendecoder.decodeHtml(toBeMerge[j][k][JSLang[lang].value]))
+                                        for(var key in toBeMerge[j][k][JSLang[lang].value])
+                                        {
+                                            tmp[JSLang[lang].value][topicSelects[j].val() + " - " + key] = toBeMerge[j][k][JSLang[lang].value][key]
+                                        }
+                                    }
+                                    else{
+                                        tmp[JSLang[lang].value][topicSelects[j].val()] = toBeMerge[j][k][JSLang[lang].value]
+                                    }
+                                }
+                            }
+                        }
+                        tmp[JSLang[lang].value] = stringendecoder.decodeHtml(JSON.stringify(tmp[JSLang[lang].value]))
+                        dataset.push(tmp)
+                    }
+                }
+                else if(toBeMerge.length==1)
+                {
+                    dataset = toBeMerge[0]
+                }
+                else
+                {
+                    dataset = []
+                }
                 init_table()
+            }
+            topicSelect.bind('change', function() {
+                fresh()
             })
             globalTableProjectInfo.currentTp = '$'
             topicDiv.append(topicSelect)
-            var removeTopicButton = $('<a class="btn btn-danger btn-circle btn-sm" style="margin-left:8px"><i class="fa fa-close"></i></a>')
-            topicDiv.append(removeTopicButton)
-            removeTopicButton.click(function() {
-                if (globalTableProjectInfo.currentTp != "$") {
-                    delete globalTableProjectInfo.received[globalTableProjectInfo.currentTp]
-                    topicSelect.val('$')
-                    topicSelect.children("[value='" + globalTableProjectInfo.currentTp + "']").remove()
-                    globalTableProjectInfo.currentTp = '$'
-                    dataset = []
-                    init_table()
+            var addTopicButton = $('<a class="btn btn-primary btn-circle btn-sm" style="margin-left:8px"><i class="fa fa-plus"></i></a>')
+            topicDiv.append(addTopicButton)
+            var addBind = function(){
+                var newtopicSelect = $("<select class='form-control' style='width:150px; margin-top:5px'></select>")
+                newtopicSelect.append($("<option value='$'>" + JSLang[lang].select + "</option>"))
+                for (var tp in globalTableProjectInfo.received) {
+                    newtopicSelect.append($("<option value='" + tp + "'>" + tp + "</option>"))
                 }
+                topicSelects.push(newtopicSelect)
+                var tempTitle = $("<span style='font-weight:bold; color:white; margin-top:5px'>" + JSLang[lang].listener + "&nbsp;</span>")
+                var removeTopicButton = $('<a class="btn btn-primary btn-circle btn-sm" style="margin-left:8px; margin-top:5px"><i class="fa fa-minus"></i></a>')
+                addTopicButton.after(removeTopicButton)
+                addTopicButton.after(newtopicSelect)
+                addTopicButton.after(tempTitle)
+                removeTopicButton.bind('click',function(){
+                    newtopicSelect.remove()
+                    removeTopicButton.remove()
+                    tempTitle.remove()
+                    var index = topicSelects.indexOf(newtopicSelect)
+                    topicSelects.splice(index,1)
+                    fresh()
+                })
+                newtopicSelect.bind('change', function() {
+                    fresh()
+                })
+                
+            }
+            addTopicButton.bind('click', function() {
+                addBind()
             })
             topicOuterDiv.append(topicDiv)
             grid2.append(topicOuterDiv)
@@ -1059,12 +1168,50 @@ function view_project(projectName, projectType) {
             leftCardTitle.append($('<h6 class="m-0 font-weight-bold text-primary">' + JSLang[lang].monitor + '</h6>'))
             var downloadButton = $('<a class="btn btn-primary btn-sm" download="data.csv" style="padding:0 5px 0 5px;margin-left:10px">' + JSLang[lang].download + '</a>')
             var clearButton = $('<a class="btn btn-success btn-sm" style="padding:0 5px 0 5px;margin-left:8px">' + JSLang[lang].clear + '</a>')
+            var clearAllButton = $('<a class="btn btn-warning btn-sm" style="padding:0 5px 0 5px;margin-left:8px">' + JSLang[lang].clearAll + '</a>')
+            clearAllButton.click(function() {
+                if (globalTableProjectInfo.currentTp != "$") {
+                    if (globalTableProjectInfo.currentTp.split(",,").length == 1)
+                        delete globalTableProjectInfo.received[globalTableProjectInfo.currentTp]
+                    else {
+                        var temp = globalTableProjectInfo.currentTp.split(",,")
+                        for (var i in temp) {
+                            if(temp[i] != "$")
+                                delete globalTableProjectInfo.received[temp[i]]
+                        }
+                    }
+                    for(var i in topicSelects)
+                    {
+                        topicSelects[i].val('$')
+                        if (globalTableProjectInfo.currentTp.split(",,").length == 1)
+                            topicSelects[i].children("[value='" + globalTableProjectInfo.currentTp + "']").remove()
+                        else {
+                            var temp = globalTableProjectInfo.currentTp.split(",,")
+                            for (var j in temp) {
+                                if(temp[j] != "$")
+                                    topicSelects[i].children("[value='" + temp[j] + "']").remove()
+                            }
+                        }
+                    }
+                    globalTableProjectInfo.currentTp = '$'
+                    dataset = []
+                    init_table()
+                }
+            })
             leftCardTitle.append(downloadButton)
             leftCardTitle.append(clearButton)
+            leftCardTitle.append(clearAllButton)
             clearButton.click(function() {
-                globalTableProjectInfo.received[globalTableProjectInfo.currentTp] = []
-                dataset = []
-                init_table()
+                if (globalTableProjectInfo.currentTp.split(",,").length == 1)
+                    globalTableProjectInfo.received[globalTableProjectInfo.currentTp] = []
+                else {
+                    var temp = globalTableProjectInfo.currentTp.split(",,")
+                    for (var i in temp) {
+                        if(temp[i] != "$")
+                            globalTableProjectInfo.received[temp[i]] = []
+                    }
+                }
+                fresh()
             })
             var sync_export = function() {
                 var fields = globalTable.data().JSGrid.fields
@@ -1163,6 +1310,7 @@ function view_project(projectName, projectType) {
                         cvtName = JSLang[lang].time
                     else if (cvtName == "值")
                         cvtName = JSLang[lang].value
+                    console.log(cvtName)
                     tableFields.push({
                         name: cvtName,
                         type: 'text',
@@ -1412,7 +1560,6 @@ function view_project(projectName, projectType) {
                     if (isJSON(stringendecoder.decodeHtml(globalTableProjectInfo['toBeSentJSON']))) {
                         var json_parsed = JSON.parse(stringendecoder.decodeHtml(globalTableProjectInfo['toBeSentJSON']))
                         for (key in json_parsed) {
-                            console.log(key)
                             let valueDiv = $('<div style="display:flex;align-items:center;margin-bottom:10px"></div>')
                             valueDiv.append($('<span style="margin-right:8px">' + JSLang[lang].key + '</span>'))
                             let keyInput = $('<input class="form-control" style="min-width:0;width:120px"/>')
@@ -1457,7 +1604,9 @@ function view_project(projectName, projectType) {
                         }
                     }
                     if (globalTableProjectInfo['currentTp'] != '$') {
-                        dataset = copy(globalTableProjectInfo['received'][globalTableProjectInfo['currentTp']])
+                        globalTableProjectInfo['currentTp'] = globalTableProjectInfo['currentTp'].split(',,')[0]
+                        topicSelect.val(stringendecoder.decodeHtml(globalTableProjectInfo['currentTp']))
+                        fresh()
                     }
                     messageInput.val(stringendecoder.decodeHtml(globalTableProjectInfo['toBeSent']))
                     if (globalTableProjectInfo['currentTp2'])
@@ -1521,7 +1670,7 @@ function add_widget() {
     widget_list.append(timer_add)
     var trigger_add = $("<div class='widget_div'><div><img src='icons/trigger.svg'><span>" + JSLang[lang].trigger + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(trigger_add)
-    var ble_add = $("<div class='widget_div'><div><img src='icons/ble.svg'><span>" + JSLang[lang].ble + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
+    var ble_add = $("<div class='widget_div'><div><img src='icons/ble.svg'><span>" + JSLang[lang].ble + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(ble_add)
     widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].data + "</h5>"))
     var output_chart_add = $("<div class='widget_div'><div><img src='icons/output_chart.svg'><span>" + JSLang[lang].lineChart + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
@@ -1541,7 +1690,7 @@ function add_widget() {
     widget_list.append(input_keyboard_add)
     var output_text_add = $("<div class='widget_div'><div><img src='icons/output_text.svg'><span>" + JSLang[lang].screen + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(output_text_add)
-    var output_pixel_add = $("<div class='widget_div'><div><img src='icons/output_pixel.svg'><span>" + JSLang[lang].pixel + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
+    var output_pixel_add = $("<div class='widget_div'><div><img src='icons/output_pixel.svg'><span>" + JSLang[lang].pixel + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(output_pixel_add)
     var decorate_text_add = $("<div class='widget_div'><div><img src='icons/decorate_text.svg'><span>" + JSLang[lang].label + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(decorate_text_add)
@@ -1549,6 +1698,162 @@ function add_widget() {
     widget_list.append(decorate_pic_add)
     var magic_add = $("<div class='widget_div'><div><img src='icons/magic.svg'><span>" + JSLang[lang].magic + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(magic_add)
+    ble_add.children("a").click(function() {
+        d.close().remove()
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/ble.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].readMessTopic + '</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div.append(topic_input)
+        topic_input.val("bleread")
+        editForm.append(topic_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].writeMessTopic + '</h5>'))
+        var topic_input_div_2 = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input_2 = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div_2.append(topic_input_2)
+        topic_input_2.val("blewrite")
+        editForm.append(topic_input_div_2)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].bleTarget + '</h5>'))
+        var ble_target_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var ble_target = $("<input class='form-control form-control-user'  style='text-align:center;cursor:pointer' readonly/>")
+        ble_target.val(JSLang[lang].select)
+        ble_target_div.append(ble_target)
+        ble_target.click(function() {
+            // use web bluetooth to select device, no filter
+            if (navigator.bluetooth) {
+                navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    // read and write to device characteristic (for example, to send data to a micro:bit)
+                    optionalServices: [0xfff0]
+                }).then(function(device) {
+                    var old_ble_target = ble_target.val()
+                    if(old_ble_target != JSLang[lang].select)
+                    {
+                        globalBLE[old_ble_target].gatt.disconnect()
+                        delete globalBLE[old_ble_target]
+                    }
+                    ble_target.val(device.name + ' (' + device.id + ')')
+                    globalBLE[device.name + ' (' + device.id + ')'] = device
+                }).catch(function(error) {
+                    // if user cancel the selection(NotFoundError)
+                    if(error.name == "NotFoundError")
+                    {
+                        var old_ble_target = ble_target.val()
+                        globalBLE[old_ble_target].gatt.disconnect()
+                        delete globalBLE[old_ble_target]
+                        ble_target.val(JSLang[lang].select)
+                        title.parent().parent().attr('user-content', JSLang[lang].select)
+                    }
+                    else
+                        showtext(error)
+                })
+            } else {
+                showtext(JSLang[lang].noWebBluetooth)
+            }
+        })
+
+        editForm.append(ble_target_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function() {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+                var re = /^[a-z0-9]+$/i;
+                if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11 && getByteLen(topic_input_2.val()) > 0 && getByteLen(topic_input_2.val()) < 11)
+                    if (true) {
+                        if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
+                            add_ble(title_input.val(), topic_input.val()+","+topic_input_2.val(), ble_target.val())
+                            modifyDia.close().remove()
+                        } else
+                            showtext(JSLang[lang].sameUnit)
+                    } else
+                        showtext("")
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            } else
+                showtext(JSLang[lang].nameLenIllegal)
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function() {
+            modifyDia.close().remove()
+            add_widget()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content: editForm[0],
+            cancel: false
+        })
+        modifyDia.showModal()
+    })
+
+    output_pixel_add.children("a").click(function() {
+        d.close().remove()
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_pixel.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div.append(topic_input)
+        topic_input.val("pixel")
+        editForm.append(topic_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].xpixel + '</h5>'))
+        var xpixel_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var xpixel_input = $("<input class='form-control form-control-user' type='number' min='1' max='100' style='text-align:center'/>")
+        xpixel_input_div.append(xpixel_input)
+        editForm.append(xpixel_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].ypixel + '</h5>'))
+        var ypixel_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var ypixel_input = $("<input class='form-control form-control-user' type='number' min='1' max='100' style='text-align:center'/>")
+        ypixel_input_div.append(ypixel_input)
+        editForm.append(ypixel_input_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        xpixel_input.val(30)
+        ypixel_input.val(20)
+        confirmEdit.click(function() {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+                var re = /^[a-z0-9]+$/i;
+                if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                    if (xpixel_input.val() > 0 && xpixel_input.val() < 101 && ypixel_input.val() > 0 && ypixel_input.val() < 101) {
+                        if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
+                            add_pixel(title_input.val(), topic_input.val(), xpixel_input.val() + "," + ypixel_input.val())
+                            modifyDia.close().remove()
+                        } else
+                            showtext(JSLang[lang].sameUnit)
+                    } else
+                        showtext(JSLang[lang].invalidPixel)
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            } else
+                showtext(JSLang[lang].nameLenIllegal)
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function() {
+            modifyDia.close().remove()
+            add_widget()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content: editForm[0],
+            cancel: false
+        })
+        modifyDia.showModal()
+    })
+
     input_button_add.children("a").click(function() {
         d.close().remove()
         var editForm = $('<div class="nnt"/>')
@@ -2279,8 +2584,12 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            add_magic(title_input.val(), undefined, color_select.val())
-            modifyDia.close().remove()
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+                add_magic(title_input.val(), undefined, color_select.val())
+                modifyDia.close().remove()
+            }
+            else
+                showtext(JSLang[lang].nameLenIllegal)
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function() {

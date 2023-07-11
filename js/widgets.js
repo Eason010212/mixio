@@ -4,6 +4,7 @@
  * @Version 2.8.30
  */
 
+
 function add_block(width, height, contents, attrs) {
     var itemdiv = $("<div/>")
     itemdiv.attr("class", "item")
@@ -35,16 +36,71 @@ function add_block(width, height, contents, attrs) {
         isOpen = true
     })
     itemdiv.bind('mousedown', function(event) {
-        grid.append(itemdiv[0])
+        if(itemdiv.attr('user-type') != 'magic')
+            grid.append(itemdiv[0])
+        else
+            grid.prepend(itemdiv[0])
     })
     itemdiv.draggable({
         onStopDrag: function() {
+            
+            if (itemdiv.attr('user-type') == 'magic') {
+                var left = parseInt(itemdiv.css('left'))
+                var top = parseInt(itemdiv.css('top'))
+                var width = parseInt(itemdiv.css('width'))
+                var height = parseInt(itemdiv.css('height'))
+                var items = $('.item')
+                for (var i = 0; i < items.length; i++) {
+                    var item = $(items[i])
+                    if (item.attr('user-type') == 'magic')
+                        continue
+                    var itemLeft = parseInt(item.css('left'))
+                    var itemTop = parseInt(item.css('top'))
+                    var itemWidth = parseInt(item.css('width'))
+                    var itemHeight = parseInt(item.css('height'))
+                    if (itemLeft >= left && itemLeft + itemWidth <= left + width && itemTop >= top && itemTop + itemHeight <= top + height) {
+                        console.log("here")
+                        item.css('left', itemLeft - itemLeft % 20 + (itemLeft % 20>10?1:0)*20 + 'px')
+                        item.css('top', itemTop - itemTop % 20 + (itemTop % 20>10?1:0)*20 + 'px')
+                    }
+                }
+            }
             var stdLeft = parseInt(itemdiv.css('left')) - (parseInt(itemdiv.css('left')) % 20) + (parseInt(itemdiv.css('left')) % 20 > 10 ? 1 : 0) * 20
             var stdTop = parseInt(itemdiv.css('top')) - (parseInt(itemdiv.css('top')) % 20) + (parseInt(itemdiv.css('top')) % 20 > 10 ? 1 : 0) * 20
             itemdiv.css('left', stdLeft + 'px')
             itemdiv.css('top', stdTop + 'px')
+        },
+        onStartDrag: function(event) {
+            lastDragX = event.pageX
+            lastDragY = event.pageY
+        },
+        onDrag: function(event) {
+            // when drag unit with user-type 'magic', any other unit in the box will be dragged too
+            if (itemdiv.attr('user-type') == 'magic') {
+                var left = parseInt(itemdiv.css('left'))
+                var top = parseInt(itemdiv.css('top'))
+                var width = parseInt(itemdiv.css('width'))
+                var height = parseInt(itemdiv.css('height'))
+                var items = $('.item')
+                for (var i = 0; i < items.length; i++) {
+                    var item = $(items[i])
+                    if (item.attr('user-type') == 'magic')
+                        continue
+                    var itemLeft = parseInt(item.css('left'))
+                    var itemTop = parseInt(item.css('top'))
+                    var itemWidth = parseInt(item.css('width'))
+                    var itemHeight = parseInt(item.css('height'))
+                    if (itemLeft >= left && itemLeft + itemWidth <= left + width && itemTop >= top && itemTop + itemHeight <= top + height) {
+                        item.css('left', itemLeft + event.pageX - lastDragX + 'px')
+                        item.css('top', itemTop + event.pageY - lastDragY + 'px')
+                    }
+                }
+            }
+            lastDragX = event.pageX
+            lastDragY = event.pageY
         }
     })
+    if(itemdiv.attr('user-type') != 'pixel')
     itemdiv.resizable({
         onStopResize: function() {
             var stdLeft = parseInt(itemdiv.css('left')) - parseInt(itemdiv.css('left')) % 20 + (parseInt(itemdiv.css('left')) % 20 > 10 ? 1 : 0) * 20
@@ -58,6 +114,187 @@ function add_block(width, height, contents, attrs) {
         }
     })
     return itemdiv
+}
+
+function add_pixel(user_title, user_topic, user_content, user_style) {
+    var isAlive = true
+    var contents = []
+    var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    contents.push(title)
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
+    var pixelDiv = $("<div class='pixelDiv'/>")
+    var xpixel = parseInt(user_content.split(',')[0])
+    var ypixel = parseInt(user_content.split(',')[1])
+    for(var i=0;i<ypixel;i++){
+        var row = $("<div class='pixelrow'/>")
+        for(var j=0;j<xpixel;j++){
+            var pixel = $("<div class='pixel'/>")
+            row.append(pixel)
+        }
+        pixelDiv.append(row)
+    }
+    contents.push(pixelDiv)
+    var tbd = null;
+    var delete_on_click = function() {
+        title.parent().parent().remove();
+        isAlive = false
+        if (tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function() {
+        modifyDia.showModal()
+        if (tbd)
+            tbd.remove()
+    }
+    attrs = [
+        ['user-type', 'pixel'],
+        ['user-title', user_title],
+        ['user-topic', user_topic],
+        ['user-content', user_content]
+    ]
+    
+    var itemdiv = add_block(3, 3, contents, attrs)
+    var stdwidth = xpixel*20 + 20 + "px"
+    var stdheight = ypixel*20 + 60 + "px"
+    itemdiv.css('width', stdwidth)
+    itemdiv.css('height', stdheight)
+    var editForm = $("<div class='editForm'/>")
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_pixel.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].xpixel + '</h5>'))
+    var xpixel_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var xpixel_input = $("<input class='form-control form-control-user' type='number' min='1' max='100' style='text-align:center'/>")
+    xpixel_input_div.append(xpixel_input)
+    editForm.append(xpixel_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].ypixel + '</h5>'))
+    var ypixel_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var ypixel_input = $("<input class='form-control form-control-user' type='number' min='1' max='100' style='text-align:center'/>")
+    ypixel_input_div.append(ypixel_input)
+    editForm.append(ypixel_input_div)
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    client.on('message', function(topic1, message1) {
+        if (isAlive && isRunning)
+            if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
+                var content = message1.toString()
+                var pixels = content.split(',')
+                for (var i = 0; i < pixels.length; i++) {
+                    var pixel = pixels[i].split('-')
+                    var x = parseInt(pixel[0])
+                    var y = parseInt(pixel[1])
+                    var color = pixel[2]
+                    if(color == '0')
+                        color = '#EEEEEE'
+                    else if(color == '1')
+                        color = '#4E73DF'
+                    var pixel = itemdiv.find('.pixelrow').eq(x).find('.pixel').eq(y)
+                    pixel.css('background-color', color)
+                }
+            }
+    })
+    confirmEdit.click(function() {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            var re = /^[a-z0-9]+$/i;
+            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                if (xpixel_input.val() > 0 && xpixel_input.val() < 101 && ypixel_input.val() > 0 && ypixel_input.val() < 101) {
+                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                        xpixel = xpixel_input.val()
+                        ypixel = ypixel_input.val()
+                        title.text(title_input.val())
+                        topic.text(topic_input.val())
+                        title.parent().parent().attr('user-title', title_input.val())
+                        title.parent().parent().attr('user-topic', topic_input.val())
+                        title.parent().parent().attr('user-content', xpixel + ',' + ypixel)
+                        pixelDiv.empty()
+                        console.log(xpixel)
+                        console.log(ypixel)
+                        for(var i=0;i<ypixel;i++){
+                            var row = $("<div class='pixelrow'/>")
+                            for(var j=0;j<xpixel;j++){
+                                var pixel = $("<div class='pixel'/>")
+                                row.append(pixel)
+                            }
+                            pixelDiv.append(row)
+                        }
+                        var stdwidth = xpixel*20 + 20 + "px"
+                        var stdheight = ypixel*20 + 60 + "px"
+                        itemdiv.css('width', stdwidth)
+                        itemdiv.css('height', stdheight)
+                        modifyDia.close()
+                    } else
+                        showtext(JSLang[lang].sameUnit)
+                } else
+                    showtext(JSLang[lang].invalidPixel)
+            else
+                showtext(JSLang[lang].topicLenIllegal)
+        } else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function() {
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content: editForm[0],
+        cancel: false
+    })
+    var showEditBubble = function(event) {
+        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+            var bubble = $('<div style="text-align:center"/>')
+            bubble.append(topicDiv)
+            var d = dialog({
+                align: 'top',
+                content: bubble[0],
+                quickClose: true,
+                autofocus: false
+            });
+            tbd = d;
+            editButton.click(edit_on_click)
+            deleteButton.click(delete_on_click)
+            if (!isRunning)
+                bubble.append(editButton)
+            if (!isRunning)
+                bubble.append(deleteButton)
+            title_input.val(title.text())
+            topic_input.val(topic.text())
+            xpixel_input.val(xpixel)
+            ypixel_input.val(ypixel)
+            if (!d.open)
+                d.show(itemdiv[0]);
+            else
+                d.close()
+        }
+    }
+    if (window.screen.width > 800)
+        itemdiv.click(showEditBubble)
+    else
+        itemdiv[0].addEventListener('touchend', function(event) {
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove', function(e) {
+        e.preventDefault()
+    })
+    if (user_style != undefined)
+        itemdiv.attr('style', user_style)
 }
 
 function add_button(user_title, user_topic, user_content, user_style) {
@@ -572,6 +809,7 @@ function add_controller(user_title, user_topic, user_content, user_style) {
     controllerDiv.children()[0].addEventListener("mouseup", function() {
         pressed = 0
         title.parent().parent().attr('user-content', "0,0")
+        publish(topic.text(), "0,0")
     }, false);
     controllerDiv.children()[0].addEventListener("touchstart", function() {
         pressed = 1
@@ -579,6 +817,7 @@ function add_controller(user_title, user_topic, user_content, user_style) {
     controllerDiv.children()[0].addEventListener("touchend", function() {
         pressed = 0
         title.parent().parent().attr('user-content', "0,0")
+        publish(topic.text(), "0,0")
     }, false);
     var tbd = null;
     var delete_on_click = function() {
@@ -995,6 +1234,302 @@ function add_bulb(user_title, user_topic, user_content, user_style) {
                 bubble.append(deleteButton)
             title_input.val(title.text())
             topic_input.val(topic.text())
+            if (!d.open)
+                d.show(itemdiv[0]);
+            else
+                d.close()
+        }
+    }
+    if (window.screen.width > 800)
+        itemdiv.click(showEditBubble)
+    else
+        itemdiv[0].addEventListener('touchend', function(event) {
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove', function(e) {
+        e.preventDefault()
+    })
+    if (user_style != undefined)
+        itemdiv.attr('style', user_style)
+}
+
+function add_ble(user_title, user_topic, user_content, user_style) {
+    var isAlive = true
+    var contents = []
+    if(user_style != undefined)
+        user_content = JSLang[lang].select
+    var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    contents.push(title)
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
+    attrs = [
+        ['user-type', 'ble'],
+        ['user-title', user_title],
+        ['user-topic', user_topic],
+        ['user-content', user_content]
+    ]
+    var bletarget = user_content
+    var bleconnect = function(){
+        if(bletarget != JSLang[lang].select)
+        {
+            var ble = globalBLE[bletarget]
+            console.log(ble)
+            ble.addEventListener('gattserverdisconnected', function() {
+                showtext("Bluetooth Disconnected")
+                clearInterval(blink)
+                ble_icon.css('color', '#E74A3B')
+                delete globalBLE[bletarget]
+                bletarget = JSLang[lang].select
+                ble_target.val(JSLang[lang].select)
+                title.parent().parent().attr('user-content', JSLang[lang].select)
+            })
+            var blinkStatus = false
+            var blink = setInterval(function() {
+                ble_icon.css('color', blinkStatus ? '#858796' : '#4e73df')
+                blinkStatus = !blinkStatus
+            }, 500)
+            ble.gatt.connect().then(function(server) {
+                console.log(server)
+                var Rok = false
+                var Tok = false
+                var serviceUuid = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
+                var uartRxCharacteristicUuid = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+                var uartTxCharacteristicUuid = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+                server.getPrimaryService(serviceUuid).then(function(service) {
+                    service.getCharacteristic(uartRxCharacteristicUuid).then(function(uartRxCharacteristic) {
+                        Rok = true
+                        if (Rok && Tok) {
+                            clearInterval(blink)
+                            ble_icon.css('color', '#4e73df')
+                        }
+                        client.on('message', function(topic1, message1) {
+                            if(isAlive && topic1.split("/")[(isMixly ? 3 : 2)] == topic.text().split(",")[1])
+                            {
+                                var encoder = new TextEncoder('utf-8');
+                                uartRxCharacteristic.writeValue(encoder.encode(message1))
+                                ble_icon.css('color', '#1cc88a')
+                                    setTimeout(function() {
+                                        ble_icon.css('color', '#36b9cc')
+                                    }, 300)
+                            }
+                        })
+                    }).catch(function(error) {
+                        clearInterval(blink)
+                        showtext(error)
+                        console.log(error)
+                        ble_icon.css('color', '#E74A3B')
+                        delete globalBLE[bletarget]
+                        bletarget = JSLang[lang].select
+                        ble_target.val(JSLang[lang].select)
+                        title.parent().parent().attr('user-content', JSLang[lang].select)
+                    })
+                    service.getCharacteristic(uartTxCharacteristicUuid).then(function(uartTxCharacteristic) {
+                        console.log(uartTxCharacteristic)
+                        uartTxCharacteristic.startNotifications().then(function() {
+                            Tok = true
+                            if (Rok && Tok) {
+                                clearInterval(blink)
+                                ble_icon.css('color', '#4e73df')
+                            }
+                            uartTxCharacteristic.addEventListener('characteristicvaluechanged', function(event) {
+                                // get data
+                                var decoder = new TextDecoder('utf-8');
+                                var value = decoder.decode(event.target.value);
+                                if(isAlive)
+                                {
+                                    publish(topic.text().split(",")[0], value)
+                                    ble_icon.css('color', '#1cc88a')
+                                    setTimeout(function() {
+                                        ble_icon.css('color', '#4e73df')
+                                    }, 300)
+                                }
+                            })
+                        }).catch(function(error) {
+                            clearInterval(blink)
+                            showtext(error)
+                            console.log(error)
+                            ble_icon.css('color', '#E74A3B')
+                            delete globalBLE[bletarget]
+                            bletarget = JSLang[lang].select
+                            ble_target.val(JSLang[lang].select)
+                            title.parent().parent().attr('user-content', JSLang[lang].select)
+                        })
+                    }).catch(function(error) {
+                        clearInterval(blink)
+                        showtext(error)
+                        console.log(error)
+                        ble_icon.css('color', '#E74A3B')
+                        delete globalBLE[bletarget]
+                        bletarget = JSLang[lang].select
+                        ble_target.val(JSLang[lang].select)
+                        title.parent().parent().attr('user-content', JSLang[lang].select)
+                    })
+                }).catch(function(error) {
+                    clearInterval(blink)
+                    showtext(error)
+                    console.log(error)
+                    ble_icon.css('color', '#E74A3B')
+                    delete globalBLE[bletarget]
+                    bletarget = JSLang[lang].select
+                    ble_target.val(JSLang[lang].select)
+                    title.parent().parent().attr('user-content', JSLang[lang].select)
+                })
+            }).catch(function(error) {
+                clearInterval(blink)
+                showtext(error)
+                console.log(error)
+                ble_icon.css('color', '#E74A3B')
+                delete globalBLE[bletarget]
+                bletarget = JSLang[lang].select
+                ble_target.val(JSLang[lang].select)
+                title.parent().parent().attr('user-content', JSLang[lang].select)
+            })
+        }
+        else
+        {
+            ble_icon.css('color', '#858796')
+        }
+    }
+    
+    var icon_div = $('<div style="display:flex;flex-direction:row;align-items:center;justify-content:center"/>')
+    var ble_icon = $('<i class="fa fa-bluetooth-b" style="font-size:40px;color:#858796"></i>')
+    icon_div.append(ble_icon)
+    contents.push(icon_div)
+    var itemdiv = add_block(1, 1, contents, attrs)
+    bleconnect()
+    var tbd = null;
+    var delete_on_click = function() {
+        title.parent().parent().remove();
+        isAlive = false
+        if (tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function() {
+        modifyDia.showModal()
+        if (tbd)
+            tbd.remove()
+    }
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/ble.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].readMessTopic + '</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].writeMessTopic + '</h5>'))
+    var topic_input_div_2 = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input_2 = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div_2.append(topic_input_2)
+    editForm.append(topic_input_div_2)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].bleTarget + '</h5>'))
+    var ble_target_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var ble_target = $("<input class='form-control form-control-user'  style='text-align:center;cursor:pointer' readonly/>")
+    ble_target.val(JSLang[lang].select)
+    ble_target_div.append(ble_target)
+    ble_target.click(function() {
+        // use web bluetooth to select device, no filter
+        if (navigator.bluetooth) {
+            navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                // read and write to device characteristic (for example, to send data to a micro:bit)
+                optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e', '6e400002-b5a3-f393-e0a9-e50e24dcca9e', '6e400003-b5a3-f393-e0a9-e50e24dcca9e']
+            }).then(function(device) {
+                var old_ble_target = ble_target.val()
+                if(old_ble_target != JSLang[lang].select)
+                {
+                    globalBLE[old_ble_target].gatt.disconnect()
+                    delete globalBLE[old_ble_target]
+                }
+                ble_target.val(device.name + ' (' + device.id + ')')
+                globalBLE[device.name + ' (' + device.id + ')'] = device
+            }).catch(function(error) {
+                var old_ble_target = ble_target.val()
+                // if user cancel the selection(NotFoundError)
+                if(error.name == "NotFoundError")
+                {
+                    if(old_ble_target != JSLang[lang].select)
+                    {
+                        globalBLE[old_ble_target].gatt.disconnect()
+                        delete globalBLE[old_ble_target]
+                    }
+                    ble_target.val(JSLang[lang].select)
+                    title.parent().parent().attr('user-content', JSLang[lang].select)
+                }
+                else
+                    showtext(error)
+            })
+        } else {
+            showtext(JSLang[lang].noWebBluetooth)
+        }
+    })
+    editForm.append(ble_target_div)
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function() {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            var re = /^[a-z0-9]+$/i;
+            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11 && getByteLen(topic_input_2.val()) > 0 && getByteLen(topic_input_2.val()) < 11)
+                if (true) {
+                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                        title.parent().parent().attr('user-title', title_input.val())
+                        title.parent().parent().attr('user-topic', topic_input.val())
+                        title.parent().parent().attr('user-content', ble_target.val())
+                        bletarget = ble_target.val()
+                        title.text(title_input.val())
+                        topic.text(topic_input.val() + "," + topic_input_2.val())
+                        modifyDia.close()
+                        bleconnect()
+                    } else
+                        showtext(JSLang[lang].sameUnit)
+                } else
+                    showtext("")
+            else
+                showtext(JSLang[lang].topicLenIllegal)
+        } else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function() {
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content: editForm[0],
+        cancel: false
+    })
+    var showEditBubble = function(event) {
+        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+            var bubble = $('<div style="text-align:center"/>')
+            bubble.append(topicDiv)
+            var d = dialog({
+                align: 'top',
+                content: bubble[0],
+                quickClose: true,
+                autofocus: false
+            });
+            tbd = d;
+            editButton.click(edit_on_click)
+            deleteButton.click(delete_on_click)
+            if (!isRunning)
+                bubble.append(editButton)
+            if (!isRunning)
+                bubble.append(deleteButton)
+            title_input.val(title.text())
+            topic_input.val(topic.text().split(",")[0])
+            topic_input_2.val(topic.text().split(",")[1])
+            ble_target.val(bletarget)
             if (!d.open)
                 d.show(itemdiv[0]);
             else
@@ -2686,7 +3221,7 @@ function add_text(user_title, user_topic, user_content, user_style) {
     topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
     topicDiv.append(topic)
     var textDiv = $("<div/>")
-    textDiv.text(stringendecoder.decodeHtml(user_content))
+    textDiv.html(stringendecoder.decodeHtml(user_content))
     textDiv.attr('class', 'mid_screen')
     contents.push(textDiv)
     attrs = [
@@ -2702,7 +3237,9 @@ function add_text(user_title, user_topic, user_content, user_style) {
     client.on('message', function(topic1, message1) {
         if (isAlive && isRunning)
             if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
-                textDiv.text(message1)
+                textDiv.empty()
+                // set innerHTML
+                textDiv.html(stringendecoder.decodeHtml(String(message1)))
                 title.parent().parent().attr('user-content', stringendecoder.encodeHtml(String(message1)))
                 itemdiv.trigger(MixIO.eventTags.TEXT_SCREEN_CHANGED, [String(message1)])
             }
@@ -3957,7 +4494,14 @@ function add_decorate_text(user_title, user_topic, user_content, user_style) {
 function add_decorate_pic(user_title, user_topic, user_content, user_style) {
     var isAlive = true
     var contents = []
-    var ctt = $("<img style='height:100%;width:100%' src='" + user_content + "'></img>")
+    // check user_content type: image or video
+    var ctt = null
+    if(user_content.endsWith(".mp4") || user_content.endsWith(".webm") || user_content.endsWith(".ogg")){
+        var ctt = $("<video style='height:100%;width:100%' src='" + user_content + "' controls loop></video>")
+    }else
+    {
+        var ctt = $("<img style='height:100%;width:100%' src='" + user_content + "'></img>")
+    }
     contents.push(ctt)
     attrs = [
         ['user-type', 'decorate_pic'],
@@ -3989,8 +4533,19 @@ function add_decorate_pic(user_title, user_topic, user_content, user_style) {
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
         modifyDia.close()
-        ctt.attr("src", text_input.val())
-        ctt.parent().parent().attr("user-content", text_input.val())
+        if(text_input.val().endsWith(".mp4") || text_input.val().endsWith(".webm") || text_input.val().endsWith(".ogg")){
+            var newCTT = $("<video style='height:100%;width:100%' src='" + text_input.val() + "' controls loop></video>")
+            ctt.parent().html(newCTT)
+            ctt = newCTT
+        }else
+        {
+            var newCTT = $("<img style='height:100%;width:100%' src='" + text_input.val() + "'></img>")
+            ctt.parent().html(newCTT)
+            ctt = newCTT
+        }
+        console.log(text_input.val())
+        console.log(itemdiv)
+        itemdiv.attr("user-content", text_input.val())
     })
     var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
     cancelEdit.click(function() {
