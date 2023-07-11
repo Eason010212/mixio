@@ -274,7 +274,7 @@
                                             <td style="min-width:100px">
                                                 消息量
                                             </td>
-                                            <td style="min-width:300px">
+                                            <td style="min-width:100px">
                                                 执行操作
                                             </td>
                                         </thead>
@@ -309,73 +309,6 @@
                     setTimeout(function(){
                         window.location.href = window.location.href
                     },1000)
-                }
-                else
-                {
-                    showtext("操作失败")
-                }
-            })
-        }
-        var clearProject = function(userName){
-            $.get('clearMessage',{
-                "userName":userName
-            },function(res){
-                if(res == 1)
-                {
-                    $.get('clearProject',{
-                        "userName":userName
-                    },function(res){
-                        if(res == 1)
-                        {
-                            showtext("操作成功！")
-                            setTimeout(function(){
-                                window.location.href = window.location.href
-                            },1000)
-                        }
-                        else
-                        {
-                            showtext("操作失败")
-                        }
-                    })
-                }
-                else
-                {
-                    showtext("操作失败")
-                }
-            })
-        }
-        var clearUser = function(userName){
-            $.get('clearMessage',{
-                "userName":userName
-            },function(res){
-                if(res == 1)
-                {
-                    $.get('clearProject',{
-                        "userName":userName
-                    },function(res){
-                        if(res == 1)
-                        {
-                            $.get('clearUser',{
-                                "userName":userName
-                            },function(res){
-                                if(res == 1)
-                                {
-                                    showtext("操作成功！")
-                                    setTimeout(function(){
-                                        window.location.href = window.location.href
-                                    },1000)
-                                }
-                                else
-                                {
-                                    showtext("操作失败")
-                                }
-                            })
-                        }
-                        else
-                        {
-                            showtext("操作失败")
-                        }
-                    })
                 }
                 else
                 {
