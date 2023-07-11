@@ -71,7 +71,7 @@ i{
     cursor: pointer;
 }
 p, .content ul, .content ol{
-    font-size: 14px;
+    font-size: 16px;
     color: #fff;
     margin-bottom: 16px;
     line-height: 1.6;
@@ -218,7 +218,7 @@ pre{
 .content h4,
 .content h5,
 .content h6 {
-    font-size: 15px;
+    font-size: 18px;
     margin-top: 2.5em;
     margin-bottom: 0.8em;
     color: #034c8f;

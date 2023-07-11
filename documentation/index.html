@@ -39,19 +39,73 @@
 <div class="left-menu">
     <div class="content-logo" style="display: flex;flex-direction: row;align-items: center;">
         <img src="../img/logo.png" style="height:40px;width:38px" />
-        <span style="font-weight:bold;color:white;margin-left:15px;font-size: 25px;">MixIO</span>
+        <span style="font-weight:bold;color:white;margin-left:15px;font-size: 23px;">MixIO | 组件</span>
     </div>
     <div class="content-menu">
         <ul>
-            <li class="scroll-to-link active" data-target="get-started">
-                <a>快速上手指南</a>
+            <li class="scroll-to-link active" data-target="switch">
+                <a>开关</a>
             </li>
-            <li class="scroll-to-link" data-target="widgets">
-                <a>组件说明</a>
+            <li class="scroll-to-link" data-target="button">
+                <a>按键</a>
             </li>
-            <li class="scroll-to-link" data-target="share">
-                <a>项目共享</a>
+            <li class="scroll-to-link" data-target="slider">
+                <a>滑杆</a>
             </li>
+            <li class="scroll-to-link" data-target="joystick">
+                <a>摇杆手柄</a>
+            </li>
+            <li class="scroll-to-link" data-target="rgb">
+                <a>RGB色盘</a>
+            </li>
+            <li class="scroll-to-link" data-target="bulb">
+                <a>指示灯</a>
+            </li>
+            <li class="scroll-to-link" data-target="timer">
+                <a>定时触发器</a>
+            </li>
+            <li class="scroll-to-link" data-target="trigger">
+                <a>条件触发器</a>
+            </li>
+            <li class="scroll-to-link" data-target="ble">
+                <a>蓝牙转发器</a>
+            </li>
+            <li class="scroll-to-link" data-target="chart">
+                <a>折线图表</a>
+            </li>
+            <li class="scroll-to-link" data-target="bar">
+                <a>柱状图表</a>
+            </li>
+            <li class="scroll-to-link" data-target="table">
+                <a>数据表格</a>
+            </li>
+            <li class="scroll-to-link" data-target="map">
+                <a>数据地图</a> 
+            </li>
+            <li class="scroll-to-link" data-target="dashboard">
+                <a>仪表盘</a>
+            </li>
+            <li class="scroll-to-link" data-target="weather">
+                <a>实时气象仪</a>
+            </li>
+            <li class="scroll-to-link" data-target="input">
+                <a>文本输入</a>
+            </li>
+            <li class="scroll-to-link" data-target="screen">
+                <a>文本显示屏</a>
+            </li>
+            <li class="scroll-to-link" data-target="pixel">
+                <a>点阵屏</a>
+            </li>
+            <li class="scroll-to-link" data-target="label">
+                <a>标签</a>、
+            </li>
+            <li class="scroll-to-link" data-target="image">
+                <a>图片</a>
+            </li>
+            <li class="scroll-to-link" data-target="video">
+                <a>视频</a>
+            </li> 
         </ul>
     </div>
 </div>
@@ -59,109 +113,222 @@
 
 <div class="content-page">
     <div class="content">
-        
-        <div class="overflow-hidden content-section" id="content-get-started">
-            
-            <h1 id="get-started">快速上手指南</h1>
-            <p>注意：如要访问MixIO开发者文档，请移步 <a href="../devAPI">dev-api</a></p>
-            <p>
-                MixIO是一个组件化的物联网应用构建平台。在MixIO平台中，你可以便捷地连接、控制、监控各类可编程设备，快速打造易用的物联网应用，并将创意共享给他人。
-            </p>
-            <p>
-                MixIO平台的全部通信均基于开源的MQTT协议。这意味着，凡是支持MQTT协议的硬件设备都能够使用MixIO的开放能力。在本指南描述的应用场景中，MixIO平台是与Mixly图形化编程软件结合使用的。
-            </p>
-            <h3>创建 / 导入项目</h3>
-            <p>
-                假定您已经完成了账号注册并成功登录到了MixIO平台。在打开的“项目管理”页面中，点击右上角的<a class="btn btn-primary btn-circle" style="color:white;transform:scale(0.6)"><i class="fa fa-plus"></i></a>按钮，即可开始创建一个MixIO项目。<br>
-                在弹出的对话框中，您需要为项目指定一个名称。点击<a class="btn btn-primary btn-circle" style="color:white;transform:scale(0.6)"><i class="fa fa-check"></i></a>按钮，即可完成项目创建。<br>
-                如果您想基于其他用户的现有项目创建项目，您也可以通过点击右上角的<a class="btn btn-primary btn-circle" style="color:white;transform:scale(0.6)"><i class="fa fa-cloud-download"></i></a>按钮以导入项目（需要该用户为您提供一个授权码）。
-            </p>
-            <h3>连接设备</h3>
-            <p>
-                成功创建或导入项目后，“项目管理”页面中将出现对应的项目。点击项目缩略图下方的<a class="btn btn-success btn-circle" style="color:white;transform:scale(0.6)"><i class="fa fa-arrow-right"></i></a>按钮，即可进入该项目。<br>
-                进入项目页面后，您可以首先点击右上角的<a class="btn btn-success btn-circle" style="color:white;transform:scale(0.6)"><i class="fa fa-play"></i></a>按钮以运行项目。<br>
-                在项目运行状态下，点击右上角的<a class="btn btn-primary btn-circle" style="color:white;transform:scale(0.6);position:relative;"><i class="fa fa-link"></i></a>按钮，可以查看硬件连接所需的用户名/密码。<b>注意：此密码与您MixIO账号的登录密码不同。</b><br>
-                在Mixly图形化编程软件中，选择物联网→MixIO分区，使用“创建MQTT客户端并连接”程序块，依次键入用户名、硬件连接密码、项目名称，即可完成设备的连接。设备的连接信息将被实时显示在<a class="btn btn-primary btn-circle" style="color:white;transform:scale(0.6);position:relative;"><i class="fa fa-link"></i></a>按钮呼起的对话框中，设备名称为硬件的MAC地址。
-            </p>
-            <h3>添加组件</h3>
-            <p>
-                一个空的MixIO项目仅起到了汇聚设备、共享MQTT连接的作用；要实现控制、监控等特定功能，需要您为项目添加恰当的组件。在运行模式下，项目是不可编辑的；您需要点击右上角的<a class="btn btn-danger btn-circle" style="color:white;transform:scale(0.6)"><i class="fa fa-stop"></i></a>按钮停止项目，以重新进入编辑模式。<br>
-                在编辑模式下，点击右上角的<a class="btn btn-primary btn-circle" style="color:white;transform:scale(0.6)"><i class="fa fa-plus"></i></a>按钮，可以呼起“添加组件”对话框。MixIO平台提供了15种不同的组件，组件的具体功能与见下一章节“组件说明”。<br>
-                添加组件时，您需要为组件指定一个“组件名称”（用以在项目中特异标记该组件），并设定“消息主题”（用以与该组件进行输入/输出交互）。在Mixly图形化编程软件中，使用“发布”与“订阅”程序块，并遵循下一章节“组件说明”中的输入/输出规范，即可充分调用组件功能。<br>
-                在编辑模式下，项目组件的位置是可以自由移动的，组件的各项属性是可以自由更改的。在完成更改后，请您点击右上角的<a class="btn btn-info btn-circle" style="color:white;transform:scale(0.6)"><i class="fa fa-save"></i></a>按钮以保存项目布局。
-                
-            </p>
-        </div>
-        <div class="overflow-hidden content-section" id="content-widgets">
-            <h1 id="widgets">组件说明</h1>
-            <p>
-                MixIO平台提供了13种预设组件，以下为每种组件的功能与输入/输出规范进行详细介绍。
-            </p>
+        <div class="overflow-hidden content-section" id="content-switch">
+            <h1 id="switch">开关</h1>
             <h3>组件总览</h3>
-            <table>
-                <thead>
-                <tr>
-                    <th>组件名称</th>
-                    <th>功能简介</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>按键 / 开关</td>
-                    <td>以按键和开关两种模式响应用户输入，向设定主题发送0/1信号。</td>
-                </tr>
-                <tr>
-                    <td>滑杆</td>
-                    <td>以滑动形式响应用户输入，向设定主题发送数值信息；监听设定主题的数值信息，并进行实时呈现。</td>
-                </tr>
-                <tr>
-                    <td>文本输入</td>
-                    <td>将用户输入的文本信息发送到设定主题。</td>
-                </tr>
-                <tr>
-                    <td>摇杆手柄</td>
-                    <td>以摇杆形式响应用户输入，向设定主题发送输入位置坐标字符串。</td>
-                </tr>
-                <tr>
-                    <td>RGB色盘</td>
-                    <td>支持用户自由选色，将色彩对应的R/G/B通道数值发送到设定主题；监听设定主题的数值信息，并将其实时合成为对应的颜色。</td>
-                </tr>
-                <tr>
-                    <td>指示灯</td>
-                    <td>监听设定主题的数值信号，呈现对应的熄灭/点亮色彩。</td>
-                </tr>
-                <tr>
-                    <td>文本显示屏</td>
-                    <td>监听设定主题的文本信息，将信息进行原样呈现。</td>
-                </tr>
-                <tr>
-                    <td>折线图表</td>
-                    <td>监听设定主题的数值信息，以折线图形式进行呈现，支持多数据源与图表转换。</td>
-                </tr>
-                <tr>
-                    <td>直方图表</td>
-                    <td>监听设定主题的文本信息，以直方图形式进行筛选呈现，支持图表转换。</td>
-                </tr>
-                <tr>
-                    <td>数据表格</td>
-                    <td>监听设定主题的文本信息，以表格形式进行筛选呈现。</td>
-                </tr>
-                <tr>
-                    <td>仪表盘</td>
-                    <td>监听设定主题的数值信息，进行动态呈现。</td>
-                </tr>
-                <tr>
-                    <td>数据地图</td>
-                    <td>监听设定主题下特定格式的消息，在地图上进行包含时空两维信息的可视化呈现。</td>
-                </tr>
-                <tr>
-                    <td>实时气象仪</td>
-                    <td>获取设定地区的实时天气，并向设定主题发送。</td>
-                </tr>
-                </tbody>
-            </table>
+            <p>
+                以“关/开”两种状态响应用户输入，向消息主题发送0/1信号；同时接收消息主题的0/1信号，实现对应的关/开状态呈现。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">反馈模式</span> - 组件的反馈模式，可在此处将“开关”组件转换为“按键”组件。
+            </p>
         </div>
-        
+        <div class="overflow-hidden content-section" id="content-button">
+            <h1 id="button">按键</h1>
+            <h3>组件总览</h3>
+            <p>
+                以“按下/松开”模式响应用户输入，向消息主题发送0/1信号（按下=1，松开=0）。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">反馈模式</span> - 组件的反馈模式，可在此处将“按键”组件转换为“开关”组件。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-slider">
+            <h1 id="slider">滑杆</h1>
+            <h3>组件总览</h3>
+            <p>
+                以“滑动”模式响应用户输入，向消息主题发送数字；同时接收消息主题的数字，实现对应的滑动位置呈现。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">滑动范围</span> - 滑杆的最小值、最大值和步长值。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-joystick">
+            <h1 id="joystick">摇杆手柄</h1>
+            <h3>组件总览</h3>
+            <p>
+                以“摇杆”模式响应用户输入，向消息主题发送"X,Y"格式的字符串, 其中X和Y分别为摇杆的X轴和Y轴的值（范围均为-100~100），每500ms采样一次。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-rgb">
+            <h1 id="rgb">RGB色盘</h1>
+            <h3>组件总览</h3>
+            <p>
+                以“拖动”或“点击”模式响应用户输入，向三个消息主题分别发送R、G、B通道的颜色值（范围均为0~255）。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题（R）</span> - 组件的消息主题（R通道）。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题（G）</span> - 组件的消息主题（G通道）。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题（B）</span> - 组件的消息主题（B通道）。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-bulb">
+            <h1 id="bulb">指示灯</h1>
+            <h3>组件总览</h3>
+            <p>
+                接收消息主题的0/1/2/3信号，实现对应的状态呈现（0=关闭，1=<b style="color: #1cc88a;">绿灯</b>，2=<b style="color:#f6c23e">黄灯</b>，3=<b style="color:#e74a3b">红灯</b>）。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-timer">
+            <h1 id="timer">定时触发器</h1>
+            <h3>组件总览</h3>
+            <p>
+                以设定的“触发间隔”为周期，向“触发消息主题”发送“触发消息内容”，直至触发次数达到“次数上限”（0=无限制）。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">触发消息主题</span> - 组件下发触发消息的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">触发消息内容</span> - 组件下发触发消息的消息内容。
+            </p>
+            <p>
+                <span style="color:#4e73df;">触发间隔</span> - 组件下发触发消息的间隔时间（单位：毫秒）。
+            </p>
+            <p>
+                <span style="color:#4e73df;">次数上限</span> - 组件下发触发消息的次数上限（0=无限制）。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-trigger">
+            <h1 id="trigger">条件触发器</h1>
+            <h3>组件总览</h3>
+            <p>
+                接收条件主题的消息，当来自条件主题的消息满足触发条件的关系组合时，在动作主题发送动作消息。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">条件主题</span> - 组件接收消息的主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">触发条件1</span> - 组件触发动作的条件1。
+            </p>
+            <p>
+                <span style="color:#4e73df;">触发条件2</span> - 组件触发动作的条件2。
+            </p>
+            <p>
+                <span style="color:#4e73df;">条件关系</span> - 组件触发动作需要满足的条件关系（“AND”关系下需要同时满足两项条件方能执行动作，“OR”关系下需要满足至少一项条件方能执行动作，“XOR”关系下需要满足且仅满足一项条件方能执行动作）。
+            </p>
+            <p>
+                <span style="color:#4e73df;">动作主题</span> - 组件下发动作消息的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">动作消息内容</span> - 组件下发动作消息的消息内容。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-ble">
+            <h1 id="ble">蓝牙转发器</h1>
+            <h3>组件总览</h3>
+            <p>
+                连接蓝牙设备，将蓝牙设备的读取与写入对接到消息主题，实现蓝牙设备与MixIO的通信。<br>
+            </p>
+            <p>
+                <b>以下是蓝牙转发器的状态指示灯含义：</b>
+            </p>
+            <p>
+                <span style="color:#4e73df;">深蓝色闪烁标志</span> - 正在尝试连接蓝牙设备。
+            </p>
+            <p>
+                <span style="color:#4e73df;">深蓝色常亮标志</span> - 已连接蓝牙设备。
+            </p>
+            <p>
+                <span style="color: #1cc88a">绿色闪烁标志</span> - 正在从设备接收数据。
+            </p>
+            <p>
+                <span style="color: #36B9CC;">浅蓝色闪烁标志</span> - 正在向设备发送数据。
+            </p>
+            <p>
+                <span style="color: #e74a3b">红色常亮标志</span> - 蓝牙设备已断开。
+            </p>
+            <p>
+                <span style="color: #858796">灰色标志</span> - 未选择蓝牙设备。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">读取消息主题</span> - 组件读取蓝牙设备消息，进行转发的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">蓝牙设备</span> - 组件连接的蓝牙设备。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-pixel">
+            <h1 id="pixel">点阵屏</h1>
+            <h3>组件总览</h3>
+            <p>
+                接收像素数据，实现点阵图像显示<br>
+            </p>
+            <p>
+                <b>以下是数据格式：</b>
+            </p>
+            <p>
+                行索引（0起始）-列索引（0起始）-颜色（0=灰，1=深蓝，任意个数的不同像素间用英文逗号连接）<br>
+                例如：0-1-1,1-0-0,1-1-1
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件接收消息的主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">水平像素</span> - 点阵屏水平像素的个数。
+            </p>
+            <p>
+                <span style="color:#4e73df;">垂直像素</span> - 点阵屏垂直像素的个数。
+            </p>
+        </div>
     </div>
 </div>
 
