@@ -471,7 +471,10 @@ async function daemon_start() {
     })
 
     app.get('/saveAndRestart', async function(req, res) {
-        newConfig = req.query.configs
+        newConfig = JSON.parse(req.query.configs)
+        for(var key in newConfig)
+            configs[key] = newConfig[key]
+        newConfig = JSON.stringify(configs, null, 4)
         if (newConfig) {
             fs.writeFileSync(configPath, newConfig)
             configs = JSON.parse(newConfig)
@@ -1906,8 +1909,8 @@ var mixioServer = function() {
                 console.log('[INFO] WebSocket MQTT server listening on port', 8083)
                 httpsServer.listen(8084, function() {
                     console.log('[INFO] WebSocketS MQTT server listening on port', 8084)
-                    
-                    httpServer2 = app.listen(configs['MIXIO_HTTP_PORT'], function() {
+                    httpServer2 = http.createServer(app)
+                    httpServer2.listen(configs['MIXIO_HTTP_PORT'], function() {
                         if(configs['MIXIO_HTTP_PORT'] != 0)
                             console.log("[INFO] MixIO server listening on port", configs['MIXIO_HTTP_PORT'])
                         httpsServer2 = https.createServer(credentials, app)
