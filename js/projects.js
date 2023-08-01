@@ -633,7 +633,7 @@ function view_project(projectName, projectType) {
             var jTa = $("<textarea style='height:50%'></textarea>")
             rightDiv.append(jTa)
             if (globalXML != "") {
-                Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(stringendecoder.decodeHtml(globalXML)), workspace);
+                Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(stringendecoder.decodeHtml(globalXML).replaceAll("&", "&amp;")), workspace);
             }
             MixIO.editor = CodeMirror.fromTextArea(jTa[0], {
                 mode: "text/javascript",
