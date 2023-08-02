@@ -2499,7 +2499,7 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
             "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather"
         ],
         this.zhcnTags = ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪"],
-
+        this.log = function(){},
         /*合法的MixIO事件种类*/
         this.eventTags = {
             MQTT_MESSAGE_RECEIVED: "11", //收到MQTT消息
