@@ -37,6 +37,8 @@ var { JSLang, arrLang, lang } = require("./js/lang.js")
 const path = require('path');
 var readline = require('readline');
 var iconv = require('iconv-lite');
+var request = require('request');
+const cors = require('cors');
 
 function init(cb){
     if (!fs.existsSync("logs")) {
@@ -830,6 +832,8 @@ var mixioServer = function() {
 
     app.set('trust proxy', 1)
 
+    app.use(cors())
+
     app.get('/', function(req, res) {
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
             'main':fs.existsSync("config/certs/chain.crt"),
@@ -837,6 +841,33 @@ var mixioServer = function() {
         }, function(err, data) {
             res.send(data)
         })
+    })
+
+    app.post('/proxy', function(req, res) {
+        var url = req.body.url
+        var data = req.body.data
+        // timeout in 5 seconds
+        var timeout = 50000
+        request({
+            url: url,
+            method: "POST",
+            json: true,
+            headers: {
+                "content-type": "application/json",
+            },
+            body: data,
+            timeout: timeout
+        }, function(error, response, body) {
+            if (!error) {
+                res.send(body)
+            } else {
+                res.send({
+                    "status": "failed",
+                    "reason": error
+                })
+            }
+        }
+        )
     })
 
     app.get('/index', function(req, res) {
