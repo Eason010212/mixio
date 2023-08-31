@@ -48,6 +48,11 @@
     <script>var BAIDU_MAP_AK = '<%=configs['BAIDU_MAP_AK']%>'</script>
     <script src="js/projects.js?v=273"></script>
     <script src="js/MixIO.js?v=30"></script>
+    <style>
+        .custom2{
+            color:#4e73df
+        }
+    </style>
 </head>
 
 <body id="page-top" class="sidebar-toggled" style="position:relative;overflow-x:hidden">
@@ -175,7 +180,7 @@
                     
                 </div>
             <div class="container-fluid" id="project_detail">
-                <div class="grid gridbg" id="grid" hidden></div>
+                <div class="grid2 gridbg" id="grid" hidden></div>
                 <div class="grid" id="grid2" hidden></div>
                 <div class="grid" id="grid3" hidden></div> 
             </div>
@@ -358,7 +363,23 @@
                 </shadow>    
             </value>
         </block>
-        
+        <block type="publish_project_message">
+            <value name="project">
+                <shadow type="text">
+                    <field name="TEXT">project</field>
+                </shadow>    
+            </value>
+            <value name="topic">
+                <shadow type="text">
+                    <field name="TEXT">topic</field>
+                </shadow>    
+            </value>
+            <value name="message">
+                <shadow type="text">
+                    <field name="TEXT">message</field>
+                </shadow>    
+            </value>
+        </block>
         <block type="publish_message">
             <value name="topic">
                 <shadow type="text">
@@ -410,7 +431,51 @@
         </block>
     </category>
 
+    <category name="人工智能" colour="#1cc88a" css-icon="customIcon fa fa-cloud">
+        <block type="get_accessToken">
+            <value name="name">
+                <shadow type="text">
+                    <field name="TEXT">API Key</field>
+                </shadow>    
+            </value>
+            <value name="name2">
+                <shadow type="text">
+                    <field name="TEXT">Secret Key</field>
+                </shadow>    
+            </value>
+        </block>
+        <block type="translate">
+            <value name="name">
+                <shadow type="text">
+                    <field name="TEXT">Access Token</field>
+                </shadow>    
+            </value>
+            <value name="name2">
+                <shadow type="text">
+                    <field name="TEXT">text</field>
+                </shadow>    
+            </value>
+            <value name="name3">
+                <shadow type="text">
+                    <field name="TEXT">en</field>
+                </shadow>    
+            </value>
+        </block>
+        <block type="chat">
+            <value name="name">
+                <shadow type="text">
+                    <field name="TEXT">Access Token</field>
+                </shadow>    
+            </value>
+            <value name="name2">
+                <shadow type="text">
+                    <field name="TEXT">text</field>
+                </shadow>    
+            </value>
+        </block>
+    </category>
 
+    <category name="组件操作" colour="#4e73df" css-icon="customIcon custom2 fa fa-list">
     <category name="按键/开关" colour="#CFA45A" css-icon="customIcon fa fa-toggle-on">
         <block type="button_down">
             <value name="name">
@@ -890,6 +955,7 @@
             </value>
         </block>
     </category>
+</category> 
 
     </xml>
 </body>
