@@ -138,6 +138,23 @@ Blockly.Blocks['publish_message'] = {
     }
 };
 
+Blockly.Blocks['publish_project_message'] = {
+  init: function() {
+      this.setColour(message_HUE);
+      this.appendDummyInput().appendField(Blockly.Msg.TEXT_APPEND_TO);
+      this.appendValueInput("project").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.Msg.VARIABLES_DEFAULT_NAME);
+      this.appendValueInput("topic").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.PUBLISH_MESSAGE);
+      this.appendValueInput("message").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.MESSAGE);
+      this.setInputsInline(true);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);        
+      this.setTooltip("");
+  }
+};
+
 button_HUE = "#CFA45A";
 
 Blockly.Blocks['button_down'] = {
@@ -1719,5 +1736,59 @@ Blockly.Blocks['text2json'] = {
       this.appendDummyInput().appendField(Blockly.TEXT2JSON);
       this.setOutput(true, null);
       this.setTooltip("");
+  }
+};
+
+Blockly.Blocks['get_accessToken'] = {
+  init: function() {
+      this.setColour("#1cc88a");
+      this.appendDummyInput().appendField(Blockly.USEAPIKEY);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.USESECRETKEY);
+      this.appendValueInput("name2").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.GETTOKEN);
+      this.setOutput(true, null);
+      this.setTooltip("");
+  }
+};
+
+Blockly.Blocks['translate'] = {
+  init: function() {
+      this.setColour("#1cc88a");
+      this.appendDummyInput().appendField(Blockly.TRANSORIGIN);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.USETEXT);
+      this.appendValueInput("name2").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.TOLANG);
+      this.appendValueInput("name3").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.PARA1);
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip('');
+  },
+  getVars:function(){
+      return ["result"];
+  }
+};
+
+Blockly.Blocks['chat'] = {
+  init: function() {
+      this.setColour("#1cc88a");
+      this.appendDummyInput().appendField(Blockly.TRANSORIGIN);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.USETEXT2);
+      this.appendValueInput("name2").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.BOT);
+      this.appendDummyInput().appendField(Blockly.PARA1);
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip('');
+  },
+  getVars:function(){
+      return ["result"];
   }
 };

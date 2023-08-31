@@ -311,6 +311,7 @@ Blockly.Msg["RENAME_VARIABLE"] = "重命名变量...";
 Blockly.Msg["RENAME_VARIABLE_TITLE"] = "将所有“%1”变量重命名为:";
 Blockly.Msg["TEXT_APPEND_HELPURL"] = "https://github.com/google/blockly/wiki/Text#text-modification";  // untranslated
 Blockly.Msg["TEXT_APPEND_TITLE"] = "在%1之后加上文本%2";
+Blockly.Msg["TEXT_APPEND_TO"] = "向";
 Blockly.Msg["TEXT_APPEND_TOOLTIP"] = "将一些文本追加到变量“%1”里。";
 Blockly.Msg["TEXT_CHANGECASE_HELPURL"] = "https://github.com/google/blockly/wiki/Text#adjusting-text-case";  // untranslated
 Blockly.Msg["TEXT_CHANGECASE_OPERATOR_LOWERCASE"] = "转为小写";
@@ -554,3 +555,14 @@ Blockly.GET_KEYBOARD_INPUT="文本输入的文本";
 
 Blockly.JSON2TEXT = "字典转文本";
 Blockly.TEXT2JSON = "文本转字典";
+
+Blockly.USEAPIKEY = "使用百度API Key";
+Blockly.USESECRETKEY = "和Secret Key";
+Blockly.GETTOKEN = "获取的Access Token";
+
+Blockly.TRANSORIGIN = "使用Access Token";
+Blockly.USETEXT = "将文本";
+Blockly.USETEXT2 = "使用文本";
+Blockly.BOT = "与文心一言对话";
+Blockly.TOLANG = "翻译为";
+Blockly.PARA1 = "，参数: result";

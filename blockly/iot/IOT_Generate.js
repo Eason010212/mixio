@@ -89,6 +89,14 @@ Blockly.JavaScript.publish_message=function(block) {
     return code;
 };
 
+Blockly.JavaScript.publish_project_message=function(block) {
+    var project = Blockly.JavaScript.valueToCode(this, 'project', Blockly.JavaScript.ORDER_ATOMIC);
+    var topic = Blockly.JavaScript.valueToCode(this, 'topic', Blockly.JavaScript.ORDER_ATOMIC);
+    var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
+    var code="propublish("+project+","+topic+","+message+")\n"
+    return code;
+};
+
 Blockly.JavaScript.button_down=function(block) {
     var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
     var code="MixIO.getInstance("+name+",MixIO.typeTags.BUTTON)\n"+".bind(MixIO.eventTags.BUTTON_PRESSED, function(){\n"
@@ -672,4 +680,99 @@ Blockly.JavaScript.text2json=function(block) {
     var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
     var code="JSON.parse("+name+")";
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
+Blockly.JavaScript.get_accessToken = function(block) {
+    MixIO.get_accessToken = function(client_id,client_secret){
+        var accessToken = undefined;
+        $.ajax({
+            type: 'POST',
+            url: 'proxy',
+            async: false,
+            data: {
+                'url': 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id='+client_id+'&client_secret='+client_secret+'',
+                'data':{
+                }
+            },
+            success: function(data) {
+                accessToken = data.access_token;
+            },
+            error: function(xhr, type) {
+                MixIO.log(xhr);
+            }
+        });
+        return accessToken;
+    }
+
+    var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+    var name2 = Blockly.JavaScript.valueToCode(this, 'name2', Blockly.JavaScript.ORDER_ATOMIC);
+    var code="MixIO.get_accessToken("+name+","+name2+")";
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
+Blockly.JavaScript.translate = function(block) {
+    MixIO.translate = function(access_token, query, to, func){
+        var result = undefined;
+        $.ajax({
+            type: 'POST',
+            url: 'proxy',
+            data: {
+                'url': 'https://aip.baidubce.com/rpc/2.0/mt/texttrans/v1?access_token='+access_token+'',
+                'data':{
+                    "from":"auto",
+                    "to":to,
+                    "q":query
+                }
+            },
+            success: function(data) {
+                func(data)
+            },
+            error: function(xhr, type) {
+                MixIO.log(xhr);
+            }
+        });
+    }
+
+    var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+    var name2 = Blockly.JavaScript.valueToCode(this, 'name2', Blockly.JavaScript.ORDER_ATOMIC);
+    var name3 = Blockly.JavaScript.valueToCode(this, 'name3', Blockly.JavaScript.ORDER_ATOMIC);
+    var code="MixIO.translate("+name+","+name2+","+name3+")";
+    var code="MixIO.translate("+name+","+name2+","+name3+",function(result){\n"
+    +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+    return code; 
+};
+
+Blockly.JavaScript.chat = function(block) {
+    MixIO.chat = function(access_token, message, history, func){
+        var result = undefined;
+        var allMessages = history;
+        allMessages.push({
+            "role": "user",
+            "content": message
+        })
+        $.ajax({
+            type: 'POST',
+            url: 'proxy',
+            data: {
+                'url': 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions?access_token='+access_token+'',
+                'data':{
+                    "messages":allMessages
+                }
+            },
+            success: function(data) {
+                func(data)
+            },
+            error: function(xhr, type) {
+                MixIO.log(xhr);
+            }
+        });
+    }
+
+    var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+    var name2 = Blockly.JavaScript.valueToCode(this, 'name2', Blockly.JavaScript.ORDER_ATOMIC);
+    var name3 = "[]";
+    var code="MixIO.chat("+name+","+name2+","+name3+")";
+    var code="MixIO.chat("+name+","+name2+","+name3+",function(result){\n"
+    +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+    return code; 
 };
