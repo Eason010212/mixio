@@ -186,6 +186,12 @@ input[type="search"]{
     overflow: auto;
     height: calc(100vh - 4.375rem);
 }
+.grid2 {
+  position: relative;
+  overflow: auto;
+  height: calc(100vh - 4.375rem);
+}
+
 @media screen and (max-width: 800px) {
     .grid {
         position: relative;
@@ -193,6 +199,12 @@ input[type="search"]{
         overflow-y: scroll;
         height: calc(100vh - 4.375rem);
     }
+    .grid2 {
+      position: relative;
+      width:100vw;
+      overflow-y: scroll;
+      height: calc(100vh - 4.375rem);
+  }
 }
 
 @keyframes fade-in {  
@@ -495,4 +507,18 @@ input{
   padding:10px;
   padding-top:0;
   padding-bottom: 0;
+}
+
+.ui-popup-backdrop{
+  pointer-events: none;
+}
+
+
+.button-7colors {
+  background: conic-gradient(#e74a3b, #fd7e14, #f6c23e, #1cc88a, #36b9cc, #4e73df, #9b59b6, #e74a3b);
+  border: none;
+}
+
+.button-7colors:hover{
+  filter: brightness(0.95);
 }
