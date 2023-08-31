@@ -4,6 +4,7 @@
  * @Version 2.8.30
  */
 
+tbd = undefined;
 
 function add_block(width, height, contents, attrs) {
     var itemdiv = $("<div/>")
@@ -116,10 +117,11 @@ function add_block(width, height, contents, attrs) {
     return itemdiv
 }
 
-function add_pixel(user_title, user_topic, user_content, user_style) {
+function add_pixel(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -137,7 +139,7 @@ function add_pixel(user_title, user_topic, user_content, user_style) {
         pixelDiv.append(row)
     }
     contents.push(pixelDiv)
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -153,9 +155,9 @@ function add_pixel(user_title, user_topic, user_content, user_style) {
         ['user-type', 'pixel'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
-    
     var itemdiv = add_block(3, 3, contents, attrs)
     var stdwidth = xpixel*20 + 20 + "px"
     var stdheight = ypixel*20 + 60 + "px"
@@ -207,7 +209,7 @@ function add_pixel(user_title, user_topic, user_content, user_style) {
             }
     })
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (xpixel_input.val() > 0 && xpixel_input.val() < 101 && ypixel_input.val() > 0 && ypixel_input.val() < 101) {
@@ -255,6 +257,8 @@ function add_pixel(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -273,18 +277,37 @@ function add_pixel(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+            {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             xpixel_input.val(xpixel)
             ypixel_input.val(ypixel)
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -297,10 +320,11 @@ function add_pixel(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_button(user_title, user_topic, user_content, user_style) {
+function add_button(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -400,7 +424,7 @@ function add_button(user_title, user_topic, user_content, user_style) {
                 itemdiv.trigger(MixIO.eventTags.BUTTON_CHANGED, [Uint8ArrayToString(message1)])
             }
     })
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -421,7 +445,8 @@ function add_button(user_title, user_topic, user_content, user_style) {
         ['user-type', 'input_button'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(1, 1, contents, attrs)
     itemdiv.bind(MixIO.actionTags.BUTTON_SWITCH, function(event, status) {
@@ -465,7 +490,7 @@ function add_button(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (true) {
@@ -505,6 +530,8 @@ function add_button(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -523,10 +550,22 @@ function add_button(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
                 bubble.append(deleteButton)
             }
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
@@ -534,7 +573,14 @@ function add_button(user_title, user_topic, user_content, user_style) {
     if (user_style != undefined)
         itemdiv.attr('style', user_style)
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -545,10 +591,11 @@ function add_button(user_title, user_topic, user_content, user_style) {
     })
 }
 
-function add_slider(user_title, user_topic, user_content, user_style) {
+function add_slider(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -605,7 +652,7 @@ function add_slider(user_title, user_topic, user_content, user_style) {
     sliderDiv.append(slider)
     sliderDiv.append(mark)
     contents.push(sliderDiv)
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -621,7 +668,8 @@ function add_slider(user_title, user_topic, user_content, user_style) {
         ['user-type', 'input_slider'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(3, 1, contents, attrs)
     client.on('message', function(topic1, message1) {
@@ -661,7 +709,7 @@ function add_slider(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (true) {
@@ -716,6 +764,8 @@ function add_slider(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -734,19 +784,38 @@ function add_slider(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             minInput.val(slider.attr('min'))
             maxInput.val(slider.attr('max'))
             paceInput.val(slider.attr('step'))
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -759,10 +828,11 @@ function add_slider(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_controller(user_title, user_topic, user_content, user_style) {
+function add_controller(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -776,7 +846,8 @@ function add_controller(user_title, user_topic, user_content, user_style) {
         ['user-type', 'input_controller'],
         ['user-title', user_title],
         ['user-content', "0,0"],
-        ['user-topic', user_topic]
+        ['user-topic', user_topic],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(2, 2, contents, attrs)
     var joy = new JoyStick(controllerID)
@@ -819,7 +890,7 @@ function add_controller(user_title, user_topic, user_content, user_style) {
         title.parent().parent().attr('user-content', "0,0")
         publish(topic.text(), "0,0")
     }, false);
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -847,7 +918,7 @@ function add_controller(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (true) {
@@ -878,6 +949,8 @@ function add_controller(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -896,16 +969,35 @@ function add_controller(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -918,10 +1010,11 @@ function add_controller(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_keyboard(user_title, user_topic, user_content, user_style) {
+function add_keyboard(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -931,7 +1024,8 @@ function add_keyboard(user_title, user_topic, user_content, user_style) {
         ['user-type', 'input_keyboard'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var keyDiv = $("<div style='width:100%;display:flex;flex-direction:row;justify-content:center;align-items:center'/>")
     var messDiv = $("<input class='form-control' style='width:70%;min-width:0px'/>")
@@ -1005,7 +1099,7 @@ function add_keyboard(user_title, user_topic, user_content, user_style) {
             sendIcon.children().addClass("fa-paper-plane")
         }, 300)
     })
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -1033,7 +1127,7 @@ function add_keyboard(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (true) {
@@ -1065,6 +1159,8 @@ function add_keyboard(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -1083,16 +1179,35 @@ function add_keyboard(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -1106,10 +1221,11 @@ function add_keyboard(user_title, user_topic, user_content, user_style) {
 
 }
 
-function add_bulb(user_title, user_topic, user_content, user_style) {
+function add_bulb(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -1129,7 +1245,8 @@ function add_bulb(user_title, user_topic, user_content, user_style) {
         ['user-type', 'output_bulb'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(1, 1, contents, attrs)
     itemdiv.bind(MixIO.actionTags.BULB_CHANGE, function(event, status) {
@@ -1154,7 +1271,7 @@ function add_bulb(user_title, user_topic, user_content, user_style) {
                 itemdiv.trigger(MixIO.eventTags.BULB_CHANGED, [Uint8ArrayToString(message1)])
             }
     })
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -1182,7 +1299,7 @@ function add_bulb(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (true) {
@@ -1214,6 +1331,8 @@ function add_bulb(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -1232,16 +1351,35 @@ function add_bulb(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -1254,12 +1392,13 @@ function add_bulb(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_ble(user_title, user_topic, user_content, user_style) {
+function add_ble(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     if(user_style != undefined)
         user_content = JSLang[lang].select
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -1269,7 +1408,8 @@ function add_ble(user_title, user_topic, user_content, user_style) {
         ['user-type', 'ble'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var bletarget = user_content
     var bleconnect = function(){
@@ -1400,7 +1540,7 @@ function add_ble(user_title, user_topic, user_content, user_style) {
     contents.push(icon_div)
     var itemdiv = add_block(1, 1, contents, attrs)
     bleconnect()
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -1475,7 +1615,7 @@ function add_ble(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11 && getByteLen(topic_input_2.val()) > 0 && getByteLen(topic_input_2.val()) < 11)
                 if (true) {
@@ -1508,6 +1648,8 @@ function add_ble(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -1526,18 +1668,37 @@ function add_ble(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text().split(",")[0])
             topic_input_2.val(topic.text().split(",")[1])
             ble_target.val(bletarget)
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -1550,7 +1711,7 @@ function add_ble(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_magic(user_title, user_topic, user_content, user_style) {
+function add_magic(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var bgColor = user_content
@@ -1562,12 +1723,13 @@ function add_magic(user_title, user_topic, user_content, user_style) {
         ['user-type', 'magic'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(5, 5, contents, attrs)
     itemdiv.css('background-color', 'rgba(0,0,0,0)')
     itemdiv.css('box-shadow', user_content + ' 10px 10px 20px')
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -1601,7 +1763,7 @@ function add_magic(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (true)
                 if (true) {
@@ -1634,6 +1796,8 @@ function add_magic(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -1651,16 +1815,35 @@ function add_magic(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             color_select.val(bgColor)
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -1673,10 +1856,11 @@ function add_magic(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_timer(user_title, user_topic, user_content, user_style) {
+function add_timer(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic.split("$$$")[0] + "</span>")
@@ -1688,7 +1872,8 @@ function add_timer(user_title, user_topic, user_content, user_style) {
         ['user-type', 'timer'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var triggerTopic = user_topic.split("$$$")[0]
     var triggerMessage = user_topic.split("$$$")[1]
@@ -1710,7 +1895,7 @@ function add_timer(user_title, user_topic, user_content, user_style) {
     }
     MixIO.triggersToPreCode()
     MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -1756,7 +1941,7 @@ function add_timer(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (getByteLen(message_input.val()) > 0) {
@@ -1804,6 +1989,8 @@ function add_timer(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -1822,19 +2009,38 @@ function add_timer(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             message_input.val(triggerMessage)
             trigger_interval.val(triggerInterval)
             trigger_times.val(triggerTimes)
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -1847,10 +2053,11 @@ function add_timer(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_trigger(user_title, user_topic, user_content, user_style) {
+function add_trigger(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic.split("$$$")[0] + "</span>")
@@ -1862,7 +2069,8 @@ function add_trigger(user_title, user_topic, user_content, user_style) {
         ['user-type', 'trigger'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var condition1_1 = user_content.split("$$$")[0]
     var condition1_2 = user_content.split("$$$")[1]
@@ -1938,7 +2146,7 @@ function add_trigger(user_title, user_topic, user_content, user_style) {
     }
     MixIO.triggersToPreCode()
     MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -2020,7 +2228,7 @@ function add_trigger(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (getByteLen(condition1_input2.val()) > 0 && (condition2_input1.val() == "--" || getByteLen(condition2_input2.val()) > 0)) {
@@ -2071,6 +2279,8 @@ function add_trigger(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -2089,6 +2299,13 @@ function add_trigger(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             condition1_input1.val(condition1_1)
@@ -2103,13 +2320,25 @@ function add_trigger(user_title, user_topic, user_content, user_style) {
             else
                 condition2_input2.removeAttr("disabled")
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -2122,10 +2351,11 @@ function add_trigger(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_rgb(user_title, user_topic, user_content, user_style) {
+function add_rgb(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div style='margin-top:5px;margin-bottom:5px;font-size:0.75rem'/>")
     var Rtopic = $("<span class='index-topic' style='margin:0;color:#858796;;margin-right:10px'>" + user_topic.split('/')[0] + "</span>")
@@ -2198,7 +2428,8 @@ function add_rgb(user_title, user_topic, user_content, user_style) {
         ['user-type', 'input_rgb'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(3, 3, contents, attrs)
     itemdiv.bind(MixIO.actionTags.RGB_PICKER_SEND, function(event, r, g, b) {
@@ -2251,7 +2482,7 @@ function add_rgb(user_title, user_topic, user_content, user_style) {
         BInput.val(HEX2RGB(color)[2])
     })
     $.farbtastic(far).setColor(RGB2Hex(parseInt(RInput.val()), parseInt(GInput.val()), parseInt(BInput.val())))
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -2289,7 +2520,7 @@ function add_rgb(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(Rtopic_input.val()) > 0 && getByteLen(Rtopic_input.val()) < 11 && getByteLen(Gtopic_input.val()) > 0 && getByteLen(Gtopic_input.val()) < 11 && getByteLen(Btopic_input.val()) > 0 && getByteLen(Btopic_input.val()) < 11)
                 if (re.test(Rtopic_input.val()) && re.test(Gtopic_input.val()) && re.test(Btopic_input.val())) {
@@ -2321,6 +2552,8 @@ function add_rgb(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -2339,18 +2572,37 @@ function add_rgb(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             Rtopic_input.val(Rtopic.text())
             Gtopic_input.val(Gtopic.text())
             Btopic_input.val(Btopic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -2363,11 +2615,12 @@ function add_rgb(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_bar(user_title, user_topic, user_content, user_style) {
+function add_bar(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var titleDiv = $("<div style='display:flex;flex-direction:row;justify-content:center;align-items:center;margin-top:10px'/>")
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     titleDiv.append(title)
     contents.push(titleDiv)
     var topicDiv = $("<div class='topicDiv'/>")
@@ -2487,7 +2740,7 @@ function add_bar(user_title, user_topic, user_content, user_style) {
             }
     })
 
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().parent().remove();
         isAlive = false
@@ -2504,7 +2757,8 @@ function add_bar(user_title, user_topic, user_content, user_style) {
         ['user-type', 'output_bar'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(3, 3, contents, attrs)
     itemdiv.bind(MixIO.actionTags.BAR_CHART_CHANGE, function(event, message) {
@@ -2551,7 +2805,7 @@ function add_bar(user_title, user_topic, user_content, user_style) {
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
         if (option_input.val() != "") {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -2642,6 +2896,8 @@ function add_bar(user_title, user_topic, user_content, user_style) {
     editButton.click(edit_on_click)
     deleteButton.click(delete_on_click)
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var bubble = $('<div style="text-align:center"/>')
             bubble.append(topicDiv)
@@ -2659,17 +2915,36 @@ function add_bar(user_title, user_topic, user_content, user_style) {
                 bubble.append(exportButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             option_input.val(chartTarget.getOption().xAxis[0].data.join(','))
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -2717,10 +2992,11 @@ function add_bar(user_title, user_topic, user_content, user_style) {
     })
 }
 
-function add_dashboard(user_title, user_topic, user_content, user_style) {
+function add_dashboard(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -2736,7 +3012,8 @@ function add_dashboard(user_title, user_topic, user_content, user_style) {
         ['user-type', 'output_dashboard'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(2, 2, contents, attrs)
     var gauge = new RadialGauge({ renderTo: dashID, highlights: [] })
@@ -2754,7 +3031,7 @@ function add_dashboard(user_title, user_topic, user_content, user_style) {
     itemdiv.bind(MixIO.actionTags.DASHBOARD_CHANGE, function(event, value) {
         MixIO.publish(topic.text(), value)
     })
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -2800,7 +3077,7 @@ function add_dashboard(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (true) {
@@ -2842,6 +3119,8 @@ function add_dashboard(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -2860,16 +3139,35 @@ function add_dashboard(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -2882,10 +3180,11 @@ function add_dashboard(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_map(user_title, user_topic, user_content, user_style) {
+function add_map(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -2911,7 +3210,8 @@ function add_map(user_title, user_topic, user_content, user_style) {
         ['user-type', 'output_map'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(3, 3, contents, attrs)
     var maxLeft = mapDiv[0].clientWidth
@@ -3070,7 +3370,7 @@ function add_map(user_title, user_topic, user_content, user_style) {
         map.addOverlay(bubble)
     }
     setContent()
-    var tbd = null;
+
     var delete_on_click = function() {
         $("#trashbin").append(mapDiv)
         title.parent().parent().remove();
@@ -3104,7 +3404,7 @@ function add_map(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (true) {
@@ -3136,6 +3436,8 @@ function add_map(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var clearButton = $('<a class="btn btn-warning btn-circle bbbt"><i class="fa fa-eraser"></i></a>')
@@ -3157,16 +3459,35 @@ function add_map(user_title, user_topic, user_content, user_style) {
             bubble.append(clearButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -3211,10 +3532,11 @@ function create_a_map_bubble(messageBody, time, point) {
     return label
 }
 
-function add_text(user_title, user_topic, user_content, user_style) {
+function add_text(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -3228,7 +3550,8 @@ function add_text(user_title, user_topic, user_content, user_style) {
         ['user-type', 'output_text'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(2, 2, contents, attrs)
     itemdiv.bind(MixIO.actionTags.TEXT_SCREEN_CHANGE, function(event, message) {
@@ -3244,7 +3567,7 @@ function add_text(user_title, user_topic, user_content, user_style) {
                 itemdiv.trigger(MixIO.eventTags.TEXT_SCREEN_CHANGED, [String(message1)])
             }
     })
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -3272,7 +3595,7 @@ function add_text(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (true) {
@@ -3304,6 +3627,8 @@ function add_text(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -3322,16 +3647,35 @@ function add_text(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -3344,7 +3688,7 @@ function add_text(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_table(user_title, user_topic, user_content, user_style) {
+function add_table(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     client.on('message', function(topic1, message1) {
         if (isRunning)
@@ -3374,6 +3718,7 @@ function add_table(user_title, user_topic, user_content, user_style) {
     })
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -3399,7 +3744,8 @@ function add_table(user_title, user_topic, user_content, user_style) {
         ['user-type', 'table'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(3, 3, contents, attrs)
     itemdiv.bind(MixIO.actionTags.DATA_TABLE_CHANGE, function(event, message) {
@@ -3409,7 +3755,7 @@ function add_table(user_title, user_topic, user_content, user_style) {
         clear_on_click()
     })
     itemdiv.addClass("moveDiv")
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -3449,7 +3795,7 @@ function add_table(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (true) {
@@ -3494,6 +3840,8 @@ function add_table(user_title, user_topic, user_content, user_style) {
     })
     var exportButton = $('<a class="btn btn-info btn-circle bbbt" download="data.csv"><i class="fa fa-download"></i></a>')
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var clearButton = $('<a class="btn btn-warning btn-circle bbbt"><i class="fa fa-eraser"></i></a>')
@@ -3517,10 +3865,22 @@ function add_table(user_title, user_topic, user_content, user_style) {
             bubble.append(clearButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
@@ -3550,7 +3910,14 @@ function add_table(user_title, user_topic, user_content, user_style) {
         exportButton.attr("href", "data:text/csv;charset=utf-8,\ufeff" + encodeURIComponent(colNameStr + colValStr))
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -3652,11 +4019,12 @@ function add_table(user_title, user_topic, user_content, user_style) {
 
 last_weather_synced = new Date()
 
-function add_weather(user_title, user_topic, user_content, user_style) {
+function add_weather(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
 
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
@@ -3748,7 +4116,8 @@ function add_weather(user_title, user_topic, user_content, user_style) {
         ['user-type', 'input_weather'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(2, 2, contents, attrs)
     itemdiv.bind(MixIO.actionTags.WEATHER_SYNC, function() {
@@ -3785,7 +4154,7 @@ function add_weather(user_title, user_topic, user_content, user_style) {
             }, sendInterval * 60000)
         }
     }
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().remove();
         isAlive = false
@@ -3895,7 +4264,7 @@ function add_weather(user_title, user_topic, user_content, user_style) {
         if (placecode == "unselected")
             showtext(JSLang[lang].locationSet)
         else {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -3930,6 +4299,8 @@ function add_weather(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -3948,16 +4319,35 @@ function add_weather(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -3970,12 +4360,13 @@ function add_weather(user_title, user_topic, user_content, user_style) {
         itemdiv.attr('style', user_style)
 }
 
-function add_chart(user_title, user_topic, user_content, user_style) {
+function add_chart(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var isTable = false
     var contents = []
     var titleDiv = $("<div style='display:flex;flex-direction:row;justify-content:center;align-items:center;margin-top:10px'/>")
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
     titleDiv.append(title)
     contents.push(titleDiv)
     var topicDiv = $("<div class='topicDiv'/>")
@@ -4204,7 +4595,7 @@ function add_chart(user_title, user_topic, user_content, user_style) {
             }
     })
 
-    var tbd = null;
+
     var delete_on_click = function() {
         title.parent().parent().parent().remove();
         isAlive = false
@@ -4221,7 +4612,8 @@ function add_chart(user_title, user_topic, user_content, user_style) {
         ['user-type', 'output_chart'],
         ['user-title', user_title],
         ['user-topic', user_topic],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(3, 3, contents, attrs)
     itemdiv.addClass("moveDiv")
@@ -4262,7 +4654,7 @@ function add_chart(user_title, user_topic, user_content, user_style) {
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
     confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
             if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                 if (true) {
@@ -4311,6 +4703,8 @@ function add_chart(user_title, user_topic, user_content, user_style) {
     convertButton.click(convert_on_click)
     deleteButton.click(delete_on_click)
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
             var bubble = $('<div style="text-align:center"/>')
             bubble.append(topicDiv)
@@ -4329,16 +4723,35 @@ function add_chart(user_title, user_topic, user_content, user_style) {
                 bubble.append(exportButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             title_input.val(title.text())
             topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -4389,7 +4802,7 @@ function add_chart(user_title, user_topic, user_content, user_style) {
     })
 }
 
-function add_decorate_text(user_title, user_topic, user_content, user_style) {
+function add_decorate_text(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     var ctt = $("<h4 class='userTitle' style='margin:0'>" + user_content.replaceAll('\n', '<br>') + "</h4>")
@@ -4397,10 +4810,11 @@ function add_decorate_text(user_title, user_topic, user_content, user_style) {
     attrs = [
         ['user-type', 'decorate_text'],
         ['user-title', randomString()],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
     var itemdiv = add_block(2, 1, contents, attrs)
-    var tbd = null;
+
     var delete_on_click = function() {
         ctt.parent().parent().remove();
         isAlive = false
@@ -4438,6 +4852,8 @@ function add_decorate_text(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5) && !isRunning) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
@@ -4455,15 +4871,34 @@ function add_decorate_text(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+            {
+                // styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             text_input.val(ctt.html().replaceAll('<br>', '\n'))
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -4491,7 +4926,7 @@ function add_decorate_text(user_title, user_topic, user_content, user_style) {
     })
 }
 
-function add_decorate_pic(user_title, user_topic, user_content, user_style) {
+function add_decorate_pic(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
     // check user_content type: image or video
@@ -4505,11 +4940,17 @@ function add_decorate_pic(user_title, user_topic, user_content, user_style) {
     contents.push(ctt)
     attrs = [
         ['user-type', 'decorate_pic'],
+        ['user-topic', user_topic],
         ['user-title', randomString()],
-        ['user-content', user_content]
+        ['user-content', user_content],
+        ['title-hidden', title_style]
     ]
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
     var itemdiv = add_block(2, 1, contents, attrs)
-    var tbd = null;
+
     var delete_on_click = function() {
         ctt.parent().parent().remove();
         isAlive = false
@@ -4528,6 +4969,11 @@ function add_decorate_pic(user_title, user_topic, user_content, user_style) {
     var text_input = $("<textarea class='form-control form-control-user'  style='text-align:center;width:250px'/>")
     text_input_div.append(text_input)
     editForm.append(text_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center;margin-bottom:5px"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center;width:250px;min-width:250px'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
     var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
@@ -4546,6 +4992,25 @@ function add_decorate_pic(user_title, user_topic, user_content, user_style) {
         console.log(text_input.val())
         console.log(itemdiv)
         itemdiv.attr("user-content", text_input.val())
+        itemdiv.attr("user-topic", topic_input.val())
+        topic.text(topic_input.val())
+    })
+    client.on('message', function(topic1, message1) {
+        if (isAlive && isRunning)
+            if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
+                var msg = message1.toString()
+                if (msg.endsWith(".mp4") || msg.endsWith(".webm") || msg.endsWith(".ogg")){
+                    var newCTT = $("<video style='height:100%;width:100%' src='" + msg + "' controls loop></video>")
+                    ctt.parent().html(newCTT)
+                    ctt = newCTT
+                }else
+                {
+                    var newCTT = $("<img style='height:100%;width:100%' src='" + msg + "'></img>")
+                    ctt.parent().html(newCTT)
+                    ctt = newCTT
+                }
+                itemdiv.attr("user-content", msg)
+            }
     })
     var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
     cancelEdit.click(function() {
@@ -4558,10 +5023,13 @@ function add_decorate_pic(user_title, user_topic, user_content, user_style) {
         cancel: false
     })
     var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
         if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5) && !isRunning) {
             var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
             var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
             var bubble = $('<div style="text-align:center"/>')
+            bubble.append(topicDiv)
             var d = dialog({
                 align: 'top',
                 content: bubble[0],
@@ -4575,15 +5043,35 @@ function add_decorate_pic(user_title, user_topic, user_content, user_style) {
                 bubble.append(editButton)
             if (!isRunning)
                 bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                //styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
             text_input.val(ctt.attr("src"))
+            topic_input.val(topic.text())
             if (!d.open)
+            {
                 d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
             else
                 d.close()
         }
     }
     if (window.screen.width > 800)
+    {
         itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
     else
         itemdiv[0].addEventListener('touchend', function(event) {
             event.preventDefault()
@@ -4610,6 +5098,222 @@ function add_decorate_pic(user_title, user_topic, user_content, user_style) {
     })
 }
 
+function add_camera(user_title, user_topic, user_content, user_style, title_style) {
+    var isAlive = true
+    var contents = []
+    var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
+    contents.push(title)
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
+    var cameraDiv = $("<div class='cameraDiv'/>")
+    contents.push(cameraDiv)
+    // add a real-time web camera
+    var video = $("<video autoplay style='width:100%;height:100%;'/>")
+    cameraDiv.append(video)
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            width: {
+                ideal: 1280
+            },
+            height: {
+                ideal: 720
+            },
+            frameRate: {
+                ideal: 30,
+                min: 10
+            }
+        },
+        audio: false
+    }).then(function(stream) {
+        video[0].srcObject = stream
+        // send MQTT message: base64 encoded image, topic: user_topic, fps: fps, resolution: resolution
+        var canvas = $("<canvas />")
+        var context = canvas[0].getContext('2d')
+        var timer1 = setInterval(function() {
+            if(isRunning && isAlive && fps == 1)
+            {   
+                // set canvas size
+                canvas[0].width = resolutionX
+                canvas[0].height = resolutionY
+                context.drawImage(video[0], 0, 0, resolutionX, resolutionY)
+                var dataURL = canvas[0].toDataURL('image/jpeg', 0.5)
+                publish(user_topic, dataURL)
+            }
+        }, 1000)
+        var timer2 = setInterval(function() {
+            if(isRunning && isAlive && fps == 2)
+            {
+                canvas[0].width = resolutionX
+                canvas[0].height = resolutionY
+                context.drawImage(video[0], 0, 0, resolutionX, resolutionY)
+                var dataURL = canvas[0].toDataURL('image/jpeg', 0.5)
+                publish(user_topic, dataURL)
+            }
+        }, 500)
+    }).catch(function(err) {
+        showtext("Error: " + err.name + " " + err.message)
+    })
+
+
+    var resolution = user_content.split(",")[0]
+    var fps = parseInt(user_content.split(",")[1])
+    var resolutionX = parseInt(resolution.split("x")[0])
+    var resolutionY = parseInt(resolution.split("x")[1])
+    attrs = [
+        ['user-type', 'camera'],
+        ['user-title', user_title],
+        ['user-topic', user_topic],
+        ['user-content', user_content],
+        ['title-hidden', title_style]
+    ]
+    var itemdiv = add_block(4, 3, contents, attrs)
+
+    var delete_on_click = function() {
+        title.parent().parent().remove();
+        isAlive = false
+        if (tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function() {
+        modifyDia.showModal()
+        if (tbd)
+            tbd.remove()
+    }
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_text.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].resolution + '</h5>'))
+    var resolution_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var resolution_input = $("<select class='form-control form-control-user' style='text-align:center;cursor:pointer'/>")
+    resolution_input_div.append(resolution_input)
+    resolution_input.append($("<option value='160x120'>160x120</option>"))
+    resolution_input.append($("<option value='320x240'>320x240</option>"))
+    editForm.append(resolution_input_div)
+    // fps selection
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].fps + '</h5>'))
+    var fps_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var fps_input = $("<select class='form-control form-control-user' style='text-align:center;cursor:pointer'/>")
+    fps_input_div.append(fps_input)
+    fps_input.append($("<option value='1'>1</option>"))
+    fps_input.append($("<option value='2'>2</option>"))
+    editForm.append(fps_input_div)
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function() {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+            var re = /^[a-z0-9]+$/i;
+            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                if (true) {
+                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                        title.parent().parent().attr('user-title', title_input.val())
+                        title.parent().parent().attr('user-topic', topic_input.val())
+                        if (title.parent().parent().attr('user-content') == undefined)
+                            title.parent().parent().attr('user-content', "")
+                        title.text(title_input.val())
+                        topic.text(topic_input.val())
+                        resolution = resolution_input.val()
+                        fps = parseInt(fps_input.val())
+                        resolutionX = parseInt(resolution.split("x")[0])
+                        resolutionY = parseInt(resolution.split("x")[1])
+                        // set user-content
+                        title.parent().parent().attr('user-content', resolution + "," + fps)
+                        modifyDia.close()
+                    } else
+                        showtext(JSLang[lang].sameUnit)
+                } else
+                    showtext("")
+            else
+                showtext(JSLang[lang].topicLenIllegal)
+        } else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function() {
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content: editForm[0],
+        cancel: false
+    })
+    var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
+        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+            var bubble = $('<div style="text-align:center"/>')
+            bubble.append(topicDiv)
+            var d = dialog({
+                align: 'top',
+                content: bubble[0],
+                quickClose: true,
+                autofocus: false
+            });
+            tbd = d;
+            editButton.click(edit_on_click)
+            deleteButton.click(delete_on_click)
+            if (!isRunning)
+                bubble.append(editButton)
+            if (!isRunning)
+                bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
+            title_input.val(title.text())
+            topic_input.val(topic.text())
+            resolution_input.val(resolution)
+            fps_input.val(fps)
+            if (!d.open)
+            {
+                d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
+            else
+                d.close()
+        }
+    }
+    if (window.screen.width > 800)
+    {
+        itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
+    else
+        itemdiv[0].addEventListener('touchend', function(event) {
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove', function(e) {
+        e.preventDefault()
+    })
+    if (user_style != undefined)
+        itemdiv.attr('style', user_style)
+}
+
 function init_layout() {
     grid = $("#grid")
     grid2 = $("#grid2")
@@ -4622,3 +5326,103 @@ function get_width() {
     if ((fullWidth - 84) / 3 < 100)
         standardWidth = (fullWidth - 84) / 3
 }
+
+var styleButton = $('<a class="btn btn-danger btn-circle bbbt button-7colors"><i class="fa fa-paint-brush"></i></a>')
+styleButton.click(function() {
+    if(tbd)
+        tbd.remove()
+    // a dialog that is like "modifyDia" but for style
+    var itemTitle = $(this).attr("user-origin")
+    var itemdiv = $("div[user-title='" + itemTitle + "']")
+    var editForm = $('<div class="nnt" />')
+    editForm.css("width", "250px")
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><i class="fa fa-paint-brush" style="color:#4e73df;font-size:45px"></i></div>'))
+    editForm.append($('<h5 style="text-align:center">组件标题</h5>'))
+    // add a switch like "modeButton" to choose the style
+    var modeButton = $("<label class='switch' style='margin-bottom:0'></label>")
+    var modeCheckbox = $("<input type='checkbox'>")
+    modeCheckbox.click(function() {
+        if (modeCheckbox.prop("checked"))
+        {
+            // find title in the itemdiv, show it
+            itemdiv.find("h4").attr("hidden", true)
+            itemdiv.attr("title-hidden", true)
+        }
+        else
+        {
+            itemdiv.find("h4").attr("hidden", false)
+            itemdiv.attr("title-hidden", false)
+        }
+    })
+    if (itemdiv.attr("title-hidden") == "true")
+        modeCheckbox.prop("checked", true)
+    else
+        modeCheckbox.prop("checked", false)
+    var modeCheckDiv = $("<div class='slider2 round'></div>")
+    modeButton.append(modeCheckbox)
+    modeButton.append(modeCheckDiv)
+    var modeDiv = $("<div style='display:flex;margin-top:10px;flex-direction:row;align-items:center;justify-content:center'/>")
+    modeDiv.append($("<span style='font-size:1rem;margin-right:10px;color:#4e73df;font-weight:bold'>" + "显示"+"</span>"))
+    modeDiv.append(modeButton)
+    modeDiv.append($("<span style='font-size:1rem;margin-left:10px;color:#e74a3b;font-weight:bold'>" + "隐藏" + "</span>"))
+    editForm.append(modeDiv)
+    // background color
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">背景颜色</h5>'))
+    var colorDiv = $("<div style='display:flex;flex-direction:row;align-items:center;justify-content:center'/>")
+    var colorInput = $("<input class='form-control form-control-user'  style='text-align:center;width:250px;min-width:250px'/>")
+    colorInput.val(itemdiv.css("background-color"))
+    colorDiv.append(colorInput)
+    editForm.append(colorDiv)
+    colorInput.on('change', function() {
+        itemdiv.css("background-color", colorInput.val())
+    })
+    // title color
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">标题颜色</h5>'))
+    var titleColorDiv = $("<div style='display:flex;flex-direction:row;align-items:center;justify-content:center'/>")
+    var titleColorInput = $("<input class='form-control form-control-user'  style='text-align:center;width:250px;min-width:250px'/>")
+    titleColorInput.val(itemdiv.find("h4").css("color"))
+    titleColorDiv.append(titleColorInput)
+    editForm.append(titleColorDiv)
+    titleColorInput.on('change', function() {
+        itemdiv.find("h4").css("color", titleColorInput.val())
+    })
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function() {
+        modifyDia.close()
+    })
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content: editForm[0],
+        cancel: false
+    })
+    modifyDia.showModal()
+})
+
+var helpButton = $('<a class="btn btn-dark btn-circle bbbt"><i class="fa fa-book"></i></a>')
+helpButton.click(function() {
+    if(tbd)
+        tbd.remove()
+    var helpurl = window.location.href.replace("projects", "documentation/") + "#" + $(this).attr("user-origin")
+    // add a floating window to show the help, it can be moved and closed
+    var helpWindow = $('<div style=""/>')
+    helpWindow.css("width", "300px")
+    helpWindow.css("height", "500px")
+    helpWindow.append($('<iframe src="' + helpurl + '" style="width:100%;height:100%;border:none"/>'))
+    // use a div to show the help, it is movable and closable
+    var helpDiv = $('<div style="z-index:1000;position:absolute;left:20px;top:80px;background-color:white;border-radius:10px;padding:20px;box-shadow: 1px 1px 20px #4e73df;overflow:auto"/>')
+    helpDiv.append(helpWindow)
+    // draw a close button on the help window
+    var closeButton = $('<a class="btn btn-sm btn-danger btn-circle" style="position:absolute;top:0;right:0"><i class="fa fa-times"></i></a>')
+    closeButton.click(function() {
+        helpDiv.remove()
+    }
+    )
+    helpWindow.append(closeButton)
+    // make it draggable
+    helpDiv.draggable(
+    )
+    $("body").append(helpDiv)
+        
+})

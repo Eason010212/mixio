@@ -25,7 +25,7 @@ var JSLang = {
         "editProper": "修改项目属性",
         "viewProject": "查看和编辑项目内容",
         "illegalCycle": "逻辑视图中存在循环方法，不允许后台运行",
-        "codeException": "代码内部存在错误",
+        "codeException": "当前项目的逻辑视图存在无法在后台运行的内容",
         "loading": "加载中",
         "loading2": "更改中",
         "wrongAcc": "用户名或密码错误",
@@ -97,7 +97,7 @@ var JSLang = {
         "widget": "组件",
         "data": "- 数据 -",
         "lineChart": "折线图表",
-        "barChart": "柱状图表",
+        "barChart": "投票器",
         "dataTable": "数据表格",
         "dataMap": "数据地图",
         "dashboard": "仪表盘",
@@ -208,7 +208,12 @@ var JSLang = {
         "invalidUType": "不正确的组件类别。",
         "noUnitFound": "未找到组件。",
         "platformList": "已登录平台",
-        "deviceList": "已连接设备"
+        "deviceList": "已连接设备",
+        "camera": "摄像头",
+        "mic": "麦克风",
+        "tinydb": "数据库",
+        "resolution": "分辨率",
+        "fps": "帧率"
     },
     "tw": {
         "syncInterval": "自動更新頻率",
@@ -419,7 +424,12 @@ var JSLang = {
         "invalidUType": "不正確的組件類別。",
         "noUnitFound": "未找到組件。",
         "platformList": "已登錄平台",
-        "deviceList": "已連接設備"
+        "deviceList": "已連接設備",
+        "camera": "攝像頭",
+        "mic": "麥克風",
+        "tinydb": "數據庫",
+        "resolution": "分辨率",
+        "fps": "幀率"
     },
     "en": {
         "syncInterval": "Auto-sync",
@@ -630,7 +640,12 @@ var JSLang = {
         "invalidUType": "Invalid unit type.",
         "noUnitFound": "The unit does not exist",
         "platformList": "Platforms",
-        "deviceList": "Devices"
+        "deviceList": "Devices",
+        "camera": "Camera",
+        "mic": "Microphone",
+        "tinydb": "Database",
+        "resolution": "Resolution",
+        "fps": "FPS"
     }
 }
 

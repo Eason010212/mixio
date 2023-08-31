@@ -511,9 +511,13 @@ function shareKey() {
 }
 
 function switch_mode() {
+    grid.on("contextmenu", function(e) {
+        e.preventDefault()
+    })
     grid.removeAttr("hidden")
     grid2.removeAttr("hidden")
     grid3.removeAttr("hidden")
+    
     if (globalProjectType == DATA_MODE) {
         $("#projMode").removeClass("btn-primary")
         $("#projMode").addClass("btn-light")
@@ -699,6 +703,8 @@ function view_project(projectName, projectType) {
                 }
             })
             MixIO.log = function(text) {
+                if(typeof text == "object")
+                    text = JSON.stringify(text)
                 if (jTa2.html())
                     jTa2.html(jTa2.html() + '<br>' + '[' + timeStamp2String().substring(11) + '] ' + text)
                 else
@@ -895,6 +901,8 @@ function view_project(projectName, projectType) {
                 } else if (topic1.split('/').length == 3 && !isMixly) {
                     var tp = stringendecoder.encodeHtml(topic1.split('/')[2])
                     var ms = message1.toString()
+                    if(ms.length>500)
+                        ms = "[Too long to display]"
                     if(isJSON(ms))
                     {   
                         var msJSON = JSON.parse(ms)
@@ -948,6 +956,8 @@ function view_project(projectName, projectType) {
                 } else if (topic1.split('/').length == 4 && isMixly) {
                     var tp = stringendecoder.encodeHtml(topic1.split('/')[3])
                     var ms = message1.toString()
+                    if(ms.length>500)
+                        ms = "[Too long to display]"
                     if(isJSON(ms))
                     {   
                         var msJSON = JSON.parse(ms)
@@ -1010,6 +1020,14 @@ function view_project(projectName, projectType) {
             var units_array = $(prev_layout)
             for (var ct = 0; ct <= units_array.length - 1; ct = ct + 1) {
                 var un = $(units_array[ct])
+                var titleHidden = un.attr('title-hidden')
+                // if no title-hidden attribute, set it to false
+                if (titleHidden == undefined)
+                    titleHidden = false
+                if (titleHidden == "true")
+                    titleHidden = true
+                if (titleHidden == "false")
+                    titleHidden = false
                 var toolkits = {
                     'input_button': add_button,
                     'input_slider': add_slider,
@@ -1030,9 +1048,10 @@ function view_project(projectName, projectType) {
                     'decorate_text': add_decorate_text,
                     'decorate_pic': add_decorate_pic,
                     'timer': add_timer,
-                    'ble': add_ble
+                    'ble': add_ble,
+                    'camera': add_camera
                 }
-                toolkits[un.attr('user-type')](un.attr('user-title'), un.attr('user-topic'), un.attr('user-content'), un.attr('style'))
+                toolkits[un.attr('user-type')](un.attr('user-title'), un.attr('user-topic'), un.attr('user-content'), un.attr('style'), titleHidden)
             }
             var topicOuterDiv = $("<div style='width:100%;display:flex;align-items:center;'></div>")
             var topicDiv = $("<div style='z-index:1000;margin:0;display:flex;flex-direction:row;align-items:center;justify-content:center;margin-bottom:20px;width:320px;background-color:white;border-radius:0 0 40px 0;padding-left:10px;padding-right:10px;padding-top:5px;padding-bottom:10px;box-shadow:0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important;flex-wrap:wrap'></div>")
@@ -1685,6 +1704,12 @@ function add_widget() {
     widget_list.append(output_dashboard_add)
     var input_weather_add = $("<div class='widget_div'><div><img src='icons/input_weather.svg'><span>" + JSLang[lang].weather + "</span></div><a class='btn btn-" + (OFFLINE_MODE ? 'secondary' : 'success') + " btn-block'><i class='fa fa-" + (OFFLINE_MODE ? 'lock' : 'plus') + "'></i></a></div>")
     widget_list.append(input_weather_add)
+    var input_camera_add = $("<div class='widget_div'><div><img src='icons/camera.svg'><span>" + JSLang[lang].camera + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(input_camera_add)
+    var input_mic_add = $("<div class='widget_div'><div><img src='icons/mic.svg'><span>" + JSLang[lang].mic + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(input_mic_add)
+    var input_tinydb_add = $("<div class='widget_div'><div><img src='icons/database.svg'><span>" + JSLang[lang].tinydb + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(input_tinydb_add)
     widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].text + "</h5>"))
     var input_keyboard_add = $("<div class='widget_div'><div><img src='icons/input_keyboard.svg'><span>" + JSLang[lang].keyboard + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(input_keyboard_add)
@@ -1763,12 +1788,77 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11 && getByteLen(topic_input_2.val()) > 0 && getByteLen(topic_input_2.val()) < 11)
                     if (true) {
                         if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
                             add_ble(title_input.val(), topic_input.val()+","+topic_input_2.val(), ble_target.val())
+                            modifyDia.close().remove()
+                        } else
+                            showtext(JSLang[lang].sameUnit)
+                    } else
+                        showtext("")
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            } else
+                showtext(JSLang[lang].nameLenIllegal)
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function() {
+            modifyDia.close().remove()
+            add_widget()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content: editForm[0],
+            cancel: false
+        })
+        modifyDia.showModal()
+    })
+
+    input_camera_add.children("a").click(function() {
+        d.close().remove()
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/camera.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div.append(topic_input)
+        topic_input.val("camera")
+        editForm.append(topic_input_div)
+        // resolution selection
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].resolution + '</h5>'))
+        var resolution_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var resolution_input = $("<select class='form-control form-control-user' style='text-align:center;cursor:pointer'/>")
+        resolution_input_div.append(resolution_input)
+        resolution_input.append($("<option value='160x120'>160x120</option>"))
+        resolution_input.append($("<option value='320x240'>320x240</option>"))
+        editForm.append(resolution_input_div)
+        // fps selection
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].fps + '</h5>'))
+        var fps_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var fps_input = $("<select class='form-control form-control-user' style='text-align:center;cursor:pointer'/>")
+        fps_input_div.append(fps_input)
+        fps_input.append($("<option value='1'>1</option>"))
+        fps_input.append($("<option value='2'>2</option>"))
+        editForm.append(fps_input_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function() {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                var re = /^[a-z0-9]+$/i;
+                if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                    if (true) {
+                        if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
+                            add_camera(title_input.val(), topic_input.val(), resolution_input.val() + "," + fps_input.val())
                             modifyDia.close().remove()
                         } else
                             showtext(JSLang[lang].sameUnit)
@@ -1824,7 +1914,7 @@ function add_widget() {
         xpixel_input.val(30)
         ypixel_input.val(20)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (xpixel_input.val() > 0 && xpixel_input.val() < 101 && ypixel_input.val() > 0 && ypixel_input.val() < 101) {
@@ -1891,7 +1981,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -1958,7 +2048,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -2007,7 +2097,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -2074,7 +2164,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -2123,7 +2213,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -2184,7 +2274,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(Rtopic_input.val()) > 0 && getByteLen(Rtopic_input.val()) < 11 && getByteLen(Gtopic_input.val()) > 0 && getByteLen(Gtopic_input.val()) < 11 && getByteLen(Btopic_input.val()) > 0 && getByteLen(Btopic_input.val()) < 11)
                     if (re.test(Rtopic_input.val()) && re.test(Gtopic_input.val()) && re.test(Btopic_input.val())) {
@@ -2301,7 +2391,7 @@ function add_widget() {
                 if (placecode == "unselected")
                     showtext(JSLang[lang].locationSet)
                 else {
-                    if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+                    if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                         var re = /^[a-z0-9]+$/i;
                         if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                             if (true) {
@@ -2351,7 +2441,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -2417,7 +2507,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (getByteLen(message_input.val()) > 0) {
@@ -2523,7 +2613,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (getByteLen(condition1_input2.val()) > 0 && (condition2_input1.val() == "--" || getByteLen(condition2_input2.val()) > 0)) {
@@ -2584,7 +2674,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 add_magic(title_input.val(), undefined, color_select.val())
                 modifyDia.close().remove()
             }
@@ -2624,7 +2714,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -2679,7 +2769,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -2743,7 +2833,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -2811,7 +2901,7 @@ function add_widget() {
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
             if (option_input.val() != "") {
-                if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+                if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                     var re = /^[a-z0-9]+$/i;
                     if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                         if (true) {
@@ -2878,7 +2968,7 @@ function add_widget() {
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                 var re = /^[a-z0-9]+$/i;
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
@@ -2932,7 +3022,7 @@ function add_widget() {
             var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
             bottomDiv.append(confirmEdit)
             confirmEdit.click(function() {
-                if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 11) {
+                if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
                     var re = /^[a-z0-9]+$/i;
                     if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                         if (true) {
@@ -3001,11 +3091,17 @@ function add_widget() {
         var text_input = $("<textarea class='form-control form-control-user'  style='text-align:center;width:250px' autofocus='autofocus'/>")
         text_input_div.append(text_input)
         editForm.append(text_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input.val("pic")
+        topic_input_div.append(topic_input)
+        editForm.append(topic_input_div)
         var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
-            add_decorate_pic(undefined, undefined, text_input.val())
+            add_decorate_pic(undefined, topic_input.val(), text_input.val())
             modifyDia.close().remove()
         })
         var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
@@ -3171,7 +3267,7 @@ function listen_project(projectName) {
         if (code == 1) {
             window.location.href = window.location.href
         } else if (code == -1) {
-            showtext(JSLang[lang].codeException + ": " + JSON.parse(res)["exception"])
+            showtext(JSLang[lang].codeException + ": " + JSON.stringify(JSON.parse(res)["exception"]))
         } else if (code == -2)
             showtext(JSLang[lang].prj404)
         else if (code == -3)
@@ -3390,6 +3486,22 @@ function publish(topic, message, omit) {
             MixIO.log(JSLang[lang].speedLimit)
             stop_project()
         }
+    }
+}
+
+function propublish(project, topic, message){
+    var newPublishTime = new Date()
+    if (newPublishTime - lastPublishTime[0] >= minPublishInterval) {
+        if (!isMixly)
+            client.publish(globalUserName + '/' + project + '/' + topic, message)
+        else
+            client.publish('MixIO' + '/' + globalUserName.slice(1) + '/' + project + '/' + topic, message)
+        lastPublishTime.shift()
+        lastPublishTime.push(new Date())
+    } else {
+        showtext(JSLang[lang].speedLimit)
+        MixIO.log(JSLang[lang].speedLimit)
+        stop_project()
     }
 }
 
