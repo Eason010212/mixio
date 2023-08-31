@@ -74,7 +74,7 @@
                 <a>折线图表</a>
             </li>
             <li class="scroll-to-link" data-target="bar">
-                <a>柱状图表</a>
+                <a>投票器</a>
             </li>
             <li class="scroll-to-link" data-target="table">
                 <a>数据表格</a>
@@ -91,7 +91,7 @@
             <li class="scroll-to-link" data-target="input">
                 <a>文本输入</a>
             </li>
-            <li class="scroll-to-link" data-target="screen">
+            <li class="scroll-to-link" data-target="output_text">
                 <a>文本显示屏</a>
             </li>
             <li class="scroll-to-link" data-target="pixel">
@@ -300,6 +300,58 @@
             </p>
             <p>
                 <span style="color:#4e73df;">蓝牙设备</span> - 组件连接的蓝牙设备。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-chart">
+            <h1 id="chart">折线图表</h1>
+            <h3>组件总览</h3>
+            <p>
+                接收单一数值数据或JSON格式的多个数值数据，显示为折线统计图。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-bar">
+            <h1 id="bar">投票器</h1>
+            <h3>组件总览</h3>
+            <p>
+                接收文本数据，增加对应选项的计数。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">选项列表</span> - 用英文逗号分隔的选项列表。
+            </p>
+            <p>
+                <span style="color:#4e73df;">接收模式</span> - 单选（严格匹配，每次仅接收一个选项）或多选（模糊匹配，每次可接收多个选项）。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-table">
+            <h1 id="table">数据表格</h1>
+            <h3>组件总览</h3>
+            <p>
+                接收单一数值数据或英文逗号分隔的多个数值数据，呈现为一个数据行。<br>
+                “时间”列自动生成，显示数据接收的时间。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">列名</span> - 用英文逗号分隔的表格列名列表。
             </p>
         </div>
         <div class="overflow-hidden content-section" id="content-pixel">
