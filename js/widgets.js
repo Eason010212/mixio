@@ -1028,7 +1028,7 @@ function add_keyboard(user_title, user_topic, user_content, user_style, title_st
         ['title-hidden', title_style]
     ]
     var keyDiv = $("<div style='width:100%;display:flex;flex-direction:row;justify-content:center;align-items:center'/>")
-    var messDiv = $("<input class='form-control' style='width:70%;min-width:0px'/>")
+    var messDiv = $("<input class='form-control' style='width:calc(100% - 85px);min-width:0px'/>")
     messDiv.val(stringendecoder.decodeHtml(user_content))
     messDiv.click(function(event) {
         event.stopPropagation()
@@ -1113,6 +1113,243 @@ function add_keyboard(user_title, user_topic, user_content, user_style, title_st
     }
     var editForm = $('<div class="nnt"/>')
     editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/input_keyboard.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function() {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+            var re = /^[a-z0-9]+$/i;
+            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                if (true) {
+                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                        title.parent().parent().attr('user-title', title_input.val())
+                        title.parent().parent().attr('user-topic', topic_input.val())
+                        if (title.parent().parent().attr('user-content') == undefined)
+                            title.parent().parent().attr('user-content', "")
+                        title.text(title_input.val())
+                        topic.text(topic_input.val())
+                        modifyDia.close()
+                    } else
+                        showtext(JSLang[lang].sameUnit)
+                } else
+                    showtext("")
+            else
+                showtext(JSLang[lang].topicLenIllegal)
+        } else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function() {
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content: editForm[0],
+        cancel: false
+    })
+    var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
+        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+            var bubble = $('<div style="text-align:center"/>')
+            bubble.append(topicDiv)
+            var d = dialog({
+                align: 'top',
+                content: bubble[0],
+                quickClose: true,
+                autofocus: false
+            });
+            tbd = d;
+            editButton.click(edit_on_click)
+            deleteButton.click(delete_on_click)
+            if (!isRunning)
+                bubble.append(editButton)
+            if (!isRunning)
+                bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
+            title_input.val(title.text())
+            topic_input.val(topic.text())
+            if (!d.open)
+            {
+                d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
+            else
+                d.close()
+        }
+    }
+    if (window.screen.width > 800)
+    {
+        itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
+    else
+        itemdiv[0].addEventListener('touchend', function(event) {
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove', function(e) {
+        e.preventDefault()
+    })
+    if (user_style != undefined)
+        itemdiv.attr('style', user_style)
+
+}
+
+function add_mic(user_title, user_topic, user_content, user_style, title_style) {
+    var isAlive = true
+    var isRecording = false
+    var contents = []
+    var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
+    contents.push(title)
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
+    attrs = [
+        ['user-type', 'input_mic'],
+        ['user-title', user_title],
+        ['user-topic', user_topic],
+        ['user-content', user_content],
+        ['title-hidden', title_style]
+    ]
+    var keyDiv = $("<div style='width:100%;display:flex;flex-direction:row;justify-content:center;align-items:center'/>")
+    var messDiv = $("<input class='form-control' readonly style='width:calc(100% - 85px);min-width:0px'/>")
+    messDiv.val(stringendecoder.decodeHtml(user_content))
+    messDiv.click(function(event) {
+        event.stopPropagation()
+    })
+    messDiv.bind('mousedown', function(event) {
+        event.stopPropagation()
+    })
+    messDiv.bind('mouseup', function(event) {
+        event.stopPropagation()
+    })
+    messDiv.bind('input', function() {
+        title.parent().parent().attr('user-content', stringendecoder.encodeHtml(messDiv.val()))
+    })
+    keyDiv.append(messDiv)
+    var sendIcon = $('<a class="btn btn-primary btn-circle" style="margin-left:10px"><i class="fa fa-microphone"></i></a')
+    keyDiv.append(sendIcon)
+    sendIcon.bind('mousedown', function(event) {
+        event.stopPropagation()
+    })
+    sendIcon.bind('mouseup', function(event) {
+        event.stopPropagation()
+    })
+    if (window.screen.width > 800)
+        sendIcon.bind('click', function(event) {
+            event.stopPropagation()
+            if(!isRecording)
+            {
+                sendIcon.removeClass("btn-primary")
+                sendIcon.addClass("btn-danger")
+                sendIcon.children().removeClass('fa-microphone')
+                sendIcon.children().addClass("fa-stop")
+                // start recording, use web speech api
+                recognition = new webkitSpeechRecognition();
+                recognition.lang = 'zh-CN';
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.start();
+                recognition.onresult = function(event) {
+                    // update the result
+                    var recordRes = ''
+                    for(var i = 0; i < event.results.length; i++)
+                        recordRes += event.results[i][0].transcript
+                    messDiv.val(recordRes)
+                }
+                isRecording = true
+            }
+            else
+            {
+                sendIcon.removeClass("btn-danger")
+                sendIcon.addClass("btn-primary")
+                sendIcon.children().removeClass('fa-stop')
+                sendIcon.children().addClass("fa-microphone")
+                recognition.stop();
+                publish(topic.text(), messDiv.val())
+                isRecording = false
+            }
+        })
+    else
+        sendIcon.bind('touchend', function(event) {
+            event.stopPropagation()
+            if(!isRecording)
+            {
+                sendIcon.removeClass("btn-primary")
+                sendIcon.addClass("btn-danger")
+                sendIcon.children().removeClass('fa-microphone')
+                sendIcon.children().addClass("fa-stop")
+                // start recording, use web speech api
+                recognition = new webkitSpeechRecognition();
+                recognition.lang = 'zh-CN';
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.start();
+                recognition.onresult = function(event) {
+                    // update the result
+                    var recordRes = ''
+                    for(var i = 0; i < event.results.length; i++)
+                        recordRes += event.results[i][0].transcript
+                    messDiv.val(recordRes)
+                }
+                isRecording = true
+
+            }
+            else
+            {
+                sendIcon.removeClass("btn-danger")
+                sendIcon.addClass("btn-primary")
+                sendIcon.children().removeClass('fa-stop')
+                sendIcon.children().addClass("fa-microphone")
+                recognition.stop();
+                publish(topic.text(), messDiv.val())
+                isRecording = false
+            }
+        })
+    contents.push(keyDiv)
+    var itemdiv = add_block(3, 1, contents, attrs)
+
+    var delete_on_click = function() {
+        title.parent().parent().remove();
+        isAlive = false
+        if (tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function() {
+        modifyDia.showModal()
+        if (tbd)
+            tbd.remove()
+    }
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/mic.svg" style="width:45px;"></div>'))
     editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
     var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
     var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")

@@ -1049,7 +1049,8 @@ function view_project(projectName, projectType) {
                     'decorate_pic': add_decorate_pic,
                     'timer': add_timer,
                     'ble': add_ble,
-                    'camera': add_camera
+                    'camera': add_camera,
+                    'input_mic': add_mic
                 }
                 toolkits[un.attr('user-type')](un.attr('user-title'), un.attr('user-topic'), un.attr('user-content'), un.attr('style'), titleHidden)
             }
@@ -1706,7 +1707,7 @@ function add_widget() {
     widget_list.append(input_weather_add)
     var input_camera_add = $("<div class='widget_div'><div><img src='icons/camera.svg'><span>" + JSLang[lang].camera + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(input_camera_add)
-    var input_mic_add = $("<div class='widget_div'><div><img src='icons/mic.svg'><span>" + JSLang[lang].mic + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
+    var input_mic_add = $("<div class='widget_div'><div><img src='icons/mic.svg'><span>" + JSLang[lang].mic + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(input_mic_add)
     var input_tinydb_add = $("<div class='widget_div'><div><img src='icons/database.svg'><span>" + JSLang[lang].tinydb + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(input_tinydb_add)
@@ -2170,6 +2171,55 @@ function add_widget() {
                     if (true) {
                         if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
                             add_keyboard(title_input.val(), topic_input.val(), "")
+                            modifyDia.close().remove()
+                        } else
+                            showtext(JSLang[lang].sameUnit)
+                    } else
+                        showtext("")
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            } else
+                showtext(JSLang[lang].nameLenIllegal)
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function() {
+            modifyDia.close().remove()
+            add_widget()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content: editForm[0],
+            cancel: false
+        })
+        modifyDia.showModal()
+    })
+
+    input_mic_add.children("a").click(function() {
+        d.close().remove()
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/mic.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input.val("mic")
+        topic_input_div.append(topic_input)
+        editForm.append(topic_input_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function() {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                var re = /^[a-z0-9]+$/i;
+                if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                    if (true) {
+                        if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
+                            add_mic(title_input.val(), topic_input.val(), "")
                             modifyDia.close().remove()
                         } else
                             showtext(JSLang[lang].sameUnit)
