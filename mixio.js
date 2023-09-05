@@ -19,6 +19,10 @@ var logFileName = "logs/" + [
 ].join("-") + ".log"
 const { spawn, exec } = require('child_process');
 var fs = require('fs-extra')
+// if windows, clear C:\Users\%username%\AppData\Local\Temp\pkg
+if (process.platform == "win32") {
+    fs.emptyDirSync(process.env.TEMP + "/pkg")
+}
 var express = require('express');
 var session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
