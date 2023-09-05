@@ -7,6 +7,13 @@
 curlong = 0
 curlati = 0
 
+navigator.geolocation.getCurrentPosition(function(position){
+    curlong = position.coords.longitude
+    curlati = position.coords.latitude
+}, function(error){
+    console.log(error)
+})
+
 function MixIOLogicError(message){
     this.message = message
     this.name = "MixIOLogicError"
