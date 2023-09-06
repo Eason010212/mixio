@@ -19,22 +19,22 @@
 ## 主站（免费使用）
 https://mixio.mixly.cn
 
-## 私有部署发行版-v1.10.0
+## 私有部署发行版-v1.10.1
 
 ### Windows-x64发行版（win10及以上）
-https://gitee.com/bnu_mixly/mixio-win32-x86-dist/blob/master/mixio.exe
+https://gitee.com/bnu_mixly/mixio-win32-x86-dist/blob/master/1.10.1/mixio.exe
 
 ### Windows-x64发行版（win7）
-https://gitee.com/bnu_mixly/mixio-win32-x86-dist/blob/win7/mixio.exe
+https://gitee.com/bnu_mixly/mixio-win32-x86-dist/blob/win7/1.10.1/mixio.exe
 
 ### Linux-x64发行版
-https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/master/mixio
+https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/master/1.10.1/mixio
 
 ### Linux-arm64发行版
-https://gitee.com/bnu_mixly/mixio-linux-arm64-dist/blob/master/mixio
+https://gitee.com/bnu_mixly/mixio-linux-arm64-dist/blob/master/1.10.1/mixio
 
 ### MacOS-x64发行版
-https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
+https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/1.10.1/mixio
 
 
 ## 指令说明
