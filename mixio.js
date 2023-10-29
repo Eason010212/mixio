@@ -1344,7 +1344,7 @@ var mixioServer = function() {
         if (req.session.userName && req.query.projectName) {
             var userName = req.session.userName
             var projectName = req.query.projectName
-            var shareid = randomString(6, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+            var shareid = md5(userName + projectName).substring(0, 6)
             db.run("delete from `share` where userName=? and projectName=?", [req.session.userName, req.query.projectName], function(err) {
                 if (err)
                     console.log(err)
@@ -1659,7 +1659,7 @@ var mixioServer = function() {
     })
 
     app.get('/addShareKey', function(req, res) {
-        var rString = randomString(6, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+        var rString = md5(req.session.userName + req.query.projectName).substring(0, 6)
         if (req.session.userName && req.query.projectName && req.query.projectPass) {
             db.run("delete from `share` where userName=? and projectName = ?", [req.session.userName, req.query.projectName], function(err) {
                 if (err)

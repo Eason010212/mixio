@@ -44,28 +44,6 @@ function add_block(width, height, contents, attrs) {
     })
     itemdiv.draggable({
         onStopDrag: function() {
-            
-            if (itemdiv.attr('user-type') == 'magic') {
-                var left = parseInt(itemdiv.css('left'))
-                var top = parseInt(itemdiv.css('top'))
-                var width = parseInt(itemdiv.css('width'))
-                var height = parseInt(itemdiv.css('height'))
-                var items = $('.item')
-                for (var i = 0; i < items.length; i++) {
-                    var item = $(items[i])
-                    if (item.attr('user-type') == 'magic')
-                        continue
-                    var itemLeft = parseInt(item.css('left'))
-                    var itemTop = parseInt(item.css('top'))
-                    var itemWidth = parseInt(item.css('width'))
-                    var itemHeight = parseInt(item.css('height'))
-                    if (itemLeft >= left && itemLeft + itemWidth <= left + width && itemTop >= top && itemTop + itemHeight <= top + height) {
-                        console.log("here")
-                        item.css('left', itemLeft - itemLeft % 20 + (itemLeft % 20>10?1:0)*20 + 'px')
-                        item.css('top', itemTop - itemTop % 20 + (itemTop % 20>10?1:0)*20 + 'px')
-                    }
-                }
-            }
             var stdLeft = parseInt(itemdiv.css('left')) - (parseInt(itemdiv.css('left')) % 20) + (parseInt(itemdiv.css('left')) % 20 > 10 ? 1 : 0) * 20
             var stdTop = parseInt(itemdiv.css('top')) - (parseInt(itemdiv.css('top')) % 20) + (parseInt(itemdiv.css('top')) % 20 > 10 ? 1 : 0) * 20
             itemdiv.css('left', stdLeft + 'px')
@@ -76,27 +54,6 @@ function add_block(width, height, contents, attrs) {
             lastDragY = event.pageY
         },
         onDrag: function(event) {
-            // when drag unit with user-type 'magic', any other unit in the box will be dragged too
-            if (itemdiv.attr('user-type') == 'magic') {
-                var left = parseInt(itemdiv.css('left'))
-                var top = parseInt(itemdiv.css('top'))
-                var width = parseInt(itemdiv.css('width'))
-                var height = parseInt(itemdiv.css('height'))
-                var items = $('.item')
-                for (var i = 0; i < items.length; i++) {
-                    var item = $(items[i])
-                    if (item.attr('user-type') == 'magic')
-                        continue
-                    var itemLeft = parseInt(item.css('left'))
-                    var itemTop = parseInt(item.css('top'))
-                    var itemWidth = parseInt(item.css('width'))
-                    var itemHeight = parseInt(item.css('height'))
-                    if (itemLeft >= left && itemLeft + itemWidth <= left + width && itemTop >= top && itemTop + itemHeight <= top + height) {
-                        item.css('left', itemLeft + event.pageX - lastDragX + 'px')
-                        item.css('top', itemTop + event.pageY - lastDragY + 'px')
-                    }
-                }
-            }
             lastDragX = event.pageX
             lastDragY = event.pageY
         }
@@ -279,6 +236,8 @@ function add_pixel(user_title, user_topic, user_content, user_style, title_style
                 bubble.append(deleteButton)
             if (!isRunning)
             {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -552,6 +511,8 @@ function add_button(user_title, user_topic, user_content, user_style, title_styl
             }
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -786,6 +747,8 @@ function add_slider(user_title, user_topic, user_content, user_style, title_styl
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -971,6 +934,8 @@ function add_controller(user_title, user_topic, user_content, user_style, title_
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -1181,6 +1146,8 @@ function add_keyboard(user_title, user_topic, user_content, user_style, title_st
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -1418,6 +1385,8 @@ function add_mic(user_title, user_topic, user_content, user_style, title_style) 
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -1590,6 +1559,8 @@ function add_bulb(user_title, user_topic, user_content, user_style, title_style)
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -1907,6 +1878,8 @@ function add_ble(user_title, user_topic, user_content, user_style, title_style) 
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -2054,6 +2027,8 @@ function add_magic(user_title, user_topic, user_content, user_style, title_style
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -2248,6 +2223,8 @@ function add_timer(user_title, user_topic, user_content, user_style, title_style
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -2538,6 +2515,8 @@ function add_trigger(user_title, user_topic, user_content, user_style, title_sty
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -2811,6 +2790,8 @@ function add_rgb(user_title, user_topic, user_content, user_style, title_style) 
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -3154,6 +3135,8 @@ function add_bar(user_title, user_topic, user_content, user_style, title_style) 
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -3378,6 +3361,8 @@ function add_dashboard(user_title, user_topic, user_content, user_style, title_s
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -3698,6 +3683,8 @@ function add_map(user_title, user_topic, user_content, user_style, title_style) 
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -3886,6 +3873,8 @@ function add_text(user_title, user_topic, user_content, user_style, title_style)
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -3932,25 +3921,67 @@ function add_table(user_title, user_topic, user_content, user_style, title_style
             if (isAlive && isRunning)
                 if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
                     var cols = []
-                    for (datafield in datafields) {
-                        if (datafields[datafield].type != "control" && datafields[datafield].name != "时间" && datafields[datafield].name != "時間" && datafields[datafield].name != "time")
+                    // if not JSON
+                    if(!isJSON(String(message1)))
+                    {
+                        for (datafield in datafields) {
+                            if (datafields[datafield].type != "control" && datafields[datafield].name != "时间" && datafields[datafield].name != "時間" && datafields[datafield].name != "time")
+                                cols.push(datafields[datafield].name)
+                        }
+                        var message = String(message1).split(',')
+                        itemdiv.trigger(MixIO.eventTags.DATA_TABLE_CHANGED, [message])
+                        var toBePushed = {}
+                        var index = 0
+                        toBePushed["時間"] = timeStamp2String()
+                        toBePushed["时间"] = timeStamp2String()
+                        toBePushed["time"] = timeStamp2String()
+                        for (datafield in cols) {
+                            toBePushed[cols[datafield]] = message[index] ? message[index] : ''
+                            index = index + 1
+                        }
+                        dataset.unshift(toBePushed)
+                        console.log(dataset)
+                        init_table()
+                        setContent()
+                    }
+                    else
+                    {
+                        // use JSON's keys as columns
+                        var message = JSON.parse(String(message1))
+                        itemdiv.trigger(MixIO.eventTags.DATA_TABLE_CHANGED, [message])
+                        // make datafield
+                        datafields = []
+                        // push time
+                        datafields.push({
+                            "name": JSLang[lang].time,
+                            "type": "text",
+                            "align": "center"
+                        })
+                        for (datafield in message) {
+                            datafields.push({
+                                "name": datafield,
+                                "type": "text",
+                                "align": "center"
+                            })
+                        }
+                        var cols = []
+                        for (datafield in datafields) {
                             cols.push(datafields[datafield].name)
+                        }
+                        count_input.val(cols.join(','))
+                        // make dataset
+                        var toBePushed = {}
+                        toBePushed["時間"] = timeStamp2String()
+                        toBePushed["时间"] = timeStamp2String()
+                        toBePushed["time"] = timeStamp2String()
+                        for (datafield in message) {
+                            toBePushed[datafield] = message[datafield]
+                        }
+                        dataset.unshift(toBePushed)
+                        console.log(dataset)
+                        init_table()
+                        setContent()
                     }
-                    var message = String(message1).split(',')
-                    itemdiv.trigger(MixIO.eventTags.DATA_TABLE_CHANGED, [message])
-                    var toBePushed = {}
-                    var index = 0
-                    toBePushed["時間"] = timeStamp2String()
-                    toBePushed["时间"] = timeStamp2String()
-                    toBePushed["time"] = timeStamp2String()
-                    for (datafield in cols) {
-                        toBePushed[cols[datafield]] = message[index] ? message[index] : ''
-                        index = index + 1
-                    }
-                    dataset.unshift(toBePushed)
-                    console.log(dataset)
-                    init_table()
-                    setContent()
                 }
     })
     var contents = []
@@ -4104,6 +4135,8 @@ function add_table(user_title, user_topic, user_content, user_style, title_style
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -4168,6 +4201,7 @@ function add_table(user_title, user_topic, user_content, user_style, title_style
     var dataset = [];
     var colCount = parseInt(user_content.split(',')[0])
     var colNames = user_content.split(',').slice(1, 1 + colCount)
+    console.log(colNames)
     count_input.val(colNames.join(','))
     var colVals = user_content.split(',').slice(1 + colCount)
     var rowNum = colVals.length / colCount
@@ -4558,6 +4592,8 @@ function add_weather(user_title, user_topic, user_content, user_style, title_sty
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -4962,6 +4998,8 @@ function add_chart(user_title, user_topic, user_content, user_style, title_style
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -5110,7 +5148,9 @@ function add_decorate_text(user_title, user_topic, user_content, user_style, tit
                 bubble.append(deleteButton)
             if (!isRunning)
             {
-                // styleButton.attr("user-origin", title.text())
+                // copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
+                //styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
                 bubble.append(helpButton)
@@ -5282,6 +5322,8 @@ function add_decorate_pic(user_title, user_topic, user_content, user_style, titl
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                //copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 //styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -5510,6 +5552,8 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
                 bubble.append(deleteButton)
             if (!isRunning)
                 {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
                 bubble.append(styleButton)
                 helpButton.attr("user-origin", attrs[0][1])
@@ -5563,6 +5607,21 @@ function get_width() {
     if ((fullWidth - 84) / 3 < 100)
         standardWidth = (fullWidth - 84) / 3
 }
+
+var copyButton = $('<a class="btn btn-success btn-circle bbbt"><i class="fa fa-copy"></i></a>')
+copyButton.click(function() {
+    // copy the item
+    var itemTitle = $(this).attr("user-origin")
+    var itemdiv = $("div[user-title='" + itemTitle + "']")
+    // get user-type, user-topic, user-content, user-style
+    var user_type = itemdiv.attr("user-type")
+    var user_topic = itemdiv.attr("user-topic")
+    var user_content = itemdiv.attr("user-content")
+    var user_style = itemdiv.attr("style")
+    // add the item, use the function of user-type
+    toolkits[user_type](itemTitle + "_copy", user_topic, user_content, user_style)
+
+})
 
 var styleButton = $('<a class="btn btn-danger btn-circle bbbt button-7colors"><i class="fa fa-paint-brush"></i></a>')
 styleButton.click(function() {

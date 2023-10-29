@@ -432,6 +432,21 @@ function sync_connect_status() {
         contentDiv.append(sharekey)
         contentDiv.append("<p style='font-weight:bold;margin-top:5px;margin-bottom:5px;font-size:1rem'>共享链接 Share Link</p>")
         sharelink = $("<a style='font-size:1rem'></a>")
+        // hover sharelink, show QR code
+        sharelink.hover(function() {
+            var qrCode = $("<div style='width:50px;height:50px;margin-bottom:12px'></div>")
+            // let it show over the sharelink
+            qrCode.css("position", "absolute")
+            qrCode.css("left", "calc(50% - 25px)")
+            qrCode.css("top", "100%")
+            $(this).append(qrCode)
+            // set width and height to 0 to avoid the QR code being too large
+            new QRCode(qrCode[0], {
+                text: $(this).attr("href")
+            })
+        }, function() {
+            $(this).children("div").remove()
+        })
         contentDiv.append(sharelink)
     }
     var cancelDiv = $("<div style='width:100%;text-align:center;margin-top:15px'/>")
@@ -1028,7 +1043,7 @@ function view_project(projectName, projectType) {
                     titleHidden = true
                 if (titleHidden == "false")
                     titleHidden = false
-                var toolkits = {
+                toolkits = {
                     'input_button': add_button,
                     'input_slider': add_slider,
                     'input_keyboard': add_keyboard,
