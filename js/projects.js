@@ -924,15 +924,16 @@ function view_project(projectName, projectType) {
                         if(("clientid" in msJSON)&&("long" in msJSON)&&("lat" in msJSON)&&("message" in msJSON))
                         {
                             var newJSON = {}
-                            var clientid = msJSON["clientid"]
-                            newJSON[clientid+"-"+"long"] = msJSON["long"]
-                            newJSON[clientid+"-"+"lat"] = msJSON["lat"]
+                            var clientid = String(msJSON["clientid"]).split('b\'')[1].split('\'')[0]
+                            newJSON["clientid"] = clientid
+                            newJSON["long"] = msJSON["long"]
+                            newJSON["lat"] = msJSON["lat"]
                             var msg = msJSON["message"]
                             if(typeof msg == "string")
                                 msg = JSON.parse(msg)
                             for(item of msg)
                             {
-                                newJSON[clientid+"-"+item["label"]] = item["value"]
+                                newJSON[item["label"]] = item["value"]
                             }
                             ms = JSON.stringify(newJSON)
                         }
