@@ -64,3 +64,26 @@ https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
 9. cd mixio
 10. npm i
 11. node mixio.js debug
+
+## 服务器配置文件（config/config.json）
+1. 首次运行服务器后，会在相对应位置的config文件夹生成config.json
+2. config.json内容可修改，重启服务器后生效
+3. MIXIO_HTTP_PORT - int，HTTP端口，默认为8080
+4. MIXIO_HTTPS_PORT - int，HTTP端口，默认为8443
+5. MAX_PROJECT_NUM_PER_USER - int，每个用户的最大项目数，默认为20
+6. MAX_MESSAGE_PER_USER - int，每个用户的最大离线消息存储数，默认为1000
+7. MAX_MESSAGE_PER_SECOND - int，每个用户每秒的最大消息数，默认为5
+8. ALLOW_REGISTER - bool，是否允许自主注册，默认为true
+9. ALLOW_HOOK - bool，是否允许离线存储消息，默认为true
+10. OFFLINE_MODE - bool，是否禁用天气/地图数据，默认为true
+11. BAIDU_MAP_AK - string，百度地图客户端应用AK（OFFLINE_MODE=false时必须配置），默认为""
+12. BAIDU_MAP_SERVER_AK - string，百度地图服务端应用AK（OFFLINE_MODE=false时必须配置），默认为""
+13. ADMIN_USERNAME - string，管理后台用户名，默认为"admin"
+14. ADMIN_PASSWORD - string，管理后台密码，默认为"public"
+15. STORAGE_ENGINE - string，数据库引擎，默认为"sqlite"
+16. MYSQL_HOST - string，MySQL地址（STORAGE_ENGINE="mysql"时必须配置），默认为"localhost"
+17. MYSQL_PORT - int，MySQL地址（STORAGE_ENGINE="mysql"时必须配置），默认为3306
+18. MYSQL_USER - string，MySQL用户名（STORAGE_ENGINE="mysql"时必须配置），默认为""
+19. MYSQL_PASS - string，MySQL密码（STORAGE_ENGINE="mysql"时必须配置），默认为""
+20. MYSQL_DB - string，MySQL数据库名（STORAGE_ENGINE="mysql"时必须配置），默认为"mixio",
+21. FOOTER - string，显示在首页的备案信息，公网部署时请务必配置此项（支持HTML语言，请注意为双引号添加转义字符\"），默认为""
