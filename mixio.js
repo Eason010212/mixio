@@ -68,7 +68,8 @@ function init(cb){
             "MYSQL_PORT":3306,
             "MYSQL_USER":"",
             "MYSQL_PASS":"",
-            "MYSQL_DB":"mixio"
+            "MYSQL_DB":"mixio",
+            "FOOTER":""
           }`
         fs.writeFileSync("config/config.json", defaultConfig)
         fs.mkdirSync("config/certs")
@@ -840,7 +841,7 @@ var mixioServer = function() {
 
     app.get('/', function(req, res) {
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
-            'main':fs.existsSync("config/certs/chain.crt"),
+            'footer':configs["FOOTER"],
             'mixly':fs.existsSync("../mixly")
         }, function(err, data) {
             res.send(data)
@@ -2276,7 +2277,8 @@ init(function(res){
         configPath = "config/config.json"
         configs = fs.readFileSync(configPath);
         configs = JSON.parse(configs.toString());
-
+        if(! configs["FOOTER"])
+            configs["FOOTER"] = ""
         STORAGE_ENGINE = configs["STORAGE_ENGINE"]
 
 
