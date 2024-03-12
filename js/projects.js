@@ -924,7 +924,7 @@ function view_project(projectName, projectType) {
                         if(("clientid" in msJSON)&&("long" in msJSON)&&("lat" in msJSON)&&("message" in msJSON))
                         {
                             var newJSON = {}
-                            var clientid = String(msJSON["clientid"]).split('b\'')[1].split('\'')[0]
+                            var clientid = String(msJSON["clientid"]).split('b\'').pop().split('\'')[0]
                             newJSON["clientid"] = clientid
                             newJSON["long"] = msJSON["long"]
                             newJSON["lat"] = msJSON["lat"]
