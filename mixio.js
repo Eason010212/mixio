@@ -53,6 +53,9 @@ function init(cb){
         var defaultConfig = `{
             "MIXIO_HTTP_PORT": 8080,
             "MIXIO_HTTPS_PORT": 8443,
+            "MIXIO_MQTT_PORT": 1883,
+            "MIXIO_WS_PORT": 8083,
+            "MIXIO_WSS_PORT": 8084,
             "MAX_PROJECT_NUM_PER_USER": 20,
             "MAX_MESSAGE_PER_USER": 1000,
             "MAX_MESSAGE_PER_SECOND": 5,
@@ -1939,12 +1942,12 @@ var mixioServer = function() {
     }
 
     return new Promise(resolve => {
-        plainServer.listen(1883, function() {
-            console.log('[INFO] Plain MQTT server listening on port', 1883)
-            httpServer.listen(8083, function() {
-                console.log('[INFO] WebSocket MQTT server listening on port', 8083)
-                httpsServer.listen(8084, function() {
-                    console.log('[INFO] WebSocketS MQTT server listening on port', 8084)
+        plainServer.listen(configs["MIXIO_MQTT_PORT"], function() {
+            console.log('[INFO] Plain MQTT server listening on port', configs["MIXIO_MQTT_PORT"])
+            httpServer.listen(configs["MIXIO_WS_PORT"], function() {
+                console.log('[INFO] WebSocket MQTT server listening on port', configs["MIXIO_WS_PORT"])
+                httpsServer.listen(configs["MIXIO_WSS_PORT"], function() {
+                    console.log('[INFO] WebSocketS MQTT server listening on port', configs["MIXIO_WSS_PORT"])
                     httpServer2 = http.createServer(app)
                     httpServer2.listen(configs['MIXIO_HTTP_PORT'], function() {
                         if(configs['MIXIO_HTTP_PORT'] != 0)
@@ -2447,7 +2450,7 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
     }
     this.lastPublishTime = [new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0), new Date(0)],
         this.minPublishInterval = 500,
-        this.client = mqtt.connect('ws://localhost:8083', {
+        this.client = mqtt.connect('ws://localhost:' + configs["MIXIO_WS_PORT"], {
             'clientId': "MixIO_" + Math.random().toString(16).substr(2, 8),
             'username': userName,
             'password': projectPass

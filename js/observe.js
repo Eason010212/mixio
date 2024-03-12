@@ -48,7 +48,7 @@ $(function(){
         randomClientID = 'OBGuest_' + Math.random().toString(16).substr(2, 8)
         globalUserName = userName
         globalProjectName = projectName
-        client = mqtt.connect((location.protocol == 'https:' ? 'wss://' : 'ws://')+window.location.host+(location.protocol == 'https:' ? ':8084' : ':8083')+'/mqtt',{
+        mqtt.connect((location.protocol == 'https:' ? 'wss://' : 'ws://') + window.location.host.split(":")[0] + (location.protocol == 'https:' ? (':'+MIXIO_WSS_PORT) : (':'+MIXIO_WS_PORT)), {
             'clientId':randomClientID,
             'username':userName,
             'password':projectPass

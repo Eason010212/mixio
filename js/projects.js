@@ -847,7 +847,7 @@ function view_project(projectName, projectType) {
                 keyName = userName.slice(1)
                 userName = 'MixIO_public'
             }
-            client = mqtt.connect((location.protocol == 'https:' ? 'wss://' : 'ws://') + window.location.host.split(":")[0] + (location.protocol == 'https:' ? ':8084' : ':8083'), {
+            client = mqtt.connect((location.protocol == 'https:' ? 'wss://' : 'ws://') + window.location.host.split(":")[0] + (location.protocol == 'https:' ? (':'+MIXIO_WSS_PORT) : (':'+MIXIO_WS_PORT)), {
                 'clientId': randomClientID,
                 'username': userName,
                 'password': projectPass,
