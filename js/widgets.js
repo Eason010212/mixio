@@ -48,14 +48,72 @@ function add_block(width, height, contents, attrs) {
             var stdTop = parseInt(itemdiv.css('top')) - (parseInt(itemdiv.css('top')) % 20) + (parseInt(itemdiv.css('top')) % 20 > 10 ? 1 : 0) * 20
             itemdiv.css('left', stdLeft + 'px')
             itemdiv.css('top', stdTop + 'px')
+            // 对于tmpInnerItems中的所有item，也进行同样的处理
+            if(itemdiv.attr('user-type') == 'magic')
+            {
+                for(var i=0;i<tmpInnerItems.length;i++)
+                {
+                    var item = $(".item").eq(tmpInnerItems[i])
+                    var left = parseInt(item.css('left')) - (parseInt(item.css('left')) % 20) + (parseInt(item.css('left')) % 20 > 10 ? 1 : 0) * 20
+                    var top = parseInt(item.css('top')) - (parseInt(item.css('top')) % 20) + (parseInt(item.css('top')) % 20 > 10 ? 1 : 0) * 20
+                    item.css('left', left + 'px')
+                    item.css('top', top + 'px')
+                }
+            }
+            tmpInnerItems = []
         },
         onStartDrag: function(event) {
             lastDragX = event.pageX
             lastDragY = event.pageY
+            if(itemdiv.attr('user-type') == 'magic')
+            {
+                
+                // 包围在块内部的所有item
+                tmpInnerItems = []
+                // magic块的边界坐标
+                var magicLeft = parseInt(itemdiv.css('left'))
+                var magicTop = parseInt(itemdiv.css('top'))
+                var magicRight = magicLeft + parseInt(itemdiv.css('width'))
+                var magicBottom = magicTop + parseInt(itemdiv.css('height'))
+                // 遍历所有.item
+                var items = $(".item")
+                tmpOriHeight = parseInt(itemdiv.css('height'))
+                tmpOriWidth = parseInt(itemdiv.css('width'))
+                for(var i=0;i<items.length;i++)
+                {
+                    if(items.eq(i).attr('user-type') != 'magic')
+                    {  
+                        var item = items.eq(i)
+                        var left = parseInt(item.css('left'))
+                        var top = parseInt(item.css('top'))
+                        var right = left + parseInt(item.css('width'))
+                        var bottom = top + parseInt(item.css('height'))
+                        if(left+5 >= magicLeft && right-5 <= magicRight && top+5 >= magicTop && bottom-5 <= magicBottom)
+                            tmpInnerItems.push(i)
+                    }
+                }
+                console.log(tmpInnerItems)
+            }
         },
         onDrag: function(event) {
+            var dx = event.pageX - lastDragX
+            var dy = event.pageY - lastDragY
             lastDragX = event.pageX
             lastDragY = event.pageY
+            
+            var items = $(".item")
+            if(itemdiv.attr('user-type') == 'magic')
+            {
+                if(tmpOriWidth==parseInt(itemdiv.css('width')) && tmpOriHeight==parseInt(itemdiv.css('height')))
+                for(var i=0;i<tmpInnerItems.length;i++)
+                {
+                    var item = items.eq(tmpInnerItems[i])
+                    var left = parseInt(item.css('left'))
+                    var top = parseInt(item.css('top'))
+                    item.css('left', left + dx)
+                    item.css('top', top + dy)
+                }
+            }
         }
     })
     if(itemdiv.attr('user-type') != 'pixel')
