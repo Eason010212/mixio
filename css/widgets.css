@@ -237,6 +237,9 @@
     font-size: 1rem;
     border-radius:10px;
     border:solid gray 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .bulb0{
     width: 46px;

@@ -847,7 +847,7 @@ function view_project(projectName, projectType) {
                 keyName = userName.slice(1)
                 userName = 'MixIO_public'
             }
-            client = mqtt.connect((location.protocol == 'https:' ? 'wss://' : 'ws://') + window.location.host.split(":")[0] + (location.protocol == 'https:' ? (':'+MIXIO_WSS_PORT) : (':'+MIXIO_WS_PORT)), {
+            client = mqtt.connect((location.protocol == 'https:' ? 'wss://' : 'ws://') + window.location.host.split(":")[0] + (location.protocol == 'https:' ? ':8084' : ':8083'), {
                 'clientId': randomClientID,
                 'username': userName,
                 'password': projectPass,
@@ -1740,6 +1740,11 @@ function add_widget() {
     widget_list.append(decorate_pic_add)
     var magic_add = $("<div class='widget_div'><div><img src='icons/magic.svg'><span>" + JSLang[lang].magic + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(magic_add)
+    /*
+    widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].tensorAI + "</h5>"))
+    var imageNet_add = $("<div class='widget_div'><div><img src='icons/input_keyboard.svg'><span>" + JSLang[lang].imageNet + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(imageNet_add)
+    */
     ble_add.children("a").click(function() {
         d.close().remove()
         var editForm = $('<div class="nnt"/>')
