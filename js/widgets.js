@@ -1247,6 +1247,229 @@ function add_keyboard(user_title, user_topic, user_content, user_style, title_st
 
 }
 
+function add_tinydb(user_title, user_topic, user_content, user_style, title_style) {
+    var isAlive = true
+    var contents = []
+    var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
+    contents.push(title)
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
+    attrs = [
+        ['user-type', 'tinydb'],
+        ['user-title', user_title],
+        ['user-topic', user_topic],
+        ['user-content', user_content],
+        ['title-hidden', title_style]
+    ]
+    var keyDiv = $("<div style='width:100%;display:flex;flex-direction:row;justify-content:center;align-items:center'/>")
+    var messDiv = $("<select class='form-control' style='width:calc(100% - 85px);min-width:0px'/>")
+    var options = user_content.split(',')
+    for (var i = 0; i < options.length; i++) {
+        var option = $("<option value='" + options[i] + "'>" + options[i] + "</option>")
+        messDiv.append(option)
+    }
+    keyDiv.append(messDiv)
+    messDiv.click(function(event) {
+        event.stopPropagation()
+    })
+    messDiv.bind('mousedown', function(event) {
+        event.stopPropagation()
+    })
+    messDiv.bind('mouseup', function(event) {
+        event.stopPropagation()
+    })
+    var sendIcon = $('<a class="btn btn-primary btn-circle" style="margin-left:10px"><i class="fa fa-paper-plane"></i></a')
+    keyDiv.append(sendIcon)
+    sendIcon.bind('mousedown', function(event) {
+        event.stopPropagation()
+    })
+    sendIcon.bind('mouseup', function(event) {
+        event.stopPropagation()
+    })
+    if (window.screen.width > 800)
+        sendIcon.bind('click', function(event) {
+            event.stopPropagation()
+            publish(topic.text(), messDiv.val())
+            sendIcon.removeClass("btn-primary")
+            sendIcon.addClass("btn-success")
+            sendIcon.children().removeClass('fa-paper-plane')
+            sendIcon.children().addClass("fa-check")
+            setTimeout(function() {
+                sendIcon.removeClass("btn-success")
+                sendIcon.addClass("btn-primary")
+                sendIcon.children().removeClass('fa-check')
+                sendIcon.children().addClass("fa-paper-plane")
+            }, 300)
+        })
+    else
+        sendIcon.bind('touchend', function(event) {
+            event.stopPropagation()
+            publish(topic.text(), messDiv.val())
+            sendIcon.removeClass("btn-primary")
+            sendIcon.addClass("btn-success")
+            sendIcon.children().removeClass('fa-paper-plane')
+            sendIcon.children().addClass("fa-check")
+            setTimeout(function() {
+                sendIcon.removeClass("btn-success")
+                sendIcon.addClass("btn-primary")
+                sendIcon.children().removeClass('fa-check')
+                sendIcon.children().addClass("fa-paper-plane")
+            }, 300)
+        })
+    contents.push(keyDiv)
+    var itemdiv = add_block(3, 1, contents, attrs)
+    itemdiv.bind(MixIO.actionTags.KEYBOARD_SEND, function(event, message) {
+        messDiv.val(message)
+        publish(topic.text(), messDiv.val())
+        sendIcon.removeClass("btn-primary")
+        sendIcon.addClass("btn-success")
+        sendIcon.children().removeClass('fa-paper-plane')
+        sendIcon.children().addClass("fa-check")
+        setTimeout(function() {
+            sendIcon.removeClass("btn-success")
+            sendIcon.addClass("btn-primary")
+            sendIcon.children().removeClass('fa-check')
+            sendIcon.children().addClass("fa-paper-plane")
+        }, 300)
+    })
+
+    var delete_on_click = function() {
+        title.parent().parent().remove();
+        isAlive = false
+        if (tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function() {
+        modifyDia.showModal()
+        if (tbd)
+            tbd.remove()
+    }
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/input_keyboard.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].options + '</h5>'))
+    var options_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var options_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    options_input_div.append(options_input)
+    editForm.append(options_input_div)
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function() {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+            var re = /^[a-z0-9]+$/i;
+            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                if (true) {
+                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                        title.parent().parent().attr('user-title', title_input.val())
+                        title.parent().parent().attr('user-topic', topic_input.val())
+                        title.parent().parent().attr('user-content', options_input.val())
+                        title.text(title_input.val())
+                        topic.text(topic_input.val())
+                        messDiv.empty()
+                        var options = options_input.val().split(',')
+                        for (var i = 0; i < options.length; i++) {
+                            var option = $("<option value='" + options[i] + "'>" + options[i] + "</option>")
+                            messDiv.append(option)
+                        }
+                        modifyDia.close()
+                    } else
+                        showtext(JSLang[lang].sameUnit)
+                } else
+                    showtext("")
+            else
+                showtext(JSLang[lang].topicLenIllegal)
+        } else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function() {
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content: editForm[0],
+        cancel: false
+    })
+    var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
+        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+            var bubble = $('<div style="text-align:center"/>')
+            bubble.append(topicDiv)
+            var d = dialog({
+                align: 'top',
+                content: bubble[0],
+                quickClose: true,
+                autofocus: false
+            });
+            tbd = d;
+            editButton.click(edit_on_click)
+            deleteButton.click(delete_on_click)
+            if (!isRunning)
+                bubble.append(editButton)
+            if (!isRunning)
+                bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
+            title_input.val(title.text())
+            topic_input.val(topic.text())
+            options_input.val(title.parent().parent().attr('user-content'))
+            if (!d.open)
+            {
+                d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
+            else
+                d.close()
+        }
+    }
+    if (window.screen.width > 800)
+    {
+        itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
+    else
+        itemdiv[0].addEventListener('touchend', function(event) {
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove', function(e) {
+        e.preventDefault()
+    })
+    if (user_style != undefined)
+        itemdiv.attr('style', user_style)
+
+}
+
 function add_mic(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var isRecording = false
@@ -3848,16 +4071,20 @@ function add_text(user_title, user_topic, user_content, user_style, title_style)
     client.on('message', function(topic1, message1) {
         if (isAlive && isRunning)
             if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
-                textDiv.empty()
-                // set innerHTML
-                textDiv.html(stringendecoder.decodeHtml(String(message1)))
-                var minFontSize = 1
-                var fontSize = 3 - String(message1).length / 3
-                if (fontSize < minFontSize)
-                    fontSize = minFontSize
-                textDiv.css('font-size', fontSize + 'rem')
-                title.parent().parent().attr('user-content', stringendecoder.encodeHtml(String(message1)))
-                itemdiv.trigger(MixIO.eventTags.TEXT_SCREEN_CHANGED, [String(message1)])
+                textDiv.animate({ opacity: 0 }, 200);
+                setTimeout(function() {
+                    textDiv.empty()
+                    // set innerHTML
+                    textDiv.html(stringendecoder.decodeHtml(String(message1)))
+                    var minFontSize = 1
+                    var fontSize = 3 - String(message1).length / 3
+                    if (fontSize < minFontSize)
+                        fontSize = minFontSize
+                    textDiv.css('font-size', fontSize + 'rem')
+                    textDiv.animate({ opacity: 1 }, 200);
+                    title.parent().parent().attr('user-content', stringendecoder.encodeHtml(String(message1)))
+                    itemdiv.trigger(MixIO.eventTags.TEXT_SCREEN_CHANGED, [String(message1)])
+                }, 200)
             }
     })
 

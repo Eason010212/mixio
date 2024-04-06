@@ -48,7 +48,7 @@ $(function(){
         randomClientID = 'OBGuest_' + Math.random().toString(16).substr(2, 8)
         globalUserName = userName
         globalProjectName = projectName
-        mqtt.connect((location.protocol == 'https:' ? 'wss://' : 'ws://') + window.location.host.split(":")[0] + (location.protocol == 'https:' ? (':'+MIXIO_WSS_PORT) : (':'+MIXIO_WS_PORT)), {
+        client = mqtt.connect((location.protocol == 'https:' ? 'wss://' : 'ws://')+window.location.host+(location.protocol == 'https:' ? ':8084' : ':8083')+'/mqtt',{
             'clientId':randomClientID,
             'username':userName,
             'password':projectPass
@@ -77,7 +77,8 @@ $(function(){
                 'magic':add_magic,
                 'ble': add_ble,
                 'pixel': add_pixel,
-                'input_mic': add_mic
+                'input_mic': add_mic,
+                'tinydb': add_tinydb
             }
             console.log(un.attr('user-type'))
             toolkits[un.attr('user-type')](un.attr('user-title'),un.attr('user-topic'),un.attr('user-content'),un.attr('style'));
