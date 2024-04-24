@@ -79,7 +79,8 @@ $(function(){
                 'pixel': add_pixel,
                 'input_mic': add_mic,
                 'tinydb': add_tinydb,
-                'timer': add_timer
+                'timer': add_timer,
+                'trigger': add_trigger,
             }
             console.log(un.attr('user-type'))
             toolkits[un.attr('user-type')](un.attr('user-title'),un.attr('user-topic'),un.attr('user-content'),un.attr('style'),un.attr('title_style'),true);

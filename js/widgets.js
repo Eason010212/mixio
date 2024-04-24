@@ -2549,7 +2549,7 @@ function add_timer(user_title, user_topic, user_content, user_style, title_style
         itemdiv.attr('style', user_style)
 }
 
-function add_trigger(user_title, user_topic, user_content, user_style, title_style) {
+function add_trigger(user_title, user_topic, user_content, user_style, title_style, isObserve) {
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
@@ -2641,7 +2641,8 @@ function add_trigger(user_title, user_topic, user_content, user_style, title_sty
         })
     }
     MixIO.triggersToPreCode()
-    MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
+    if(!isObserve)
+        MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
 
     var delete_on_click = function() {
         title.parent().parent().remove();
