@@ -78,10 +78,12 @@ $(function(){
                 'ble': add_ble,
                 'pixel': add_pixel,
                 'input_mic': add_mic,
-                'tinydb': add_tinydb
+                'tinydb': add_tinydb,
+                'timer': add_timer,
+                'trigger': add_trigger,
             }
             console.log(un.attr('user-type'))
-            toolkits[un.attr('user-type')](un.attr('user-title'),un.attr('user-topic'),un.attr('user-content'),un.attr('style'));
+            toolkits[un.attr('user-type')](un.attr('user-title'),un.attr('user-topic'),un.attr('user-content'),un.attr('style'),un.attr('title_style'),true);
         }
     }
     var modald = showmodaltext("<div style='text-align:center' class='nnt'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading+"</p></div>")
@@ -92,7 +94,7 @@ $(function(){
             {
                 view_project(JSON.parse(JSON.parse(res).projectLayout),JSON.parse(res).userName,JSON.parse(res).projectPass,JSON.parse(res).projectName,JSON.parse(res).timeStamp)
                 if(JSON.parse(res).logicStorage)
-                    globalCode = stringendecoder.decodeHtml(JSON.parse(JSON.parse(res).logicStorage).code)
+                    globalCode = MixIO.preCode + stringendecoder.decodeHtml(JSON.parse(JSON.parse(res).logicStorage).code)
                 else
                     globalCode = ''
                 $("#grid").removeClass("gridbg")
