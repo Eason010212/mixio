@@ -3556,19 +3556,19 @@ function add_prjblock(projectName, projectLay, timeStamp, projectType, isTask) {
     var bottomButtonDiv = $("<div style='min-width:calc(7.5rem + 35px)'/>")
     console.log(isTask)
     if (isTask == 0)
-        bottomButtonDiv.append('<a title="' + JSLang[lang].backRun + '" onclick="listen_project(\'' + projectName + '\',\'' + projectType + '\')" class="btn btn-primary btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-cloud-upload"></i></a>')
+        bottomButtonDiv.append('<a title="' + JSLang[lang].backRun + '" onclick="listen_project(`' + projectName + '`,`' + projectType + '`)" class="btn btn-primary btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-cloud-upload"></i></a>')
     else if (isTask == 1)
-        bottomButtonDiv.append('<a title="' + JSLang[lang].stopBackRun + '" onclick="unlisten_project(\'' + projectName + '\',\'' + projectType + '\')" class="btn btn-danger btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-stop"></i></a>')
+        bottomButtonDiv.append('<a title="' + JSLang[lang].stopBackRun + '" onclick="unlisten_project(`' + projectName + '`,`' + projectType + '`)" class="btn btn-danger btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-stop"></i></a>')
     else {
         var reason = stringendecoder.encodeHtml(isTask)
-        bottomButtonDiv.append('<a title="' + JSLang[lang].backRunErr + '" onclick="listenerr_project(\'' + projectName + '\',\'' + projectType + '\',\'' + reason + '\')" class="btn btn-danger btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-exclamation-triangle"></i></a>')
+        bottomButtonDiv.append('<a title="' + JSLang[lang].backRunErr + '" onclick="listenerr_project(`' + projectName + '`,`' + projectType + '`,`' + reason + '`)" class="btn btn-danger btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-exclamation-triangle"></i></a>')
     }
     if (isTask == 0)
-        bottomButtonDiv.append('<a title="' + JSLang[lang].editProper + '" onclick="edit_project(\'' + projectName + '\',\'' + projectType + '\')" class="btn btn-info btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-pencil"></i></a>')
+        bottomButtonDiv.append('<a title="' + JSLang[lang].editProper + '" onclick="edit_project(`' + projectName + '`,`' + projectType + '`)" class="btn btn-info btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-pencil"></i></a>')
     else
         bottomButtonDiv.append('<a title="' + JSLang[lang].editProper + '" class="btn btn-info btn-circle disabled" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:10px;z-index:9"><i class="fa fa-pencil"></i></a>')
     if (isTask == 0)
-        bottomButtonDiv.append('<a title="' + JSLang[lang].viewProject + '" onclick="view_project(\'' + projectName + '\',\'' + projectType + '\')" class="btn btn-success btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:15px;z-index:9"><i class="fa fa-arrow-right"></i></a>')
+        bottomButtonDiv.append('<a title="' + JSLang[lang].viewProject + '" onclick="view_project(`' + projectName + '`,`' + projectType + '`)" class="btn btn-success btn-circle" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:15px;z-index:9"><i class="fa fa-arrow-right"></i></a>')
     else
         bottomButtonDiv.append('<a title="' + JSLang[lang].viewProject + '" class="btn btn-success btn-circle disabled" style="width:2.5rem;height:2.5rem;font-size:1rem;margin-right:15px;z-index:9"><i class="fa fa-arrow-right"></i></a>')
     bottomdiv.append(bottomButtonDiv)
