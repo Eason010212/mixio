@@ -1757,19 +1757,32 @@ function add_bulb(user_title, user_topic, user_content, user_style, title_style)
                     bulb.attr('class', 'bulb3')
                 }
                 else{
-                    var availableMessageStrings = [
-                        "红", "橙", "黄", "绿", "青", "蓝", "紫", "白", "黑", "灰", "棕",
-                        "red", "orange", "yellow", "green", "cyan", "blue", "purple", "white", "black", "grey", "brown"
-                    ]
-                    for (var avaMessage of availableMessageStrings) {
-                        console.log(message1.toString(), avaMessage)
-                        if (message1.toString()=== avaMessage) {
-                            title.parent().parent().attr('user-content', avaMessage);
-                            bulb.css('background-color', message1);
-                            bulb.css('box-shadow', message1 + ' 1px 1px 8px')
-                            break;
+                    if (message1.toString().indexOf("#") != -1) {
+                        title.parent().parent().attr('user-content', message1);
+                        bulb.css('background-color', message1);
+                        bulb.css('box-shadow', message1 + ' 1px 1px 8px')
+                    }
+                    else if (message1.toString().split(",").length == 3) {
+                        title.parent().parent().attr('user-content', message1);
+                        bulb.css('background-color', 'rgb(' + message1 + ')');
+                        bulb.css('box-shadow', 'rgb(' + message1 + ') 1px 1px 8px')
+                    }
+                    else{
+                        var availableMessageStrings = [
+                            "红", "橙", "黄", "绿", "青", "蓝", "紫", "白", "黑", "灰", "棕",
+                            "red", "orange", "yellow", "green", "cyan", "blue", "purple", "white", "black", "grey", "brown"
+                        ]
+                        for (var avaMessage of availableMessageStrings) {
+                            console.log(message1.toString(), avaMessage)
+                            if (message1.toString()=== avaMessage) {
+                                title.parent().parent().attr('user-content', avaMessage);
+                                bulb.css('background-color', message1);
+                                bulb.css('box-shadow', message1 + ' 1px 1px 8px')
+                                break;
+                            }
                         }
                     }
+                    
                 }
                 itemdiv.trigger(MixIO.eventTags.BULB_CHANGED, [Uint8ArrayToString(message1)])
             }
