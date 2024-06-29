@@ -3755,14 +3755,55 @@ var exportProjects = function() {
                     "timestamp": res[i].timestamp
                 })
             }
-            var eleLink = document.createElement('a');
-            eleLink.download = "backup.json";
-            eleLink.style.display = 'none';
-            var blob = new Blob([JSON.stringify(exportRes, null, 4)]);
-            eleLink.href = URL.createObjectURL(blob);
-            document.body.appendChild(eleLink);
-            eleLink.click();
-            document.body.removeChild(eleLink);
+            // dialog, 允许用户选择导出哪些项目
+            var editForm = $('<div class="nnt" style="width:294px"/>')
+            editForm.append($('<div style="margin-top:-63px;margin-left:105px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/transfer.svg" style="width:45px;"></div>'))
+            editForm.append($('<h3 style="text-align:center;margin-bottom:5px">' + arrLang[lang].EXPORT + '</h3>'))
+            // 选择导出项目，多选input，选项为所有项目的projectName
+            var checkBoxes = $('<div style="display:flex;flex-direction:column;max-height:200px;overflow:auto"/>')
+            for (i in exportRes) {
+                var checkbox = $('<input type="checkbox" style="width:20px;height:20px;min-width:0!important;min-height:0!important;margin:10px" id="' + exportRes[i].projectName + '"/>')
+                var label = $('<label style="color:black;font-size:1rem;padding-top:2px" for="' + exportRes[i].projectName + '">' + exportRes[i].projectName + '</label>')
+                // 默认选中
+                checkbox.prop("checked", true)
+                checkBoxes.append($('<div style="display:flex;flex-direction:row;align-items:center;"/>').append(checkbox).append(label))
+            }
+            editForm.append(checkBoxes)
+            var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+            var confirmEdit = $('<a class="btn btn-success btn-circle" style="box-shadow:1px 1px 5px #1cc88a"><i class="fa fa-check"></i></a>')
+            var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+            bottomDiv.append(confirmEdit)
+            bottomDiv.append(cancelEdit)
+            editForm.append(bottomDiv)
+            var modifyDia = dialog({
+                content: editForm[0],
+                cancel: false
+            })
+            modifyDia.showModal()
+            confirmEdit.click(function() {
+                var eleLink = document.createElement('a');
+                eleLink.download = "backup.json";
+                eleLink.style.display = 'none';
+                var selectedProjects = []
+                for (i in exportRes) {
+                    if ($("#" + exportRes[i].projectName).prop("checked"))
+                        selectedProjects.push(exportRes[i].projectName)
+                }
+                var selectedData = []
+                for (i in exportRes) {
+                    if (selectedProjects.includes(exportRes[i].projectName))
+                        selectedData.push(exportRes[i])
+                }
+                var blob = new Blob([JSON.stringify(selectedData, null, 4)]);
+                eleLink.href = URL.createObjectURL(blob);
+                document.body.appendChild(eleLink);
+                eleLink.click();
+                document.body.removeChild(eleLink);
+                modifyDia.close().remove()
+            })
+            cancelEdit.click(function() {
+                modifyDia.close().remove()
+            })
         } else
             showtext("Unknown Error")
     })

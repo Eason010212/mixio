@@ -50,6 +50,11 @@ https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
 4. Windows版可直接双击mixio.exe查看更多选项
 5. Linux/MacOS版 可mixio install将mixio添加到systemctl中
 
+## 不同版本间数据迁移
+
+1. 复制服务器目录下的reserve文件夹进行替换，即可完成数据迁移
+2. 复制服务器目录下的config文件夹进行替换，即可完成配置选项迁移（新老版本间的配置文件可能存在差异，建议手动配置）
+
 ## 从源码运行（debug模式）
 
 1. git clone https://gitee.com/mixly2/mixio.git
