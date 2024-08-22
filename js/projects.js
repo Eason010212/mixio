@@ -1849,7 +1849,7 @@ function add_widget() {
     blazeFace_add.children("a").click(function() {
         d.close().remove()
         var editForm = $('<div class="nnt"/>')
-        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/camera.svg" style="width:45px;"></div>'))
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/blazeFace.svg" style="width:45px;"></div>'))
         editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
         var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
         var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
