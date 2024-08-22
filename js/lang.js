@@ -1,13 +1,13 @@
 var JSLang = {
     "zh": {
-        "tensorAI": "- 人工智能 Tensorflow.js -",
+        "tensorAI": "- 人工智能 -",
         "imageNet": "ImageNet 图像分类",
         "cocoSSD": "CocoSSD 对象检测",
         "deepLab": "DeepLab 图像分割",
-        "blazeFace": "BlazeFace 人脸检测",
-        "mediaPipe": "MediaPipe 手势检测",
+        "blazeFace": "人脸识别",
+        "mediaPipe": "手势检测",
         "MoveNet": "MoveNet 关节点识别",
-        "Bert": "BERT 文本问答",
+        "Bert": "文本问答",
         "SpeechCMD": "SpeechCMD 语音指令",
         "syncInterval": "自动更新频率",
         "sendInterval": "自动发送频率",

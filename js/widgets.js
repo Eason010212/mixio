@@ -5787,7 +5787,7 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
             tbd.remove()
     }
     var editForm = $('<div class="nnt"/>')
-    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_text.svg" style="width:45px;"></div>'))
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/camera.svg" style="width:45px;"></div>'))
     editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
     var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
     var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
@@ -5888,6 +5888,253 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
             topic_input.val(topic.text())
             resolution_input.val(resolution)
             fps_input.val(fps)
+            if (!d.open)
+            {
+                d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
+            else
+                d.close()
+        }
+    }
+    if (window.screen.width > 800)
+    {
+        itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
+    else
+        itemdiv[0].addEventListener('touchend', function(event) {
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove', function(e) {
+        e.preventDefault()
+    })
+    if (user_style != undefined)
+        itemdiv.attr('style', user_style)
+}
+
+function add_face(user_title, user_topic, user_content, user_style, title_style) {
+    var isAlive = true
+    var contents = []
+    var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
+    contents.push(title)
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
+    var cameraDiv = $("<div class='cameraDiv' style='position:relative'/>")
+    contents.push(cameraDiv)
+    // add a real-time web camera
+    var video = $("<video autoplay style='width:100%;height:100%;'/>")
+    cameraDiv.append(video)
+    // floating canvas on top of the video
+    var canvas = $("<canvas style='position:absolute;top:0;left:0'/>")
+    var canvas2 = $("<canvas style='position:absolute;top:0;left:0;display:none'/>")
+    cameraDiv.append(canvas)
+    cameraDiv.append(canvas2)
+    var ctx = canvas[0].getContext('2d')
+    // 居中显示Loading...
+    
+    var ctx2 = canvas2[0].getContext('2d')
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            width: {
+                ideal: 1000
+            },
+            height: {
+                ideal: 1000
+            },
+            frameRate: {
+                ideal: 60,
+                min: 10
+            }
+        },
+        audio: false
+    }).then(function(stream) {
+        video[0].srcObject = stream
+        ctx.font = "30px Arial"
+        ctx.fillStyle = "#4e73df"
+        ctx.textAlign = "center"
+        ctx.fillText("Loading...", canvas.width() / 2, canvas.height() / 2)
+        blazeface.load().then(function(model) {
+            // 关闭镜面翻转
+            const returnTensors = false;
+            const flipHorizontal = false;
+            const annotateBoxes = true;
+            var fresh = function(){
+            // if video ready
+            if (video[0].readyState >1 && isAlive) {
+                // video element size, not the video resolution
+                canvas[0].height = cameraDiv.height()
+                canvas[0].width = cameraDiv.width()
+                canvas2[0].height = cameraDiv.height()
+                canvas2[0].width = cameraDiv.width()
+                // 在canvas中居中绘制，缩放到合适大小
+                var scale = Math.min(canvas.width() / video[0].videoWidth, canvas.height() / video[0].videoHeight)
+                var x = (canvas.width() - video[0].videoWidth * scale) / 2
+                var y = (canvas.height() - video[0].videoHeight * scale) / 2
+                ctx2.clearRect(0, 0, canvas2.width(), canvas2.height())
+                ctx2.drawImage(video[0], x, y, video[0].videoWidth * scale, video[0].videoHeight * scale)
+                model.estimateFaces(canvas2[0], returnTensors, flipHorizontal, annotateBoxes).then(predictions => {
+                    if (predictions.length > 0) {
+                        for (let i = 0; i < predictions.length; i++) {
+                            if (returnTensors) {
+                                predictions[i].topLeft = predictions[i].topLeft.arraySync();
+                                predictions[i].bottomRight = predictions[i].bottomRight.arraySync();
+                                if (annotateBoxes) {
+                                    predictions[i].landmarks = predictions[i].landmarks.arraySync();
+                                }
+                            }
+                            const start = predictions[i].topLeft;
+                            const end = predictions[i].bottomRight;
+                            const size = [end[0] - start[0], end[1] - start[1]];
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            // 四角框，标记人脸位置
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                            ctx.fillRect(start[0], start[1], size[0], size[1]);
+                            if (annotateBoxes) {
+                                const landmarks = predictions[i].landmarks
+                                if(isAlive && isRunning){
+                                    var landmark_dict = {}
+                                    var landmark_names = ['left_eye', 'right_eye', 'nose', 'mouth', 'left_ear', 'right_ear']
+                                    for (let j = 0; j < landmarks.length; j++) {
+                                        const x = landmarks[j][0];
+                                        const y = landmarks[j][1];
+                                        const name = landmark_names[j];
+                                        landmark_dict[name+'_x'] = x
+                                        landmark_dict[name+'_y'] = y
+                                    }
+
+                                    publish(user_topic, JSON.stringify(landmark_dict))
+                                }
+                                ctx.fillStyle = 'blue';
+                                for (let j = 0; j < landmarks.length; j++) {
+                                    const x = landmarks[j][0];
+                                    const y = landmarks[j][1];
+                                    ctx.fillRect(x, y, 5, 5);
+                                }
+                            }
+                        }
+                    }
+                }).catch(err => {
+                    console.log(err)
+                })
+            }
+        }
+        // wait for the video to be loaded
+        setInterval(fresh, 500)
+        })
+        
+    })
+    
+
+    attrs = [
+        ['user-type', 'face'],
+        ['user-title', user_title],
+        ['user-topic', user_topic],
+        ['user-content', user_content],
+        ['title-hidden', title_style]
+    ]
+    var itemdiv = add_block(4, 3, contents, attrs)
+
+    var delete_on_click = function() {
+        title.parent().parent().remove();
+        isAlive = false
+        if (tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function() {
+        modifyDia.showModal()
+        if (tbd)
+            tbd.remove()
+    }
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/blazeFace.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function() {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+            var re = /^[a-z0-9]+$/i;
+            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                if (true) {
+                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                        title.parent().parent().attr('user-title', title_input.val())
+                        title.parent().parent().attr('user-topic', topic_input.val())
+                        if (title.parent().parent().attr('user-content') == undefined)
+                            title.parent().parent().attr('user-content', "")
+                        title.text(title_input.val())
+                        topic.text(topic_input.val())
+                        modifyDia.close()
+                    } else
+                        showtext(JSLang[lang].sameUnit)
+                } else
+                    showtext("")
+            else
+                showtext(JSLang[lang].topicLenIllegal)
+        } else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function() {
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content: editForm[0],
+        cancel: false
+    })
+    var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
+        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+            var bubble = $('<div style="text-align:center"/>')
+            bubble.append(topicDiv)
+            var d = dialog({
+                align: 'top',
+                content: bubble[0],
+                quickClose: true,
+                autofocus: false
+            });
+            tbd = d;
+            editButton.click(edit_on_click)
+            deleteButton.click(delete_on_click)
+            if (!isRunning)
+                bubble.append(editButton)
+            if (!isRunning)
+                bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
+            title_input.val(title.text())
+            topic_input.val(topic.text())
             if (!d.open)
             {
                 d.show(itemdiv[0]);
