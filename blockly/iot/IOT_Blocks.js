@@ -1697,6 +1697,16 @@ Blockly.Blocks['current_time'] = {
   }
 };
 
+Blockly.Blocks['current_time_string'] = {
+  init: function() {
+    this.appendDummyInput().appendField(Blockly.Msg.CURRENT_TIME + "(LocaleString)");
+    this.setOutput(true, "String");
+    this.setColour("5BA58C");
+    this.setTooltip("");
+    this.setHelpUrl("");
+  }
+};
+
 
 Blockly.Blocks['math_parse_int'] = {
   init: function() {

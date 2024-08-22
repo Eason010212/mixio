@@ -648,6 +648,11 @@ Blockly.JavaScript.current_time=function(block) {
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
+Blockly.JavaScript.current_time_string=function(block) {
+    var code="Date().toLocaleString()"
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
 
 Blockly.JavaScript.math_parse_int=function(block) {
     var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
