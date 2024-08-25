@@ -262,6 +262,7 @@ function run_project() {
     if ((typeof Notification) != "undefined")
         Notification.requestPermission();
     isRunning = true
+    $(".facial").attr("hidden", "hidden")
     try {
         var logicFunction = Function(globalCode);
         logicFunction()
@@ -287,6 +288,7 @@ function run_project() {
 
 function stop_project() {
     isRunning = false
+    $(".facial").removeAttr("hidden")
     $("#grid").addClass("gridbg")
     $("#grid").children(".item").removeClass("itemrun")
     $("#grid").children(".item").draggable({
@@ -1348,7 +1350,6 @@ function view_project(projectName, projectType) {
                         cvtName = JSLang[lang].time
                     else if (cvtName == "值")
                         cvtName = JSLang[lang].value
-                    console.log(cvtName)
                     tableFields.push({
                         name: cvtName,
                         type: 'text',

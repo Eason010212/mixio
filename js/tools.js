@@ -134,7 +134,7 @@ function showtext(text){
     });
     d.showModal();
     setTimeout(function(){
-        d.close()
+        d.close().remove();
     },1000)
 }
 

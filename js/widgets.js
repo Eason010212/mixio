@@ -5,7 +5,7 @@
  */
 
 tbd = undefined;
-
+lastFacePublishTime = false;
 function add_block(width, height, contents, attrs) {
     var itemdiv = $("<div/>")
     itemdiv.attr("class", "item")
@@ -5937,13 +5937,74 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
     cameraDiv.append(video)
     // floating canvas on top of the video
     var canvas = $("<canvas style='position:absolute;top:0;left:0'/>")
-    var canvas2 = $("<canvas style='position:absolute;top:0;left:0;display:none'/>")
     cameraDiv.append(canvas)
-    cameraDiv.append(canvas2)
+    var addFacialDataButton = $('<a class="btn btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> 新增当前人脸数据</a>')
+    contents.push(addFacialDataButton)
+    // stopPropagation
+    addFacialDataButton.bind('mousedown', function(event) {
+        event.stopPropagation()
+    })
+    addFacialDataButton.bind('mouseup', function(event) {
+        event.stopPropagation()
+    })
+    if (window.screen.width > 800)
+        addFacialDataButton.bind('click', function(event) {
+            event.stopPropagation()
+        })
+    else
+        addFacialDataButton.bind('touchend', function(event) {
+            event.stopPropagation()
+        })
+    var landmarks = false
+    var isMouthOpen = -1
+    addFacialDataButton.click(function() {
+        if(landmarks)
+        {
+            // 备份当前landmarks
+            var data = []
+            for (var i = 0; i < landmarks.length; i++)
+            {
+                data.push(landmarks[i])
+            }
+            // 获取当前的user-content
+            var user_content = title.parent().parent().attr('user-content')
+            if (user_content == undefined || user_content == "")
+                user_content = "[]"
+            // 读取当前的user-content
+            var user_data = JSON.parse(user_content)
+            user_data.push(data)
+            title.parent().parent().attr('user-content', JSON.stringify(user_data))
+            showtext("人脸数据已保存。ID:" + (user_data.length - 1))
+        }
+        else
+        {
+            showtext("未检测到人脸")
+        }
+    })
+    var removeAllFacialDataButton = $('<a class="btn btn-danger facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-trash"></i> 删除所有人脸数据</a>')
+    contents.push(removeAllFacialDataButton)
+    removeAllFacialDataButton.bind('mousedown', function(event) {
+        event.stopPropagation()
+    })
+    removeAllFacialDataButton.bind('mouseup', function(event) {
+        event.stopPropagation()
+    }
+    )
+    if (window.screen.width > 800)
+        removeAllFacialDataButton.bind('click', function(event) {
+            event.stopPropagation()
+        })
+    else
+        removeAllFacialDataButton.bind('touchend', function(event) {
+            event.stopPropagation()
+        }
+    )
+    removeAllFacialDataButton.click(function() {
+        title.parent().parent().attr('user-content', "[]")
+        showtext("所有人脸数据已删除")
+    })
     var ctx = canvas[0].getContext('2d')
     // 居中显示Loading...
-    
-    var ctx2 = canvas2[0].getContext('2d')
     navigator.mediaDevices.getUserMedia({
         video: {
             width: {
@@ -5963,76 +6024,92 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
         ctx.font = "30px Arial"
         ctx.fillStyle = "#4e73df"
         ctx.textAlign = "center"
-        ctx.fillText("Loading...", canvas.width() / 2, canvas.height() / 2)
-        blazeface.load().then(function(model) {
-            // 关闭镜面翻转
-            const returnTensors = false;
-            const flipHorizontal = false;
-            const annotateBoxes = true;
-            var fresh = function(){
-            // if video ready
-            if (video[0].readyState >1 && isAlive) {
-                // video element size, not the video resolution
-                canvas[0].height = cameraDiv.height()
-                canvas[0].width = cameraDiv.width()
-                canvas2[0].height = cameraDiv.height()
-                canvas2[0].width = cameraDiv.width()
-                // 在canvas中居中绘制，缩放到合适大小
-                var scale = Math.min(canvas.width() / video[0].videoWidth, canvas.height() / video[0].videoHeight)
-                var x = (canvas.width() - video[0].videoWidth * scale) / 2
-                var y = (canvas.height() - video[0].videoHeight * scale) / 2
-                ctx2.clearRect(0, 0, canvas2.width(), canvas2.height())
-                ctx2.drawImage(video[0], x, y, video[0].videoWidth * scale, video[0].videoHeight * scale)
-                model.estimateFaces(canvas2[0], returnTensors, flipHorizontal, annotateBoxes).then(predictions => {
-                    if (predictions.length > 0) {
-                        for (let i = 0; i < predictions.length; i++) {
-                            if (returnTensors) {
-                                predictions[i].topLeft = predictions[i].topLeft.arraySync();
-                                predictions[i].bottomRight = predictions[i].bottomRight.arraySync();
-                                if (annotateBoxes) {
-                                    predictions[i].landmarks = predictions[i].landmarks.arraySync();
-                                }
-                            }
-                            const start = predictions[i].topLeft;
-                            const end = predictions[i].bottomRight;
-                            const size = [end[0] - start[0], end[1] - start[1]];
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-                            // 四角框，标记人脸位置
-                            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                            ctx.fillRect(start[0], start[1], size[0], size[1]);
-                            if (annotateBoxes) {
-                                const landmarks = predictions[i].landmarks
-                                if(isAlive && isRunning){
-                                    var landmark_dict = {}
-                                    var landmark_names = ['left_eye', 'right_eye', 'nose', 'mouth', 'left_ear', 'right_ear']
-                                    for (let j = 0; j < landmarks.length; j++) {
-                                        const x = landmarks[j][0];
-                                        const y = landmarks[j][1];
-                                        const name = landmark_names[j];
-                                        landmark_dict[name+'_x'] = x
-                                        landmark_dict[name+'_y'] = y
-                                    }
-
-                                    publish(user_topic, JSON.stringify(landmark_dict))
-                                }
-                                ctx.fillStyle = 'blue';
-                                for (let j = 0; j < landmarks.length; j++) {
-                                    const x = landmarks[j][0];
-                                    const y = landmarks[j][1];
-                                    ctx.fillRect(x, y, 5, 5);
-                                }
-                            }
-                        }
-                    }
-                }).catch(err => {
-                    console.log(err)
-                })
-            }
-        }
-        // wait for the video to be loaded
-        setInterval(fresh, 500)
-        })
+        ctx.fillText("Loading...", 100, 100)
+        Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('./js/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('./js/models'),
+            faceapi.nets.faceRecognitionNet.loadFromUri('./js/models'),
+            faceapi.nets.faceExpressionNet.loadFromUri('./js/models'),
+        ]).then(function(){
+            var displaySize = { width: cameraDiv.width(), height: cameraDiv.height() }
+            faceapi.matchDimensions(canvas[0], displaySize)
+            setInterval(async () => {
+                // 识别位置, 脸部特征, 表情
+                // 设置最低置信度 0.4，最多检测一张脸
+                var options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.4 })
+                const detections = await faceapi
+                    .detectAllFaces(video[0], options)
+                    .withFaceLandmarks()
+                    .withFaceExpressions()
+                    .withFaceDescriptors()
         
+                // 调整尺寸
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                
+                // 如果有人脸, 则保存用以进行人脸匹配的特征向量
+                if(resizedDetections.length > 0)
+                {
+                    // 获取RecogntionNet的128维特征向量
+                    landmarks = resizedDetections[0].descriptor
+                    // 计算嘴是否张开
+                    if(resizedDetections[0].expressions.happy > 0.5 || resizedDetections[0].expressions.surprised > 0.5)
+                        isMouthOpen = 1
+                    else
+                        isMouthOpen = 0
+                    
+                }
+                else
+                {
+                    landmarks = false
+                    isMouthOpen = -1
+                }
+                // 尝试匹配user-content中的人脸数据
+                var user_content = title.parent().parent().attr('user-content')
+                if (user_content == undefined || user_content == "")
+                    user_content = "[]"
+                var user_data = JSON.parse(user_content)
+                var min_euclidean_distance = 0.4
+                var min_index = -1
+                for (var i = 0; i < user_data.length; i++)
+                {
+                    var euclidean_distance = 0
+                    for (var j = 0; j < user_data[i].length; j++)
+                    {
+                        euclidean_distance += Math.pow(user_data[i][j] - landmarks[j], 2)
+                    }
+                    euclidean_distance = Math.sqrt(euclidean_distance)
+                    if(euclidean_distance < min_euclidean_distance)
+                    {
+                        min_euclidean_distance = euclidean_distance
+                        min_index = i
+                    }
+                }
+                canvas[0].getContext('2d')?.clearRect(0, 0, canvas[0].width, canvas[0].height); // 清空画布
+                //faceapi.draw.drawDetections(canvas[0], resizedDetections); // 位置
+                faceapi.draw.drawFaceLandmarks(canvas[0], resizedDetections); // 脸部特征  
+                faceapi.draw.drawFaceExpressions(canvas[0], resizedDetections); // 表情
+                if(resizedDetections.length > 0)
+                {
+                    ctx.font = "30px Arial"
+                    ctx.fillStyle = "#ff0000"
+                    if(min_index == -1)
+                    {
+                        const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:Unknown    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
+                        drawBox.draw(canvas[0])
+                    }
+                    else
+                    {
+                        const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:" + min_index + "    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
+                        drawBox.draw(canvas[0])
+                    }
+                    if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= 500)
+                    {   
+                        publish(user_topic, JSON.stringify({id: min_index, isMouthOpen: isMouthOpen, face_probability: resizedDetections[0].detection.score, happy_probability: resizedDetections[0].expressions.happy, sad_probability: resizedDetections[0].expressions.sad, angry_probability: resizedDetections[0].expressions.angry, surprised_probability: resizedDetections[0].expressions.surprised, disgusted_probability: resizedDetections[0].expressions.disgusted, fearful_probability: resizedDetections[0].expressions.fearful}))
+                        lastFacePublishTime = new Date().getTime()
+                    }
+                }
+            }, 100);
+        })
     })
     
 
@@ -6079,8 +6156,8 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                     if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
                         title.parent().parent().attr('user-title', title_input.val())
                         title.parent().parent().attr('user-topic', topic_input.val())
-                        if (title.parent().parent().attr('user-content') == undefined)
-                            title.parent().parent().attr('user-content', "")
+                        if (title.parent().parent().attr('user-content') == undefined || title.parent().parent().attr('user-content') == "")
+                            title.parent().parent().attr('user-content', "[]")
                         title.text(title_input.val())
                         topic.text(topic_input.val())
                         modifyDia.close()
