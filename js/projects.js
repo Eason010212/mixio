@@ -10,6 +10,18 @@ $(function() {
         scriptcordova.src = "https://injection/www/cordova.js";
         document.head.appendChild(scriptcordova);
     }
+    $("#copypass").click(function(){
+        projectPass = $("#prjpass").text()
+        var input = document.createElement('input');
+        document.body.appendChild(input);
+        input.setAttribute('value', projectPass);
+        input.select();
+        if (document.execCommand('copy')) {
+            document.execCommand('copy');
+        }
+        document.body.removeChild(input);
+        showtext("密钥信息已复制到剪贴板")
+    })
 })
 $(function() {
     get_width();
