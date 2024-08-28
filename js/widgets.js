@@ -117,7 +117,7 @@ function add_block(width, height, contents, attrs) {
             }
         }
     })
-    if(itemdiv.attr('user-type') != 'pixel')
+    if(itemdiv.attr('user-type') != 'pixel' && itemdiv.attr('user-type') != 'face')
     itemdiv.resizable({
         onStopResize: function() {
             var stdLeft = parseInt(itemdiv.css('left')) - parseInt(itemdiv.css('left')) % 20 + (parseInt(itemdiv.css('left')) % 20 > 10 ? 1 : 0) * 20
@@ -5712,7 +5712,7 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
     topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
     topicDiv.append(topic)
-    var cameraDiv = $("<div class='cameraDiv'/>")
+    var cameraDiv = $("<div class='cameraDiv' style='margin-bottom:20px'/>")
     contents.push(cameraDiv)
     // add a real-time web camera
     var video = $("<video autoplay style='width:100%;height:100%;'/>")
@@ -6102,7 +6102,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                         const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:" + min_index + "    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
                         drawBox.draw(canvas[0])
                     }
-                    if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= 500)
+                    if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= 1000)
                     {   
                         publish(user_topic, JSON.stringify({id: min_index, isMouthOpen: isMouthOpen, face_probability: resizedDetections[0].detection.score, happy_probability: resizedDetections[0].expressions.happy, sad_probability: resizedDetections[0].expressions.sad, angry_probability: resizedDetections[0].expressions.angry, surprised_probability: resizedDetections[0].expressions.surprised, disgusted_probability: resizedDetections[0].expressions.disgusted, fearful_probability: resizedDetections[0].expressions.fearful}))
                         lastFacePublishTime = new Date().getTime()
