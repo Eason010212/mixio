@@ -629,7 +629,15 @@ function view_project(projectName, projectType) {
             mainDiv.append(leftDiv)
             workspace = Blockly.inject('block', {
                 toolbox: document.getElementById('toolbox'),
-                media: 'blockly/media/'
+                media: 'blockly/media/',
+                zoom: {
+                    controls: true,
+                    wheel: true,
+                    startScale: 0.75,
+                    maxScale: 4,
+                    minScale: 0.25,
+                    scaleSpeed: 1.1
+                },
             });
             //Blockly.Variables.createVariable_(workspace,null,"topic")
             //Blockly.Variables.createVariable_(workspace,null,"message")
