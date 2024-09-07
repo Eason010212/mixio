@@ -5923,7 +5923,7 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
 function add_face(user_title, user_topic, user_content, user_style, title_style) {
     var isAlive = true
     var contents = []
-    var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+    var title = $("<h4 class='userTitle' style='margin-top:20px'>" + user_title + "</h4>")
     title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
@@ -5938,8 +5938,8 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
     // floating canvas on top of the video
     var canvas = $("<canvas style='position:absolute;top:0;left:0'/>")
     cameraDiv.append(canvas)
-    var addFacialDataButton = $('<a class="btn btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> 新增当前人脸数据</a>')
-    contents.push(addFacialDataButton)
+    var addFacialDataButton = $('<a class="btn btn-sm btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> 新增当前人脸数据</a>')
+    cameraDiv.append(addFacialDataButton)
     // stopPropagation
     addFacialDataButton.bind('mousedown', function(event) {
         event.stopPropagation()
@@ -5972,7 +5972,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                 user_content = "[]"
             // 读取当前的user-content
             var user_data = JSON.parse(user_content)
-            user_data.push(data)
+            user_data.push({"name": "", "landmarks": data})
             title.parent().parent().attr('user-content', JSON.stringify(user_data))
             showtext("人脸数据已保存。ID:" + (user_data.length - 1))
         }
@@ -5980,29 +5980,117 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
         {
             showtext("未检测到人脸")
         }
+        sync_table_info()
     })
-    var removeAllFacialDataButton = $('<a class="btn btn-danger facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-trash"></i> 删除所有人脸数据</a>')
-    contents.push(removeAllFacialDataButton)
-    removeAllFacialDataButton.bind('mousedown', function(event) {
+    var addFaceByPicButton = $('<a class="btn btn-sm btn-success facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #1cc88a"><i class="fa fa-photo"></i> 上传一张人脸图片</a>')
+    cameraDiv.append(addFaceByPicButton)
+    addFaceByPicButton.bind('mousedown', function(event) {
         event.stopPropagation()
     })
-    removeAllFacialDataButton.bind('mouseup', function(event) {
+    addFaceByPicButton.bind('mouseup', function(event) {
         event.stopPropagation()
     }
     )
     if (window.screen.width > 800)
-        removeAllFacialDataButton.bind('click', function(event) {
+        addFaceByPicButton.bind('click', function(event) {
             event.stopPropagation()
         })
     else
-        removeAllFacialDataButton.bind('touchend', function(event) {
+        addFaceByPicButton.bind('touchend', function(event) {
             event.stopPropagation()
         }
     )
-    removeAllFacialDataButton.click(function() {
-        title.parent().parent().attr('user-content', "[]")
-        showtext("所有人脸数据已删除")
+    addFaceByPicButton.click(function() {
+        // 弹出上传图片对话框
+        var uploadForm = $('<div class="nnt"/>')
+        uploadForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/decorate_pic.svg" style="width:45px;"></div>'))
+        uploadForm.append($('<h5 style="text-align:center">上传一张人脸图片</h5>'))
+        var upload_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var upload_input = $("<input type='file' class='form-control form-control-user'  style='text-align:center;width:250px'/>")
+        upload_input_div.append(upload_input)
+        uploadForm.append(upload_input_div)
+        // 人物命名
+        uploadForm.append($('<h5 style="margin-top:15px;text-align:center">人物命名</h5>'))
+        var name_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var name_input = $("<input class='form-control form-control-user'  style='text-align:center;width:250px'/>")
+        name_input_div.append(name_input)
+        uploadForm.append(name_input_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+        bottomDiv.append(cancelEdit)
+        uploadForm.append(bottomDiv)
+        var dia = dialog({
+            content: uploadForm[0],
+            cancel: false
+        })
+        dia.showModal()
+        confirmEdit.click(function() {
+            // faceapi识别图片
+            var file = upload_input[0].files[0]
+            var img = new Image()
+            img.src = URL.createObjectURL(file)
+            // 加载中 模态
+            var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].loading + "</p></div>")
+            img.onload = function() {
+                // 加载模型
+                Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri('./js/models'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('./js/models'),
+                    faceapi.nets.faceRecognitionNet.loadFromUri('./js/models'),
+                    faceapi.nets.faceExpressionNet.loadFromUri('./js/models'),
+                ]).then(async function(){
+                    console.log(1)
+                    // 识别图片
+                    var options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.4 })
+                    const detections = await faceapi
+                        .detectAllFaces(img, options)
+                        .withFaceLandmarks()
+                        .withFaceExpressions()
+                        .withFaceDescriptors()
+                    if(detections.length > 0)
+                    {
+                        // 获取RecogntionNet的128维特征向量
+                        landmarks = detections[0].descriptor
+                        // 计算嘴是否张开
+                        if(detections[0].expressions.happy > 0.5 || detections[0].expressions.surprised > 0.5)
+                            isMouthOpen = 1
+                        else
+                            isMouthOpen = 0
+                        // 备份当前landmarks
+                        var data = []
+                        for (var i = 0; i < landmarks.length; i++)
+                        {
+                            data.push(landmarks[i])
+                        }
+                        // 获取当前的user-content
+                        var user_content = title.parent().parent().attr('user-content')
+                        if (user_content == undefined || user_content == "")
+                            user_content = "[]"
+                        // 读取当前的user-content
+                        var user_data = JSON.parse(user_content)
+                        user_data.push({"name": name_input.val(), "landmarks": data})
+                        title.parent().parent().attr('user-content', JSON.stringify(user_data))
+                        modald.close().remove()
+                        showtext("人脸数据已保存。ID:" + (user_data.length - 1))
+                        sync_table_info()
+                        dia.close().remove()
+                    }
+                    else
+                    {
+                        modald.close().remove()
+                        showtext("未检测到人脸")
+                    }
+                })
+            }
+        })
+        cancelEdit.click(function() {
+            dia.close().remove()
+        })
     })
+    var allDataTable = $('<div style="height:40%"/>')
+    contents.push(allDataTable)
     var ctx = canvas[0].getContext('2d')
     // 居中显示Loading...
     navigator.mediaDevices.getUserMedia({
@@ -6073,9 +6161,9 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                 for (var i = 0; i < user_data.length; i++)
                 {
                     var euclidean_distance = 0
-                    for (var j = 0; j < user_data[i].length; j++)
+                    for (var j = 0; j < user_data[i]["landmarks"].length; j++)
                     {
-                        euclidean_distance += Math.pow(user_data[i][j] - landmarks[j], 2)
+                        euclidean_distance += Math.pow(user_data[i]["landmarks"][j] - landmarks[j], 2)
                     }
                     euclidean_distance = Math.sqrt(euclidean_distance)
                     if(euclidean_distance < min_euclidean_distance)
@@ -6099,12 +6187,12 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                     }
                     else
                     {
-                        const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:" + min_index + "    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
+                        const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:" + min_index + "     Name:" + user_data[min_index]["name"] +"    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
                         drawBox.draw(canvas[0])
                     }
                     if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= 1000)
                     {   
-                        publish(user_topic, JSON.stringify({id: min_index, isMouthOpen: isMouthOpen, face_probability: resizedDetections[0].detection.score, happy_probability: resizedDetections[0].expressions.happy, sad_probability: resizedDetections[0].expressions.sad, angry_probability: resizedDetections[0].expressions.angry, surprised_probability: resizedDetections[0].expressions.surprised, disgusted_probability: resizedDetections[0].expressions.disgusted, fearful_probability: resizedDetections[0].expressions.fearful}))
+                        publish(user_topic, JSON.stringify({id: min_index, name: user_data[min_index]["name"], isMouthOpen: isMouthOpen, face_probability: resizedDetections[0].detection.score, happy_probability: resizedDetections[0].expressions.happy, sad_probability: resizedDetections[0].expressions.sad, angry_probability: resizedDetections[0].expressions.angry, surprised_probability: resizedDetections[0].expressions.surprised, disgusted_probability: resizedDetections[0].expressions.disgusted, fearful_probability: resizedDetections[0].expressions.fearful}))
                         lastFacePublishTime = new Date().getTime()
                     }
                 }
@@ -6120,7 +6208,84 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
         ['user-content', user_content],
         ['title-hidden', title_style]
     ]
-    var itemdiv = add_block(4, 3, contents, attrs)
+    var itemdiv = add_block(4, 5, contents, attrs)
+    var sync_table_info = function() {
+        var user_content = title.parent().parent().attr('user-content')
+        if (user_content == undefined || user_content == "")
+            user_content = "[]"
+        var user_data = JSON.parse(user_content)
+        var datafields = [{"name": "ID", "type": "text", "width": 50, "align": "center", "editing": false},
+             {"name": "Name", "type": "text", "width": 100, "align": "center"}, 
+             {"type": "control", "width": 50}];
+        var data = []
+        for (var i = 0; i < user_data.length; i++)
+        {
+            data.push({"ID": i, "Name": user_data[i]["name"]})
+        }
+        // jsGrid
+        allDataTable.jsGrid({
+            width: "100%",
+            height: "100%",
+            noDataContent: JSLang[lang].noData,
+            editing: true,
+            data: data,
+            confirmDeleting: false,
+            fields: datafields,
+            onItemDeleted: function() {
+                var data = allDataTable.jsGrid("option", "data")
+                var user_content = title.parent().parent().attr('user-content')
+                if (user_content == undefined || user_content == "")
+                    user_content = "[]"
+                var user_data = JSON.parse(user_content)
+                var isDel = false
+                for (var i = 0; i < data.length; i++)
+                {
+                    if(data[i]["ID"] != i)
+                    {
+                        isDel = true
+                        user_data.splice(i, 1)
+                    }
+                }
+                if(!isDel)
+                    user_data.splice(data.length, 1)
+                title.parent().parent().attr('user-content', JSON.stringify(user_data))
+                sync_table_info()
+            },
+            onItemUpdated: function() {
+                var data = allDataTable.jsGrid("option", "data")
+                var user_content = title.parent().parent().attr('user-content')
+                if (user_content == undefined || user_content == "")
+                    user_content = "[]"
+                var user_data = JSON.parse(user_content)
+                for (var i = 0; i < data.length; i++)
+                {
+                    user_data[i]["name"] = data[i]["Name"]
+                }
+                title.parent().parent().attr('user-content', JSON.stringify(user_data))
+            }
+        })
+        allDataTable.on('click', function(event) {
+            event.stopPropagation()
+        }
+        )
+        allDataTable.on('mousedown', function(event) {
+            event.stopPropagation()
+        }
+        )
+        allDataTable.on('mouseup', function(event) {
+            event.stopPropagation()
+        }
+        )
+        allDataTable.on('touchend', function(event) {
+            event.stopPropagation()
+        }
+        )
+        allDataTable.on('touchstart', function(event) {
+            event.stopPropagation()
+        }
+        )
+    }
+    sync_table_info()
 
     var delete_on_click = function() {
         title.parent().parent().remove();
