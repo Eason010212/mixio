@@ -363,6 +363,32 @@
                 <span style="color:#4e73df;">列名</span> - 用英文逗号分隔的表格列名列表。
             </p>
         </div>
+        <div class="overflow-hidden content-section" id="content-map">
+            <h1 id="map">数据地图</h1>
+            <h3>组件总览</h3>
+            <p>
+                接收JSON格式的地图标记数据，并进行显示。<br>
+                消息示例：
+                {
+                    "clientid": "#bus1",
+                    "long": "116.404",
+                    "lat": "39.915",
+                    "message":[
+                        {"label":"位置","value":"北京"},
+                        {"label":"天气","value":"晴"}
+                    ]
+                }<br>
+                其中，clientid为地图标记的唯一id，long和lat为地图标记的经纬度，message为地图标记的信息，须由包含label和value两个键的元素列表构成。<br>
+                同一clientid的新消息将覆盖旧消息，更新显示。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+        </div>
         <div class="overflow-hidden content-section" id="content-pixel">
             <h1 id="pixel">点阵屏</h1>
             <h3>组件总览</h3>
