@@ -43,6 +43,7 @@ var readline = require('readline');
 var iconv = require('iconv-lite');
 var request = require('request');
 const cors = require('cors');
+var globalQPSControl = {}
 
 function init(cb){
     if (!fs.existsSync("logs")) {
@@ -901,6 +902,72 @@ var mixioServer = function() {
         }, function(err, data) {
             res.send(data)
         })
+    })
+
+    app.get('/api/v1/getData', function(req, res) {
+        try{
+            if(!(req.query.user && req.query.password && req.query.project && req.query.topic))
+                {
+                    res.send('{"status":"incorrect params"}')
+                    return
+                }
+                var user = req.query.user
+                var password = req.query.password
+                var project = req.query.project
+                var topic = req.query.topic
+                var num = 1
+                if(globalQPSControl[user])
+                {
+                    if(Date.now() - globalQPSControl[user] > 1000)
+                    {
+                        globalQPSControl[user] = Date.now()
+                    }
+                    else{
+                        res.send('{"status":"too fast"}')
+                        return
+                    }
+                }
+                else
+                    globalQPSControl[user] = Date.now()
+                if (req.query.num)
+                    num = req.query.num
+                db.get("select password from user where username = ?", [user], function(err, row) {
+                    if (err)
+                    {
+                        res.send('{"status":"failed"}')
+                    }
+                    else if (row && (row["password"] == password)) {
+                        db.get("select * from project where username = ? and projectName = ?", [user, project], function(err, row) {
+                            if (err)
+                            {
+                                res.send('{"status":"failed"}')
+                            }
+                            else if (row) {
+                                var dataStorage = row["dataStorage"]
+                                if (dataStorage == null)
+                                    dataStorage = "{}"
+                                var dataStorageJSON = JSON.parse(dataStorage)
+                                if(dataStorageJSON["received"] && dataStorageJSON["received"][topic])
+                                {
+                                    var data = dataStorageJSON["received"][topic]
+                                    if(data.length<num)
+                                        num = data.length
+                                    res.send(JSON.stringify({
+                                        "status": "success",
+                                        "data": data.slice(0,num)
+                                    }))
+                                }
+                                else
+                                    res.send('{"status":"success","data":[]}')
+                            }
+                        })
+                    }
+                })
+        }
+        catch(e){
+            res.send('{"status":"failed"}')
+        }
+        
     })
 
 

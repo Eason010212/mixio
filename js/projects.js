@@ -1228,10 +1228,29 @@ function view_project(projectName, projectType) {
             leftCard.append(leftCardTitle)
             rightCard.append(rightCardTitle)
             leftCardTitle.append($('<h6 class="m-0 font-weight-bold text-primary">' + JSLang[lang].monitor + '</h6>'))
+            var httpAPIButton = $('<a class="btn btn-info btn-sm" style="padding:0 5px 0 5px;margin-left:10px">' + "HTTP API" + '</a>')
             var downloadButton = $('<a class="btn btn-primary btn-sm" download="data.csv" style="padding:0 5px 0 5px;margin-left:10px">' + JSLang[lang].download + '</a>')
             var clearButton = $('<a class="btn btn-success btn-sm" style="padding:0 5px 0 5px;margin-left:8px">' + JSLang[lang].clear + '</a>')
             var clearAllButton = $('<a class="btn btn-warning btn-sm" style="padding:0 5px 0 5px;margin-left:8px">' + JSLang[lang].clearAll + '</a>')
+            httpAPIButton.click(function() {
+                var text = "URL: " + window.location.href.replace("projects", "") + "api/v1/getData?user=" + globalUserName + "&password=" + globalProjectPass + "&project=" + globalProjectName + "&topic=" + "[想要获取的主题]" + "&num=" + "[想要获取的最新消息数量]"
+                var text = "Method: GET<br>" + text
+                var text = text + "<br>" + "一般情况下，数据更新频率为30秒/次，手动保存项目会立即更新数据。"
+                // dialog, 自动换行
+                var text = "<div style='word-wrap:break-word;word-break:break-all;'>" + text + "</div>"
+                var dia = dialog({
+                    title: "通过HTTP API获取数据",
+                    content: text,
+                    okValue: JSLang[lang].close,
+                    ok: function() {
+                        dia.close().remove()
+                    }
+                })
+                dia.showModal()
+            })
+
             clearAllButton.click(function() {
+                isChanged = true
                 if (globalTableProjectInfo.currentTp != "$") {
                     if (globalTableProjectInfo.currentTp.split(",,").length == 1)
                         delete globalTableProjectInfo.received[globalTableProjectInfo.currentTp]
@@ -1260,10 +1279,12 @@ function view_project(projectName, projectType) {
                     init_table()
                 }
             })
+            leftCardTitle.append(httpAPIButton)
             leftCardTitle.append(downloadButton)
             leftCardTitle.append(clearButton)
             leftCardTitle.append(clearAllButton)
             clearButton.click(function() {
+                isChanged = true
                 if (globalTableProjectInfo.currentTp.split(",,").length == 1)
                     globalTableProjectInfo.received[globalTableProjectInfo.currentTp] = []
                 else {
