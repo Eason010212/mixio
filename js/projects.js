@@ -3374,6 +3374,7 @@ function save_layout(exit, silent) {
     var logic_JSON = JSON.stringify(globalLogicInfo)
     $.post('saveProject', { 'layout': layout_JSON, 'dataStorage': data_JSON, 'logicStorage': logic_JSON, 'projectName': globalProjectName, 'projectType': globalProjectType }, function(res) {
         if (res == 1) {
+            isChanged = false
             if(typeof globalShareKey != 'undefined')
             {
                 $.post('updateShareContent', { 'shareid':globalShareKey, 'projectName': globalProjectName, 'projectLayout':layout_JSON, 'dataStorage': data_JSON, 'logicStorage': logic_JSON }, function(res) {
