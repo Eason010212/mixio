@@ -6192,7 +6192,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                     }
                     if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= 1000)
                     {   
-                        publish(user_topic, JSON.stringify({id: min_index, name: user_data[min_index]["name"], isMouthOpen: isMouthOpen, face_probability: resizedDetections[0].detection.score, happy_probability: resizedDetections[0].expressions.happy, sad_probability: resizedDetections[0].expressions.sad, angry_probability: resizedDetections[0].expressions.angry, surprised_probability: resizedDetections[0].expressions.surprised, disgusted_probability: resizedDetections[0].expressions.disgusted, fearful_probability: resizedDetections[0].expressions.fearful}))
+                        publish(user_topic, JSON.stringify({id: min_index, name: user_data[min_index]["name"], isMouthOpen: isMouthOpen, faceProbability: resizedDetections[0].detection.score.toFixed(3), happy: resizedDetections[0].expressions.happy.toFixed(3), sad: resizedDetections[0].expressions.sad.toFixed(3), angry: resizedDetections[0].expressions.angry.toFixed(3), surprised: resizedDetections[0].expressions.surprised.toFixed(3), disgusted: resizedDetections[0].expressions.disgusted.toFixed(3), fearful: resizedDetections[0].expressions.fearful.toFixed(3)}))
                         lastFacePublishTime = new Date().getTime()
                     }
                 }
