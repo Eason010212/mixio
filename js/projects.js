@@ -1,4 +1,5 @@
 var globalVer = "MixIO ver 1.11.24"
+var isChanged = false;
 var globalBLE = {}
 function copy(obj) {
     return JSON.parse(JSON.stringify(obj))
@@ -918,6 +919,7 @@ function view_project(projectName, projectType) {
                 }
             }, 20000)
             client.on('message', function(topic1, message1) {
+                isChanged = true
                 var convertedMessage = Uint8ArrayToString(message1)
                 if (topic1.split('/')[2] == 'b640a0ce465fa2a4150c36b305c1c11b' || (topic1.split('/').length == 4 && isMixly && topic1.split('/')[3] == 'b640a0ce465fa2a4150c36b305c1c11b')) {
                     console.log(convertedMessage)
@@ -3335,7 +3337,7 @@ function add_widget() {
     d.showModal();
 }
 
-function save_layout(exit) {
+function save_layout(exit, silent) {
     $("#top_right_icon_3").attr('class', 'fa fa-spin fa-spinner')
     var layout_info = grid.html()
     var layout_and_time_info = {
@@ -3357,7 +3359,8 @@ function save_layout(exit) {
                     if(res == 1)
                     {
                         $("#top_right_icon_3").attr('class', 'fa fa-save')
-                        showtext(JSLang[lang].saveSuccess)
+                        if(!silent)
+                            showtext(JSLang[lang].saveSuccess)
                         if (exit)
                             window.location.href = 'logout'
                     }
@@ -3371,7 +3374,8 @@ function save_layout(exit) {
             else
             {
                 $("#top_right_icon_3").attr('class', 'fa fa-save')
-                showtext(JSLang[lang].saveSuccess)
+                if(!silent)
+                    showtext(JSLang[lang].saveSuccess)
                 if (exit)
                     window.location.href = 'logout'
             }
@@ -3883,3 +3887,11 @@ var exportProjects = function() {
             showtext("Unknown Error")
     })
 }
+
+setInterval(function(){
+    if(isChanged)
+    {
+        save_layout(false, true)
+        isChanged = false
+    }
+}, 30000)
