@@ -948,15 +948,44 @@ var mixioServer = function() {
                                     dataStorage = "{}"
                                 var dataStorageJSON = JSON.parse(dataStorage)
                                 if(dataStorageJSON["received"] && dataStorageJSON["received"][topic])
-                                {
-                                    var data = dataStorageJSON["received"][topic]
-                                    if(data.length<num)
-                                        num = data.length
-                                    res.send(JSON.stringify({
-                                        "status": "success",
-                                        "data": data.slice(0,num)
-                                    }))
-                                }
+                                    {
+                                        var data = dataStorageJSON["received"][topic]
+                                        if(data.length<num)
+                                            num = data.length
+                                        data = data.slice(0,num)
+                                        for(var i = 0;i<data.length;i++)
+                                        {
+                                            // for each key, if value is int, convert to int; if value is float, convert to float
+                                            for(var key in data[i])
+                                            {
+                                                // if only have digits, convert to int
+                                                if(/^\d+$/.test(data[i][key]))
+                                                    data[i][key] = parseInt(data[i][key])
+                                                // if have digits and one dot, convert to float
+                                                else if(/^\d+\.\d+$/.test(data[i][key]))
+                                                    data[i][key] = parseFloat(data[i][key])
+                                                // if json string, convert to json
+                                                else if(data[i][key].startsWith("{") && data[i][key].endsWith("}"))
+                                                    try{
+                                                        data[i][key] = JSON.parse(stringendecoder.decodeHtml(data[i][key]))
+                                                        for(var key2 in data[i][key])
+                                                        {
+                                                            if(/^\d+$/.test(data[i][key][key2]))
+                                                                data[i][key][key2] = parseInt(data[i][key][key2])
+                                                            else if(/^\d+\.\d+$/.test(data[i][key][key2]))
+                                                                data[i][key][key2] = parseFloat(data[i][key][key2])
+                                                        }
+                                                    }
+                                                    catch(e){
+                                                        data[i][key] = data[i][key]
+                                                    }
+                                            }
+                                        }
+                                        res.send(JSON.stringify({
+                                            "status": "success",
+                                            "data": data
+                                        }))
+                                    }
                                 else
                                     res.send('{"status":"success","data":[]}')
                             }
