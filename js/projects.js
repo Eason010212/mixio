@@ -1905,6 +1905,16 @@ function add_widget() {
         topic_input_div.append(topic_input)
         topic_input.val("face")
         editForm.append(topic_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerInterval + '</h5>'))
+        var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var trigger_interval = $("<input type='number' step='100' min='1000' max='100000' required class='form-control form-control-user'  style='text-align:center'/>")
+        trigger_interval.val(1000)
+        trigger_interval_div.append(trigger_interval)
+        trigger_interval.change(function(){
+            if(trigger_interval.val()<1000)
+                trigger_interval.val(1000)
+        })
+        editForm.append(trigger_interval_div)
         var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
         var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
@@ -1914,7 +1924,7 @@ function add_widget() {
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
                         if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
-                            add_face(title_input.val(), topic_input.val(), "")
+                            add_face(title_input.val(), topic_input.val(), "[" + trigger_interval.val() + "]")
                             modifyDia.close().remove()
                         } else
                             showtext(JSLang[lang].sameUnit)
@@ -2711,10 +2721,22 @@ function add_widget() {
         topic_input.val("timer")
         editForm.append(topic_input_div)
         editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerMessage + '</h5>'))
+        var moreButtonDiv = $('<div style="display:flex;flex-direction:row;align-items:center;justify-content:center"></div>')
+        var currTimeBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">实时时间</a>')
+        var ranNumBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">随机整数（1-99）</a>')
+        moreButtonDiv.append(currTimeBtn)
+        moreButtonDiv.append(ranNumBtn)
+        editForm.append(moreButtonDiv)
         var message_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
         var message_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
         message_input_div.append(message_input)
         editForm.append(message_input_div)
+        currTimeBtn.click(function(){
+            message_input.val("$CURR_TIME$")
+        })
+        ranNumBtn.click(function(){
+            message_input.val("$RAN_NUM$")
+        })
         editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerInterval + '</h5>'))
         var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
         var trigger_interval = $("<input type='number' step='100' min='500' max='100000' required class='form-control form-control-user'  style='text-align:center'/>")

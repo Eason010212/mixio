@@ -2410,7 +2410,12 @@ function add_timer(user_title, user_topic, user_content, user_style, title_style
                 setTimeout(function() {
                     itemdiv.removeClass("triggered")
                 }, 150)
-                MixIO.publish(triggerTopic, triggerMessage)
+                if(triggerMessage=="$CURR_TIME$")
+                    MixIO.publish(triggerTopic, (new Date().getHours() > 10 ? new Date().getHours()+"" : ("0" + new Date().getHours())) +":"+ (new Date().getMinutes() > 10 ? new Date().getMinutes()+"" : ("0" + new Date().getMinutes())) +":"+ (new Date().getSeconds() > 10 ? new Date().getSeconds()+"" : ("0" + new Date().getSeconds())))
+                else if(triggerMessage=="$RAN_NUM$")
+                    MixIO.publish(triggerTopic, Math.round(Math.random()*99+1))
+                else
+                    MixIO.publish(triggerTopic, triggerMessage)
                 localTime = localTime + 1
             }
         }, triggerInterval)
@@ -2445,10 +2450,22 @@ function add_timer(user_title, user_topic, user_content, user_style, title_style
     topic_input_div.append(topic_input)
     editForm.append(topic_input_div)
     editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerMessage + '</h5>'))
+    var moreButtonDiv = $('<div style="display:flex;flex-direction:row;align-items:center;justify-content:center"></div>')
+    var currTimeBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">实时时间</a>')
+    var ranNumBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">随机整数（1-99）</a>')
+    moreButtonDiv.append(currTimeBtn)
+    moreButtonDiv.append(ranNumBtn)
+    editForm.append(moreButtonDiv)
     var message_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
     var message_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
     message_input_div.append(message_input)
     editForm.append(message_input_div)
+    currTimeBtn.click(function(){
+        message_input.val("$CURR_TIME$")
+    })
+    ranNumBtn.click(function(){
+        message_input.val("$RAN_NUM$")
+    })
     editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerInterval + '</h5>'))
     var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
     var trigger_interval = $("<input type='number' step='100' min='500' max='100000' required class='form-control form-control-user'  style='text-align:center'/>")
@@ -5974,7 +5991,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
             var user_data = JSON.parse(user_content)
             user_data.push({"name": "", "landmarks": data})
             title.parent().parent().attr('user-content', JSON.stringify(user_data))
-            showtext("人脸数据已保存。ID:" + (user_data.length - 1))
+            showtext("人脸数据已保存。")
         }
         else
         {
@@ -6073,7 +6090,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                         user_data.push({"name": name_input.val(), "landmarks": data})
                         title.parent().parent().attr('user-content', JSON.stringify(user_data))
                         modald.close().remove()
-                        showtext("人脸数据已保存。ID:" + (user_data.length - 1))
+                        showtext("人脸数据已保存。")
                         sync_table_info()
                         dia.close().remove()
                     }
@@ -6156,6 +6173,16 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                 if (user_content == undefined || user_content == "")
                     user_content = "[]"
                 var user_data = JSON.parse(user_content)
+                var interval = 1000
+                if(user_data.length==0 || user_data[0]["name"])
+                {
+                    
+                }
+                else
+                {
+                    interval = user_data[0]
+                    user_data.shift()
+                }
                 var min_euclidean_distance = 0.4
                 var min_index = -1
                 for (var i = 0; i < user_data.length; i++)
@@ -6190,9 +6217,12 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                         const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:" + min_index + "     Name:" + user_data[min_index]["name"] +"    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
                         drawBox.draw(canvas[0])
                     }
-                    if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= 1000)
+                    if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= interval)
                     {   
-                        publish(user_topic, JSON.stringify({id: min_index, name: user_data[min_index]["name"], isMouthOpen: isMouthOpen, faceProbability: resizedDetections[0].detection.score.toFixed(3), happy: resizedDetections[0].expressions.happy.toFixed(3), sad: resizedDetections[0].expressions.sad.toFixed(3), angry: resizedDetections[0].expressions.angry.toFixed(3), surprised: resizedDetections[0].expressions.surprised.toFixed(3), disgusted: resizedDetections[0].expressions.disgusted.toFixed(3), fearful: resizedDetections[0].expressions.fearful.toFixed(3)}))
+                        if(min_index == -1)
+                            publish(user_topic, JSON.stringify({id: min_index, name: "Unknown", isMouthOpen: isMouthOpen, faceProbability: resizedDetections[0].detection.score.toFixed(3), happy: resizedDetections[0].expressions.happy.toFixed(3), sad: resizedDetections[0].expressions.sad.toFixed(3), angry: resizedDetections[0].expressions.angry.toFixed(3), surprised: resizedDetections[0].expressions.surprised.toFixed(3), disgusted: resizedDetections[0].expressions.disgusted.toFixed(3), fearful: resizedDetections[0].expressions.fearful.toFixed(3)}))
+                        else
+                            publish(user_topic, JSON.stringify({id: min_index, name: user_data[min_index]["name"], isMouthOpen: isMouthOpen, faceProbability: resizedDetections[0].detection.score.toFixed(3), happy: resizedDetections[0].expressions.happy.toFixed(3), sad: resizedDetections[0].expressions.sad.toFixed(3), angry: resizedDetections[0].expressions.angry.toFixed(3), surprised: resizedDetections[0].expressions.surprised.toFixed(3), disgusted: resizedDetections[0].expressions.disgusted.toFixed(3), fearful: resizedDetections[0].expressions.fearful.toFixed(3)}))
                         lastFacePublishTime = new Date().getTime()
                     }
                 }
@@ -6214,6 +6244,16 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
         if (user_content == undefined || user_content == "")
             user_content = "[]"
         var user_data = JSON.parse(user_content)
+        var interval = 1000
+        if(user_data.length==0 || user_data[0]["name"])
+        {
+            
+        }
+        else
+        {
+            interval = user_data[0]
+            user_data.shift()
+        }
         var datafields = [{"name": "ID", "type": "text", "width": 50, "align": "center", "editing": false},
              {"name": "Name", "type": "text", "width": 100, "align": "center"}, 
              {"type": "control", "width": 50}];
@@ -6237,6 +6277,15 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                 if (user_content == undefined || user_content == "")
                     user_content = "[]"
                 var user_data = JSON.parse(user_content)
+                if(user_data.length==0 || user_data[0]["name"])
+                {
+                    
+                }
+                else
+                {
+                    interval = user_data[0]
+                    user_data.shift()
+                }
                 var isDel = false
                 for (var i = 0; i < data.length; i++)
                 {
@@ -6244,10 +6293,12 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                     {
                         isDel = true
                         user_data.splice(i, 1)
+                        break
                     }
                 }
                 if(!isDel)
                     user_data.splice(data.length, 1)
+                user_data.unshift(interval)
                 title.parent().parent().attr('user-content', JSON.stringify(user_data))
                 sync_table_info()
             },
@@ -6257,11 +6308,22 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                 if (user_content == undefined || user_content == "")
                     user_content = "[]"
                 var user_data = JSON.parse(user_content)
+                if(user_data.length==0 || user_data[0]["name"])
+                {
+                    
+                }
+                else
+                {
+                    interval = user_data[0]
+                    user_data.shift()
+                }
                 for (var i = 0; i < data.length; i++)
                 {
                     user_data[i]["name"] = data[i]["Name"]
                 }
+                user_data.unshift(interval)
                 title.parent().parent().attr('user-content', JSON.stringify(user_data))
+                sync_table_info()
             }
         })
         allDataTable.on('click', function(event) {
@@ -6310,6 +6372,16 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
     var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
     topic_input_div.append(topic_input)
     editForm.append(topic_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerInterval + '</h5>'))
+    var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var trigger_interval = $("<input type='number' step='100' min='1000' max='100000' required class='form-control form-control-user'  style='text-align:center'/>")
+    trigger_interval.val(1000)
+    trigger_interval.change(function(){
+        if(trigger_interval.val()<1000)
+            trigger_interval.val(1000)
+    })
+    trigger_interval_div.append(trigger_interval)
+    editForm.append(trigger_interval_div)
     var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
@@ -6322,7 +6394,21 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                         title.parent().parent().attr('user-title', title_input.val())
                         title.parent().parent().attr('user-topic', topic_input.val())
                         if (title.parent().parent().attr('user-content') == undefined || title.parent().parent().attr('user-content') == "")
-                            title.parent().parent().attr('user-content', "[]")
+                            title.parent().parent().attr('user-content', "[" + trigger_interval.val() + "]")
+                        else
+                        {
+                            var user_content = title.parent().parent().attr('user-content')
+                            var user_data = JSON.parse(user_content)
+                            if(user_data.length==0 || user_data[0]["name"])
+                            {
+                                user_data.unshift(trigger_interval.val())
+                            }
+                            else
+                            {
+                                user_data[0] = trigger_interval.val()
+                            }
+                            title.parent().parent().attr("user-content", JSON.stringify(user_data))
+                        }
                         title.text(title_input.val())
                         topic.text(topic_input.val())
                         modifyDia.close()
@@ -6377,6 +6463,15 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
             }
             title_input.val(title.text())
             topic_input.val(topic.text())
+            var user_content_json = JSON.parse(title.parent().parent().attr('user-content'))
+            if(user_content_json.length==0 || user_content_json[0]["name"])
+            {
+                trigger_interval.val(1000)
+            }
+            else
+            {
+                trigger_interval.val(user_content_json[0])
+            }
             if (!d.open)
             {
                 d.show(itemdiv[0]);
