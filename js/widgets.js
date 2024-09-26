@@ -1746,15 +1746,23 @@ function add_bulb(user_title, user_topic, user_content, user_style, title_style)
                 if (message1 == 0) {
                     title.parent().parent().attr('user-content', 0)
                     bulb.attr('class', 'bulb0')
+                    bulb.css('background-color', "#DCD9D4");
+                    bulb.css('box-shadow', '');
                 } else if (message1 == 1) {
                     title.parent().parent().attr('user-content', 1)
                     bulb.attr('class', 'bulb1')
+                    bulb.css('background-color', "#1CC88A");
+                    bulb.css('box-shadow', '#1CC88A 1px 1px 8px');
                 } else if (message1 == 2) {
                     title.parent().parent().attr('user-content', 2)
                     bulb.attr('class', 'bulb2')
+                    bulb.css('background-color', "#f6c23e");
+                    bulb.css('box-shadow', '#f6c23e 1px 1px 8px');
                 } else if (message1 == 3) {
                     title.parent().parent().attr('user-content', 3)
                     bulb.attr('class', 'bulb3')
+                    bulb.css('background-color', "#e74a3b");
+                    bulb.css('box-shadow', '#e74a3b 1px 1px 8px');
                 }
                 else{
                     if (message1.toString().indexOf("#") != -1) {
