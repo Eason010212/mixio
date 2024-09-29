@@ -20,7 +20,7 @@
 
 https://mixio.mixly.cn
 
-## 私有部署发行版-v1.10.1
+## 私有部署发行版-latest
 
 ### Windows-x64发行版（win10及以上）
 
@@ -63,7 +63,7 @@ https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
 ## 从源码构建
 
 1. 编译脚本见pkg_tools/
-2. 基本环境：node16(windows7为node12), python3, cmake, pkg.
+2. 基本环境：node20(windows7为node12), python3, cmake, pkg.
 
 ## 安卓端运行服务器（experimental）
 
