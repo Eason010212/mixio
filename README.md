@@ -76,8 +76,10 @@ https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
 7. pkg install git
 8. git clone https://gitee.com/mixly2/mixio.git
 9. cd mixio
-10. npm i
-11. node mixio.js debug
+10. export GYP_DEFINES="android_ndk_path=''"
+11. npm i
+12. node mixio.js debug
+13. 设置termux应用 - 允许自启动，无省电策略
 
 ## 服务器配置文件（config/config.json）
 
