@@ -490,8 +490,8 @@ function check_share_key() {
         $("#shareKey").addClass('btn-success')
         $("#shareKey").html("ON")
         sharekey.html(globalShareKey)
-        sharelink.html("http://"+window.location.host + "/observe?sid=" + globalShareKey)
-        sharelink.attr("href", "http://"+window.location.host + "/observe?sid=" + globalShareKey)
+        sharelink.html(window.location.href.split("/")[0]+"//"+window.location.host + "/observe?sid=" + globalShareKey)
+        sharelink.attr("href", window.location.href.split("/")[0]+"//"+window.location.host + "/observe?sid=" + globalShareKey)
         sharelink.css("color","#1cc88a")
     }
 }
