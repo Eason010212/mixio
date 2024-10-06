@@ -960,7 +960,7 @@ var mixioServer = function() {
                     {
                         res.send('{"status":"failed"}')
                     }
-                    else if ( (password=="MixIO_public" && user[0]=="@") || (row && (row["password"] == password)) ) {
+                    else if ( ((!row) && (password=="MixIO_public" && user[0]=="@")) || (row && (row["password"] == password)) ) {
                         db.get("select * from project where username = ? and projectName = ?", [user, project], function(err, row) {
                             if (err)
                             {
@@ -1014,6 +1014,10 @@ var mixioServer = function() {
                                     res.send('{"status":"success","data":[]}')
                             }
                         })
+                    }
+                    else
+                    {
+                        res.send('{"status":"failed"}')
                     }
                 })
         }
