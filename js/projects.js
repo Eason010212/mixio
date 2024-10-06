@@ -1233,7 +1233,7 @@ function view_project(projectName, projectType) {
             var clearButton = $('<a class="btn btn-success btn-sm" style="padding:0 5px 0 5px;margin-left:8px">' + JSLang[lang].clear + '</a>')
             var clearAllButton = $('<a class="btn btn-warning btn-sm" style="padding:0 5px 0 5px;margin-left:8px">' + JSLang[lang].clearAll + '</a>')
             httpAPIButton.click(function() {
-                var text = "URL: " + window.location.href.replace("projects", "") + "api/v1/getData?user=" + globalUserName + "&password=" + globalProjectPass + "&project=" + globalProjectName + "&topic=" + "[想要获取的主题]" + "&num=" + "[想要获取的最新消息数量]"
+                var text = "URL: " + window.location.href.replace("projects-mixly", "").replace("projects", "") + "api/v1/getData?user=" + globalUserName + "&password=" + globalProjectPass + "&project=" + globalProjectName + "&topic=" + "[想要获取的主题]" + "&num=" + "[想要获取的最新消息数量]"
                 var text = "Method: GET<br>" + text
                 var text = text + "<br>" + "一般情况下，数据更新频率为30秒/次，手动保存项目会立即更新数据。"
                 // dialog, 自动换行
