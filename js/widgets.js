@@ -1066,6 +1066,12 @@ function add_keyboard(user_title, user_topic, user_content, user_style, title_st
     messDiv.bind('input', function() {
         title.parent().parent().attr('user-content', stringendecoder.encodeHtml(messDiv.val()))
     })
+    messDiv.bind('touchstart', function(event) {
+        event.stopPropagation()
+    })
+    messDiv.bind('touchend', function(event) {
+        event.stopPropagation()
+    })
     keyDiv.append(messDiv)
     var sendIcon = $('<a class="btn btn-primary btn-circle" style="margin-left:10px"><i class="fa fa-paper-plane"></i></a')
     keyDiv.append(sendIcon)
@@ -1279,6 +1285,12 @@ function add_tinydb(user_title, user_topic, user_content, user_style, title_styl
         event.stopPropagation()
     })
     messDiv.bind('mouseup', function(event) {
+        event.stopPropagation()
+    })
+    messDiv.bind('touchstart', function(event) {
+        event.stopPropagation()
+    })
+    messDiv.bind('touchend', function(event) {
         event.stopPropagation()
     })
     var sendIcon = $('<a class="btn btn-primary btn-circle" style="margin-left:10px"><i class="fa fa-paper-plane"></i></a')
