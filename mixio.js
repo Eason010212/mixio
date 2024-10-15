@@ -37,7 +37,6 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 var jq = require("jquery");
 const mqtt = require('mqtt');
-var { JSLang, arrLang, lang } = require("./js/lang.js")
 const path = require('path');
 var readline = require('readline');
 var iconv = require('iconv-lite');
@@ -2600,7 +2599,6 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
                 this.lastPublishTime.shift()
                 this.lastPublishTime.push(new Date())
             } else {
-                //MixIO.log(JSLang[lang].speedLimit)
                 that.stop_project()
 
             }
@@ -2789,12 +2787,12 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
         /*获取组件实例*/
         this.getInstance = function(name, type) {
             if (!this.isValidType(type))
-                throw new MixIOLogicError(JSLang[lang].invalidUType)
+                throw new MixIOLogicError(1)
             var instance = this.$("[" + "user-title='" + name + "']")
             if (instance.length != 1)
-                throw new MixIOLogicError(JSLang[lang].noUnitFound)
+                throw new MixIOLogicError(2)
             if (instance.attr("user-type") != this.oldTags[type - 1])
-                throw new MixIOLogicError(JSLang[lang].invalidUType)
+                throw new MixIOLogicError(3)
             instance.toString = function() {
                 return this.zhcnTags[type - 1] + ":" + name
             }
