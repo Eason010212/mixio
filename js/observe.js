@@ -120,6 +120,7 @@ $(function(){
                 $("#grid").children("[user-type='output_bar']").removeClass("moveDiv")
                 $("#grid").children("[user-type='table']").removeClass("moveDiv")
                 $("#grid").children("[user-type='output_map']").removeClass("moveDiv")
+                $(".facial").attr("hidden", "hidden")
                 modald.close()
                 try{
                     var logicFunction = Function(globalCode);
