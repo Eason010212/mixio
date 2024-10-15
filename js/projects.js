@@ -1732,7 +1732,7 @@ function isJSON(str) {
 }
 
 function add_widget() {
-    var widget_list = $("<div class='widget_list nnt' style='display:flex;max-width:810px;align-items:center;justify-content:center;flex-direction:row;flex-wrap:wrap;padding:10px'/>")
+    var widget_list = $("<div class='widget_list nnt' style='display:flex;max-width:900px;width:900px;align-items:center;justify-content:center;flex-direction:row;flex-wrap:wrap;padding:10px'/>")
     var title = $("<div style='display:flex;align-items:center;justify-content:center;font-size:1.8rem!important;width:100%;text-align:center;margin-bottom:15px;margin-top:5px;color:#4e73df;font-size:1.3rem;font-weight:bold'><i class='fa fa-cube' style='margin-right:5px;font-size:2rem'></i><p style='margin:0'>" + JSLang[lang].widget + "</p><a class='btn btn-primary btn-block' style='width:90px;margin-left:8px;padding:2px' href='./documentation' target='_blank'>" + JSLang[lang].guide + "</a></div>")
     widget_list.append(title)
     widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:5px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].control + "</h5>"))
@@ -1792,8 +1792,8 @@ function add_widget() {
     widget_list.append(blazeFace_add)
     var mediaPipe_add = $("<div class='widget_div'><div><img src='icons/mediaPipe.svg'><span>" + JSLang[lang].mediaPipe + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(mediaPipe_add)
-    var bertQA_add = $("<div class='widget_div'><div><img src='icons/Bert.svg'><span>" + JSLang[lang].Bert + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
-    widget_list.append(bertQA_add)
+    //var bertQA_add = $("<div class='widget_div'><div><img src='icons/Bert.svg'><span>" + JSLang[lang].Bert + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
+    //widget_list.append(bertQA_add)
 
     ble_add.children("a").click(function() {
         d.close().remove()

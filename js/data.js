@@ -243,6 +243,8 @@ $(function() {
 })
 
 var play = function() {
+    showtext("由于较大的访问量，主站的离线数据功能已禁用。")
+    return
     var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].loading + "</p></div>")
     $.get('startHook', function(res) {
         modald.close()

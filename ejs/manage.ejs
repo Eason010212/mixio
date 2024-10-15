@@ -8,15 +8,10 @@
 
     <title>MixIO管理后台</title>
     <link rel="shortcut icon" href="img/shortcut.png"/>
-    <link rel="stylesheet" href="css/farbtastic.css">
-    <link href="css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/nunito.css" rel="stylesheet">
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/muuri.css?v=21">
+    <link rel="stylesheet" href="css/all.css">
     <script src="js/jquery.min.js"></script>
     
     <script src="js/lang.js?v=5"></script>
-    <script src="js/lang2.js?v=5"></script>
     <script src="js/farbtastic.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/jquery.easing.min.js"></script>
@@ -185,30 +180,6 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                                <span>MQTT 端口：</span>
-                                            </td>
-                                            <td>
-                                                <input type="number" id="MIXIO_MQTT_PORT">
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span>WS 端口：</span>
-                                            </td>
-                                            <td>
-                                                <input type="number" id="MIXIO_WS_PORT">
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span>WSS 端口：</span>
-                                            </td>
-                                            <td>
-                                                <input type="number" id="MIXIO_WSS_PORT">
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
                                                 <span>SSL证书私钥：</span>
                                             </td>
                                             <td>
@@ -346,9 +317,6 @@
         }, 1000);
         var MIXIO_HTTP_PORT = "<%=configs["MIXIO_HTTP_PORT"]%>"
         var MIXIO_HTTPS_PORT = "<%=configs["MIXIO_HTTPS_PORT"]%>"
-        var MIXIO_MQTT_PORT = "<%=configs["MIXIO_MQTT_PORT"]%>"
-        var MIXIO_WS_PORT = "<%=configs["MIXIO_WS_PORT"]%>"
-        var MIXIO_WSS_PORT = "<%=configs["MIXIO_WSS_PORT"]%>"
         var HTTPS_PRIVATE_PEM = "<%=configs["HTTPS_PRIVATE_PEM"]%>"
         var HTTPS_CRT_FILE = "<%=configs["HTTPS_CRT_FILE"]%>"
         var MAX_PROJECT_NUM_PER_USER = "<%=configs["MAX_PROJECT_NUM_PER_USER"]%>"
@@ -376,9 +344,6 @@
         var loadConfig = function(){
             $("#MIXIO_HTTP_PORT").val(MIXIO_HTTP_PORT)
             $("#MIXIO_HTTPS_PORT").val(MIXIO_HTTPS_PORT)
-            $("#MIXIO_MQTT_PORT").val(MIXIO_MQTT_PORT)
-            $("#MIXIO_WS_PORT").val(MIXIO_WS_PORT)
-            $("#MIXIO_WSS_PORT").val(MIXIO_WSS_PORT)
             $("#HTTPS_PRIVATE_PEM").val(HTTPS_PRIVATE_PEM)
             $("#HTTPS_CRT_FILE").val(HTTPS_CRT_FILE)
             $("#ALLOW_REGISTER").prop("checked",ALLOW_REGISTER)
@@ -410,9 +375,6 @@
             configs = {}
             configs["MIXIO_HTTP_PORT"] = parseInt($("#MIXIO_HTTP_PORT").val())
             configs["MIXIO_HTTPS_PORT"] = parseInt($("#MIXIO_HTTPS_PORT").val())
-            configs["MIXIO_MQTT_PORT"] = parseInt($("#MIXIO_MQTT_PORT").val())
-            configs["MIXIO_WS_PORT"] = parseInt($("#MIXIO_WS_PORT").val())
-            configs["MIXIO_WSS_PORT"] = parseInt($("#MIXIO_WSS_PORT").val())
             configs["HTTPS_PRIVATE_PEM"] = $("#HTTPS_PRIVATE_PEM").val()
             configs["HTTPS_CRT_FILE"] = $("#HTTPS_CRT_FILE").val()
             configs["MAX_PROJECT_NUM_PER_USER"] = parseInt($("#MAX_PROJECT_NUM_PER_USER").val())

@@ -1,4 +1,4 @@
-if(window.location.href == "http://mixio.mixly.cn/"||window.location.href == "http://mixio.mixly.org/")
+if(window.location.href == "http://mixio.mixly.cn/"||window.location.href == "http://mixio.mixly.org/"||window.location.host=="47.92.33.17")
     window.location.href = "https://mixio.mixly.cn/"
 function showmodaltext(text){
     var d = dialog({
@@ -28,7 +28,7 @@ $(function(){
             }
         });
     }
-    if ('_cordovaNative' in window)
+    if (true)
     {
         $("#android_text").attr("hidden","hidden")
     }
