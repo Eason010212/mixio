@@ -1,11 +1,8 @@
-var VERSION = "1.10.0"
+var VERSION = "2.0.0"
 
-// change pwd to src
 if (process.argv[0].indexOf("node") != -1) {
-    // exec from source
     process.chdir(process.argv[1].replace("mixio.js",""))
 } else {
-    // exec from binary
     if(process.platform == "win32") {
         process.chdir(process.argv[0].replace("mixio.exe",""))
     }

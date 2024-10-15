@@ -5,26 +5,6 @@ function copy(obj) {
     return JSON.parse(JSON.stringify(obj))
 }
 $(function() {
-    if ('_cordovaNative' in window) {
-        var scriptcordova = document.createElement('script');
-        scriptcordova.async = false;
-        scriptcordova.src = "https://injection/www/cordova.js";
-        document.head.appendChild(scriptcordova);
-    }
-    $("#copypass").click(function(){
-        projectPass = $("#prjpass").text()
-        var input = document.createElement('input');
-        document.body.appendChild(input);
-        input.setAttribute('value', projectPass);
-        input.select();
-        if (document.execCommand('copy')) {
-            document.execCommand('copy');
-        }
-        document.body.removeChild(input);
-        showtext("密钥信息已复制到剪贴板")
-    })
-})
-$(function() {
     get_width();
     activeExit = false;
     currentPage = 0;
@@ -36,17 +16,6 @@ $(function() {
                 save_layout();
             }
     };
-    /*
-    if (Math.random() > 0.6) {
-        var d = dialog({
-            title: '限时推广',
-            content: '<div style="width:250px">尊敬的MixIO用户，您好！<br>现邀请您参与《MixIO平台技术接受度调查》，共计10题，预计用时5-8分钟。您的作答数据将被用于科学研究和平台改进设计，感谢您的参与！ <a href="https://wj.qq.com/s2/11118283/89a9/">点击此处进入调查</a></div>',
-            cancelValue: '我知道了',
-            cancel: function() {}
-        });
-        d.showModal();
-    }
-    */
 })
 
 const DATA_MODE = 0;
