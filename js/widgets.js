@@ -6141,7 +6141,8 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
             frameRate: {
                 ideal: 60,
                 min: 10
-            }
+            },
+            facingMode: "user"
         },
         audio: false
     }).then(function(stream) {
