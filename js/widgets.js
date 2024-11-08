@@ -5975,7 +5975,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
     // floating canvas on top of the video
     var canvas = $("<canvas style='position:absolute;top:0;left:0'/>")
     cameraDiv.append(canvas)
-    var addFacialDataButton = $('<a class="btn btn-sm btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> 新增当前人脸数据</a>')
+    var addFacialDataButton = $('<a class="btn btn-sm btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> 新增当前人脸</a>')
     cameraDiv.append(addFacialDataButton)
     // stopPropagation
     addFacialDataButton.bind('mousedown', function(event) {
@@ -6019,7 +6019,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
         }
         sync_table_info()
     })
-    var addFaceByPicButton = $('<a class="btn btn-sm btn-success facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #1cc88a"><i class="fa fa-photo"></i> 上传一张人脸图片</a>')
+    var addFaceByPicButton = $('<a class="btn btn-sm btn-success facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #1cc88a"><i class="fa fa-photo"></i> 上传人脸图片</a>')
     cameraDiv.append(addFaceByPicButton)
     addFaceByPicButton.bind('mousedown', function(event) {
         event.stopPropagation()
@@ -6259,7 +6259,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
         ['user-content', user_content],
         ['title-hidden', title_style]
     ]
-    var itemdiv = add_block(4, 5, contents, attrs)
+    var itemdiv = add_block(4, 6, contents, attrs)
     var sync_table_info = function() {
         var user_content = title.parent().parent().attr('user-content')
         if (user_content == undefined || user_content == "")
