@@ -4,6 +4,7 @@
  * @Version 2.8.30
  */
 
+
 tbd = undefined;
 lastFacePublishTime = false;
 function add_block(width, height, contents, attrs) {
@@ -5975,7 +5976,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
     // floating canvas on top of the video
     var canvas = $("<canvas style='position:absolute;top:0;left:0'/>")
     cameraDiv.append(canvas)
-    var addFacialDataButton = $('<a class="btn btn-sm btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> 新增当前人脸</a>')
+    var addFacialDataButton = $('<a class="btn btn-sm btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> 新增当前人脸数据</a>')
     cameraDiv.append(addFacialDataButton)
     // stopPropagation
     addFacialDataButton.bind('mousedown', function(event) {
@@ -6019,7 +6020,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
         }
         sync_table_info()
     })
-    var addFaceByPicButton = $('<a class="btn btn-sm btn-success facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #1cc88a"><i class="fa fa-photo"></i> 上传人脸图片</a>')
+    var addFaceByPicButton = $('<a class="btn btn-sm btn-success facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #1cc88a"><i class="fa fa-photo"></i> 上传一张人脸图片</a>')
     cameraDiv.append(addFaceByPicButton)
     addFaceByPicButton.bind('mousedown', function(event) {
         event.stopPropagation()
@@ -6139,7 +6140,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                 ideal: 1000
             },
             frameRate: {
-                ideal: 60,
+                ideal: 30,
                 min: 10
             },
             facingMode: "user"
@@ -6493,6 +6494,414 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
             {
                 trigger_interval.val(user_content_json[0])
             }
+            if (!d.open)
+            {
+                d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
+            else
+                d.close()
+        }
+    }
+    if (window.screen.width > 800)
+    {
+        itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
+    else
+        itemdiv[0].addEventListener('touchend', function(event) {
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove', function(e) {
+        e.preventDefault()
+    })
+    if (user_style != undefined)
+        itemdiv.attr('style', user_style)
+}
+
+function add_ocr(user_title, user_topic, user_content, user_style, title_style) {
+    showtext("开发中")
+    return
+    var isAlive = true
+    var contents = []
+    var title = $("<h4 class='userTitle' style='margin-top:20px'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
+    contents.push(title)
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
+    var cameraDiv = $("<div class='cameraDiv' style='position:relative'/>")
+    contents.push(cameraDiv)
+    // add a real-time web camera
+    var video = $("<video autoplay style='width:100%;height:100%;'/>")
+    cameraDiv.append(video)
+    // 底部字幕
+    var bottomDiv11 = $("<div style='background-color:rgba(0,0,0,0.5);text-align:center;color:white;position:absolute;bottom:0;width:100%;height:40px'/>")
+    cameraDiv.append(bottomDiv11)
+    // 居中显示Loading...
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            width: {
+                ideal: 1000
+            },
+            height: {
+                ideal: 1000
+            },
+            frameRate: {
+                ideal: 30,
+                min: 10
+            },
+            facingMode: "environment"
+        },
+        audio: false
+    }).then(function(stream) {
+        video[0].srcObject = stream
+        var canvas = $("<canvas style='width:100%;height:100%;'/>")
+        canvas[0].width = 1000
+        canvas[0].height = 1000
+        var ctx = canvas[0].getContext('2d')
+        setInterval(function(){
+            ctx.drawImage(video[0], 0, 0, 1000, 1000)
+            var base64 = canvas[0].toDataURL('image/png')
+            $.ajax({
+                type: "POST",
+                url: "proxy",
+                dataType: "json",
+                data: JSON.stringify({
+                    "url": "http://127.0.0.1:5000",
+                    "data":{
+                        "pic": base64
+                    }
+                }),
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    var text = data["result"]
+                    if(text=="")
+                    {
+                        bottomDiv11.text("未检测到车牌")
+                    }
+                    else
+                    {
+                        bottomDiv11.text(text)
+                        if(isAlive && isRunning)
+                            publish(user_topic, text)
+                    }
+                },
+                error: function (data) {
+                    console.log(data)
+                }
+            });
+        },10000)
+        
+
+    })
+    
+
+    attrs = [
+        ['user-type', 'ocr'],
+        ['user-title', user_title],
+        ['user-topic', user_topic],
+        ['user-content', user_content],
+        ['title-hidden', title_style]
+    ]
+    var itemdiv = add_block(3, 3, contents, attrs)
+
+    var delete_on_click = function() {
+        title.parent().parent().remove();
+        isAlive = false
+        if (tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function() {
+        modifyDia.showModal()
+        if (tbd)
+            tbd.remove()
+    }
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/mediaPipe.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerInterval + '</h5>'))
+    var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var trigger_interval = $("<input type='number' step='100' min='1000' max='100000' required class='form-control form-control-user'  style='text-align:center' readonly/>")
+    trigger_interval.val(10000)
+    trigger_interval.change(function(){
+        if(trigger_interval.val()<1000)
+            trigger_interval.val(1000)
+    })
+    trigger_interval_div.append(trigger_interval)
+    editForm.append(trigger_interval_div)
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function() {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+            var re = /^[a-z0-9]+$/i;
+            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                if (true) {
+                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                        title.parent().parent().attr('user-title', title_input.val())
+                        title.parent().parent().attr('user-topic', topic_input.val())
+                        title.parent().parent().attr('user-content', trigger_interval.val())
+                        title.text(title_input.val())
+                        topic.text(topic_input.val())
+                        modifyDia.close()
+                    } else
+                        showtext(JSLang[lang].sameUnit)
+                } else
+                    showtext("")
+            else
+                showtext(JSLang[lang].topicLenIllegal)
+        } else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function() {
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content: editForm[0],
+        cancel: false
+    })
+    var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
+        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+            var bubble = $('<div style="text-align:center"/>')
+            bubble.append(topicDiv)
+            var d = dialog({
+                align: 'top',
+                content: bubble[0],
+                quickClose: true,
+                autofocus: false
+            });
+            tbd = d;
+            editButton.click(edit_on_click)
+            deleteButton.click(delete_on_click)
+            if (!isRunning)
+                bubble.append(editButton)
+            if (!isRunning)
+                bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
+            title_input.val(title.text())
+            topic_input.val(topic.text())
+            trigger_interval.val(title.parent().parent().attr('user-content'))
+            if (!d.open)
+            {
+                d.show(itemdiv[0]);
+                setTimeout(function() {
+                    $(".ui-popup-backdrop").css("pointer-events", "auto")
+                },100)
+            }
+            else
+                d.close()
+        }
+    }
+    if (window.screen.width > 800)
+    {
+        itemdiv.click(showEditBubble)
+        itemdiv.on('contextmenu', function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            showEditBubble(event)
+        })
+    }
+    else
+        itemdiv[0].addEventListener('touchend', function(event) {
+            event.preventDefault()
+            showEditBubble(event)
+        })
+    itemdiv[0].addEventListener('touchmove', function(e) {
+        e.preventDefault()
+    })
+    if (user_style != undefined)
+        itemdiv.attr('style', user_style)
+}
+function add_qr(user_title, user_topic, user_content, user_style, title_style) {
+    var isAlive = true
+    var contents = []
+    var title = $("<h4 class='userTitle' style='margin-top:20px'>" + user_title + "</h4>")
+    title.attr("hidden", title_style)
+    contents.push(title)
+    var topicDiv = $("<div class='topicDiv'/>")
+    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+    topicDiv.append(topic)
+    var cameraDiv = $("<div class='cameraDiv' style='position:relative'/>")
+    contents.push(cameraDiv)
+    // add a real-time web camera
+    var videoID = "video" + Math.random().toString(36).substr(4)
+    var video = $("<video autoplay style='width:100%;height:100%;'/>")
+    video.attr("id", videoID)
+    cameraDiv.append(video)
+    // 底部字幕
+    var bottomDiv11 = $("<div style='background-color:rgba(0,0,0,0.5);text-align:center;color:white;position:absolute;bottom:0;width:100%;height:40px'/>")
+    cameraDiv.append(bottomDiv11)
+    // 居中显示Loading...
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            width: {
+                ideal: 500
+            },
+            height: {
+                ideal: 500
+            },
+            frameRate: {
+                exact: 10
+            },
+            facingMode: "environment"
+        },
+        audio: false
+    }).then(function(stream) {
+        video[0].srcObject = stream
+        var canvas = $("<canvas/>")[0]
+        canvas.width = 500
+        canvas.height = 500
+        var ctx = canvas.getContext('2d')
+        setInterval(function(){
+            // clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            ctx.drawImage(video[0], 0, 0, canvas.width, canvas.height)
+            var uint8Array = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+            var code = jsQR(uint8Array, canvas.width, canvas.height)
+            if(code)
+            {
+                bottomDiv11.text(code.data)
+                if(isRunning && isAlive)
+                    publish(user_topic, code.data)
+            }
+            else
+                bottomDiv11.text("无二维码")
+        }, 2000)
+    })
+    
+
+    attrs = [
+        ['user-type', 'qr'],
+        ['user-title', user_title],
+        ['user-topic', user_topic],
+        ['user-content', user_content],
+        ['title-hidden', title_style]
+    ]
+    var itemdiv = add_block(3, 3, contents, attrs)
+
+    var delete_on_click = function() {
+        title.parent().parent().remove();
+        isAlive = false
+        if (tbd)
+            tbd.remove()
+    }
+    var edit_on_click = function() {
+        modifyDia.showModal()
+        if (tbd)
+            tbd.remove()
+    }
+    var editForm = $('<div class="nnt"/>')
+    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/mediaPipe.svg" style="width:45px;"></div>'))
+    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    title_input_div.append(title_input)
+    editForm.append(title_input_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+    topic_input_div.append(topic_input)
+    editForm.append(topic_input_div)
+    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+    bottomDiv.append(confirmEdit)
+    confirmEdit.click(function() {
+        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+            var re = /^[a-z0-9]+$/i;
+            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                if (true) {
+                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                        title.parent().parent().attr('user-title', title_input.val())
+                        title.parent().parent().attr('user-topic', topic_input.val())
+                        title.parent().parent().attr('user-content','')
+                        title.text(title_input.val())
+                        topic.text(topic_input.val())
+                        modifyDia.close()
+                    } else
+                        showtext(JSLang[lang].sameUnit)
+                } else
+                    showtext("")
+            else
+                showtext(JSLang[lang].topicLenIllegal)
+        } else
+            showtext(JSLang[lang].nameLenIllegal)
+    })
+    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+    cancelEdit.click(function() {
+        modifyDia.close()
+    })
+    bottomDiv.append(cancelEdit)
+    editForm.append(bottomDiv)
+    var modifyDia = dialog({
+        content: editForm[0],
+        cancel: false
+    })
+    var showEditBubble = function(event) {
+        if(tbd)
+            tbd.remove()
+        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+            var bubble = $('<div style="text-align:center"/>')
+            bubble.append(topicDiv)
+            var d = dialog({
+                align: 'top',
+                content: bubble[0],
+                quickClose: true,
+                autofocus: false
+            });
+            tbd = d;
+            editButton.click(edit_on_click)
+            deleteButton.click(delete_on_click)
+            if (!isRunning)
+                bubble.append(editButton)
+            if (!isRunning)
+                bubble.append(deleteButton)
+            if (!isRunning)
+                {
+                copyButton.attr("user-origin", title.text())
+                bubble.append(copyButton)
+                styleButton.attr("user-origin", title.text())
+                bubble.append(styleButton)
+                helpButton.attr("user-origin", attrs[0][1])
+                bubble.append(helpButton)
+            }
+            title_input.val(title.text())
+            topic_input.val(topic.text())
             if (!d.open)
             {
                 d.show(itemdiv[0]);

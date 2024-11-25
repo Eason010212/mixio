@@ -83,6 +83,8 @@ $(function(){
                 'trigger': add_trigger,
                 'camera': add_camera,
                 'face': add_face,
+                'ocr': add_ocr,
+                'qr':add_qr
             }
             console.log(un.attr('user-type'))
             toolkits[un.attr('user-type')](un.attr('user-title'),un.attr('user-topic'),un.attr('user-content'),un.attr('style'),un.attr('title_style'),true);

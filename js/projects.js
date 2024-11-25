@@ -1091,6 +1091,8 @@ function view_project(projectName, projectType) {
                     'ble': add_ble,
                     'camera': add_camera,
                     'face': add_face,
+                    'ocr': add_ocr,
+                    'qr':add_qr,
                     'input_mic': add_mic,
                     'tinydb': add_tinydb,
                 }
@@ -1735,7 +1737,7 @@ function add_widget() {
     var widget_list = $("<div class='widget_list nnt' style='display:flex;max-width:900px;width:900px;align-items:center;justify-content:center;flex-direction:row;flex-wrap:wrap;padding:10px'/>")
     var title = $("<div style='display:flex;align-items:center;justify-content:center;font-size:1.8rem!important;width:100%;text-align:center;margin-bottom:15px;margin-top:5px;color:#4e73df;font-size:1.3rem;font-weight:bold'><i class='fa fa-cube' style='margin-right:5px;font-size:2rem'></i><p style='margin:0'>" + JSLang[lang].widget + "</p><a class='btn btn-primary btn-block' style='width:90px;margin-left:8px;padding:2px' href='./documentation' target='_blank'>" + JSLang[lang].guide + "</a></div>")
     widget_list.append(title)
-    widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:5px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].control + "</h5>"))
+    //widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:5px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].control + "</h5>"))
     var input_button_add = $("<div class='widget_div'><div><img src='icons/input_button.svg'><span>" + JSLang[lang].switch+"</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(input_button_add)
     var input_button_add2 = $("<div class='widget_div'><div><img src='icons/input_button2.svg'><span>" + JSLang[lang].button + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
@@ -1754,7 +1756,7 @@ function add_widget() {
     widget_list.append(trigger_add)
     var ble_add = $("<div class='widget_div'><div><img src='icons/ble.svg'><span>" + JSLang[lang].ble + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(ble_add)
-    widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].data + "</h5>"))
+    //widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].data + "</h5>"))
     var output_chart_add = $("<div class='widget_div'><div><img src='icons/output_chart.svg'><span>" + JSLang[lang].lineChart + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(output_chart_add)
     var output_bar_add = $("<div class='widget_div'><div><img src='icons/output_bar.svg'><span>" + JSLang[lang].barChart + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
@@ -1773,7 +1775,7 @@ function add_widget() {
     widget_list.append(input_mic_add)
     var input_tinydb_add = $("<div class='widget_div'><div><img src='icons/database.svg'><span>" + JSLang[lang].tinydb + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(input_tinydb_add)
-    widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].text + "</h5>"))
+    //widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].text + "</h5>"))
     var input_keyboard_add = $("<div class='widget_div'><div><img src='icons/input_keyboard.svg'><span>" + JSLang[lang].keyboard + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(input_keyboard_add)
     var output_text_add = $("<div class='widget_div'><div><img src='icons/output_text.svg'><span>" + JSLang[lang].screen + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
@@ -1787,11 +1789,13 @@ function add_widget() {
     var magic_add = $("<div class='widget_div'><div><img src='icons/magic.svg'><span>" + JSLang[lang].magic + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(magic_add)
 
-    widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].tensorAI + "</h5>"))
+    //widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].tensorAI + "</h5>"))
     var blazeFace_add = $("<div class='widget_div'><div><img src='icons/blazeFace.svg'><span>" + JSLang[lang].blazeFace + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(blazeFace_add)
-    var mediaPipe_add = $("<div class='widget_div'><div><img src='icons/mediaPipe.svg'><span>" + JSLang[lang].mediaPipe + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
-    widget_list.append(mediaPipe_add)
+    var ocr_add = $("<div class='widget_div'><div><img src='icons/mediaPipe.svg'><span>" + JSLang[lang].ocr + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(ocr_add)
+    var qr_add = $("<div class='widget_div'><div><img src='icons/qrcode.svg'><span>" + JSLang[lang].qr + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(qr_add)
     //var bertQA_add = $("<div class='widget_div'><div><img src='icons/Bert.svg'><span>" + JSLang[lang].Bert + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
     //widget_list.append(bertQA_add)
 
@@ -1925,6 +1929,116 @@ function add_widget() {
                     if (true) {
                         if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
                             add_face(title_input.val(), topic_input.val(), "[" + trigger_interval.val() + "]")
+                            modifyDia.close().remove()
+                        } else
+                            showtext(JSLang[lang].sameUnit)
+                    } else
+                        showtext("")
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            } else
+                showtext(JSLang[lang].nameLenIllegal)
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function() {
+            modifyDia.close().remove()
+            add_widget()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content: editForm[0],
+            cancel: false
+        })
+        modifyDia.showModal()
+    })
+
+    qr_add.children("a").click(function() {
+        d.close().remove()
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/qrcode.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div.append(topic_input)
+        topic_input.val("qr")
+        editForm.append(topic_input_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function() {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                var re = /^[a-z0-9]+$/i;
+                if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                    if (true) {
+                        if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
+                            add_qr(title_input.val(), topic_input.val(), "")
+                            modifyDia.close().remove()
+                        } else
+                            showtext(JSLang[lang].sameUnit)
+                    } else
+                        showtext("")
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            } else
+                showtext(JSLang[lang].nameLenIllegal)
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function() {
+            modifyDia.close().remove()
+            add_widget()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content: editForm[0],
+            cancel: false
+        })
+        modifyDia.showModal()
+    })
+
+    ocr_add.children("a").click(function() {
+        showtext("开发中")
+        return
+        d.close().remove()
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/mediaPipe.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div.append(topic_input)
+        topic_input.val("ocr")
+        editForm.append(topic_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerInterval + '</h5>'))
+        var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var trigger_interval = $("<input type='number' step='100' min='1000' max='100000' required class='form-control form-control-user'  style='text-align:center' readonly/>")
+        trigger_interval.val(10000)
+        trigger_interval_div.append(trigger_interval)
+        trigger_interval.change(function(){
+            if(trigger_interval.val()<1000)
+                trigger_interval.val(1000)
+        })
+        editForm.append(trigger_interval_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function() {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                var re = /^[a-z0-9]+$/i;
+                if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                    if (true) {
+                        if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
+                            add_ocr(title_input.val(), topic_input.val(), trigger_interval.val())
                             modifyDia.close().remove()
                         } else
                             showtext(JSLang[lang].sameUnit)
@@ -3505,6 +3619,8 @@ function get_width() {
 }
 
 function listen_project(projectName) {
+    showtext("平台使用高峰期，后台运行功能暂时禁用。")
+    return
     var modald = showmodaltext("<div style='text-align:center' class='nnt'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].loading + "</p></div>")
     $.get('/startHost', {
         'projectName': projectName
