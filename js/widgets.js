@@ -5,6 +5,7 @@
  */
 
 
+
 tbd = undefined;
 lastFacePublishTime = false;
 function add_block(width, height, contents, attrs) {
@@ -6799,7 +6800,26 @@ function add_qr(user_title, user_topic, user_content, user_style, title_style) {
                     publish(user_topic, code.data)
             }
             else
-                bottomDiv11.text("无二维码")
+            {
+                Quagga.decodeSingle({
+                    src: canvas.toDataURL(),
+                    inputStream: {
+                        size: canvas.width
+                    },
+                    decoder: {
+                        readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader", "i2of5_reader", "2of5_reader", "code_93_reader"] // 指定条形码格式
+                    }
+                }, function(result){
+                    console.log(result)
+                    if (result && result.codeResult) {
+                        bottomDiv11.text(result.codeResult.code);
+                        if(isRunning && isAlive)
+                            publish(user_topic, result.codeResult.code)
+                    }
+                    else
+                        bottomDiv11.text("无二维码或条形码")
+                }) 
+            }
         }, 2000)
     })
     
