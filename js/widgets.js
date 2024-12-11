@@ -3753,339 +3753,343 @@ function add_dashboard(user_title, user_topic, user_content, user_style, title_s
 }
 
 function add_map(user_title, user_topic, user_content, user_style, title_style) {
-    var isAlive = true
-    var contents = []
-    var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
-    title.attr("hidden", title_style)
-    contents.push(title)
-    var topicDiv = $("<div class='topicDiv'/>")
-    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
-    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
-    topicDiv.append(topic)
-    var randomName = randomString() + "map"
-    var mapDiv = $("<div style='width:calc(100% - 20px);height:calc(100% - 60px)'/>")
-    mapDiv.attr("id", randomName)
-    mapDiv.bind('click', function(event) {
-        event.stopPropagation()
-    })
-    mapDiv.bind('pointerdown', function(event) {
-        event.stopPropagation()
-    })
-    mapDiv.bind('mousedown', function(event) {
-        event.stopPropagation()
-    })
-    mapDiv[0].addEventListener('touchstart', function(event) {
-        event.stopPropagation()
-    }, { passive: false })
-    contents.push(mapDiv)
-    attrs = [
-        ['user-type', 'output_map'],
-        ['user-title', user_title],
-        ['user-topic', user_topic],
-        ['user-content', user_content],
-        ['title-hidden', title_style]
-    ]
-    var itemdiv = add_block(3, 3, contents, attrs)
-    var maxLeft = mapDiv[0].clientWidth
-    var maxTop = mapDiv[0].clientHeight
-    var markers = []
-    var setContent = function() {
-        var tmp = []
-        for (marker in markers) {
-            console.log(markers[marker])
-            tmp.push(markers[marker].long)
-            tmp.push(markers[marker].lat)
-            tmp.push(markers[marker].time)
-            tmp.push(markers[marker].message)
-            tmp.push(markers[marker].clientid)
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载地图引擎...</p></div>")
+    $.getScript("//api.map.baidu.com/getscript?type=webgl&v=3.0&ak="+baidu_ak, function() {
+        modald.close().remove()
+        var isAlive = true
+        var contents = []
+        var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+        title.attr("hidden", title_style)
+        contents.push(title)
+        var topicDiv = $("<div class='topicDiv'/>")
+        var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+        topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+        topicDiv.append(topic)
+        var randomName = randomString() + "map"
+        var mapDiv = $("<div style='width:calc(100% - 20px);height:calc(100% - 60px)'/>")
+        mapDiv.attr("id", randomName)
+        mapDiv.bind('click', function(event) {
+            event.stopPropagation()
+        })
+        mapDiv.bind('pointerdown', function(event) {
+            event.stopPropagation()
+        })
+        mapDiv.bind('mousedown', function(event) {
+            event.stopPropagation()
+        })
+        mapDiv[0].addEventListener('touchstart', function(event) {
+            event.stopPropagation()
+        }, { passive: false })
+        contents.push(mapDiv)
+        attrs = [
+            ['user-type', 'output_map'],
+            ['user-title', user_title],
+            ['user-topic', user_topic],
+            ['user-content', user_content],
+            ['title-hidden', title_style]
+        ]
+        var itemdiv = add_block(3, 3, contents, attrs)
+        var maxLeft = mapDiv[0].clientWidth
+        var maxTop = mapDiv[0].clientHeight
+        var markers = []
+        var setContent = function() {
+            var tmp = []
+            for (marker in markers) {
+                console.log(markers[marker])
+                tmp.push(markers[marker].long)
+                tmp.push(markers[marker].lat)
+                tmp.push(markers[marker].time)
+                tmp.push(markers[marker].message)
+                tmp.push(markers[marker].clientid)
+            }
+            title.parent().parent().attr('user-content', tmp.join("@#@$@"))
         }
-        title.parent().parent().attr('user-content', tmp.join("@#@$@"))
-    }
-    itemdiv.bind(MixIO.actionTags.DATA_MAP_CHANGE, function(event, message) {
-        MixIO.publish(topic.text(), JSON.stringify(message))
-    })
-    itemdiv.bind(MixIO.actionTags.DATA_MAP_CLEAR, function() {
-        clear_on_click()
-    })
-    client.on('message', function(topic1, message1) {
+        itemdiv.bind(MixIO.actionTags.DATA_MAP_CHANGE, function(event, message) {
+            MixIO.publish(topic.text(), JSON.stringify(message))
+        })
+        itemdiv.bind(MixIO.actionTags.DATA_MAP_CLEAR, function() {
+            clear_on_click()
+        })
+        client.on('message', function(topic1, message1) {
 
-        if (isAlive && isRunning)
-            if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
+            if (isAlive && isRunning)
+                if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
 
-                var label = (new Date().getHours() + ":" + (new Date().getMinutes() < 10 ? "0" : "") + new Date().getMinutes() + ":" + (new Date().getSeconds() < 10 ? "0" : "") + new Date().getSeconds())
-                if (isJSON(String(message1)) && ("long" in JSON.parse(String(message1))) && ("lat" in JSON.parse(String(message1))) && JSON.parse(String(message1)).clientid) {
-                    var jsonMessage = JSON.parse(String(message1))
-                    console.log(jsonMessage)
-                    itemdiv.trigger(MixIO.eventTags.DATA_MAP_CHANGED, [jsonMessage.clientid, jsonMessage.long, jsonMessage.lat, jsonMessage.message])
-                    var newOrNot = true
-                    var markerIndex = -1
-                    for (marker in markers) {
-                        if (jsonMessage.clientid == markers[marker].clientid) {
-                            newOrNot = false
-                            markerIndex = marker
-                            break
+                    var label = (new Date().getHours() + ":" + (new Date().getMinutes() < 10 ? "0" : "") + new Date().getMinutes() + ":" + (new Date().getSeconds() < 10 ? "0" : "") + new Date().getSeconds())
+                    if (isJSON(String(message1)) && ("long" in JSON.parse(String(message1))) && ("lat" in JSON.parse(String(message1))) && JSON.parse(String(message1)).clientid) {
+                        var jsonMessage = JSON.parse(String(message1))
+                        console.log(jsonMessage)
+                        itemdiv.trigger(MixIO.eventTags.DATA_MAP_CHANGED, [jsonMessage.clientid, jsonMessage.long, jsonMessage.lat, jsonMessage.message])
+                        var newOrNot = true
+                        var markerIndex = -1
+                        for (marker in markers) {
+                            if (jsonMessage.clientid == markers[marker].clientid) {
+                                newOrNot = false
+                                markerIndex = marker
+                                break
+                            }
                         }
-                    }
-                    if (newOrNot) {
-                        var msgstr = ""
-                        if (typeof jsonMessage.message == "string")
-                            jsonMessage.message = JSON.parse(jsonMessage.message)
-                        for (msg in jsonMessage.message) {
-                            msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
-                        }
-                        var point = new BMapGL.Point(jsonMessage.long, jsonMessage.lat)
-                        var newMarker = new BMapGL.Marker(point)
-                        markerIndex = markers.length
-                        var bubble = create_a_map_bubble(msgstr, label, point)
-                        newMarker.bubble = bubble
-                        console.log(msgstr)
-                        markers.push({
-                            "clientid": jsonMessage.clientid,
-                            "long": jsonMessage.long,
-                            "lat": jsonMessage.lat,
-                            "time": label,
-                            "message": msgstr,
-                            "target": newMarker,
-                            "point": point
-                        })
-                        if (markers.length == 1) {
-                            map.centerAndZoom(markers[markerIndex].point, 17);
-                        }
-                        map.addOverlay(newMarker)
-                        newMarker.addEventListener('click', function() {
+                        if (newOrNot) {
+                            var msgstr = ""
+                            if (typeof jsonMessage.message == "string")
+                                jsonMessage.message = JSON.parse(jsonMessage.message)
+                            for (msg in jsonMessage.message) {
+                                msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
+                            }
+                            var point = new BMapGL.Point(jsonMessage.long, jsonMessage.lat)
+                            var newMarker = new BMapGL.Marker(point)
+                            markerIndex = markers.length
+                            var bubble = create_a_map_bubble(msgstr, label, point)
+                            newMarker.bubble = bubble
+                            console.log(msgstr)
+                            markers.push({
+                                "clientid": jsonMessage.clientid,
+                                "long": jsonMessage.long,
+                                "lat": jsonMessage.lat,
+                                "time": label,
+                                "message": msgstr,
+                                "target": newMarker,
+                                "point": point
+                            })
+                            if (markers.length == 1) {
+                                map.centerAndZoom(markers[markerIndex].point, 17);
+                            }
+                            map.addOverlay(newMarker)
+                            newMarker.addEventListener('click', function() {
+                                if (map.getOverlays().indexOf(bubble) == -1)
+                                    map.addOverlay(bubble)
+                                else
+                                    map.removeOverlay(bubble)
+                            })
+                            map.addOverlay(bubble)
+                        } else {
+                            markers[markerIndex].time = label
+                            var msgstr = ""
+                            if (typeof jsonMessage.message == "string")
+                                jsonMessage.message = JSON.parse(jsonMessage.message)
+                            for (msg in jsonMessage.message) {
+                                msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
+                            }
+                            var point = new BMapGL.Point(jsonMessage.long, jsonMessage.lat)
+                            markers[markerIndex].long = jsonMessage.long
+                            markers[markerIndex].lat = jsonMessage.lat
+                            markers[markerIndex].point = point
+                            markers[markerIndex].message = msgstr
+                            markers[markerIndex].target.bubble.setPosition(point)
+                            markers[markerIndex].target.setPosition(point)
+                            markers[markerIndex].target.bubble.setContent(label + "<br>" + msgstr)
                             if (map.getOverlays().indexOf(bubble) == -1)
                                 map.addOverlay(bubble)
-                            else
-                                map.removeOverlay(bubble)
-                        })
-                        map.addOverlay(bubble)
-                    } else {
-                        markers[markerIndex].time = label
-                        var msgstr = ""
-                        if (typeof jsonMessage.message == "string")
-                            jsonMessage.message = JSON.parse(jsonMessage.message)
-                        for (msg in jsonMessage.message) {
-                            msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
                         }
-                        var point = new BMapGL.Point(jsonMessage.long, jsonMessage.lat)
-                        markers[markerIndex].long = jsonMessage.long
-                        markers[markerIndex].lat = jsonMessage.lat
-                        markers[markerIndex].point = point
-                        markers[markerIndex].message = msgstr
-                        markers[markerIndex].target.bubble.setPosition(point)
-                        markers[markerIndex].target.setPosition(point)
-                        markers[markerIndex].target.bubble.setContent(label + "<br>" + msgstr)
-                        if (map.getOverlays().indexOf(bubble) == -1)
-                            map.addOverlay(bubble)
+                        setContent()
+                    } else {
+                        showtext(JSLang[lang].mapJSON)
                     }
-                    setContent()
-                } else {
-                    showtext(JSLang[lang].mapJSON)
                 }
-            }
-    })
-    var map = new BMapGL.Map(randomName)
-    map.centerAndZoom(new BMapGL.Point(116.373, 39.967), 17)
-    map.enableScrollWheelZoom(true);
-    map.disableContinuousZoom();
-    map.disableInertialDragging();
-    var opts = {
-        offset: new BMapGL.Size(0, 0)
-    };
-    var label = new BMapGL.Label();
-    label.setStyle({
-        color: '#4e73df',
-        borderRadius: '5px',
-        borderColor: '#ccc',
-        backgroundColor: 'rgba(255,255,255,0.8)',
-        padding: '8px',
-        fontSize: '1rem',
-        fontFamily: 'Nunito'
-    });
-    map.addEventListener('mousemove', function(e) {
-        if (!isRunning) {
-            map.addOverlay(label)
-            label.setContent(e.latlng.lng.toFixed(4) + ',' + e.latlng.lat.toFixed(4))
-            label.setPosition(new BMapGL.Point(e.latlng.lng, e.latlng.lat))
-        } else
-            map.removeOverlay(label)
-    });
-    var toBeAdded = user_content.split("@#@$@")
-    var addLength = toBeAdded.length / 5
-    console.log(toBeAdded)
-    for (var tmpi = 0; tmpi <= addLength - 1; tmpi = tmpi + 1) {
-        var point = new BMapGL.Point(toBeAdded[tmpi * 5], toBeAdded[tmpi * 5 + 1])
-        var newMarker = new BMapGL.Marker(point)
-        var bubble = create_a_map_bubble(toBeAdded[tmpi * 5 + 3], toBeAdded[tmpi * 5 + 2], point)
-        newMarker.bubble = bubble
-        markers.push({
-            "long": toBeAdded[tmpi * 5],
-            "lat": toBeAdded[tmpi * 5 + 1],
-            "time": toBeAdded[tmpi * 5 + 2],
-            "message": toBeAdded[tmpi * 5 + 3],
-            "clientid": toBeAdded[tmpi * 5 + 4],
-            "target": newMarker,
-            "point": point
         })
-        if (markers.length == 1) {
-            map.centerAndZoom(point, 17);
-        }
-        map.addOverlay(newMarker)
-        newMarker.addEventListener('click', function(bubble) {
-            return function() {
-                if (map.getOverlays().indexOf(bubble) == -1)
-                    map.addOverlay(bubble)
-                else
-                    map.removeOverlay(bubble)
+        var map = new BMapGL.Map(randomName)
+        map.centerAndZoom(new BMapGL.Point(116.373, 39.967), 17)
+        map.enableScrollWheelZoom(true);
+        map.disableContinuousZoom();
+        map.disableInertialDragging();
+        var opts = {
+            offset: new BMapGL.Size(0, 0)
+        };
+        var label = new BMapGL.Label();
+        label.setStyle({
+            color: '#4e73df',
+            borderRadius: '5px',
+            borderColor: '#ccc',
+            backgroundColor: 'rgba(255,255,255,0.8)',
+            padding: '8px',
+            fontSize: '1rem',
+            fontFamily: 'Nunito'
+        });
+        map.addEventListener('mousemove', function(e) {
+            if (!isRunning) {
+                map.addOverlay(label)
+                label.setContent(e.latlng.lng.toFixed(4) + ',' + e.latlng.lat.toFixed(4))
+                label.setPosition(new BMapGL.Point(e.latlng.lng, e.latlng.lat))
+            } else
+                map.removeOverlay(label)
+        });
+        var toBeAdded = user_content.split("@#@$@")
+        var addLength = toBeAdded.length / 5
+        console.log(toBeAdded)
+        for (var tmpi = 0; tmpi <= addLength - 1; tmpi = tmpi + 1) {
+            var point = new BMapGL.Point(toBeAdded[tmpi * 5], toBeAdded[tmpi * 5 + 1])
+            var newMarker = new BMapGL.Marker(point)
+            var bubble = create_a_map_bubble(toBeAdded[tmpi * 5 + 3], toBeAdded[tmpi * 5 + 2], point)
+            newMarker.bubble = bubble
+            markers.push({
+                "long": toBeAdded[tmpi * 5],
+                "lat": toBeAdded[tmpi * 5 + 1],
+                "time": toBeAdded[tmpi * 5 + 2],
+                "message": toBeAdded[tmpi * 5 + 3],
+                "clientid": toBeAdded[tmpi * 5 + 4],
+                "target": newMarker,
+                "point": point
+            })
+            if (markers.length == 1) {
+                map.centerAndZoom(point, 17);
             }
-        }(bubble))
-        map.addOverlay(bubble)
-    }
-    setContent()
-
-    var delete_on_click = function() {
-        $("#trashbin").append(mapDiv)
-        title.parent().parent().remove();
-        isAlive = false;
-        if (tbd)
-            tbd.remove()
-    }
-    var clear_on_click = function() {
-        map.clearOverlays()
-        markers = []
+            map.addOverlay(newMarker)
+            newMarker.addEventListener('click', function(bubble) {
+                return function() {
+                    if (map.getOverlays().indexOf(bubble) == -1)
+                        map.addOverlay(bubble)
+                    else
+                        map.removeOverlay(bubble)
+                }
+            }(bubble))
+            map.addOverlay(bubble)
+        }
         setContent()
-    }
-    var edit_on_click = function() {
-        modifyDia.showModal()
-        if (tbd)
-            tbd.remove()
-    }
-    var editForm = $('<div class="nnt"/>')
-    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_map.svg" style="width:45px;"></div>'))
-    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
-    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-    var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
-    title_input_div.append(title_input)
-    editForm.append(title_input_div)
-    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
-    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
-    topic_input_div.append(topic_input)
-    editForm.append(topic_input_div)
-    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
-    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
-    bottomDiv.append(confirmEdit)
-    confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
-            var re = /^[a-z0-9]+$/i;
-            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
-                if (true) {
-                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
-                        title.parent().parent().attr('user-title', title_input.val())
-                        title.parent().parent().attr('user-topic', topic_input.val())
-                        if (title.parent().parent().attr('user-content') == undefined)
-                            title.parent().parent().attr('user-content', "")
-                        title.text(title_input.val())
-                        topic.text(topic_input.val())
-                        modifyDia.close()
+
+        var delete_on_click = function() {
+            $("#trashbin").append(mapDiv)
+            title.parent().parent().remove();
+            isAlive = false;
+            if (tbd)
+                tbd.remove()
+        }
+        var clear_on_click = function() {
+            map.clearOverlays()
+            markers = []
+            setContent()
+        }
+        var edit_on_click = function() {
+            modifyDia.showModal()
+            if (tbd)
+                tbd.remove()
+        }
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_map.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div.append(topic_input)
+        editForm.append(topic_input_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function() {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                var re = /^[a-z0-9]+$/i;
+                if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                    if (true) {
+                        if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                            title.parent().parent().attr('user-title', title_input.val())
+                            title.parent().parent().attr('user-topic', topic_input.val())
+                            if (title.parent().parent().attr('user-content') == undefined)
+                                title.parent().parent().attr('user-content', "")
+                            title.text(title_input.val())
+                            topic.text(topic_input.val())
+                            modifyDia.close()
+                        } else
+                            showtext(JSLang[lang].sameUnit)
                     } else
-                        showtext(JSLang[lang].sameUnit)
-                } else
-                    showtext("")
-            else
-                showtext(JSLang[lang].topicLenIllegal)
-        } else
-            showtext(JSLang[lang].nameLenIllegal)
-    })
-    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
-    cancelEdit.click(function() {
-        modifyDia.close()
-    })
-    bottomDiv.append(cancelEdit)
-    editForm.append(bottomDiv)
-    var modifyDia = dialog({
-        content: editForm[0],
-        cancel: false
-    })
-    var showEditBubble = function(event) {
-        if(tbd)
-            tbd.remove()
-        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
-            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
-            var clearButton = $('<a class="btn btn-warning btn-circle bbbt"><i class="fa fa-eraser"></i></a>')
-            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
-            var bubble = $('<div style="text-align:center"/>')
-            bubble.append(topicDiv)
-            var d = dialog({
-                align: 'top',
-                content: bubble[0],
-                quickClose: true,
-                autofocus: false
-            });
-            tbd = d;
-            editButton.click(edit_on_click)
-            clearButton.click(clear_on_click)
-            deleteButton.click(delete_on_click)
-            if (!isRunning)
-                bubble.append(editButton)
-            bubble.append(clearButton)
-            if (!isRunning)
-                bubble.append(deleteButton)
-            if (!isRunning)
+                        showtext("")
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            } else
+                showtext(JSLang[lang].nameLenIllegal)
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function() {
+            modifyDia.close()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content: editForm[0],
+            cancel: false
+        })
+        var showEditBubble = function(event) {
+            if(tbd)
+                tbd.remove()
+            if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+                var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+                var clearButton = $('<a class="btn btn-warning btn-circle bbbt"><i class="fa fa-eraser"></i></a>')
+                var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+                var bubble = $('<div style="text-align:center"/>')
+                bubble.append(topicDiv)
+                var d = dialog({
+                    align: 'top',
+                    content: bubble[0],
+                    quickClose: true,
+                    autofocus: false
+                });
+                tbd = d;
+                editButton.click(edit_on_click)
+                clearButton.click(clear_on_click)
+                deleteButton.click(delete_on_click)
+                if (!isRunning)
+                    bubble.append(editButton)
+                bubble.append(clearButton)
+                if (!isRunning)
+                    bubble.append(deleteButton)
+                if (!isRunning)
+                    {
+                    copyButton.attr("user-origin", title.text())
+                    bubble.append(copyButton)
+                    styleButton.attr("user-origin", title.text())
+                    bubble.append(styleButton)
+                    helpButton.attr("user-origin", attrs[0][1])
+                    bubble.append(helpButton)
+                }
+                title_input.val(title.text())
+                topic_input.val(topic.text())
+                if (!d.open)
                 {
-                copyButton.attr("user-origin", title.text())
-                bubble.append(copyButton)
-                styleButton.attr("user-origin", title.text())
-                bubble.append(styleButton)
-                helpButton.attr("user-origin", attrs[0][1])
-                bubble.append(helpButton)
+                    d.show(itemdiv[0]);
+                    setTimeout(function() {
+                        $(".ui-popup-backdrop").css("pointer-events", "auto")
+                    },100)
+                }
+                else
+                    d.close()
             }
-            title_input.val(title.text())
-            topic_input.val(topic.text())
-            if (!d.open)
-            {
-                d.show(itemdiv[0]);
-                setTimeout(function() {
-                    $(".ui-popup-backdrop").css("pointer-events", "auto")
-                },100)
+        }
+        if (window.screen.width > 800)
+        {
+            itemdiv.click(showEditBubble)
+            itemdiv.on('contextmenu', function(event) {
+                event.preventDefault()
+                event.stopPropagation()
+                showEditBubble(event)
+            })
+        }
+        else
+            itemdiv[0].addEventListener('touchend', function(event) {
+                event.preventDefault()
+                showEditBubble(event)
+            })
+        itemdiv[0].addEventListener('touchmove', function(e) {
+            e.preventDefault()
+        })
+        if (user_style != undefined)
+            itemdiv.attr('style', user_style)
+        itemdiv.resizable({
+            minWidth: 300,
+            minHeight: 300,
+            onStopResize: function() {
+                var stdLeft = parseInt(itemdiv.css('left')) - parseInt(itemdiv.css('left')) % 20 + (parseInt(itemdiv.css('left')) % 20 > 10 ? 1 : 0) * 20
+                var stdTop = parseInt(itemdiv.css('top')) - parseInt(itemdiv.css('top')) % 20 + (parseInt(itemdiv.css('top')) % 20 > 10 ? 1 : 0) * 20
+                itemdiv.css('left', stdLeft)
+                itemdiv.css('top', stdTop)
+                var stdWidth = parseInt(itemdiv.css('width')) - parseInt(itemdiv.css('width')) % 20 + (parseInt(itemdiv.css('width')) % 20 > 10 ? 1 : 0) * 20
+                var stdHeight = parseInt(itemdiv.css('height')) - parseInt(itemdiv.css('height')) % 20 + (parseInt(itemdiv.css('height')) % 20 > 10 ? 1 : 0) * 20
+                itemdiv.css('width', stdWidth)
+                itemdiv.css('height', stdHeight)
             }
-            else
-                d.close()
-        }
-    }
-    if (window.screen.width > 800)
-    {
-        itemdiv.click(showEditBubble)
-        itemdiv.on('contextmenu', function(event) {
-            event.preventDefault()
-            event.stopPropagation()
-            showEditBubble(event)
         })
-    }
-    else
-        itemdiv[0].addEventListener('touchend', function(event) {
-            event.preventDefault()
-            showEditBubble(event)
-        })
-    itemdiv[0].addEventListener('touchmove', function(e) {
-        e.preventDefault()
-    })
-    if (user_style != undefined)
-        itemdiv.attr('style', user_style)
-    itemdiv.resizable({
-        minWidth: 300,
-        minHeight: 300,
-        onStopResize: function() {
-            var stdLeft = parseInt(itemdiv.css('left')) - parseInt(itemdiv.css('left')) % 20 + (parseInt(itemdiv.css('left')) % 20 > 10 ? 1 : 0) * 20
-            var stdTop = parseInt(itemdiv.css('top')) - parseInt(itemdiv.css('top')) % 20 + (parseInt(itemdiv.css('top')) % 20 > 10 ? 1 : 0) * 20
-            itemdiv.css('left', stdLeft)
-            itemdiv.css('top', stdTop)
-            var stdWidth = parseInt(itemdiv.css('width')) - parseInt(itemdiv.css('width')) % 20 + (parseInt(itemdiv.css('width')) % 20 > 10 ? 1 : 0) * 20
-            var stdHeight = parseInt(itemdiv.css('height')) - parseInt(itemdiv.css('height')) % 20 + (parseInt(itemdiv.css('height')) % 20 > 10 ? 1 : 0) * 20
-            itemdiv.css('width', stdWidth)
-            itemdiv.css('height', stdHeight)
-        }
-    })
+    },true);
 }
 
 function create_a_map_bubble(messageBody, time, point) {
@@ -5960,238 +5964,313 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
 }
 
 function add_face(user_title, user_topic, user_content, user_style, title_style) {
-    var isAlive = true
-    var contents = []
-    var title = $("<h4 class='userTitle' style='margin-top:20px'>" + user_title + "</h4>")
-    title.attr("hidden", title_style)
-    contents.push(title)
-    var topicDiv = $("<div class='topicDiv'/>")
-    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
-    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
-    topicDiv.append(topic)
-    var cameraDiv = $("<div class='cameraDiv' style='position:relative'/>")
-    contents.push(cameraDiv)
-    // add a real-time web camera
-    var video = $("<video autoplay style='width:100%;height:100%;'/>")
-    cameraDiv.append(video)
-    // floating canvas on top of the video
-    var canvas = $("<canvas style='position:absolute;top:0;left:0'/>")
-    cameraDiv.append(canvas)
-    var addFacialDataButton = $('<a class="btn btn-sm btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> 新增当前人脸数据</a>')
-    cameraDiv.append(addFacialDataButton)
-    // stopPropagation
-    addFacialDataButton.bind('mousedown', function(event) {
-        event.stopPropagation()
-    })
-    addFacialDataButton.bind('mouseup', function(event) {
-        event.stopPropagation()
-    })
-    if (window.screen.width > 800)
-        addFacialDataButton.bind('click', function(event) {
-            event.stopPropagation()
-        })
-    else
-        addFacialDataButton.bind('touchend', function(event) {
-            event.stopPropagation()
-        })
-    var landmarks = false
-    var isMouthOpen = -1
-    addFacialDataButton.click(function() {
-        if(landmarks)
-        {
-            // 备份当前landmarks
-            var data = []
-            for (var i = 0; i < landmarks.length; i++)
-            {
-                data.push(landmarks[i])
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载AI引擎...</p></div>")
+    $.getScript("js/tf.min.js", function() {
+        $.getScript("js/faceapi.min.js", function() {
+            modald.close().remove()
+            var isAlive = true
+            var contents = []
+            var title = $("<h4 class='userTitle' style='margin-top:20px'>" + user_title + "</h4>")
+            title.attr("hidden", title_style)
+            contents.push(title)
+            var topicDiv = $("<div class='topicDiv'/>")
+            var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+            topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+            topicDiv.append(topic)
+            var cameraDiv = $("<div class='cameraDiv' style='position:relative'/>")
+            contents.push(cameraDiv)
+            // add a real-time web camera
+            var video = $("<video autoplay style='width:100%;height:100%;'/>")
+            cameraDiv.append(video)
+            // floating canvas on top of the video
+            var canvas = $("<canvas style='position:absolute;top:0;left:0'/>")
+            cameraDiv.append(canvas)
+            var addFacialDataButton = $('<a class="btn btn-sm btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> 新增当前人脸数据</a>')
+            cameraDiv.append(addFacialDataButton)
+            // stopPropagation
+            addFacialDataButton.bind('mousedown', function(event) {
+                event.stopPropagation()
+            })
+            addFacialDataButton.bind('mouseup', function(event) {
+                event.stopPropagation()
+            })
+            if (window.screen.width > 800)
+                addFacialDataButton.bind('click', function(event) {
+                    event.stopPropagation()
+                })
+            else
+                addFacialDataButton.bind('touchend', function(event) {
+                    event.stopPropagation()
+                })
+            var landmarks = false
+            var isMouthOpen = -1
+            addFacialDataButton.click(function() {
+                if(landmarks)
+                {
+                    // 备份当前landmarks
+                    var data = []
+                    for (var i = 0; i < landmarks.length; i++)
+                    {
+                        data.push(landmarks[i])
+                    }
+                    // 获取当前的user-content
+                    var user_content = title.parent().parent().attr('user-content')
+                    if (user_content == undefined || user_content == "")
+                        user_content = "[]"
+                    // 读取当前的user-content
+                    var user_data = JSON.parse(user_content)
+                    user_data.push({"name": "", "landmarks": data})
+                    title.parent().parent().attr('user-content', JSON.stringify(user_data))
+                    showtext("人脸数据已保存。")
+                }
+                else
+                {
+                    showtext("未检测到人脸")
+                }
+                sync_table_info()
+            })
+            var addFaceByPicButton = $('<a class="btn btn-sm btn-success facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #1cc88a"><i class="fa fa-photo"></i> 上传一张人脸图片</a>')
+            cameraDiv.append(addFaceByPicButton)
+            addFaceByPicButton.bind('mousedown', function(event) {
+                event.stopPropagation()
+            })
+            addFaceByPicButton.bind('mouseup', function(event) {
+                event.stopPropagation()
             }
-            // 获取当前的user-content
-            var user_content = title.parent().parent().attr('user-content')
-            if (user_content == undefined || user_content == "")
-                user_content = "[]"
-            // 读取当前的user-content
-            var user_data = JSON.parse(user_content)
-            user_data.push({"name": "", "landmarks": data})
-            title.parent().parent().attr('user-content', JSON.stringify(user_data))
-            showtext("人脸数据已保存。")
-        }
-        else
-        {
-            showtext("未检测到人脸")
-        }
-        sync_table_info()
-    })
-    var addFaceByPicButton = $('<a class="btn btn-sm btn-success facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #1cc88a"><i class="fa fa-photo"></i> 上传一张人脸图片</a>')
-    cameraDiv.append(addFaceByPicButton)
-    addFaceByPicButton.bind('mousedown', function(event) {
-        event.stopPropagation()
-    })
-    addFaceByPicButton.bind('mouseup', function(event) {
-        event.stopPropagation()
-    }
-    )
-    if (window.screen.width > 800)
-        addFaceByPicButton.bind('click', function(event) {
-            event.stopPropagation()
-        })
-    else
-        addFaceByPicButton.bind('touchend', function(event) {
-            event.stopPropagation()
-        }
-    )
-    addFaceByPicButton.click(function() {
-        // 弹出上传图片对话框
-        var uploadForm = $('<div class="nnt"/>')
-        uploadForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/decorate_pic.svg" style="width:45px;"></div>'))
-        uploadForm.append($('<h5 style="text-align:center">上传一张人脸图片</h5>'))
-        var upload_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-        var upload_input = $("<input type='file' class='form-control form-control-user'  style='text-align:center;width:250px'/>")
-        upload_input_div.append(upload_input)
-        uploadForm.append(upload_input_div)
-        // 人物命名
-        uploadForm.append($('<h5 style="margin-top:15px;text-align:center">人物命名</h5>'))
-        var name_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-        var name_input = $("<input class='form-control form-control-user'  style='text-align:center;width:250px'/>")
-        name_input_div.append(name_input)
-        uploadForm.append(name_input_div)
-        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
-        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
-        bottomDiv.append(confirmEdit)
-        var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
-        bottomDiv.append(cancelEdit)
-        uploadForm.append(bottomDiv)
-        var dia = dialog({
-            content: uploadForm[0],
-            cancel: false
-        })
-        dia.showModal()
-        confirmEdit.click(function() {
-            // faceapi识别图片
-            var file = upload_input[0].files[0]
-            var img = new Image()
-            img.src = URL.createObjectURL(file)
-            // 加载中 模态
-            var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].loading + "</p></div>")
-            img.onload = function() {
-                // 加载模型
+            )
+            if (window.screen.width > 800)
+                addFaceByPicButton.bind('click', function(event) {
+                    event.stopPropagation()
+                })
+            else
+                addFaceByPicButton.bind('touchend', function(event) {
+                    event.stopPropagation()
+                }
+            )
+            addFaceByPicButton.click(function() {
+                // 弹出上传图片对话框
+                var uploadForm = $('<div class="nnt"/>')
+                uploadForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/decorate_pic.svg" style="width:45px;"></div>'))
+                uploadForm.append($('<h5 style="text-align:center">上传一张人脸图片</h5>'))
+                var upload_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+                var upload_input = $("<input type='file' class='form-control form-control-user'  style='text-align:center;width:250px'/>")
+                upload_input_div.append(upload_input)
+                uploadForm.append(upload_input_div)
+                // 人物命名
+                uploadForm.append($('<h5 style="margin-top:15px;text-align:center">人物命名</h5>'))
+                var name_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+                var name_input = $("<input class='form-control form-control-user'  style='text-align:center;width:250px'/>")
+                name_input_div.append(name_input)
+                uploadForm.append(name_input_div)
+                var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+                var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+                bottomDiv.append(confirmEdit)
+                var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+                bottomDiv.append(cancelEdit)
+                uploadForm.append(bottomDiv)
+                var dia = dialog({
+                    content: uploadForm[0],
+                    cancel: false
+                })
+                dia.showModal()
+                confirmEdit.click(function() {
+                    // faceapi识别图片
+                    var file = upload_input[0].files[0]
+                    var img = new Image()
+                    img.src = URL.createObjectURL(file)
+                    // 加载中 模态
+                    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].loading + "</p></div>")
+                    img.onload = function() {
+                        // 加载模型
+                        Promise.all([
+                            faceapi.nets.tinyFaceDetector.loadFromUri('./js/models'),
+                            faceapi.nets.faceLandmark68Net.loadFromUri('./js/models'),
+                            faceapi.nets.faceRecognitionNet.loadFromUri('./js/models'),
+                            faceapi.nets.faceExpressionNet.loadFromUri('./js/models'),
+                        ]).then(async function(){
+                            console.log(1)
+                            // 识别图片
+                            var options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.4 })
+                            const detections = await faceapi
+                                .detectAllFaces(img, options)
+                                .withFaceLandmarks()
+                                .withFaceExpressions()
+                                .withFaceDescriptors()
+                            if(detections.length > 0)
+                            {
+                                // 获取RecogntionNet的128维特征向量
+                                landmarks = detections[0].descriptor
+                                // 计算嘴是否张开
+                                if(detections[0].expressions.happy > 0.5 || detections[0].expressions.surprised > 0.5)
+                                    isMouthOpen = 1
+                                else
+                                    isMouthOpen = 0
+                                // 备份当前landmarks
+                                var data = []
+                                for (var i = 0; i < landmarks.length; i++)
+                                {
+                                    data.push(landmarks[i])
+                                }
+                                // 获取当前的user-content
+                                var user_content = title.parent().parent().attr('user-content')
+                                if (user_content == undefined || user_content == "")
+                                    user_content = "[]"
+                                // 读取当前的user-content
+                                var user_data = JSON.parse(user_content)
+                                user_data.push({"name": name_input.val(), "landmarks": data})
+                                title.parent().parent().attr('user-content', JSON.stringify(user_data))
+                                modald.close().remove()
+                                showtext("人脸数据已保存。")
+                                sync_table_info()
+                                dia.close().remove()
+                            }
+                            else
+                            {
+                                modald.close().remove()
+                                showtext("未检测到人脸")
+                            }
+                        })
+                    }
+                })
+                cancelEdit.click(function() {
+                    dia.close().remove()
+                })
+            })
+            var allDataTable = $('<div style="height:40%"/>')
+            contents.push(allDataTable)
+            var ctx = canvas[0].getContext('2d')
+            // 居中显示Loading...
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: {
+                        ideal: 1000
+                    },
+                    height: {
+                        ideal: 1000
+                    },
+                    frameRate: {
+                        ideal: 30,
+                        min: 10
+                    },
+                    facingMode: "user"
+                },
+                audio: false
+            }).then(function(stream) {
+                video[0].srcObject = stream
+                ctx.font = "30px Arial"
+                ctx.fillStyle = "#4e73df"
+                ctx.textAlign = "center"
+                ctx.fillText("Loading...", 100, 100)
                 Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri('./js/models'),
                     faceapi.nets.faceLandmark68Net.loadFromUri('./js/models'),
                     faceapi.nets.faceRecognitionNet.loadFromUri('./js/models'),
                     faceapi.nets.faceExpressionNet.loadFromUri('./js/models'),
-                ]).then(async function(){
-                    console.log(1)
-                    // 识别图片
-                    var options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.4 })
-                    const detections = await faceapi
-                        .detectAllFaces(img, options)
-                        .withFaceLandmarks()
-                        .withFaceExpressions()
-                        .withFaceDescriptors()
-                    if(detections.length > 0)
-                    {
-                        // 获取RecogntionNet的128维特征向量
-                        landmarks = detections[0].descriptor
-                        // 计算嘴是否张开
-                        if(detections[0].expressions.happy > 0.5 || detections[0].expressions.surprised > 0.5)
-                            isMouthOpen = 1
-                        else
-                            isMouthOpen = 0
-                        // 备份当前landmarks
-                        var data = []
-                        for (var i = 0; i < landmarks.length; i++)
+                ]).then(function(){
+                    var displaySize = { width: cameraDiv.width(), height: cameraDiv.height() }
+                    faceapi.matchDimensions(canvas[0], displaySize)
+                    setInterval(async () => {
+                        // 识别位置, 脸部特征, 表情
+                        // 设置最低置信度 0.4，最多检测一张脸
+                        var options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.4 })
+                        const detections = await faceapi
+                            .detectAllFaces(video[0], options)
+                            .withFaceLandmarks()
+                            .withFaceExpressions()
+                            .withFaceDescriptors()
+                
+                        // 调整尺寸
+                        const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                        
+                        // 如果有人脸, 则保存用以进行人脸匹配的特征向量
+                        if(resizedDetections.length > 0)
                         {
-                            data.push(landmarks[i])
+                            // 获取RecogntionNet的128维特征向量
+                            landmarks = resizedDetections[0].descriptor
+                            // 计算嘴是否张开
+                            if(resizedDetections[0].expressions.happy > 0.5 || resizedDetections[0].expressions.surprised > 0.5)
+                                isMouthOpen = 1
+                            else
+                                isMouthOpen = 0
+                            
                         }
-                        // 获取当前的user-content
+                        else
+                        {
+                            landmarks = false
+                            isMouthOpen = -1
+                        }
+                        // 尝试匹配user-content中的人脸数据
                         var user_content = title.parent().parent().attr('user-content')
                         if (user_content == undefined || user_content == "")
                             user_content = "[]"
-                        // 读取当前的user-content
                         var user_data = JSON.parse(user_content)
-                        user_data.push({"name": name_input.val(), "landmarks": data})
-                        title.parent().parent().attr('user-content', JSON.stringify(user_data))
-                        modald.close().remove()
-                        showtext("人脸数据已保存。")
-                        sync_table_info()
-                        dia.close().remove()
-                    }
-                    else
-                    {
-                        modald.close().remove()
-                        showtext("未检测到人脸")
-                    }
+                        var interval = 1000
+                        if(user_data.length==0 || user_data[0]["name"])
+                        {
+                            
+                        }
+                        else
+                        {
+                            interval = user_data[0]
+                            user_data.shift()
+                        }
+                        var min_euclidean_distance = 0.4
+                        var min_index = -1
+                        for (var i = 0; i < user_data.length; i++)
+                        {
+                            var euclidean_distance = 0
+                            for (var j = 0; j < user_data[i]["landmarks"].length; j++)
+                            {
+                                euclidean_distance += Math.pow(user_data[i]["landmarks"][j] - landmarks[j], 2)
+                            }
+                            euclidean_distance = Math.sqrt(euclidean_distance)
+                            if(euclidean_distance < min_euclidean_distance)
+                            {
+                                min_euclidean_distance = euclidean_distance
+                                min_index = i
+                            }
+                        }
+                        canvas[0].getContext('2d')?.clearRect(0, 0, canvas[0].width, canvas[0].height); // 清空画布
+                        //faceapi.draw.drawDetections(canvas[0], resizedDetections); // 位置
+                        faceapi.draw.drawFaceLandmarks(canvas[0], resizedDetections); // 脸部特征  
+                        faceapi.draw.drawFaceExpressions(canvas[0], resizedDetections); // 表情
+                        if(resizedDetections.length > 0)
+                        {
+                            ctx.font = "30px Arial"
+                            ctx.fillStyle = "#ff0000"
+                            if(min_index == -1)
+                            {
+                                const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:Unknown    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
+                                drawBox.draw(canvas[0])
+                            }
+                            else
+                            {
+                                const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:" + min_index + "     Name:" + user_data[min_index]["name"] +"    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
+                                drawBox.draw(canvas[0])
+                            }
+                            if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= interval)
+                            {   
+                                if(min_index == -1)
+                                    publish(user_topic, JSON.stringify({id: min_index, status: (min_index==-1?0:1), name: "Unknown", isMouthOpen: isMouthOpen, faceProbability: resizedDetections[0].detection.score.toFixed(3), happy: resizedDetections[0].expressions.happy.toFixed(3), sad: resizedDetections[0].expressions.sad.toFixed(3), angry: resizedDetections[0].expressions.angry.toFixed(3), surprised: resizedDetections[0].expressions.surprised.toFixed(3), disgusted: resizedDetections[0].expressions.disgusted.toFixed(3), fearful: resizedDetections[0].expressions.fearful.toFixed(3)}))
+                                else
+                                    publish(user_topic, JSON.stringify({id: min_index, status: (min_index==-1?0:1), name: user_data[min_index]["name"], isMouthOpen: isMouthOpen, faceProbability: resizedDetections[0].detection.score.toFixed(3), happy: resizedDetections[0].expressions.happy.toFixed(3), sad: resizedDetections[0].expressions.sad.toFixed(3), angry: resizedDetections[0].expressions.angry.toFixed(3), surprised: resizedDetections[0].expressions.surprised.toFixed(3), disgusted: resizedDetections[0].expressions.disgusted.toFixed(3), fearful: resizedDetections[0].expressions.fearful.toFixed(3)}))
+                                lastFacePublishTime = new Date().getTime()
+                            }
+                        }
+                    }, 100);
                 })
-            }
-        })
-        cancelEdit.click(function() {
-            dia.close().remove()
-        })
-    })
-    var allDataTable = $('<div style="height:40%"/>')
-    contents.push(allDataTable)
-    var ctx = canvas[0].getContext('2d')
-    // 居中显示Loading...
-    navigator.mediaDevices.getUserMedia({
-        video: {
-            width: {
-                ideal: 1000
-            },
-            height: {
-                ideal: 1000
-            },
-            frameRate: {
-                ideal: 30,
-                min: 10
-            },
-            facingMode: "user"
-        },
-        audio: false
-    }).then(function(stream) {
-        video[0].srcObject = stream
-        ctx.font = "30px Arial"
-        ctx.fillStyle = "#4e73df"
-        ctx.textAlign = "center"
-        ctx.fillText("Loading...", 100, 100)
-        Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri('./js/models'),
-            faceapi.nets.faceLandmark68Net.loadFromUri('./js/models'),
-            faceapi.nets.faceRecognitionNet.loadFromUri('./js/models'),
-            faceapi.nets.faceExpressionNet.loadFromUri('./js/models'),
-        ]).then(function(){
-            var displaySize = { width: cameraDiv.width(), height: cameraDiv.height() }
-            faceapi.matchDimensions(canvas[0], displaySize)
-            setInterval(async () => {
-                // 识别位置, 脸部特征, 表情
-                // 设置最低置信度 0.4，最多检测一张脸
-                var options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.4 })
-                const detections = await faceapi
-                    .detectAllFaces(video[0], options)
-                    .withFaceLandmarks()
-                    .withFaceExpressions()
-                    .withFaceDescriptors()
-        
-                // 调整尺寸
-                const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                
-                // 如果有人脸, 则保存用以进行人脸匹配的特征向量
-                if(resizedDetections.length > 0)
-                {
-                    // 获取RecogntionNet的128维特征向量
-                    landmarks = resizedDetections[0].descriptor
-                    // 计算嘴是否张开
-                    if(resizedDetections[0].expressions.happy > 0.5 || resizedDetections[0].expressions.surprised > 0.5)
-                        isMouthOpen = 1
-                    else
-                        isMouthOpen = 0
-                    
-                }
-                else
-                {
-                    landmarks = false
-                    isMouthOpen = -1
-                }
-                // 尝试匹配user-content中的人脸数据
+            })
+            
+
+            attrs = [
+                ['user-type', 'face'],
+                ['user-title', user_title],
+                ['user-topic', user_topic],
+                ['user-content', user_content],
+                ['title-hidden', title_style]
+            ]
+            var itemdiv = add_block(4, 6, contents, attrs)
+            var sync_table_info = function() {
                 var user_content = title.parent().parent().attr('user-content')
                 if (user_content == undefined || user_content == "")
                     user_content = "[]"
@@ -6206,325 +6285,257 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                     interval = user_data[0]
                     user_data.shift()
                 }
-                var min_euclidean_distance = 0.4
-                var min_index = -1
+                var datafields = [{"name": "ID", "type": "text", "width": 50, "align": "center", "editing": false},
+                    {"name": "Name", "type": "text", "width": 100, "align": "center"}, 
+                    {"type": "control", "width": 50}];
+                var data = []
                 for (var i = 0; i < user_data.length; i++)
                 {
-                    var euclidean_distance = 0
-                    for (var j = 0; j < user_data[i]["landmarks"].length; j++)
-                    {
-                        euclidean_distance += Math.pow(user_data[i]["landmarks"][j] - landmarks[j], 2)
-                    }
-                    euclidean_distance = Math.sqrt(euclidean_distance)
-                    if(euclidean_distance < min_euclidean_distance)
-                    {
-                        min_euclidean_distance = euclidean_distance
-                        min_index = i
-                    }
+                    data.push({"ID": i, "Name": user_data[i]["name"]})
                 }
-                canvas[0].getContext('2d')?.clearRect(0, 0, canvas[0].width, canvas[0].height); // 清空画布
-                //faceapi.draw.drawDetections(canvas[0], resizedDetections); // 位置
-                faceapi.draw.drawFaceLandmarks(canvas[0], resizedDetections); // 脸部特征  
-                faceapi.draw.drawFaceExpressions(canvas[0], resizedDetections); // 表情
-                if(resizedDetections.length > 0)
-                {
-                    ctx.font = "30px Arial"
-                    ctx.fillStyle = "#ff0000"
-                    if(min_index == -1)
+                // jsGrid
+                allDataTable.jsGrid({
+                    width: "100%",
+                    height: "100%",
+                    noDataContent: JSLang[lang].noData,
+                    editing: true,
+                    data: data,
+                    confirmDeleting: false,
+                    fields: datafields,
+                    onItemDeleted: function() {
+                        var data = allDataTable.jsGrid("option", "data")
+                        var user_content = title.parent().parent().attr('user-content')
+                        if (user_content == undefined || user_content == "")
+                            user_content = "[]"
+                        var user_data = JSON.parse(user_content)
+                        if(user_data.length==0 || user_data[0]["name"])
+                        {
+                            
+                        }
+                        else
+                        {
+                            interval = user_data[0]
+                            user_data.shift()
+                        }
+                        var isDel = false
+                        for (var i = 0; i < data.length; i++)
+                        {
+                            if(data[i]["ID"] != i)
+                            {
+                                isDel = true
+                                user_data.splice(i, 1)
+                                break
+                            }
+                        }
+                        if(!isDel)
+                            user_data.splice(data.length, 1)
+                        user_data.unshift(interval)
+                        title.parent().parent().attr('user-content', JSON.stringify(user_data))
+                        sync_table_info()
+                    },
+                    onItemUpdated: function() {
+                        var data = allDataTable.jsGrid("option", "data")
+                        var user_content = title.parent().parent().attr('user-content')
+                        if (user_content == undefined || user_content == "")
+                            user_content = "[]"
+                        var user_data = JSON.parse(user_content)
+                        if(user_data.length==0 || user_data[0]["name"])
+                        {
+                            
+                        }
+                        else
+                        {
+                            interval = user_data[0]
+                            user_data.shift()
+                        }
+                        for (var i = 0; i < data.length; i++)
+                        {
+                            user_data[i]["name"] = data[i]["Name"]
+                        }
+                        user_data.unshift(interval)
+                        title.parent().parent().attr('user-content', JSON.stringify(user_data))
+                        sync_table_info()
+                    }
+                })
+                allDataTable.on('click', function(event) {
+                    event.stopPropagation()
+                }
+                )
+                allDataTable.on('mousedown', function(event) {
+                    event.stopPropagation()
+                }
+                )
+                allDataTable.on('mouseup', function(event) {
+                    event.stopPropagation()
+                }
+                )
+                allDataTable.on('touchend', function(event) {
+                    event.stopPropagation()
+                }
+                )
+                allDataTable.on('touchstart', function(event) {
+                    event.stopPropagation()
+                }
+                )
+            }
+            sync_table_info()
+
+            var delete_on_click = function() {
+                title.parent().parent().remove();
+                isAlive = false
+                if (tbd)
+                    tbd.remove()
+            }
+            var edit_on_click = function() {
+                modifyDia.showModal()
+                if (tbd)
+                    tbd.remove()
+            }
+            var editForm = $('<div class="nnt"/>')
+            editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/blazeFace.svg" style="width:45px;"></div>'))
+            editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+            var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+            var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+            title_input_div.append(title_input)
+            editForm.append(title_input_div)
+            editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+            var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+            var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+            topic_input_div.append(topic_input)
+            editForm.append(topic_input_div)
+            editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerInterval + '</h5>'))
+            var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+            var trigger_interval = $("<input type='number' step='100' min='1000' max='100000' required class='form-control form-control-user'  style='text-align:center'/>")
+            trigger_interval.val(1000)
+            trigger_interval.change(function(){
+                if(trigger_interval.val()<1000)
+                    trigger_interval.val(1000)
+            })
+            trigger_interval_div.append(trigger_interval)
+            editForm.append(trigger_interval_div)
+            var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+            var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+            bottomDiv.append(confirmEdit)
+            confirmEdit.click(function() {
+                if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                    var re = /^[a-z0-9]+$/i;
+                    if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                        if (true) {
+                            if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                                title.parent().parent().attr('user-title', title_input.val())
+                                title.parent().parent().attr('user-topic', topic_input.val())
+                                if (title.parent().parent().attr('user-content') == undefined || title.parent().parent().attr('user-content') == "")
+                                    title.parent().parent().attr('user-content', "[" + trigger_interval.val() + "]")
+                                else
+                                {
+                                    var user_content = title.parent().parent().attr('user-content')
+                                    var user_data = JSON.parse(user_content)
+                                    if(user_data.length==0 || user_data[0]["name"])
+                                    {
+                                        user_data.unshift(trigger_interval.val())
+                                    }
+                                    else
+                                    {
+                                        user_data[0] = trigger_interval.val()
+                                    }
+                                    title.parent().parent().attr("user-content", JSON.stringify(user_data))
+                                }
+                                title.text(title_input.val())
+                                topic.text(topic_input.val())
+                                modifyDia.close()
+                            } else
+                                showtext(JSLang[lang].sameUnit)
+                        } else
+                            showtext("")
+                    else
+                        showtext(JSLang[lang].topicLenIllegal)
+                } else
+                    showtext(JSLang[lang].nameLenIllegal)
+            })
+            var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+            cancelEdit.click(function() {
+                modifyDia.close()
+            })
+            bottomDiv.append(cancelEdit)
+            editForm.append(bottomDiv)
+            var modifyDia = dialog({
+                content: editForm[0],
+                cancel: false
+            })
+            var showEditBubble = function(event) {
+                if(tbd)
+                    tbd.remove()
+                if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+                    var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+                    var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+                    var bubble = $('<div style="text-align:center"/>')
+                    bubble.append(topicDiv)
+                    var d = dialog({
+                        align: 'top',
+                        content: bubble[0],
+                        quickClose: true,
+                        autofocus: false
+                    });
+                    tbd = d;
+                    editButton.click(edit_on_click)
+                    deleteButton.click(delete_on_click)
+                    if (!isRunning)
+                        bubble.append(editButton)
+                    if (!isRunning)
+                        bubble.append(deleteButton)
+                    if (!isRunning)
+                        {
+                        copyButton.attr("user-origin", title.text())
+                        bubble.append(copyButton)
+                        styleButton.attr("user-origin", title.text())
+                        bubble.append(styleButton)
+                        helpButton.attr("user-origin", attrs[0][1])
+                        bubble.append(helpButton)
+                    }
+                    title_input.val(title.text())
+                    topic_input.val(topic.text())
+                    var user_content_json = JSON.parse(title.parent().parent().attr('user-content'))
+                    if(user_content_json.length==0 || user_content_json[0]["name"])
                     {
-                        const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:Unknown    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
-                        drawBox.draw(canvas[0])
+                        trigger_interval.val(1000)
                     }
                     else
                     {
-                        const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:" + min_index + "     Name:" + user_data[min_index]["name"] +"    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
-                        drawBox.draw(canvas[0])
+                        trigger_interval.val(user_content_json[0])
                     }
-                    if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= interval)
-                    {   
-                        if(min_index == -1)
-                            publish(user_topic, JSON.stringify({id: min_index, status: (min_index==-1?0:1), name: "Unknown", isMouthOpen: isMouthOpen, faceProbability: resizedDetections[0].detection.score.toFixed(3), happy: resizedDetections[0].expressions.happy.toFixed(3), sad: resizedDetections[0].expressions.sad.toFixed(3), angry: resizedDetections[0].expressions.angry.toFixed(3), surprised: resizedDetections[0].expressions.surprised.toFixed(3), disgusted: resizedDetections[0].expressions.disgusted.toFixed(3), fearful: resizedDetections[0].expressions.fearful.toFixed(3)}))
-                        else
-                            publish(user_topic, JSON.stringify({id: min_index, status: (min_index==-1?0:1), name: user_data[min_index]["name"], isMouthOpen: isMouthOpen, faceProbability: resizedDetections[0].detection.score.toFixed(3), happy: resizedDetections[0].expressions.happy.toFixed(3), sad: resizedDetections[0].expressions.sad.toFixed(3), angry: resizedDetections[0].expressions.angry.toFixed(3), surprised: resizedDetections[0].expressions.surprised.toFixed(3), disgusted: resizedDetections[0].expressions.disgusted.toFixed(3), fearful: resizedDetections[0].expressions.fearful.toFixed(3)}))
-                        lastFacePublishTime = new Date().getTime()
-                    }
-                }
-            }, 100);
-        })
-    })
-    
-
-    attrs = [
-        ['user-type', 'face'],
-        ['user-title', user_title],
-        ['user-topic', user_topic],
-        ['user-content', user_content],
-        ['title-hidden', title_style]
-    ]
-    var itemdiv = add_block(4, 6, contents, attrs)
-    var sync_table_info = function() {
-        var user_content = title.parent().parent().attr('user-content')
-        if (user_content == undefined || user_content == "")
-            user_content = "[]"
-        var user_data = JSON.parse(user_content)
-        var interval = 1000
-        if(user_data.length==0 || user_data[0]["name"])
-        {
-            
-        }
-        else
-        {
-            interval = user_data[0]
-            user_data.shift()
-        }
-        var datafields = [{"name": "ID", "type": "text", "width": 50, "align": "center", "editing": false},
-             {"name": "Name", "type": "text", "width": 100, "align": "center"}, 
-             {"type": "control", "width": 50}];
-        var data = []
-        for (var i = 0; i < user_data.length; i++)
-        {
-            data.push({"ID": i, "Name": user_data[i]["name"]})
-        }
-        // jsGrid
-        allDataTable.jsGrid({
-            width: "100%",
-            height: "100%",
-            noDataContent: JSLang[lang].noData,
-            editing: true,
-            data: data,
-            confirmDeleting: false,
-            fields: datafields,
-            onItemDeleted: function() {
-                var data = allDataTable.jsGrid("option", "data")
-                var user_content = title.parent().parent().attr('user-content')
-                if (user_content == undefined || user_content == "")
-                    user_content = "[]"
-                var user_data = JSON.parse(user_content)
-                if(user_data.length==0 || user_data[0]["name"])
-                {
-                    
-                }
-                else
-                {
-                    interval = user_data[0]
-                    user_data.shift()
-                }
-                var isDel = false
-                for (var i = 0; i < data.length; i++)
-                {
-                    if(data[i]["ID"] != i)
+                    if (!d.open)
                     {
-                        isDel = true
-                        user_data.splice(i, 1)
-                        break
+                        d.show(itemdiv[0]);
+                        setTimeout(function() {
+                            $(".ui-popup-backdrop").css("pointer-events", "auto")
+                        },100)
                     }
+                    else
+                        d.close()
                 }
-                if(!isDel)
-                    user_data.splice(data.length, 1)
-                user_data.unshift(interval)
-                title.parent().parent().attr('user-content', JSON.stringify(user_data))
-                sync_table_info()
-            },
-            onItemUpdated: function() {
-                var data = allDataTable.jsGrid("option", "data")
-                var user_content = title.parent().parent().attr('user-content')
-                if (user_content == undefined || user_content == "")
-                    user_content = "[]"
-                var user_data = JSON.parse(user_content)
-                if(user_data.length==0 || user_data[0]["name"])
-                {
-                    
-                }
-                else
-                {
-                    interval = user_data[0]
-                    user_data.shift()
-                }
-                for (var i = 0; i < data.length; i++)
-                {
-                    user_data[i]["name"] = data[i]["Name"]
-                }
-                user_data.unshift(interval)
-                title.parent().parent().attr('user-content', JSON.stringify(user_data))
-                sync_table_info()
             }
-        })
-        allDataTable.on('click', function(event) {
-            event.stopPropagation()
-        }
-        )
-        allDataTable.on('mousedown', function(event) {
-            event.stopPropagation()
-        }
-        )
-        allDataTable.on('mouseup', function(event) {
-            event.stopPropagation()
-        }
-        )
-        allDataTable.on('touchend', function(event) {
-            event.stopPropagation()
-        }
-        )
-        allDataTable.on('touchstart', function(event) {
-            event.stopPropagation()
-        }
-        )
-    }
-    sync_table_info()
-
-    var delete_on_click = function() {
-        title.parent().parent().remove();
-        isAlive = false
-        if (tbd)
-            tbd.remove()
-    }
-    var edit_on_click = function() {
-        modifyDia.showModal()
-        if (tbd)
-            tbd.remove()
-    }
-    var editForm = $('<div class="nnt"/>')
-    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/blazeFace.svg" style="width:45px;"></div>'))
-    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
-    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-    var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
-    title_input_div.append(title_input)
-    editForm.append(title_input_div)
-    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
-    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
-    topic_input_div.append(topic_input)
-    editForm.append(topic_input_div)
-    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerInterval + '</h5>'))
-    var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-    var trigger_interval = $("<input type='number' step='100' min='1000' max='100000' required class='form-control form-control-user'  style='text-align:center'/>")
-    trigger_interval.val(1000)
-    trigger_interval.change(function(){
-        if(trigger_interval.val()<1000)
-            trigger_interval.val(1000)
-    })
-    trigger_interval_div.append(trigger_interval)
-    editForm.append(trigger_interval_div)
-    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
-    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
-    bottomDiv.append(confirmEdit)
-    confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
-            var re = /^[a-z0-9]+$/i;
-            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
-                if (true) {
-                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
-                        title.parent().parent().attr('user-title', title_input.val())
-                        title.parent().parent().attr('user-topic', topic_input.val())
-                        if (title.parent().parent().attr('user-content') == undefined || title.parent().parent().attr('user-content') == "")
-                            title.parent().parent().attr('user-content', "[" + trigger_interval.val() + "]")
-                        else
-                        {
-                            var user_content = title.parent().parent().attr('user-content')
-                            var user_data = JSON.parse(user_content)
-                            if(user_data.length==0 || user_data[0]["name"])
-                            {
-                                user_data.unshift(trigger_interval.val())
-                            }
-                            else
-                            {
-                                user_data[0] = trigger_interval.val()
-                            }
-                            title.parent().parent().attr("user-content", JSON.stringify(user_data))
-                        }
-                        title.text(title_input.val())
-                        topic.text(topic_input.val())
-                        modifyDia.close()
-                    } else
-                        showtext(JSLang[lang].sameUnit)
-                } else
-                    showtext("")
-            else
-                showtext(JSLang[lang].topicLenIllegal)
-        } else
-            showtext(JSLang[lang].nameLenIllegal)
-    })
-    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
-    cancelEdit.click(function() {
-        modifyDia.close()
-    })
-    bottomDiv.append(cancelEdit)
-    editForm.append(bottomDiv)
-    var modifyDia = dialog({
-        content: editForm[0],
-        cancel: false
-    })
-    var showEditBubble = function(event) {
-        if(tbd)
-            tbd.remove()
-        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
-            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
-            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
-            var bubble = $('<div style="text-align:center"/>')
-            bubble.append(topicDiv)
-            var d = dialog({
-                align: 'top',
-                content: bubble[0],
-                quickClose: true,
-                autofocus: false
-            });
-            tbd = d;
-            editButton.click(edit_on_click)
-            deleteButton.click(delete_on_click)
-            if (!isRunning)
-                bubble.append(editButton)
-            if (!isRunning)
-                bubble.append(deleteButton)
-            if (!isRunning)
-                {
-                copyButton.attr("user-origin", title.text())
-                bubble.append(copyButton)
-                styleButton.attr("user-origin", title.text())
-                bubble.append(styleButton)
-                helpButton.attr("user-origin", attrs[0][1])
-                bubble.append(helpButton)
-            }
-            title_input.val(title.text())
-            topic_input.val(topic.text())
-            var user_content_json = JSON.parse(title.parent().parent().attr('user-content'))
-            if(user_content_json.length==0 || user_content_json[0]["name"])
+            if (window.screen.width > 800)
             {
-                trigger_interval.val(1000)
+                itemdiv.click(showEditBubble)
+                itemdiv.on('contextmenu', function(event) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    showEditBubble(event)
+                })
             }
             else
-            {
-                trigger_interval.val(user_content_json[0])
-            }
-            if (!d.open)
-            {
-                d.show(itemdiv[0]);
-                setTimeout(function() {
-                    $(".ui-popup-backdrop").css("pointer-events", "auto")
-                },100)
-            }
-            else
-                d.close()
-        }
-    }
-    if (window.screen.width > 800)
-    {
-        itemdiv.click(showEditBubble)
-        itemdiv.on('contextmenu', function(event) {
-            event.preventDefault()
-            event.stopPropagation()
-            showEditBubble(event)
-        })
-    }
-    else
-        itemdiv[0].addEventListener('touchend', function(event) {
-            event.preventDefault()
-            showEditBubble(event)
-        })
-    itemdiv[0].addEventListener('touchmove', function(e) {
-        e.preventDefault()
-    })
-    if (user_style != undefined)
-        itemdiv.attr('style', user_style)
+                itemdiv[0].addEventListener('touchend', function(event) {
+                    event.preventDefault()
+                    showEditBubble(event)
+                })
+            itemdiv[0].addEventListener('touchmove', function(e) {
+                e.preventDefault()
+            })
+            if (user_style != undefined)
+                itemdiv.attr('style', user_style)
+        }, true);
+    }, true);
+    
 }
 
 function add_ocr(user_title, user_topic, user_content, user_style, title_style) {
@@ -6747,211 +6758,215 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
         itemdiv.attr('style', user_style)
 }
 function add_qr(user_title, user_topic, user_content, user_style, title_style) {
-    var isAlive = true
-    var contents = []
-    var title = $("<h4 class='userTitle' style='margin-top:20px'>" + user_title + "</h4>")
-    title.attr("hidden", title_style)
-    contents.push(title)
-    var topicDiv = $("<div class='topicDiv'/>")
-    var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
-    topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
-    topicDiv.append(topic)
-    var cameraDiv = $("<div class='cameraDiv' style='position:relative'/>")
-    contents.push(cameraDiv)
-    // add a real-time web camera
-    var videoID = "video" + Math.random().toString(36).substr(4)
-    var video = $("<video autoplay style='width:100%;height:100%;'/>")
-    video.attr("id", videoID)
-    cameraDiv.append(video)
-    // 底部字幕
-    var bottomDiv11 = $("<div style='background-color:rgba(0,0,0,0.5);text-align:center;color:white;position:absolute;bottom:0;width:100%;height:40px'/>")
-    cameraDiv.append(bottomDiv11)
-    // 居中显示Loading...
-    navigator.mediaDevices.getUserMedia({
-        video: {
-            width: {
-                ideal: 500
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载AI引擎...</p></div>")
+    $.getScript("js/jsqr.js", function() {
+        modald.close().remove()
+        var isAlive = true
+        var contents = []
+        var title = $("<h4 class='userTitle' style='margin-top:20px'>" + user_title + "</h4>")
+        title.attr("hidden", title_style)
+        contents.push(title)
+        var topicDiv = $("<div class='topicDiv'/>")
+        var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+        topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+        topicDiv.append(topic)
+        var cameraDiv = $("<div class='cameraDiv' style='position:relative'/>")
+        contents.push(cameraDiv)
+        // add a real-time web camera
+        var videoID = "video" + Math.random().toString(36).substr(4)
+        var video = $("<video autoplay style='width:100%;height:100%;'/>")
+        video.attr("id", videoID)
+        cameraDiv.append(video)
+        // 底部字幕
+        var bottomDiv11 = $("<div style='background-color:rgba(0,0,0,0.5);text-align:center;color:white;position:absolute;bottom:0;width:100%;height:40px'/>")
+        cameraDiv.append(bottomDiv11)
+        // 居中显示Loading...
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                width: {
+                    ideal: 500
+                },
+                height: {
+                    ideal: 500
+                },
+                frameRate: {
+                    exact: 10
+                },
+                facingMode: "environment"
             },
-            height: {
-                ideal: 500
-            },
-            frameRate: {
-                exact: 10
-            },
-            facingMode: "environment"
-        },
-        audio: false
-    }).then(function(stream) {
-        video[0].srcObject = stream
-        var canvas = $("<canvas/>")[0]
-        canvas.width = 500
-        canvas.height = 500
-        var ctx = canvas.getContext('2d')
-        setInterval(function(){
-            // clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
-            ctx.drawImage(video[0], 0, 0, canvas.width, canvas.height)
-            var uint8Array = ctx.getImageData(0, 0, canvas.width, canvas.height).data
-            var code = jsQR(uint8Array, canvas.width, canvas.height)
-            if(code)
-            {
-                bottomDiv11.text(code.data)
-                if(isRunning && isAlive)
-                    publish(user_topic, code.data)
-            }
-            else
-            {
-                Quagga.decodeSingle({
-                    src: canvas.toDataURL(),
-                    inputStream: {
-                        size: canvas.width
-                    },
-                    decoder: {
-                        readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader", "i2of5_reader", "2of5_reader", "code_93_reader"] // 指定条形码格式
-                    }
-                }, function(result){
-                    console.log(result)
-                    if (result && result.codeResult) {
-                        bottomDiv11.text(result.codeResult.code);
-                        if(isRunning && isAlive)
-                            publish(user_topic, result.codeResult.code)
-                    }
-                    else
-                        bottomDiv11.text("无二维码或条形码")
-                }) 
-            }
-        }, 2000)
-    })
-    
-
-    attrs = [
-        ['user-type', 'qr'],
-        ['user-title', user_title],
-        ['user-topic', user_topic],
-        ['user-content', user_content],
-        ['title-hidden', title_style]
-    ]
-    var itemdiv = add_block(3, 3, contents, attrs)
-
-    var delete_on_click = function() {
-        title.parent().parent().remove();
-        isAlive = false
-        if (tbd)
-            tbd.remove()
-    }
-    var edit_on_click = function() {
-        modifyDia.showModal()
-        if (tbd)
-            tbd.remove()
-    }
-    var editForm = $('<div class="nnt"/>')
-    editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/mediaPipe.svg" style="width:45px;"></div>'))
-    editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
-    var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-    var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
-    title_input_div.append(title_input)
-    editForm.append(title_input_div)
-    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
-    var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-    var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
-    topic_input_div.append(topic_input)
-    editForm.append(topic_input_div)
-    var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
-    var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
-    bottomDiv.append(confirmEdit)
-    confirmEdit.click(function() {
-        if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
-            var re = /^[a-z0-9]+$/i;
-            if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
-                if (true) {
-                    if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
-                        title.parent().parent().attr('user-title', title_input.val())
-                        title.parent().parent().attr('user-topic', topic_input.val())
-                        title.parent().parent().attr('user-content','')
-                        title.text(title_input.val())
-                        topic.text(topic_input.val())
-                        modifyDia.close()
-                    } else
-                        showtext(JSLang[lang].sameUnit)
-                } else
-                    showtext("")
-            else
-                showtext(JSLang[lang].topicLenIllegal)
-        } else
-            showtext(JSLang[lang].nameLenIllegal)
-    })
-    var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
-    cancelEdit.click(function() {
-        modifyDia.close()
-    })
-    bottomDiv.append(cancelEdit)
-    editForm.append(bottomDiv)
-    var modifyDia = dialog({
-        content: editForm[0],
-        cancel: false
-    })
-    var showEditBubble = function(event) {
-        if(tbd)
-            tbd.remove()
-        if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
-            var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
-            var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
-            var bubble = $('<div style="text-align:center"/>')
-            bubble.append(topicDiv)
-            var d = dialog({
-                align: 'top',
-                content: bubble[0],
-                quickClose: true,
-                autofocus: false
-            });
-            tbd = d;
-            editButton.click(edit_on_click)
-            deleteButton.click(delete_on_click)
-            if (!isRunning)
-                bubble.append(editButton)
-            if (!isRunning)
-                bubble.append(deleteButton)
-            if (!isRunning)
+            audio: false
+        }).then(function(stream) {
+            video[0].srcObject = stream
+            var canvas = $("<canvas/>")[0]
+            canvas.width = 500
+            canvas.height = 500
+            var ctx = canvas.getContext('2d')
+            setInterval(function(){
+                // clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height)
+                ctx.drawImage(video[0], 0, 0, canvas.width, canvas.height)
+                var uint8Array = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+                var code = jsQR(uint8Array, canvas.width, canvas.height)
+                if(code)
                 {
-                copyButton.attr("user-origin", title.text())
-                bubble.append(copyButton)
-                styleButton.attr("user-origin", title.text())
-                bubble.append(styleButton)
-                helpButton.attr("user-origin", attrs[0][1])
-                bubble.append(helpButton)
-            }
-            title_input.val(title.text())
-            topic_input.val(topic.text())
-            if (!d.open)
-            {
-                d.show(itemdiv[0]);
-                setTimeout(function() {
-                    $(".ui-popup-backdrop").css("pointer-events", "auto")
-                },100)
-            }
-            else
-                d.close()
+                    bottomDiv11.text(code.data)
+                    if(isRunning && isAlive)
+                        publish(user_topic, code.data)
+                }
+                else
+                {
+                    Quagga.decodeSingle({
+                        src: canvas.toDataURL(),
+                        inputStream: {
+                            size: canvas.width
+                        },
+                        decoder: {
+                            readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader", "i2of5_reader", "2of5_reader", "code_93_reader"] // 指定条形码格式
+                        }
+                    }, function(result){
+                        console.log(result)
+                        if (result && result.codeResult) {
+                            bottomDiv11.text(result.codeResult.code);
+                            if(isRunning && isAlive)
+                                publish(user_topic, result.codeResult.code)
+                        }
+                        else
+                            bottomDiv11.text("无二维码或条形码")
+                    }) 
+                }
+            }, 2000)
+        })
+        
+
+        attrs = [
+            ['user-type', 'qr'],
+            ['user-title', user_title],
+            ['user-topic', user_topic],
+            ['user-content', user_content],
+            ['title-hidden', title_style]
+        ]
+        var itemdiv = add_block(3, 3, contents, attrs)
+
+        var delete_on_click = function() {
+            title.parent().parent().remove();
+            isAlive = false
+            if (tbd)
+                tbd.remove()
         }
-    }
-    if (window.screen.width > 800)
-    {
-        itemdiv.click(showEditBubble)
-        itemdiv.on('contextmenu', function(event) {
-            event.preventDefault()
-            event.stopPropagation()
-            showEditBubble(event)
+        var edit_on_click = function() {
+            modifyDia.showModal()
+            if (tbd)
+                tbd.remove()
+        }
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/mediaPipe.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div.append(topic_input)
+        editForm.append(topic_input_div)
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function() {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                var re = /^[a-z0-9]+$/i;
+                if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                    if (true) {
+                        if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                            title.parent().parent().attr('user-title', title_input.val())
+                            title.parent().parent().attr('user-topic', topic_input.val())
+                            title.parent().parent().attr('user-content','')
+                            title.text(title_input.val())
+                            topic.text(topic_input.val())
+                            modifyDia.close()
+                        } else
+                            showtext(JSLang[lang].sameUnit)
+                    } else
+                        showtext("")
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            } else
+                showtext(JSLang[lang].nameLenIllegal)
         })
-    }
-    else
-        itemdiv[0].addEventListener('touchend', function(event) {
-            event.preventDefault()
-            showEditBubble(event)
+        var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function() {
+            modifyDia.close()
         })
-    itemdiv[0].addEventListener('touchmove', function(e) {
-        e.preventDefault()
-    })
-    if (user_style != undefined)
-        itemdiv.attr('style', user_style)
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content: editForm[0],
+            cancel: false
+        })
+        var showEditBubble = function(event) {
+            if(tbd)
+                tbd.remove()
+            if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+                var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+                var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+                var bubble = $('<div style="text-align:center"/>')
+                bubble.append(topicDiv)
+                var d = dialog({
+                    align: 'top',
+                    content: bubble[0],
+                    quickClose: true,
+                    autofocus: false
+                });
+                tbd = d;
+                editButton.click(edit_on_click)
+                deleteButton.click(delete_on_click)
+                if (!isRunning)
+                    bubble.append(editButton)
+                if (!isRunning)
+                    bubble.append(deleteButton)
+                if (!isRunning)
+                    {
+                    copyButton.attr("user-origin", title.text())
+                    bubble.append(copyButton)
+                    styleButton.attr("user-origin", title.text())
+                    bubble.append(styleButton)
+                    helpButton.attr("user-origin", attrs[0][1])
+                    bubble.append(helpButton)
+                }
+                title_input.val(title.text())
+                topic_input.val(topic.text())
+                if (!d.open)
+                {
+                    d.show(itemdiv[0]);
+                    setTimeout(function() {
+                        $(".ui-popup-backdrop").css("pointer-events", "auto")
+                    },100)
+                }
+                else
+                    d.close()
+            }
+        }
+        if (window.screen.width > 800)
+        {
+            itemdiv.click(showEditBubble)
+            itemdiv.on('contextmenu', function(event) {
+                event.preventDefault()
+                event.stopPropagation()
+                showEditBubble(event)
+            })
+        }
+        else
+            itemdiv[0].addEventListener('touchend', function(event) {
+                event.preventDefault()
+                showEditBubble(event)
+            })
+        itemdiv[0].addEventListener('touchmove', function(e) {
+            e.preventDefault()
+        })
+        if (user_style != undefined)
+            itemdiv.attr('style', user_style)
+    }, true);
 }
 
 function init_layout() {

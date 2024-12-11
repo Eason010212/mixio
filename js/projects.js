@@ -4,6 +4,18 @@ var globalBLE = {}
 function copy(obj) {
     return JSON.parse(JSON.stringify(obj))
 }
+(function () {
+    $.getScript = function(url, callback, cache)
+    {
+        $.ajax({
+                type: "GET",
+                url: url,
+                success: callback,
+                dataType: "script",
+                cache: cache
+        });
+    };
+})();
 $(function() {
     if ('_cordovaNative' in window) {
         var scriptcordova = document.createElement('script');
@@ -1792,7 +1804,7 @@ function add_widget() {
     //widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].tensorAI + "</h5>"))
     var blazeFace_add = $("<div class='widget_div'><div><img src='icons/blazeFace.svg'><span>" + JSLang[lang].blazeFace + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(blazeFace_add)
-    var ocr_add = $("<div class='widget_div'><div><img src='icons/mediaPipe.svg'><span>" + JSLang[lang].ocr + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
+    var ocr_add = $("<div class='widget_div'><div><img src='icons/mediaPipe.svg'><span>" + JSLang[lang].ocr + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(ocr_add)
     var qr_add = $("<div class='widget_div'><div><img src='icons/qrcode.svg'><span>" + JSLang[lang].qr + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(qr_add)
@@ -3619,6 +3631,8 @@ function get_width() {
 }
 
 function listen_project(projectName) {
+    showtext("平台使用高峰期，后台运行功能暂时禁用。")
+    return
     var modald = showmodaltext("<div style='text-align:center' class='nnt'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].loading + "</p></div>")
     $.get('/startHost', {
         'projectName': projectName
