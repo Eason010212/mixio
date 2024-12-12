@@ -1820,12 +1820,12 @@ var mixioServer = function() {
     })
 
     app.get('/removeShareKey', function(req, res) {
-        if (req.session.userName && req.query.projectName && req.query.projectPass) {
-            db.run("delete from `share` where userName=? and projectName=?", [req.session.userName, req.query.projectName], function(err) {
+        if (req.session.userName && req.query.shareid) {
+            db.run("delete from `share` where shareid=?", [req.query.shareid], function(err) {
                 if (err)
                     console.log(err)
                 else {
-                    db.run("delete from `share_key` where userName=? and projectPass=? and projectName=?", [req.session.userName, req.query.projectPass, req.query.projectName], function(err) {
+                    db.run("delete from `share_key` where share_key=?", [req.query.shareid], function(err) {
                         if (err) {
                             console.log(err)
                             res.send(err)
