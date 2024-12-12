@@ -1861,6 +1861,50 @@ var mixioServer = function() {
         } else
             res.send('-1')
     })
+    app.get('/api/getWeather', function(req, res) {
+        if (req.query.city_code && !configs["OFFLINE_MODE"]) {
+            req.query.dsc_code = req.query.city_code.replace("CH","")
+            if(globalWeather[req.query.dsc_code] && globalWeather[req.query.dsc_code].time && (new Date().getTime() - globalWeather[req.query.dsc_code].time) < 600000) {
+                res.send(globalWeather[req.query.dsc_code].data)
+            } else {
+                http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
+                    var html = ''
+                    req2.on('data', function(data) {
+                        html += data;
+                    });
+                    req2.on('end', function() {
+                        globalWeather[req.query.dsc_code] = {
+                            time: new Date().getTime(),
+                            data: html
+                        }
+                        res.send(html)
+                    });
+                })
+            }
+        } else
+            res.send('-1')
+    })
+    app.get("/api/getCurrentTime", function(req, res){
+        var sysTime = new Date();
+        var year = sysTime.getFullYear();
+        var month = sysTime.getMonth() + 1; // getMonth() 返回的月份是从0开始的
+        var day = sysTime.getDate();
+        var hours = sysTime.getHours();
+        var minutes = sysTime.getMinutes();
+        var seconds = sysTime.getSeconds();
+    
+        // 补零操作
+        month = month < 10 ? '0' + month : month;
+        day = day < 10 ? '0' + day : day;
+        hours = hours < 10 ? '0' + hours : hours;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+    
+        sysTime = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+        res.send(JSON.stringify({
+            "sysTime": sysTime
+        }));
+    });
 
     app.post('/deleteProject', function(req, res) {
         if (req.session.userName && req.body.projectName) {

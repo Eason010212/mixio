@@ -4,9 +4,16 @@ var globalBLE = {}
 function copy(obj) {
     return JSON.parse(JSON.stringify(obj))
 }
+globalGottenScripts = [];
 (function () {
     $.getScript = function(url, callback, cache)
     {
+        if(globalGottenScripts.indexOf(url) != -1)
+        {
+            callback();
+            return;
+        }
+        globalGottenScripts.push(url);
         $.ajax({
                 type: "GET",
                 url: url,
@@ -283,14 +290,18 @@ function edit_project(prjName, prjType) {
     d.showModal();
 }
 
-function run_project() {
+async function run_project() {
     if ((typeof Notification) != "undefined")
         Notification.requestPermission();
     isRunning = true
     $(".facial").attr("hidden", "hidden")
     try {
         var logicFunction = Function(globalCode);
-        logicFunction()
+        if(globalCode!="")
+        {
+            await init_codemirror();
+            logicFunction()
+        }
     } catch (e) {
         MixIO.log(e)
         showtext(JSLang[lang].logicError)
@@ -632,138 +643,160 @@ function workspaceToDom() {
 
 
 function view_project(projectName, projectType) {
-    var init_codemirror = function() {
-        if (!grid3.children()[0]) {
-            customTheme()
-            var mainDiv = $("<div style='width:100%;height:100%;overflow:hidden;white-space:nowrap'></div>")
-            grid3.append(mainDiv)
-            var leftDiv = $("<div id='block' style='height:100%;display:inline-block;border-right:3px dashed #4e73df'></div>")
-            leftDiv.css("width", mainDiv.width() / 7 * 4 + "px")
-            mainDiv.append(leftDiv)
-            workspace = Blockly.inject('block', {
-                toolbox: document.getElementById('toolbox'),
-                media: 'blockly/media/',
-                zoom: {
-                    controls: true,
-                    wheel: true,
-                    startScale: 0.75,
-                    maxScale: 4,
-                    minScale: 0.25,
-                    scaleSpeed: 1.1
-                },
-            });
-            //Blockly.Variables.createVariable_(workspace,null,"topic")
-            //Blockly.Variables.createVariable_(workspace,null,"message")
-            var toJS = function() {
-                MixIO.triggersToPreCode()
-                MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
-            }
+    init_codemirror = function() {
+        return new Promise(function(resolve, reject) {
+            var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载逻辑引擎...</p></div>")
+            $.getScript("js/codemirror.min.js", function(){
+            $.getScript("blockly/blockly_compressed.js", function() {
+                $.getScript("blockly/blocks_compressed.js", function() {
+                    $.getScript("blockly/javascript_compressed.js", function() {
+                        $.getScript("blockly/iot/IOT_Blocks.js?v=1", function() {
+                            var currentProjectType = globalProjectType
+                            globalProjectType = LOGIC_MODE
+                            switch_mode()
+                            
+                            if (!grid3.children()[0]) {
+                                Blockly.registry.register(
+                                    Blockly.registry.Type.TOOLBOX_ITEM,
+                                    Blockly.ToolboxCategory.registrationName,
+                                    CustomCategory, true);
+                                var mainDiv = $("<div style='width:100%;height:100%;overflow:hidden;white-space:nowrap'></div>")
+                                grid3.append(mainDiv)
+                                var leftDiv = $("<div id='block' style='height:100%;display:inline-block;border-right:3px dashed #4e73df'></div>")
+                                leftDiv.css("width", mainDiv.width() / 7 * 4 + "px")
+                                mainDiv.append(leftDiv)
+                                workspace = Blockly.inject('block', {
+                                    toolbox: document.getElementById('toolbox'),
+                                    media: 'blockly/media/',
+                                    zoom: {
+                                        controls: true,
+                                        wheel: true,
+                                        startScale: 0.75,
+                                        maxScale: 4,
+                                        minScale: 0.25,
+                                        scaleSpeed: 1.1
+                                    },
+                                });
+                                var toJS = function() {
+                                    MixIO.triggersToPreCode()
+                                    MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
+                                }
 
-            function ast(event) {
-                toJS()
-                workspaceToDom()
-            }
-            workspace.addChangeListener(ast);
-            var rightDiv = $("<div style='height:100%;display:inline-block'></div>")
-            rightDiv.css("width", mainDiv.width() / 7 * 3 + "px")
-            mainDiv.append(rightDiv)
-            leftDiv.resizable({
-                handles: "w,e",
-                onResize: function() {
-                    MixIO.editor.setSize((mainDiv.width() - leftDiv.width()) + "px", '50%')
-                    rightDiv.css("width", (mainDiv.width() - leftDiv.width()) + "px")
-                    Blockly.svgResize(workspace);
-                },
-                onStopResize: function() {
-                    MixIO.editor.setSize((mainDiv.width() - leftDiv.width()) + "px", '50%')
-                    rightDiv.css("width", (mainDiv.width() - leftDiv.width()) + "px")
-                }
-            })
-            window.addEventListener('resize', function() {
-                MixIO.editor.setSize((mainDiv.width() - leftDiv.width()) + "px", '50%')
-                rightDiv.css("width", (mainDiv.width() - leftDiv.width()) + "px")
-                Blockly.svgResize(workspace);
-            })
-            var jTa = $("<textarea style='height:50%'></textarea>")
-            rightDiv.append(jTa)
-            if (globalXML != "") {
-                Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(stringendecoder.decodeHtml(globalXML).replaceAll("&", "&amp;")), workspace);
-            }
-            MixIO.editor = CodeMirror.fromTextArea(jTa[0], {
-                mode: "text/javascript",
-                lineNumbers: true,
-                matchBrackets: true,
-                hintOptions: {
-                    completeSingle: false
-                }
-            });
-            MixIO.editor.on("inputRead", function(instance, changeObj) {
-                if (isRunning) {
-                    showtext(JSLang[lang].pauseBeforeModify)
-                }
-                if (/^[a-zA-Z]/.test(changeObj.text[0])) {
-                    var words = MixIO.editor.getValue() + "";
-                    words = words.replace(/[a-z]+[\-|\']+[a-z]+/ig, '').match(/([a-z]+)/ig);
-                    CodeMirror.ukeys = words;
-                    MixIO.editor.showHint();
-                }
-            });
-            MixIO.editor.on('change', function() {
-                globalCode = MixIO.editor.getValue()
-            })
-            MixIO.editor.setSize('100%', '50%')
-            MixIO.editor.setValue(globalCode)
-            MixIO.editor.setCursor(MixIO.editor.lineCount(), 0);
-            var jTa2Div = $("<div style='font-family:monospace;height:50%;background-color:white'></div>")
-            jTa2Div.append($('<div style="height:2rem;display:flex;align-items:center;background-image: linear-gradient(to right, #4e73df, #b6c5f2);padding-left:5px;font-size:1rem;color:white"><p style="margin:0;">' + JSLang[lang].console + '</p><i class="fa fa-unlock" style="margin-left:10px;cursor:pointer" id="console_icon"></i></div>'))
-            var jTa2 = $("<div style='width:100%;overflow:auto;height:calc(100% - 2rem);padding:3px;color:black;border:none'></div>")
-            jTa2Div.append(jTa2)
-            rightDiv.append(jTa2Div)
-            $("#console_icon").click(function() {
-                if (typeof globalConsoleStyle == "undefined") {
-                    $("#console_icon").removeClass("fa-unlock")
-                    $("#console_icon").addClass("fa-lock")
-                    globalConsoleStyle = jTa2Div.attr("style")
-                    $("body").append(jTa2Div)
-                    jTa2Div.css("z-index", 999)
-                    jTa2Div.draggable({
-                        disabled: false
-                    })
-                    jTa2Div.resizable({
-                        disabled: false
-                    })
-                    jTa2Div.css("border", "solid black 1px")
-                    jTa2Div.css("position", "absolute")
-                    jTa2Div.css("left", "20px")
-                    jTa2Div.css("top", "20px")
-                    MixIO.editor.setSize((mainDiv.width() - leftDiv.width()) + "px", '100%')
-                } else {
-                    jTa2Div.attr("style", globalConsoleStyle)
-                    $("#console_icon").addClass("fa-unlock")
-                    $("#console_icon").removeClass("fa-lock")
-                    rightDiv.append(jTa2Div)
-                    jTa2Div.draggable({
-                        disabled: true
-                    })
-                    jTa2Div.resizable({
-                        disabled: true
-                    })
-                    MixIO.editor.setSize((mainDiv.width() - leftDiv.width()) + "px", '50%')
-                    globalConsoleStyle = undefined
-                }
-            })
-            MixIO.log = function(text) {
-                if(typeof text == "object")
-                    text = JSON.stringify(text)
-                if (jTa2.html())
-                    jTa2.html(jTa2.html() + '<br>' + '[' + timeStamp2String().substring(11) + '] ' + text)
-                else
-                    jTa2.html(jTa2.html() + '[' + timeStamp2String().substring(11) + '] ' + text)
-                jTa2.scrollTop(jTa2[0].scrollHeight)
-            }
-            MixIO.log("Version: " + globalVer)
-            MixIO.log("入门指南：<a target='_blank' href='devAPI'>dev-api</a>")
-        }
+                                function ast(event) {
+                                    toJS()
+                                    workspaceToDom()
+                                }
+                                workspace.addChangeListener(ast);
+                                var rightDiv = $("<div style='height:100%;display:inline-block'></div>")
+                                rightDiv.css("width", mainDiv.width() / 7 * 3 + "px")
+                                mainDiv.append(rightDiv)
+                                leftDiv.resizable({
+                                    handles: "w,e",
+                                    onResize: function() {
+                                        MixIO.editor.setSize((mainDiv.width() - leftDiv.width()) + "px", '50%')
+                                        rightDiv.css("width", (mainDiv.width() - leftDiv.width()) + "px")
+                                        Blockly.svgResize(workspace);
+                                    },
+                                    onStopResize: function() {
+                                        MixIO.editor.setSize((mainDiv.width() - leftDiv.width()) + "px", '50%')
+                                        rightDiv.css("width", (mainDiv.width() - leftDiv.width()) + "px")
+                                    }
+                                })
+                                window.addEventListener('resize', function() {
+                                    MixIO.editor.setSize((mainDiv.width() - leftDiv.width()) + "px", '50%')
+                                    rightDiv.css("width", (mainDiv.width() - leftDiv.width()) + "px")
+                                    Blockly.svgResize(workspace);
+                                })
+                                var jTa = $("<textarea style='height:50%'></textarea>")
+                                rightDiv.append(jTa)
+                                if (globalXML != "") {
+                                    Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(stringendecoder.decodeHtml(globalXML).replaceAll("&", "&amp;")), workspace);
+                                }
+                                MixIO.editor = CodeMirror.fromTextArea(jTa[0], {
+                                    mode: "text/javascript",
+                                    lineNumbers: true,
+                                    matchBrackets: true,
+                                    hintOptions: {
+                                        completeSingle: false
+                                    }
+                                });
+                                MixIO.editor.on("inputRead", function(instance, changeObj) {
+                                    if (isRunning) {
+                                        showtext(JSLang[lang].pauseBeforeModify)
+                                    }
+                                    if (/^[a-zA-Z]/.test(changeObj.text[0])) {
+                                        var words = MixIO.editor.getValue() + "";
+                                        words = words.replace(/[a-z]+[\-|\']+[a-z]+/ig, '').match(/([a-z]+)/ig);
+                                        CodeMirror.ukeys = words;
+                                        MixIO.editor.showHint();
+                                    }
+                                });
+                                MixIO.editor.on('change', function() {
+                                    globalCode = MixIO.editor.getValue()
+                                })
+                                MixIO.editor.setSize('100%', '50%')
+                                MixIO.editor.setValue(globalCode)
+                                MixIO.editor.setCursor(MixIO.editor.lineCount(), 0);
+                                var jTa2Div = $("<div style='font-family:monospace;height:50%;background-color:white'></div>")
+                                jTa2Div.append($('<div style="height:2rem;display:flex;align-items:center;background-image: linear-gradient(to right, #4e73df, #b6c5f2);padding-left:5px;font-size:1rem;color:white"><p style="margin:0;">' + JSLang[lang].console + '</p><i class="fa fa-unlock" style="margin-left:10px;cursor:pointer" id="console_icon"></i></div>'))
+                                var jTa2 = $("<div style='width:100%;overflow:auto;height:calc(100% - 2rem);padding:3px;color:black;border:none'></div>")
+                                jTa2Div.append(jTa2)
+                                rightDiv.append(jTa2Div)
+                                $("#console_icon").click(function() {
+                                    if (typeof globalConsoleStyle == "undefined") {
+                                        $("#console_icon").removeClass("fa-unlock")
+                                        $("#console_icon").addClass("fa-lock")
+                                        globalConsoleStyle = jTa2Div.attr("style")
+                                        $("body").append(jTa2Div)
+                                        jTa2Div.css("z-index", 999)
+                                        jTa2Div.draggable({
+                                            disabled: false
+                                        })
+                                        jTa2Div.resizable({
+                                            disabled: false
+                                        })
+                                        jTa2Div.css("border", "solid black 1px")
+                                        jTa2Div.css("position", "absolute")
+                                        jTa2Div.css("left", "20px")
+                                        jTa2Div.css("top", "20px")
+                                        MixIO.editor.setSize((mainDiv.width() - leftDiv.width()) + "px", '100%')
+                                    } else {
+                                        jTa2Div.attr("style", globalConsoleStyle)
+                                        $("#console_icon").addClass("fa-unlock")
+                                        $("#console_icon").removeClass("fa-lock")
+                                        rightDiv.append(jTa2Div)
+                                        jTa2Div.draggable({
+                                            disabled: true
+                                        })
+                                        jTa2Div.resizable({
+                                            disabled: true
+                                        })
+                                        MixIO.editor.setSize((mainDiv.width() - leftDiv.width()) + "px", '50%')
+                                        globalConsoleStyle = undefined
+                                    }
+                                })
+                                MixIO.log = function(text) {
+                                    if(typeof text == "object")
+                                        text = JSON.stringify(text)
+                                    if (jTa2.html())
+                                        jTa2.html(jTa2.html() + '<br>' + '[' + timeStamp2String().substring(11) + '] ' + text)
+                                    else
+                                        jTa2.html(jTa2.html() + '[' + timeStamp2String().substring(11) + '] ' + text)
+                                    jTa2.scrollTop(jTa2[0].scrollHeight)
+                                }
+                                MixIO.log("Version: " + globalVer)
+                                MixIO.log("入门指南：<a target='_blank' href='devAPI'>dev-api</a>")
+                            }
+                            globalProjectType = currentProjectType
+                            switch_mode()
+                            modald.close().remove()
+                            resolve();
+                        },true);
+                    }, true);
+                }, true);
+            }, true);
+        }, true);
+        })
     }
 
     var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].downloading + "</p></div>")
@@ -810,10 +843,11 @@ function view_project(projectName, projectType) {
             $("#logicMode").click(function() {
                 if (globalProjectType != LOGIC_MODE) {
                     globalProjectType = LOGIC_MODE
-                    MixIO.triggersToPreCode()
-                    MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
                     switch_mode()
-                    init_codemirror()
+                    init_codemirror().then(function() {
+                        MixIO.triggersToPreCode()
+                        MixIO.editor.setValue(MixIO.preCode + Blockly.JavaScript.workspaceToCode(workspace))
+                    })
                 }
                 $(".blocklySvg").attr("height", "100%")
                 $(".blocklyHtmlInput").removeAttr("hidden")
@@ -824,10 +858,7 @@ function view_project(projectName, projectType) {
                 globalCode = stringendecoder.decodeHtml(JSON.parse(prevLogic)['code'])
                 globalXML = stringendecoder.decodeHtml(JSON.parse(prevLogic)['module'])
             }
-            globalProjectType = LOGIC_MODE
             globalProjectName = projectName
-            switch_mode()
-            init_codemirror()
             globalProjectType = projectType
             switch_mode()
             connectStatusDia = dialog({
@@ -3887,36 +3918,7 @@ var exit = function() {
     save_layout(true)
 }
 
-class CustomCategory extends Blockly.ToolboxCategory {
-    // 自定义类别创造函数
-    // categoryDef: 类别定义的信息
-    // toolbox: 表示类别的父级toolbox
-    // opt_parent: 可选参数，表示其父类别
-    constructor(categoryDef, toolbox, opt_parent) {
-        super(categoryDef, toolbox, opt_parent);
-    }
-    addColourBorder_(colour) {
-        super.addColourBorder_(colour);
-        // this.rowDiv_.style.backgroundColor = 'unset';
-        this.iconDom_.style.color = colour;
-    }
-    setSelected(isSelected) {
-        super.setSelected(isSelected);
-        if (isSelected) {
-            // 设置icon的颜色和文本颜色相同
-            this.iconDom_.style.color = 'white'; // ====本次新增代码====
-        } else {
-            // 设置icon的颜色和文本颜色相同
-            this.iconDom_.style.color = this.colour_; // ====本次新增代码====
-        }
-    }
-}
-var customTheme = function() {
-    Blockly.registry.register(
-        Blockly.registry.Type.TOOLBOX_ITEM,
-        Blockly.ToolboxCategory.registrationName,
-        CustomCategory, true);
-}
+
 
 var uploadProjects = function() {
     var editForm = $('<div class="nnt" style="width:294px"/>')

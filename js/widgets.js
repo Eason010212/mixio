@@ -2400,7 +2400,11 @@ function add_magic(user_title, user_topic, user_content, user_style, title_style
         itemdiv.attr('style', user_style)
 }
 
-function add_timer(user_title, user_topic, user_content, user_style, title_style, isObserve) {
+async function add_timer(user_title, user_topic, user_content, user_style, title_style, isObserve) {
+    if(MixIO.editor == undefined)
+    {
+        await init_codemirror()
+    }
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
@@ -2616,7 +2620,11 @@ function add_timer(user_title, user_topic, user_content, user_style, title_style
         itemdiv.attr('style', user_style)
 }
 
-function add_trigger(user_title, user_topic, user_content, user_style, title_style, isObserve) {
+async function add_trigger(user_title, user_topic, user_content, user_style, title_style, isObserve) {
+    if(MixIO.editor == undefined)
+    {
+        await init_codemirror()
+    }
     var isAlive = true
     var contents = []
     var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
