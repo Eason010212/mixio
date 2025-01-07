@@ -22,7 +22,7 @@
     <script src="js/mqtt.min.js"></script>
     <script src="js/gauge.min.js"></script>
     <% if (configs['OFFLINE_MODE']==false) { %>
-        <script type="text/javascript" src="//api.map.baidu.com/getscript?type=webgl&v=3.0&ak=<%=configs['BAIDU_MAP_AK']%>"></script>
+        <script>var baidu_ak = "<%=configs['BAIDU_MAP_AK']%>"</script>
     <% } %>
     <script src="js/districts.js"></script>
     <script src="js/jsgrid.min.js"></script>
@@ -30,8 +30,6 @@
     <script src="js/widgets.js"></script>
     <script>var OFFLINE_MODE = <%=configs['OFFLINE_MODE']%></script>
     <script>var BAIDU_MAP_AK = '<%=configs['BAIDU_MAP_AK']%>'</script>
-    <script>var MIXIO_WS_PORT = '<%=configs['MIXIO_WS_PORT']%>'</script>
-    <script>var MIXIO_WSS_PORT = '<%=configs['MIXIO_WSS_PORT']%>'</script>
     <script src="js/MixIO.js?v=4"></script>
     <script src="js/observe.js?v=10"></script>
 </head>
