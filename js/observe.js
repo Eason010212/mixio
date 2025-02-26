@@ -122,7 +122,24 @@ $(function(){
                 $("#grid").children("[user-type='output_bar']").removeClass("moveDiv")
                 $("#grid").children("[user-type='table']").removeClass("moveDiv")
                 $("#grid").children("[user-type='output_map']").removeClass("moveDiv")
-                $(".facial").attr("hidden", "hidden")
+                var forceHide = setInterval(function(){
+                    $(".facial").attr("hidden", "hidden")
+                    $("#grid").children(".item").draggable({
+                        disabled:true
+                    })
+                    // 设置jsgrid为不可编辑
+                    $(".jsgrid").each(function(){
+                        $(this).jsGrid("option", "editing", false);
+                        $(this).jsGrid("option", "inserting", false);
+                        $(this).jsGrid("option", "deleting", false);
+                        $(this).find(".jsgrid-button").hide();
+                        // 如果存在.jsgrid-button且已经隐藏，则取消forceHide事件
+                        if($(this).find(".jsgrid-button").is(":hidden")){
+                            clearInterval(forceHide);
+                        }
+                    })
+                },500)
+                
                 modald.close()
                 try{
                     var logicFunction = Function(globalCode);
