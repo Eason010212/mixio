@@ -1268,7 +1268,7 @@ function view_project(projectName, projectType) {
             leftDiv.append(leftCard)
             rightDiv.append(rightCard)
             var leftCardTitle = $('<div class="card-header py-3" style="display:flex;align-items:center">')
-            var rightCardTitle = $('<div class="card-header py-3">')
+            var rightCardTitle = $('<div class="card-header py-3" style="display:flex;align-items:center">')
             leftCard.append(leftCardTitle)
             rightCard.append(rightCardTitle)
             leftCardTitle.append($('<h6 class="m-0 font-weight-bold text-primary">' + JSLang[lang].monitor + '</h6>'))
@@ -1361,6 +1361,43 @@ function view_project(projectName, projectType) {
                 downloadButton.attr("href", "data:text/csv;charset=utf-8,\ufeff" + encodeURIComponent(str))
             }
             rightCardTitle.append($('<h6 class="m-0 font-weight-bold text-primary">' + JSLang[lang].rtchart + '</h6>'))
+            // 两个select, 分别是rightCardGroup和rightCardLabel，显示按rightCardGroup分组显示rightCardLabel的数据
+            rightCardGroup = $('<select class="form-control" style="width:72px;height:24px;padding:0" disabled="disabled"></select>')
+            rightCardLabel = $('<select class="form-control" style="width:72px;height:24px;padding:0" disabled="disabled"></select>')
+            // on change
+            rightCardLabel.bind('change', function() {
+                fresh()
+            }
+            )
+            rightCardGroup.bind('change', function() {
+                // 如果值不为空
+                fresh()
+                if (rightCardGroup.val()) {
+                    // 把rightCardLabel的options清空，改为rightCardGroup的options(除了选中的)
+                    rightCardLabel.removeAttr("disabled")
+                    rightCardLabel.empty()
+                    var rightCardGroupChildren = rightCardGroup.children()
+                    for (var i = 0; i < rightCardGroupChildren.length; i++) {
+                        if (rightCardGroupChildren[i].value != rightCardGroup.val())
+                        {
+                            if(rightCardGroupChildren[i].value == '')
+                                rightCardLabel.append($("<option value=''>无</option>"))
+                            else
+                                rightCardLabel.append($("<option value='" + rightCardGroupChildren[i].value + "'>" + rightCardGroupChildren[i].value + "</option>"))
+                        }
+                    }
+                }
+                else{
+                    rightCardLabel.empty()
+                    rightCardLabel.attr("disabled", "disabled")
+                }
+            })
+            var rightGroupDiv = $('<div style="display:flex;align-items:center"></div>')
+            rightGroupDiv.append("<span style='font-weight:bold'>&nbsp;&nbsp;按&nbsp;</span>")
+            rightGroupDiv.append(rightCardGroup)
+            rightGroupDiv.append("<span style='font-weight:bold'>&nbsp;分组显示&nbsp;</span>")
+            rightGroupDiv.append(rightCardLabel)
+            rightCardTitle.append(rightGroupDiv)
             var leftCardBody = $('<div class="card-body" style="height:400px;padding:0">')
             var rightCardBody = $('<div class="card-body" style="height:400px">')
             leftCard.append(leftCardBody)
@@ -1494,44 +1531,147 @@ function view_project(projectName, projectType) {
                 }
 
                 var series = []
-                for (tableField in tableFields) {
-                    series.push({
-                        type: 'line',
-                        name: tableFields[tableField].name,
-                        data: [],
-                        oriData:[],
-                        connectNulls: true
-                    })
+
+                var last_group_options = []
+                for(child in rightCardGroup.children())
+                {
+                    if(rightCardGroup.children()[child].value)
+                        last_group_options.push(rightCardGroup.children()[child].value)
                 }
-                for (dataitem in dataset) {
-                    xAxis.data.unshift(dataset[dataitem][JSLang[lang].time].slice(11))
-                    if (isJSON(stringendecoder.decodeHtml(dataset[dataitem][JSLang[lang].value]))) {
-                        var json_parsed = JSON.parse(stringendecoder.decodeHtml(dataset[dataitem][JSLang[lang].value]))
-                        for (sery in series) {
-                            var seryName = series[sery].name
-                            if (seryName != JSLang[lang].time)
-                                if (json_parsed[seryName] || json_parsed[seryName] === 0) {
-                                    series[sery].data.unshift(parseFloat(json_parsed[seryName]))
-                                    series[sery].oriData.unshift(json_parsed[seryName])
-                                } else
-                                {
-                                    series[sery].data.unshift(NaN)
-                                    series[sery].oriData.unshift("-")
-                                }
+                var isUpdateGroup = false
+                var new_group_options = []
+                for (tableField in tableFields) {
+                    if (tableFields[tableField].name != JSLang[lang].time)
+                    {
+                        new_group_options.push(tableFields[tableField].name)
+                    }
+                }
+                // 判断是否需要更新group
+                if(last_group_options.length != new_group_options.length)
+                    isUpdateGroup = true
+                else
+                {
+                    for(var i=0;i<last_group_options.length;i++)
+                    {
+                        if(last_group_options[i] != new_group_options[i])
+                        {
+                            isUpdateGroup = true
+                            break
                         }
-                    } else {
-                        for (sery in series) {
-                            var seryName = series[sery].name
-                            if (seryName != JSLang[lang].time)
-                                if (seryName == JSLang[lang].value){
-                                    series[sery].data.unshift(parseFloat(dataset[dataitem][JSLang[lang].value]))
-                                    series[sery].oriData.unshift(dataset[dataitem][JSLang[lang].value])
+                    }
+                }
+                console.log(isUpdateGroup)
+                if(isUpdateGroup)
+                {
+                    rightCardGroup.empty()
+                    rightCardLabel.empty()
+                    rightCardGroup.append($("<option value=''>无</option>"))
+                    rightCardGroup.removeAttr("disabled")
+                    rightCardLabel.attr("disabled","disabled")
+                    for (tableField in tableFields) {
+                        if (tableFields[tableField].name != JSLang[lang].time)
+                        {
+                            rightCardGroup.append($("<option value='" + tableFields[tableField].name + "'>" + tableFields[tableField].name + "</option>"))
+                        }
+                    }
+                }
+                var isGrouping = false
+                if(rightCardGroup.val() && rightCardLabel.val())
+                    isGrouping = true
+                if(isGrouping)
+                {
+                    var groupBy = rightCardGroup.val()
+                    var valueUse = rightCardLabel.val()
+                    var allGroups = []
+                    for (dataitem in dataset){
+                        xAxis.data.unshift(dataset[dataitem][JSLang[lang].time].slice(11))
+                        if(isJSON(stringendecoder.decodeHtml(dataset[dataitem][JSLang[lang].value])))
+                        {
+                            var json_parsed = JSON.parse(stringendecoder.decodeHtml(dataset[dataitem][JSLang[lang].value]))
+                            if(json_parsed[groupBy] || json_parsed[groupBy] === 0 || json_parsed[groupBy] === false || json_parsed[groupBy] === "")
+                            {
+                                if(allGroups.indexOf(json_parsed[groupBy])==-1)
+                                    allGroups.push(json_parsed[groupBy])
+                            }
+                        }
+                    }
+                    for (group in allGroups) {
+                        var seriesData = []
+                        var seriesOriData = []
+                        for (dataitem in dataset) {
+                            if(isJSON(stringendecoder.decodeHtml(dataset[dataitem][JSLang[lang].value])))
+                            {
+                                var json_parsed = JSON.parse(stringendecoder.decodeHtml(dataset[dataitem][JSLang[lang].value]))
+                                if(json_parsed[groupBy] == allGroups[group])
+                                {
+                                    if(json_parsed[valueUse] || json_parsed[valueUse] === 0 || json_parsed[valueUse] === false || json_parsed[valueUse] === "")
+                                    {
+                                        seriesData.unshift(parseFloat(json_parsed[valueUse]))
+                                        seriesOriData.unshift(json_parsed[valueUse])
+                                    }
+                                    else
+                                    {
+                                        seriesData.unshift(NaN)
+                                        seriesOriData.unshift("-")
+                                    }
                                 }
                                 else
                                 {
-                                    series[sery].data.unshift(NaN)
-                                    series[sery].oriData.unshift("-")
+                                    seriesData.unshift(NaN)
+                                    seriesOriData.unshift("-")
                                 }
+                            }
+                        }
+                        series.push({
+                            type: 'line',
+                            name: allGroups[group],
+                            data: seriesData,
+                            oriData: seriesOriData,
+                            connectNulls: true
+                        })
+                        console.log(series)
+                    }
+                }
+                else{
+                    for (tableField in tableFields) {
+                        series.push({
+                            type: 'line',
+                            name: tableFields[tableField].name,
+                            data: [],
+                            oriData:[],
+                            connectNulls: true
+                        })
+                    }
+                    for (dataitem in dataset) {
+                        xAxis.data.unshift(dataset[dataitem][JSLang[lang].time].slice(11))
+                        if (isJSON(stringendecoder.decodeHtml(dataset[dataitem][JSLang[lang].value]))) {
+                            var json_parsed = JSON.parse(stringendecoder.decodeHtml(dataset[dataitem][JSLang[lang].value]))
+                            for (sery in series) {
+                                var seryName = series[sery].name
+                                if (seryName != JSLang[lang].time)
+                                    if (json_parsed[seryName] || json_parsed[seryName] === 0) {
+                                        series[sery].data.unshift(parseFloat(json_parsed[seryName]))
+                                        series[sery].oriData.unshift(json_parsed[seryName])
+                                    } else
+                                    {
+                                        series[sery].data.unshift(NaN)
+                                        series[sery].oriData.unshift("-")
+                                    }
+                            }
+                        } else {
+                            for (sery in series) {
+                                var seryName = series[sery].name
+                                if (seryName != JSLang[lang].time)
+                                    if (seryName == JSLang[lang].value){
+                                        series[sery].data.unshift(parseFloat(dataset[dataitem][JSLang[lang].value]))
+                                        series[sery].oriData.unshift(dataset[dataitem][JSLang[lang].value])
+                                    }
+                                    else
+                                    {
+                                        series[sery].data.unshift(NaN)
+                                        series[sery].oriData.unshift("-")
+                                    }
+                            }
                         }
                     }
                 }
