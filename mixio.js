@@ -1,5 +1,61 @@
 var VERSION = "1.10.0"
 
+defaultCrt = 
+`-----BEGIN CERTIFICATE-----
+MIID0TCCArmgAwIBAgICYxswDQYJKoZIhvcNAQELBQAwczELMAkGA1UEBhMCQ04x
+EDAOBgNVBAgMB1RpYW5qaW4xEDAOBgNVBAcMB1RpYW5qaW4xFTATBgNVBAoMDENI
+SU5BU1NMIEluYzEpMCcGA1UEAwwgQ0hJTkFTU0wgQ2VydGlmaWNhdGlvbiBBdXRo
+b3JpdHkwHhcNMjQwOTI5MTUyMDI4WhcNMjUwOTI5MTUyMDI4WjB3MQswCQYDVQQG
+EwJDTjEOMAwGA1UECAwFTWl4bHkxDjAMBgNVBAoMBU1peGx5MQ4wDAYDVQQLDAVN
+aXhseTEWMBQGA1UEAwwNZXhhbXBsZS5taXhseTEgMB4GCSqGSIb3DQEJARYRZXhh
+bXBsZUBtaXhseS52b20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDA
+EMX1qHnw4026dMFrNTuzwdZiSl8ojgzrMVj+sy287hismsj3YDNlkwdhTUGbvqwR
+YOBB5pupHMeKUL22UU3czHbvwghTC4S+Y7kQG16uFXm8Nxik1KYXyV0IuYd8Db8I
+u1SDH09wN4+JralpTqCRT94hrFpODbLwWldhgQadVuhh0IfkJowZS7/PehwlXFwI
+vNg9i7XJFLTqJYvnm7vG95lfCwqf3bAjcuwoM52vtbVQ4OK0O0NKnIuDmpn8kLSH
+nro4yYZvcDwp2u2Pm5jMx8R4XpRgoNliOYhqGOUSEckvN1k4dgfM8I2OHszEVLKM
+c2Y73v7s4V9cuSRlS9Q5AgMBAAGjazBpMB8GA1UdIwQYMBaAFFwfI/rI4SExwtg3
+9oj80m/CVEMzMAkGA1UdEwQCMAAwCwYDVR0PBAQDAgTwMC4GA1UdEQQnMCWCCWxv
+Y2FsaG9zdIIMd3d3LnRlc3QuY29thwTAqAABhwR/AAABMA0GCSqGSIb3DQEBCwUA
+A4IBAQAroAByalkB/CtXPXH+coWAJGlwJf16p8fHvQzZsY4ENIwZn/C5y5GTIST+
+BQs3ScHOlox2WrVEK2AsIrwt/Kyr2gGLw/qDdpPP3HZIgFFl0FII7OrRyVI5wu3C
+6z+I/KorzvZX07eVevMc/S02zsmt2RdWpfdf+kZXn9lvVkrUfsvfP69cUxiO0qmh
+D/GvjSoGgz2k6aPa9hC8nu8EwAs4I3dY7NGQFED+xa+L7lL0Bp5AKqlQB9GMYaJ6
+bTz4wxPbQbAeCHlF0MIIM5V8imnyIzGJGBNAnZxy+Wkd2+NZXqSTvo1aPxJnhOHC
+EljElgZJBd+WCYFPEtdruklvlE93
+-----END CERTIFICATE-----
+`
+defaultPem = 
+`-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDAEMX1qHnw4026
+dMFrNTuzwdZiSl8ojgzrMVj+sy287hismsj3YDNlkwdhTUGbvqwRYOBB5pupHMeK
+UL22UU3czHbvwghTC4S+Y7kQG16uFXm8Nxik1KYXyV0IuYd8Db8Iu1SDH09wN4+J
+ralpTqCRT94hrFpODbLwWldhgQadVuhh0IfkJowZS7/PehwlXFwIvNg9i7XJFLTq
+JYvnm7vG95lfCwqf3bAjcuwoM52vtbVQ4OK0O0NKnIuDmpn8kLSHnro4yYZvcDwp
+2u2Pm5jMx8R4XpRgoNliOYhqGOUSEckvN1k4dgfM8I2OHszEVLKMc2Y73v7s4V9c
+uSRlS9Q5AgMBAAECggEBAKNfISQe1OrETl+l5MiOlWQII5Wj8WGLww1kAnFUdDla
+xf48A2n4mH90Gzj3ADG8dJyrrNYhlJK6+jh7CYRFkFeaTCkRAQeyqo1QQiCjR1wI
+xG4G5519jHJ7Q/mh5s7s2mxQ/Eg0n9uyRxQzdgEvcoFoUGiQNJhkKqssDVvQ5pF5
+3CGCOx9Rt6cX+BWdZyV46HBtBSpkx+0kETIpv1YBvo6JKubrcf8zTMXI8tEZ12qU
+LDybZvl6JrUXD0QL+I1uhDIsRYIGbTZZRMOpukhyXuMGu/O249z/gI9WtdTzCQLU
+YUNxwK6TezmzJMGrZgD+bJxFJSiHufIw9ROaWE2F30kCgYEA3kOf24WGUxlzwGvj
+IJMoFOIlQ3xXlazRS09HmlSIeTJiBOtPQlvJHv+I9rBHRNVTz7mRJpmRZIq4Nkbo
+miFrGbwu2eqa+q/CCxfbrv8ZFV9OJYD0v4mSgLarDgctfhC3iUkaQMFqD24L6T+1
+ENPCpeV6H73Ize8ecn01bGoTRJMCgYEA3Te9Yun4L/6t1dS8dhH16ALsBCWuta47
+nQJ2xrrZMWdxlESbLqbmV2bE7u3I+/yKoF0hFFFASxNCxpP/ZQRcsfIXrcL7SmW5
+nwzz1mSWInN7xltWSegKhxNdAUDeWfINznPaho7s/eKY7ogla9ShFhc6Xl+uj2+e
+Iq6/Vfb8b4MCgYEAyKoFCQvj2eKAvpio1iAFb9U8D1GTQW5lBrjszEjFbaYvGIHZ
+bO+xBGtwHEfKEDsJD+FZSqAaw8r5xQb/uSeyqelb4yIMCYfkiF9h1vw4iTMiOnnS
+fZqWyd4hUOjqCYbOLQPyz8PPHV8dIdiCgE6uzVgAieeuAz5/Hp4sPVUHUEECgYA7
+8eHJDvupDctPWWFkYUOQhlIsYYWxR7BxwHwtJ+64+34Enn6qqqFaZ8fPsvG2jt2F
+zRasqcPRVDvREcOwPPldYuvVszNjGqOtHNZqb0Fbvo1418FPL6jCp5WZRFm8Z+Ij
+4rMBqXNA7QliAdSaHrk0AkFX13e2+JkSbuX8RnxrPwKBgHVMwcjNJe19sXb/F4l3
+ag7Z9uRvToDKyCZ73WHFDUItJcCAITuZpxAdaJdtCFWGHdu26rza/H7wEgKN/Lem
+HKqIhewfd473iyVbGW5PfCPXEH4oJI5NLbd2MvUJPi8oSHupmc+JbkD8n2uMU7s3
+mUGpI4CFOgtRwpo9KRebaqfq
+-----END PRIVATE KEY-----
+`
+
 // change pwd to src
 if (process.argv[0].indexOf("node") != -1) {
     // exec from source
@@ -42,6 +98,7 @@ var readline = require('readline');
 var iconv = require('iconv-lite');
 var request = require('request');
 const cors = require('cors');
+var syncRequest = require('sync-request');
 var globalQPSControl = {}
 
 function init(cb){
@@ -56,6 +113,8 @@ function init(cb){
             "MIXIO_MQTT_PORT": 1883,
             "MIXIO_WS_PORT": 8083,
             "MIXIO_WSS_PORT": 8084,
+            "HTTPS_CRT_FILE": "config/certs/file.crt",
+            "HTTPS_PRIVATE_PEM": "config/certs/private.pem",
             "MAX_PROJECT_NUM_PER_USER": 20,
             "MAX_MESSAGE_PER_USER": 1000,
             "MAX_MESSAGE_PER_SECOND": 5,
@@ -76,62 +135,8 @@ function init(cb){
           }`
         fs.writeFileSync("config/config.json", defaultConfig)
         fs.mkdirSync("config/certs")
-        var defaultCrt = 
-`-----BEGIN CERTIFICATE-----
-MIID0TCCArmgAwIBAgICYxswDQYJKoZIhvcNAQELBQAwczELMAkGA1UEBhMCQ04x
-EDAOBgNVBAgMB1RpYW5qaW4xEDAOBgNVBAcMB1RpYW5qaW4xFTATBgNVBAoMDENI
-SU5BU1NMIEluYzEpMCcGA1UEAwwgQ0hJTkFTU0wgQ2VydGlmaWNhdGlvbiBBdXRo
-b3JpdHkwHhcNMjQwOTI5MTUyMDI4WhcNMjUwOTI5MTUyMDI4WjB3MQswCQYDVQQG
-EwJDTjEOMAwGA1UECAwFTWl4bHkxDjAMBgNVBAoMBU1peGx5MQ4wDAYDVQQLDAVN
-aXhseTEWMBQGA1UEAwwNZXhhbXBsZS5taXhseTEgMB4GCSqGSIb3DQEJARYRZXhh
-bXBsZUBtaXhseS52b20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDA
-EMX1qHnw4026dMFrNTuzwdZiSl8ojgzrMVj+sy287hismsj3YDNlkwdhTUGbvqwR
-YOBB5pupHMeKUL22UU3czHbvwghTC4S+Y7kQG16uFXm8Nxik1KYXyV0IuYd8Db8I
-u1SDH09wN4+JralpTqCRT94hrFpODbLwWldhgQadVuhh0IfkJowZS7/PehwlXFwI
-vNg9i7XJFLTqJYvnm7vG95lfCwqf3bAjcuwoM52vtbVQ4OK0O0NKnIuDmpn8kLSH
-nro4yYZvcDwp2u2Pm5jMx8R4XpRgoNliOYhqGOUSEckvN1k4dgfM8I2OHszEVLKM
-c2Y73v7s4V9cuSRlS9Q5AgMBAAGjazBpMB8GA1UdIwQYMBaAFFwfI/rI4SExwtg3
-9oj80m/CVEMzMAkGA1UdEwQCMAAwCwYDVR0PBAQDAgTwMC4GA1UdEQQnMCWCCWxv
-Y2FsaG9zdIIMd3d3LnRlc3QuY29thwTAqAABhwR/AAABMA0GCSqGSIb3DQEBCwUA
-A4IBAQAroAByalkB/CtXPXH+coWAJGlwJf16p8fHvQzZsY4ENIwZn/C5y5GTIST+
-BQs3ScHOlox2WrVEK2AsIrwt/Kyr2gGLw/qDdpPP3HZIgFFl0FII7OrRyVI5wu3C
-6z+I/KorzvZX07eVevMc/S02zsmt2RdWpfdf+kZXn9lvVkrUfsvfP69cUxiO0qmh
-D/GvjSoGgz2k6aPa9hC8nu8EwAs4I3dY7NGQFED+xa+L7lL0Bp5AKqlQB9GMYaJ6
-bTz4wxPbQbAeCHlF0MIIM5V8imnyIzGJGBNAnZxy+Wkd2+NZXqSTvo1aPxJnhOHC
-EljElgZJBd+WCYFPEtdruklvlE93
------END CERTIFICATE-----
-`
+        
         fs.writeFileSync("config/certs/file.crt", defaultCrt)
-        var defaultPem = 
-`-----BEGIN PRIVATE KEY-----
-MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDAEMX1qHnw4026
-dMFrNTuzwdZiSl8ojgzrMVj+sy287hismsj3YDNlkwdhTUGbvqwRYOBB5pupHMeK
-UL22UU3czHbvwghTC4S+Y7kQG16uFXm8Nxik1KYXyV0IuYd8Db8Iu1SDH09wN4+J
-ralpTqCRT94hrFpODbLwWldhgQadVuhh0IfkJowZS7/PehwlXFwIvNg9i7XJFLTq
-JYvnm7vG95lfCwqf3bAjcuwoM52vtbVQ4OK0O0NKnIuDmpn8kLSHnro4yYZvcDwp
-2u2Pm5jMx8R4XpRgoNliOYhqGOUSEckvN1k4dgfM8I2OHszEVLKMc2Y73v7s4V9c
-uSRlS9Q5AgMBAAECggEBAKNfISQe1OrETl+l5MiOlWQII5Wj8WGLww1kAnFUdDla
-xf48A2n4mH90Gzj3ADG8dJyrrNYhlJK6+jh7CYRFkFeaTCkRAQeyqo1QQiCjR1wI
-xG4G5519jHJ7Q/mh5s7s2mxQ/Eg0n9uyRxQzdgEvcoFoUGiQNJhkKqssDVvQ5pF5
-3CGCOx9Rt6cX+BWdZyV46HBtBSpkx+0kETIpv1YBvo6JKubrcf8zTMXI8tEZ12qU
-LDybZvl6JrUXD0QL+I1uhDIsRYIGbTZZRMOpukhyXuMGu/O249z/gI9WtdTzCQLU
-YUNxwK6TezmzJMGrZgD+bJxFJSiHufIw9ROaWE2F30kCgYEA3kOf24WGUxlzwGvj
-IJMoFOIlQ3xXlazRS09HmlSIeTJiBOtPQlvJHv+I9rBHRNVTz7mRJpmRZIq4Nkbo
-miFrGbwu2eqa+q/CCxfbrv8ZFV9OJYD0v4mSgLarDgctfhC3iUkaQMFqD24L6T+1
-ENPCpeV6H73Ize8ecn01bGoTRJMCgYEA3Te9Yun4L/6t1dS8dhH16ALsBCWuta47
-nQJ2xrrZMWdxlESbLqbmV2bE7u3I+/yKoF0hFFFASxNCxpP/ZQRcsfIXrcL7SmW5
-nwzz1mSWInN7xltWSegKhxNdAUDeWfINznPaho7s/eKY7ogla9ShFhc6Xl+uj2+e
-Iq6/Vfb8b4MCgYEAyKoFCQvj2eKAvpio1iAFb9U8D1GTQW5lBrjszEjFbaYvGIHZ
-bO+xBGtwHEfKEDsJD+FZSqAaw8r5xQb/uSeyqelb4yIMCYfkiF9h1vw4iTMiOnnS
-fZqWyd4hUOjqCYbOLQPyz8PPHV8dIdiCgE6uzVgAieeuAz5/Hp4sPVUHUEECgYA7
-8eHJDvupDctPWWFkYUOQhlIsYYWxR7BxwHwtJ+64+34Enn6qqqFaZ8fPsvG2jt2F
-zRasqcPRVDvREcOwPPldYuvVszNjGqOtHNZqb0Fbvo1418FPL6jCp5WZRFm8Z+Ij
-4rMBqXNA7QliAdSaHrk0AkFX13e2+JkSbuX8RnxrPwKBgHVMwcjNJe19sXb/F4l3
-ag7Z9uRvToDKyCZ73WHFDUItJcCAITuZpxAdaJdtCFWGHdu26rza/H7wEgKN/Lem
-HKqIhewfd473iyVbGW5PfCPXEH4oJI5NLbd2MvUJPi8oSHupmc+JbkD8n2uMU7s3
-mUGpI4CFOgtRwpo9KRebaqfq
------END PRIVATE KEY-----
-`
         fs.writeFileSync("config/certs/private.pem", defaultPem)
     }
     if (!fs.existsSync("storage")) {
@@ -583,10 +588,69 @@ async function daemon_start() {
 }
 
 var mixioServer = function() {
-    var keyPath = "config/certs/private.pem"
-    var crtPath = "config/certs/file.crt"
-    var privateKey = fs.readFileSync(keyPath, 'utf8');
-    var certificate = fs.readFileSync(crtPath, 'utf8');
+    var keyPath = HTTPS_PRIVATE_PEM
+    var crtPath = HTTPS_CRT_FILE
+    var privateKey = ""
+    var certificate = ""
+    // if keyPath and crtPath are http/https, first download to configs/certs/
+    var privateKeyFileName = keyPath.split("/").pop()
+    var crtFileName = crtPath.split("/").pop()
+    if (keyPath.indexOf("http") == 0) {
+        console.log("[INFO] Downloading private key from", keyPath)
+        var filePath = "config/certs/" + privateKeyFileName
+        // 如果存在就覆盖
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath)
+        }
+        // 下载文件
+        try{
+            var body = syncRequest('GET', keyPath).getBody()
+            // 不存在就创建
+            fs.writeFileSync(filePath, body, 'utf8')
+            privateKey = fs.readFileSync(filePath, 'utf8')
+            console.log("[INFO] Private key downloaded to", filePath)
+        }catch(e){
+            console.log("[ERROR] Failed to download private key from", keyPath)
+            console.log("[INFO] Falling back to default private key")
+            privateKey = defaultPem
+        }
+    }
+    else{
+        if (fs.existsSync(keyPath)) {
+            privateKey = fs.readFileSync(keyPath, 'utf8')
+        } else {
+            console.log("[ERROR] Private key path not found")
+            console.log("[INFO] Falling back to default private key")
+            privateKey = defaultPem
+        }
+    }
+    if (crtPath.indexOf("http") == 0) {
+        console.log("[INFO] Downloading certificate from", crtPath)
+        var filePath = "config/certs/" + crtFileName
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath)
+        }
+        try{
+            var body = syncRequest('GET', crtPath).getBody()
+            fs.writeFileSync(filePath, body, 'utf8')
+            certificate = fs.readFileSync(filePath, 'utf8')
+            console.log("[INFO] Certificate downloaded to", filePath)
+        }
+        catch(e){
+            console.log("[ERROR] Failed to download certificate from", crtPath)
+            console.log("[INFO] Falling back to default certificate")
+            certificate = defaultCrt
+        }
+    }
+    else{
+        if (fs.existsSync(crtPath)) {
+            certificate = fs.readFileSync(crtPath, 'utf8')
+        } else {
+            console.log("[ERROR] Certificate path not found")
+            console.log("[INFO] Falling back to default certificate")
+            certificate = defaultCrt
+        }
+    }
     
     var credentials = {
         key: privateKey,
@@ -2460,6 +2524,8 @@ init(function(res){
 
         MAX_MESSAGE_PER_USER = configs["MAX_MESSAGE_PER_USER"]
         MAX_MESSAGE_PER_SECOND = configs["MAX_MESSAGE_PER_SECOND"]
+        HTTPS_CRT_FILE = configs["HTTPS_CRT_FILE"]
+        HTTPS_PRIVATE_PEM = configs["HTTPS_PRIVATE_PEM"]
         if (args.length > 1 || (args.length == 0 && process.platform != "win32")) {
             console.log("Invalid parameter(s). Use \"mixio help\" for help.")
         } else {

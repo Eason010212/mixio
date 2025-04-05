@@ -87,23 +87,25 @@ https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
 2. config.json内容可修改，重启服务器后生效
 3. MIXIO_HTTP_PORT - int，HTTP端口，默认为8080
 4. MIXIO_HTTPS_PORT - int，HTTP端口，默认为8443
-5. MIXIO_MQTT_PORT - int, MQTT端口, 默认为1883
-6. MIXIO_WS_PORT - int, MQTT over WebSocket端口, 默认为8083
-7. MIXIO_WSS_PORT - int, MQTT over WebSocketS端口, 默认为8084
-8. MAX_PROJECT_NUM_PER_USER - int，每个用户的最大项目数，默认为20
-9. MAX_MESSAGE_PER_USER - int，每个用户的最大离线消息存储数，默认为1000
-10. MAX_MESSAGE_PER_SECOND - int，每个用户每秒的最大消息数，默认为5
-11. ALLOW_REGISTER - bool，是否允许自主注册，默认为true
-12. ALLOW_HOOK - bool，是否允许离线存储消息，默认为true
-13. OFFLINE_MODE - bool，是否禁用天气/地图数据，默认为true
-14. BAIDU_MAP_AK - string，百度地图客户端应用AK（OFFLINE_MODE=false时必须配置），默认为""
-15. BAIDU_MAP_SERVER_AK - string，百度地图服务端应用AK（OFFLINE_MODE=false时必须配置），默认为""
-16. ADMIN_USERNAME - string，管理后台用户名，默认为"admin"
-17. ADMIN_PASSWORD - string，管理后台密码，默认为"public"
-18. STORAGE_ENGINE - string，数据库引擎，默认为"sqlite"
-19. MYSQL_HOST - string，MySQL地址（STORAGE_ENGINE="mysql"时必须配置），默认为"localhost"
-20. MYSQL_PORT - int，MySQL地址（STORAGE_ENGINE="mysql"时必须配置），默认为3306
-21. MYSQL_USER - string，MySQL用户名（STORAGE_ENGINE="mysql"时必须配置），默认为""
-22. MYSQL_PASS - string，MySQL密码（STORAGE_ENGINE="mysql"时必须配置），默认为""
-23. MYSQL_DB - string，MySQL数据库名（STORAGE_ENGINE="mysql"时必须配置），默认为"mixio",
-24. FOOTER - string，显示在首页的备案信息，公网部署时请务必配置此项（支持HTML语言，请注意为双引号添加转义字符\\），默认为""
+5. HTTPS_PRIVATE_PEM - string, 私钥链接，支持本地地址和在线地址
+6. HTTPS_CRT_FILE - string, 证书链接，支持本地地址和在线地址
+7. MIXIO_MQTT_PORT - int, MQTT端口, 默认为1883
+8. MIXIO_WS_PORT - int, MQTT over WebSocket端口, 默认为8083
+9. MIXIO_WSS_PORT - int, MQTT over WebSocketS端口, 默认为8084
+10. MAX_PROJECT_NUM_PER_USER - int，每个用户的最大项目数，默认为20
+11. MAX_MESSAGE_PER_USER - int，每个用户的最大离线消息存储数，默认为1000
+12. MAX_MESSAGE_PER_SECOND - int，每个用户每秒的最大消息数，默认为5
+13. ALLOW_REGISTER - bool，是否允许自主注册，默认为true
+14. ALLOW_HOOK - bool，是否允许离线存储消息，默认为true
+15. OFFLINE_MODE - bool，是否禁用天气/地图数据，默认为true
+16. BAIDU_MAP_AK - string，百度地图客户端应用AK（OFFLINE_MODE=false时必须配置），默认为""
+17. BAIDU_MAP_SERVER_AK - string，百度地图服务端应用AK（OFFLINE_MODE=false时必须配置），默认为""
+18. ADMIN_USERNAME - string，管理后台用户名，默认为"admin"
+19. ADMIN_PASSWORD - string，管理后台密码，默认为"public"
+20. STORAGE_ENGINE - string，数据库引擎，默认为"sqlite"
+21. MYSQL_HOST - string，MySQL地址（STORAGE_ENGINE="mysql"时必须配置），默认为"localhost"
+23. MYSQL_PORT - int，MySQL地址（STORAGE_ENGINE="mysql"时必须配置），默认为3306
+24. MYSQL_USER - string，MySQL用户名（STORAGE_ENGINE="mysql"时必须配置），默认为""
+25. MYSQL_PASS - string，MySQL密码（STORAGE_ENGINE="mysql"时必须配置），默认为""
+26. MYSQL_DB - string，MySQL数据库名（STORAGE_ENGINE="mysql"时必须配置），默认为"mixio",
+27. FOOTER - string，显示在首页的备案信息，公网部署时请务必配置此项（支持HTML语言，请注意为双引号添加转义字符\\），默认为""
