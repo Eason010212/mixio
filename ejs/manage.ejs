@@ -258,6 +258,14 @@
                                                 <input type="text" id="BAIDU_MAP_SERVER_AK">
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <td>
+                                                <span>百度统计链接AK：</span>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="BAIDU_STAT_LINK">
+                                            </td>
+                                        </tr>
                                     </table>
                                     <button class="btn btn-lg btn-success" style="margin-top:20px;"  onclick="saveAndRestart()" id="saveAndRestart"><i class="fa fa-check"></i> 保存设置并重新启动</button>
                                 </div>
@@ -354,6 +362,7 @@
         var OFFLINE_MODE = <%=configs["OFFLINE_MODE"]%>
         var BAIDU_MAP_AK = "<%=configs["BAIDU_MAP_AK"]%>"
         var BAIDU_MAP_SERVER_AK = "<%=configs["BAIDU_MAP_SERVER_AK"]%>"
+        var BAIDU_STAT_LINK = "<%=configs["BAIDU_STAT_LINK"]%>"
         var ADMIN_USERNAME = "<%=configs["ADMIN_USERNAME"]%>"
         var ADMIN_PASSWORD = "<%=configs["ADMIN_PASSWORD"]%>"
         $("#OFFLINE_MODE").bind('change',function(){
@@ -386,6 +395,7 @@
             $("#MAX_MESSAGE_PER_SECOND").val(MAX_MESSAGE_PER_SECOND)
             $("#ADMIN_USERNAME").val(ADMIN_USERNAME)
             $("#ADMIN_PASSWORD").val(ADMIN_PASSWORD)
+            $("#BAIDU_STAT_LINK").val(BAIDU_STAT_LINK)
             if($("#OFFLINE_MODE").prop("checked"))
             {
                 $("#BAIDU_MAP_AK").attr("disabled","true")
@@ -420,6 +430,7 @@
             configs["BAIDU_MAP_SERVER_AK"] = $("#BAIDU_MAP_SERVER_AK").val()
             configs["ADMIN_USERNAME"] = $("#ADMIN_USERNAME").val()
             configs["ADMIN_PASSWORD"] = $("#ADMIN_PASSWORD").val()
+            configs["BAIDU_STAT_LINK"] = $("#BAIDU_STAT_LINK").val()
             $.get('/saveAndRestart',{'configs':JSON.stringify(configs,null,2)},function(res){
                 if(res=="1")
                 {

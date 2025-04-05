@@ -123,6 +123,7 @@ function init(cb){
             "OFFLINE_MODE": true,
             "BAIDU_MAP_AK": "",
             "BAIDU_MAP_SERVER_AK": "",
+            "BAIDU_STAT_LINK": "",
             "ADMIN_USERNAME":"admin",
             "ADMIN_PASSWORD":"public",
             "STORAGE_ENGINE":"sqlite",
@@ -965,7 +966,8 @@ var mixioServer = function() {
     app.get('/index', function(req, res) {
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
             'main':fs.existsSync("config/certs/chain.crt"),
-            'mixly':fs.existsSync("../mixly")
+            'mixly':fs.existsSync("../mixly"),
+            'configs': configs
         }, function(err, data) {
             res.send(data)
         })
