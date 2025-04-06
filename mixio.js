@@ -98,7 +98,7 @@ var readline = require('readline');
 var iconv = require('iconv-lite');
 var request = require('request');
 const cors = require('cors');
-var syncRequest = require('sync-request');
+const axios = require('axios');
 var globalQPSControl = {}
 
 function init(cb){
@@ -588,24 +588,23 @@ async function daemon_start() {
     })
 }
 
-var mixioServer = function() {
+var mixioServer = async function() {
     var keyPath = HTTPS_PRIVATE_PEM
     var crtPath = HTTPS_CRT_FILE
     var privateKey = ""
     var certificate = ""
-    // if keyPath and crtPath are http/https, first download to configs/certs/
-    var privateKeyFileName = keyPath.split("/").pop()
-    var crtFileName = crtPath.split("/").pop()
     if (keyPath.indexOf("http") == 0) {
-        console.log("[INFO] Downloading private key from", keyPath)
-        var filePath = "config/certs/" + privateKeyFileName
-        // 如果存在就覆盖
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath)
-        }
-        // 下载文件
         try{
-            var body = syncRequest('GET', keyPath).getBody()
+            var privateKeyFileName = keyPath.split("/").pop()
+            console.log("[INFO] Downloading private key from", keyPath)
+            var filePath = "config/certs/" + privateKeyFileName
+            // 如果存在就覆盖
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath)
+            }
+            // 下载文件
+            var resp = await axios.get(keyPath)
+            body = resp.data
             // 不存在就创建
             fs.writeFileSync(filePath, body, 'utf8')
             privateKey = fs.readFileSync(filePath, 'utf8')
@@ -626,13 +625,15 @@ var mixioServer = function() {
         }
     }
     if (crtPath.indexOf("http") == 0) {
-        console.log("[INFO] Downloading certificate from", crtPath)
-        var filePath = "config/certs/" + crtFileName
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath)
-        }
         try{
-            var body = syncRequest('GET', crtPath).getBody()
+            var crtFileName = crtPath.split("/").pop()
+            console.log("[INFO] Downloading certificate from", crtPath)
+            var filePath = "config/certs/" + crtFileName
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath)
+            }
+            var resp = await axios.get(crtPath)
+            body = resp.data
             fs.writeFileSync(filePath, body, 'utf8')
             certificate = fs.readFileSync(filePath, 'utf8')
             console.log("[INFO] Certificate downloaded to", filePath)
