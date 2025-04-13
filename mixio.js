@@ -1,7 +1,7 @@
 var VERSION = "1.10.0"
 
-defaultCrt = 
-`-----BEGIN CERTIFICATE-----
+defaultCrt =
+    `-----BEGIN CERTIFICATE-----
 MIID0TCCArmgAwIBAgICYxswDQYJKoZIhvcNAQELBQAwczELMAkGA1UEBhMCQ04x
 EDAOBgNVBAgMB1RpYW5qaW4xEDAOBgNVBAcMB1RpYW5qaW4xFTATBgNVBAoMDENI
 SU5BU1NMIEluYzEpMCcGA1UEAwwgQ0hJTkFTU0wgQ2VydGlmaWNhdGlvbiBBdXRo
@@ -25,8 +25,8 @@ bTz4wxPbQbAeCHlF0MIIM5V8imnyIzGJGBNAnZxy+Wkd2+NZXqSTvo1aPxJnhOHC
 EljElgZJBd+WCYFPEtdruklvlE93
 -----END CERTIFICATE-----
 `
-defaultPem = 
-`-----BEGIN PRIVATE KEY-----
+defaultPem =
+    `-----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDAEMX1qHnw4026
 dMFrNTuzwdZiSl8ojgzrMVj+sy287hismsj3YDNlkwdhTUGbvqwRYOBB5pupHMeK
 UL22UU3czHbvwghTC4S+Y7kQG16uFXm8Nxik1KYXyV0IuYd8Db8Iu1SDH09wN4+J
@@ -59,14 +59,14 @@ mUGpI4CFOgtRwpo9KRebaqfq
 // change pwd to src
 if (process.argv[0].indexOf("node") != -1) {
     // exec from source
-    process.chdir(process.argv[1].replace("mixio.js",""))
+    process.chdir(process.argv[1].replace("mixio.js", ""))
 } else {
     // exec from binary
-    if(process.platform == "win32") {
-        process.chdir(process.argv[0].replace("mixio.exe",""))
+    if (process.platform == "win32") {
+        process.chdir(process.argv[0].replace("mixio.exe", ""))
     }
-    if(process.platform == "linux") {
-        process.chdir(process.argv[0].slice(0,process.argv[0].lastIndexOf("/")) + "/")
+    if (process.platform == "linux") {
+        process.chdir(process.argv[0].slice(0, process.argv[0].lastIndexOf("/")) + "/")
     }
 }
 var spawnTime = new Date()
@@ -75,7 +75,7 @@ var logFileName = "logs/" + [
 ].join("-") + ".log"
 const { spawn, exec } = require('child_process');
 var fs = require('fs-extra')
-// if windows, clear C:\Users\%username%\AppData\Local\Temp\pkg
+    // if windows, clear C:\Users\%username%\AppData\Local\Temp\pkg
 if (process.platform == "win32") {
     fs.emptyDirSync(process.env.TEMP + "/pkg")
 }
@@ -101,7 +101,7 @@ const cors = require('cors');
 const axios = require('axios');
 var globalQPSControl = {}
 
-function init(cb){
+function init(cb) {
     if (!fs.existsSync("logs")) {
         fs.mkdirSync("logs")
     }
@@ -136,7 +136,7 @@ function init(cb){
           }`
         fs.writeFileSync("config/config.json", defaultConfig)
         fs.mkdirSync("config/certs")
-        
+
         fs.writeFileSync("config/certs/file.crt", defaultCrt)
         fs.writeFileSync("config/certs/private.pem", defaultPem)
     }
@@ -146,20 +146,17 @@ function init(cb){
             if (err) {
                 console.log(err)
                 cb(false)
-            }
-            else{
+            } else {
                 newDB.run(`CREATE TABLE "devices" (
                     "userName"	TEXT,
                     "clientid"	TEXT,
                     "timestamp"	INTEGER DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY("clientid")
-                )`,function(err){
-                    if(err){
+                )`, function(err) {
+                    if (err) {
                         console.log(err)
                         cb(false)
-                    }
-                    else
-                    {
+                    } else {
                         newDB.run(`CREATE TABLE "project" (
                             "projectName"	TEXT,
                             "userName"	TEXT,
@@ -168,13 +165,11 @@ function init(cb){
                             "logicStorage"	TEXT,
                             "timestamp"	INTEGER DEFAULT CURRENT_TIMESTAMP,
                             "projectType"	INTEGER
-                        )`, function(err){
-                            if(err){
+                        )`, function(err) {
+                            if (err) {
                                 console.log(err)
                                 cb(false)
-                            }
-                            else
-                            {
+                            } else {
                                 newDB.run(`CREATE TABLE "share" (
                                     "shareid"	TEXT,
                                     "userName"	TEXT,
@@ -185,26 +180,21 @@ function init(cb){
                                     "timeStamp"	INTEGER DEFAULT CURRENT_TIMESTAMP,
                                     "status"	INTEGER DEFAULT 1,
                                     "shareCount"	INTEGER DEFAULT 0
-                                )`, function(err){
-                                    if(err){
+                                )`, function(err) {
+                                    if (err) {
                                         console.log(err)
                                         cb(false)
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         newDB.run(`CREATE TABLE "share_key" (
                                             "userName"	TEXT,
                                             "projectPass"	TEXT,
                                             "projectName"	TEXT,
                                             "share_key"	TEXT
-                                        )`, function(err){
-                                            if(err)
-                                            {
+                                        )`, function(err) {
+                                            if (err) {
                                                 console.log(err)
                                                 cb(false)
-                                            }
-                                            else
-                                            {
+                                            } else {
                                                 newDB.run(`CREATE TABLE "user" (
                                                     "id"	INTEGER,
                                                     "username"	TEXT,
@@ -215,25 +205,19 @@ function init(cb){
                                                     "question"	TEXT,
                                                     "answer"	TEXT,
                                                     PRIMARY KEY("id" AUTOINCREMENT)
-                                                )`, function(err){
-                                                    if(err)
-                                                    {
+                                                )`, function(err) {
+                                                    if (err) {
                                                         console.log(err)
                                                         cb(false)
-                                                    }
-                                                    else
-                                                    {
+                                                    } else {
                                                         newDB.close()
                                                         fs.mkdirSync("storage/reserve")
                                                         fs.writeFileSync("storage/reserve/filter.json", "{}")
                                                         var newDB1 = new sqlite3.Database("storage/reserve/1.db", sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function(err) {
-                                                            if(err)
-                                                            {
+                                                            if (err) {
                                                                 console.log(err)
                                                                 cb(false)
-                                                            }
-                                                            else
-                                                            {
+                                                            } else {
                                                                 newDB1.run(`CREATE TABLE "reserve" (
                                                                     "id"	INTEGER,
                                                                     "userName"	TEXT NOT NULL,
@@ -241,17 +225,14 @@ function init(cb){
                                                                     "message"	TEXT NOT NULL,
                                                                     "time" INTEGER DEFAULT CURRENT_TIMESTAMP,
                                                                     PRIMARY KEY("id" AUTOINCREMENT)
-                                                                )`, function(err){
-                                                                    if(err)
-                                                                    {
+                                                                )`, function(err) {
+                                                                    if (err) {
                                                                         console.log(err)
                                                                         cb(false)
-                                                                    }
-                                                                    else
-                                                                    {
+                                                                    } else {
                                                                         newDB1.close()
-                                                                        for(var i = 2;i<=8;i = i+1){
-                                                                            fs.copyFileSync("storage/reserve/1.db","storage/reserve/" + i + ".db")
+                                                                        for (var i = 2; i <= 8; i = i + 1) {
+                                                                            fs.copyFileSync("storage/reserve/1.db", "storage/reserve/" + i + ".db")
                                                                         }
                                                                         cb(true)
                                                                     }
@@ -270,8 +251,7 @@ function init(cb){
                 })
             }
         })
-    }
-    else
+    } else
         cb(true)
 }
 
@@ -442,7 +422,8 @@ async function daemon_start() {
         if (req.session.admin) {
             var userName = req.query.userName
             if (userName) {
-                var hash = 0,i, chr;
+                var hash = 0,
+                    i, chr;
                 for (i = 0; i < userName.length; i++) {
                     chr = userName.charCodeAt(i);
                     hash = ((hash << 5) - hash) + chr;
@@ -463,36 +444,36 @@ async function daemon_start() {
             res.send('-1')
     })
 
-    app.get('/clearProject', function(req, res){
-        if(req.session.admin){
+    app.get('/clearProject', function(req, res) {
+        if (req.session.admin) {
             var userName = req.query.userName
-            if(userName){
-                db.run("delete from `project` where userName=?", [userName, ], function(err){
-                    if(err){
+            if (userName) {
+                db.run("delete from `project` where userName=?", [userName, ], function(err) {
+                    if (err) {
                         console.log(err.message)
                         res.send('-1')
-                    }else{
+                    } else {
                         res.send('1')
                     }
                 })
-            }else
+            } else
                 res.send('-1')
         }
     })
 
-    app.get('/clearUser', function(req, res){
-        if(req.session.admin){
+    app.get('/clearUser', function(req, res) {
+        if (req.session.admin) {
             var userName = req.query.userName
-            if(userName){
-                db.run("delete from `user` where username=?", [userName, ], function(err){
-                    if(err){
+            if (userName) {
+                db.run("delete from `user` where username=?", [userName, ], function(err) {
+                    if (err) {
                         console.log(err.message)
                         res.send('-1')
-                    }else{
+                    } else {
                         res.send('1')
                     }
                 })
-            }else
+            } else
                 res.send('-1')
         }
     })
@@ -508,7 +489,7 @@ async function daemon_start() {
 
     app.get('/saveAndRestart', async function(req, res) {
         newConfig = JSON.parse(req.query.configs)
-        for(var key in newConfig)
+        for (var key in newConfig)
             configs[key] = newConfig[key]
         newConfig = JSON.stringify(configs, null, 4)
         if (newConfig) {
@@ -594,28 +575,33 @@ var mixioServer = async function() {
     var privateKey = ""
     var certificate = ""
     if (keyPath.indexOf("http") == 0) {
-        try{
+        try {
             var privateKeyFileName = keyPath.split("/").pop()
             console.log("[INFO] Downloading private key from", keyPath)
             var filePath = "config/certs/" + privateKeyFileName
-            // 如果存在就覆盖
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath)
-            }
+                // 如果存在就覆盖
+
             // 下载文件
             var resp = await axios.get(keyPath)
             body = resp.data
-            // 不存在就创建
+                // 不存在就创建
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath)
+            }
             fs.writeFileSync(filePath, body, 'utf8')
             privateKey = fs.readFileSync(filePath, 'utf8')
             console.log("[INFO] Private key downloaded to", filePath)
-        }catch(e){
+        } catch (e) {
             console.log("[ERROR] Failed to download private key from", keyPath)
-            console.log("[INFO] Falling back to default private key")
-            privateKey = defaultPem
+            if (fs.existsSync(filePath)) {
+                console.log("[INFO] Using existing private key with the same file name")
+                privateKey = fs.readFileSync(filePath, 'utf8')
+            } else {
+                console.log("[INFO] Falling back to default private key")
+                privateKey = defaultPem
+            }
         }
-    }
-    else{
+    } else {
         if (fs.existsSync(keyPath)) {
             privateKey = fs.readFileSync(keyPath, 'utf8')
         } else {
@@ -625,26 +611,30 @@ var mixioServer = async function() {
         }
     }
     if (crtPath.indexOf("http") == 0) {
-        try{
+        try {
             var crtFileName = crtPath.split("/").pop()
             console.log("[INFO] Downloading certificate from", crtPath)
             var filePath = "config/certs/" + crtFileName
+
+            var resp = await axios.get(crtPath)
+            body = resp.data
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath)
             }
-            var resp = await axios.get(crtPath)
-            body = resp.data
             fs.writeFileSync(filePath, body, 'utf8')
             certificate = fs.readFileSync(filePath, 'utf8')
             console.log("[INFO] Certificate downloaded to", filePath)
-        }
-        catch(e){
+        } catch (e) {
             console.log("[ERROR] Failed to download certificate from", crtPath)
-            console.log("[INFO] Falling back to default certificate")
-            certificate = defaultCrt
+            if (fs.existsSync(filePath)) {
+                console.log("[INFO] Using existing certificate with the same file name")
+                certificate = fs.readFileSync(filePath, 'utf8')
+            } else {
+                console.log("[INFO] Falling back to default certificate")
+                certificate = defaultCrt
+            }
         }
-    }
-    else{
+    } else {
         if (fs.existsSync(crtPath)) {
             certificate = fs.readFileSync(crtPath, 'utf8')
         } else {
@@ -653,14 +643,14 @@ var mixioServer = async function() {
             certificate = defaultCrt
         }
     }
-    
+
     var credentials = {
         key: privateKey,
         cert: certificate
     };
 
     var chainPath = "config/certs/chain.crt"
-    if(fs.existsSync(chainPath))
+    if (fs.existsSync(chainPath))
         credentials['ca'] = fs.readFileSync(chainPath, 'utf8')
 
     aedes = aedesmodule()
@@ -792,21 +782,16 @@ var mixioServer = async function() {
 
     }
     aedes.authorizePublish = function(client, packet, callback) {
-        if(packet.topic=="$SYS/hello")
+        if (packet.topic == "$SYS/hello")
             return callback(null)
         if (client.user != packet.topic.split('/')[0])
             return callback(new Error('wrong topic'))
-        else
-        {
-            if(globalConnectionControl[client.id])
-            {
-                if(Date.now() - globalConnectionControl[client.id][0] > 1000)
-                {
+        else {
+            if (globalConnectionControl[client.id]) {
+                if (Date.now() - globalConnectionControl[client.id][0] > 1000) {
                     globalConnectionControl[client.id][0] = Date.now()
                     globalConnectionControl[client.id][1] = 0
-                }
-                else if(globalConnectionControl[client.id][1] > MAX_MESSAGE_PER_SECOND)
-                {
+                } else if (globalConnectionControl[client.id][1] > MAX_MESSAGE_PER_SECOND) {
                     delete globalConnectionControl[client.id]
                     return callback(new Error('too fast'))
                 }
@@ -816,49 +801,49 @@ var mixioServer = async function() {
     }
 
     aedes.authorizeSubscribe = function(client, subscription, callback) {
-        if (client.user != subscription.topic.split('/')[0] && subscription.topic!="$SYS/hello")
+        if (client.user != subscription.topic.split('/')[0] && subscription.topic != "$SYS/hello")
             return callback(new Error('wrong topic'))
         else
             callback(null, subscription);
     }
 
-    setInterval(function(){
+    setInterval(function() {
         aedes.publish({
             cmd: 'publish',
             qos: 0,
             dup: false,
             topic: '$SYS/hello',
-            payload: Buffer.from(""+Date.now()),
+            payload: Buffer.from("" + Date.now()),
             retain: false
         })
-    },10000)
+    }, 10000)
 
     aedes.on('publish', function(packet, client) {
-        
-        if(client)
-        {
-            if(globalConnectionControl[client.id])
+
+        if (client) {
+            if (globalConnectionControl[client.id])
                 globalConnectionControl[client.id][1] = globalConnectionControl[client.id][1] + 1
             else
-                globalConnectionControl[client.id] = [Date.now(),1]
+                globalConnectionControl[client.id] = [Date.now(), 1]
         }
-            
+
         var topic = packet.topic.split('/')
         var payload = String(packet.payload)
         if (topic.length == 3) {
             if (topic[2] == 'b640a0ce465fa2a4150c36b305c1c11b') {
-                if(STORAGE_ENGINE == "sqlite")
+                if (STORAGE_ENGINE == "sqlite")
                     db.run("insert or ignore into devices (userName, clientid) values (?,?)", [topic[0], payload])
-                else if(STORAGE_ENGINE == "mysql")
+                else if (STORAGE_ENGINE == "mysql")
                     db.run("insert ignore into devices (userName, clientid) values (?,?)", [topic[0], payload])
             } else if (topic[2] == '9d634e1a156dc0c1611eb4c3cff57276') {
                 db.run("delete from devices where userName = ? and clientid = ?", [topic[0], payload])
-                if(client)
+                if (client)
                     delete globalConnectionControl[client.id]
             } else if (configs["ALLOW_HOOK"] && reserveJSON[topic[0]] && topic[0] != "$SYS") {
                 var userName = topic[0]
                 var reserveTopic = topic[1] + "/" + topic[2]
-                var hash = 0,i, chr;
+                var hash = 0,
+                    i, chr;
                 for (i = 0; i < userName.length; i++) {
                     chr = userName.charCodeAt(i);
                     hash = ((hash << 5) - hash) + chr;
@@ -876,26 +861,25 @@ var mixioServer = async function() {
                                 }
                             })
                         } else if (row["count(*)"] >= MAX_MESSAGE_PER_USER) {
-                                targetDB.get("select id from `reserve` where userName = ? order by id asc limit 1", [userName, ], function(err, row) {
-                                    if (err) {
-                                        console.log(err.message)
-                                    } else {
-                                        if (row && row["id"]) {
-                                            targetDB.run("delete from `reserve` where id = ?", [row["id"], ], function(err) {
-                                                if (err) {
-                                                    console.log(err.message)
-                                                }
-                                                else{
-                                                    targetDB.run("insert into `reserve` (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err) {
-                                                        if (err) {
-                                                            console.log(err.message)
-                                                        }
-                                                    })
-                                                }
-                                            })
-                                        }
+                            targetDB.get("select id from `reserve` where userName = ? order by id asc limit 1", [userName, ], function(err, row) {
+                                if (err) {
+                                    console.log(err.message)
+                                } else {
+                                    if (row && row["id"]) {
+                                        targetDB.run("delete from `reserve` where id = ?", [row["id"], ], function(err) {
+                                            if (err) {
+                                                console.log(err.message)
+                                            } else {
+                                                targetDB.run("insert into `reserve` (userName, topic, message) values (?,?,?)", [userName, reserveTopic, payload], function(err) {
+                                                    if (err) {
+                                                        console.log(err.message)
+                                                    }
+                                                })
+                                            }
+                                        })
                                     }
-                                })   
+                                }
+                            })
                         }
                     }
                 })
@@ -930,8 +914,8 @@ var mixioServer = async function() {
 
     app.get('/', function(req, res) {
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
-            'footer':configs["FOOTER"],
-            'mixly':fs.existsSync("../mixly")
+            'footer': configs["FOOTER"],
+            'mixly': fs.existsSync("../mixly")
         }, function(err, data) {
             res.send(data)
         })
@@ -940,7 +924,7 @@ var mixioServer = async function() {
     app.post('/proxy', function(req, res) {
         var url = req.body.url
         var data = req.body.data
-        // timeout in 5 seconds
+            // timeout in 5 seconds
         var timeout = 50000
         request({
             url: url,
@@ -960,14 +944,13 @@ var mixioServer = async function() {
                     "reason": error
                 })
             }
-        }
-        )
+        })
     })
 
     app.get('/index', function(req, res) {
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
-            'main':fs.existsSync("config/certs/chain.crt"),
-            'mixly':fs.existsSync("../mixly"),
+            'main': fs.existsSync("config/certs/chain.crt"),
+            'mixly': fs.existsSync("../mixly"),
             'configs': configs
         }, function(err, data) {
             res.send(data)
@@ -991,106 +974,87 @@ var mixioServer = async function() {
     })
 
     app.get('/api/v1/getData', function(req, res) {
-        try{
-            if(!(req.query.user && req.query.password && req.query.project && req.query.topic))
-                {
-                    res.send('{"status":"incorrect params"}')
+        try {
+            if (!(req.query.user && req.query.password && req.query.project && req.query.topic)) {
+                res.send('{"status":"incorrect params"}')
+                return
+            }
+            var user = req.query.user
+            var password = req.query.password
+            var project = req.query.project
+            var topic = req.query.topic
+            var num = 1
+            if (globalQPSControl[user]) {
+                if (Date.now() - globalQPSControl[user] > 1000) {
+                    globalQPSControl[user] = Date.now()
+                } else {
+                    res.send('{"status":"too fast"}')
                     return
                 }
-                var user = req.query.user
-                var password = req.query.password
-                var project = req.query.project
-                var topic = req.query.topic
-                var num = 1
-                if(globalQPSControl[user])
-                {
-                    if(Date.now() - globalQPSControl[user] > 1000)
-                    {
-                        globalQPSControl[user] = Date.now()
-                    }
-                    else{
-                        res.send('{"status":"too fast"}')
-                        return
-                    }
-                }
-                else
-                    globalQPSControl[user] = Date.now()
-                if (req.query.num)
-                    num = req.query.num
-                db.get("select password from user where username = ?", [user], function(err, row) {
-                    if (err)
-                    {
-                        res.send('{"status":"failed"}')
-                    }
-                    else if ((!row) && (password!="MixIO_public" || user[0]!="@"))
-                    {
-                        res.send('{"status":"failed"}')
-                    }
-                    else if ( ((!row) && (password=="MixIO_public" && user[0]=="@")) || (row && (row["password"] == password)) ) {
-                        db.get("select * from project where username = ? and projectName = ?", [user, project], function(err, row) {
-                            if (err)
-                            {
-                                res.send('{"status":"failed"}')
-                            }
-                            else if (row) {
-                                var dataStorage = row["dataStorage"]
-                                if (dataStorage == null)
-                                    dataStorage = "{}"
-                                var dataStorageJSON = JSON.parse(dataStorage)
-                                if(dataStorageJSON["received"] && dataStorageJSON["received"][topic])
-                                    {
-                                        var data = dataStorageJSON["received"][topic]
-                                        if(data.length<num)
-                                            num = data.length
-                                        data = data.slice(0,num)
-                                        for(var i = 0;i<data.length;i++)
-                                        {
-                                            // for each key, if value is int, convert to int; if value is float, convert to float
-                                            for(var key in data[i])
-                                            {
-                                                // if only have digits, convert to int
-                                                if(/^\d+$/.test(data[i][key]))
-                                                    data[i][key] = parseInt(data[i][key])
-                                                // if have digits and one dot, convert to float
-                                                else if(/^\d+\.\d+$/.test(data[i][key]))
-                                                    data[i][key] = parseFloat(data[i][key])
-                                                // if json string, convert to json
-                                                else if(data[i][key].startsWith("{") && data[i][key].endsWith("}"))
-                                                    try{
-                                                        data[i][key] = JSON.parse(stringendecoder.decodeHtml(data[i][key]))
-                                                        for(var key2 in data[i][key])
-                                                        {
-                                                            if(/^\d+$/.test(data[i][key][key2]))
-                                                                data[i][key][key2] = parseInt(data[i][key][key2])
-                                                            else if(/^\d+\.\d+$/.test(data[i][key][key2]))
-                                                                data[i][key][key2] = parseFloat(data[i][key][key2])
-                                                        }
-                                                    }
-                                                    catch(e){
-                                                        data[i][key] = data[i][key]
-                                                    }
+            } else
+                globalQPSControl[user] = Date.now()
+            if (req.query.num)
+                num = req.query.num
+            db.get("select password from user where username = ?", [user], function(err, row) {
+                if (err) {
+                    res.send('{"status":"failed"}')
+                } else if ((!row) && (password != "MixIO_public" || user[0] != "@")) {
+                    res.send('{"status":"failed"}')
+                } else if (((!row) && (password == "MixIO_public" && user[0] == "@")) || (row && (row["password"] == password))) {
+                    db.get("select * from project where username = ? and projectName = ?", [user, project], function(err, row) {
+                        if (err) {
+                            res.send('{"status":"failed"}')
+                        } else if (row) {
+                            var dataStorage = row["dataStorage"]
+                            if (dataStorage == null)
+                                dataStorage = "{}"
+                            var dataStorageJSON = JSON.parse(dataStorage)
+                            if (dataStorageJSON["received"] && dataStorageJSON["received"][topic]) {
+                                var data = dataStorageJSON["received"][topic]
+                                if (data.length < num)
+                                    num = data.length
+                                data = data.slice(0, num)
+                                for (var i = 0; i < data.length; i++) {
+                                    // for each key, if value is int, convert to int; if value is float, convert to float
+                                    for (var key in data[i]) {
+                                        // if only have digits, convert to int
+                                        if (/^\d+$/.test(data[i][key]))
+                                            data[i][key] = parseInt(data[i][key])
+                                            // if have digits and one dot, convert to float
+                                        else if (/^\d+\.\d+$/.test(data[i][key]))
+                                            data[i][key] = parseFloat(data[i][key])
+                                            // if json string, convert to json
+                                        else if (data[i][key].startsWith("{") && data[i][key].endsWith("}"))
+                                            try {
+                                                data[i][key] = JSON.parse(stringendecoder.decodeHtml(data[i][key]))
+                                                for (var key2 in data[i][key]) {
+                                                    if (/^\d+$/.test(data[i][key][key2]))
+                                                        data[i][key][key2] = parseInt(data[i][key][key2])
+                                                    else if (/^\d+\.\d+$/.test(data[i][key][key2]))
+                                                        data[i][key][key2] = parseFloat(data[i][key][key2])
+                                                }
                                             }
+                                        catch (e) {
+                                            data[i][key] = data[i][key]
                                         }
-                                        res.send(JSON.stringify({
-                                            "status": "success",
-                                            "data": data
-                                        }))
                                     }
-                                else
-                                    res.send('{"status":"success","data":[]}')
-                            }
-                        })
-                    }
-                    else
-                    {
-                        res.send('{"status":"failed"}')
-                    }
-                })
-        }
-        catch(e){
+                                }
+                                res.send(JSON.stringify({
+                                    "status": "success",
+                                    "data": data
+                                }))
+                            } else
+                                res.send('{"status":"success","data":[]}')
+                        }
+                    })
+                } else {
+                    res.send('{"status":"failed"}')
+                }
+            })
+        } catch (e) {
             res.send('{"status":"failed"}')
         }
-        
+
     })
 
 
@@ -1099,24 +1063,23 @@ var mixioServer = async function() {
             db.all("select * from `share` where userName=?", [req.session.userName], function(err, rows) {
                 if (err)
                     console.log(err)
-                else
-                {
-                    for(i in rows){
+                else {
+                    for (i in rows) {
                         var tmp = new Date(new Date(rows[i]['timeStamp']).getTime() + 28800000)
-                        rows[i]['timeStamp'] = ""+tmp.getFullYear()+"-"
-                        if(tmp.getMonth()<9)
+                        rows[i]['timeStamp'] = "" + tmp.getFullYear() + "-"
+                        if (tmp.getMonth() < 9)
                             rows[i]['timeStamp'] += "0"
-                        rows[i]['timeStamp'] += (tmp.getMonth()+1)+"-"
-                        if(tmp.getDate()<10)
+                        rows[i]['timeStamp'] += (tmp.getMonth() + 1) + "-"
+                        if (tmp.getDate() < 10)
                             rows[i]['timeStamp'] += "0"
-                        rows[i]['timeStamp'] += tmp.getDate()+" "
-                        if(tmp.getHours()<10)
+                        rows[i]['timeStamp'] += tmp.getDate() + " "
+                        if (tmp.getHours() < 10)
                             rows[i]['timeStamp'] += "0"
-                        rows[i]['timeStamp'] += tmp.getHours()+":"
-                        if(tmp.getMinutes()<10)
+                        rows[i]['timeStamp'] += tmp.getHours() + ":"
+                        if (tmp.getMinutes() < 10)
                             rows[i]['timeStamp'] += "0"
-                        rows[i]['timeStamp'] += tmp.getMinutes()+":"
-                        if(tmp.getSeconds()<10)
+                        rows[i]['timeStamp'] += tmp.getMinutes() + ":"
+                        if (tmp.getSeconds() < 10)
                             rows[i]['timeStamp'] += "0"
                         rows[i]['timeStamp'] += tmp.getSeconds()
                     }
@@ -1304,8 +1267,7 @@ var mixioServer = async function() {
                     }
                 }
             })
-        }
-        else
+        } else
             res.send({
                 "status": "failed",
                 "reason": "bad request"
@@ -1319,8 +1281,7 @@ var mixioServer = async function() {
                     res.send("Internal Error", 500)
                 else {
                     if (row) {
-                        if(row["password"] == md5(req.body.oldPassword + row["salt"]))
-                        {
+                        if (row["password"] == md5(req.body.oldPassword + row["salt"])) {
                             var salt = randomString(16, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
                             var password = md5(req.body.newPassword + salt)
                             db.run("update `user` set password=?,salt=? where username=?", [password, salt, req.body.userName], function(err) {
@@ -1331,8 +1292,7 @@ var mixioServer = async function() {
                                         "status": "success"
                                     })
                             })
-                        }
-                        else
+                        } else
                             res.send({
                                 "status": "failed",
                                 "reason": "wrong password"
@@ -1345,8 +1305,7 @@ var mixioServer = async function() {
                     }
                 }
             })
-        }
-        else
+        } else
             res.send({
                 "status": "failed",
                 "reason": "bad request"
@@ -1444,7 +1403,8 @@ var mixioServer = async function() {
     app.get('/getData', function(req, res) {
         if (req.session.userName) {
             var userName = req.session.userName
-            var hash = 0,i, chr;
+            var hash = 0,
+                i, chr;
             for (i = 0; i < userName.length; i++) {
                 chr = userName.charCodeAt(i);
                 hash = ((hash << 5) - hash) + chr;
@@ -1702,8 +1662,7 @@ var mixioServer = async function() {
         var password = req.query.password
         var directLogin = req.query.directLogin
         if (userName && password)
-            if(directLogin)
-            {
+            if (directLogin) {
                 db.get("select * from `user` where username=?", [userName], function(err, row) {
                     if (row) {
                         if (row['password'] == md5(password + row['salt'])) {
@@ -1723,9 +1682,7 @@ var mixioServer = async function() {
                     } else
                         res.send('Invalid Username or Password')
                 })
-            }
-            else
-            {
+            } else {
                 db.get("select * from `user` where username=?", [userName], function(err, row) {
                     if (row) {
                         if (row['password'] == md5(password + row['salt'])) {
@@ -1908,7 +1865,7 @@ var mixioServer = async function() {
 
     app.get('/getWeather', function(req, res) {
         if (req.query.dsc_code && !configs["OFFLINE_MODE"]) {
-            if(globalWeather[req.query.dsc_code] && globalWeather[req.query.dsc_code].time && (new Date().getTime() - globalWeather[req.query.dsc_code].time) < 600000) {
+            if (globalWeather[req.query.dsc_code] && globalWeather[req.query.dsc_code].time && (new Date().getTime() - globalWeather[req.query.dsc_code].time) < 600000) {
                 res.send(globalWeather[req.query.dsc_code].data)
             } else {
                 http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
@@ -1930,8 +1887,8 @@ var mixioServer = async function() {
     })
     app.get('/api/getWeather', function(req, res) {
         if (req.query.city_code && !configs["OFFLINE_MODE"]) {
-            req.query.dsc_code = req.query.city_code.replace("CH","")
-            if(globalWeather[req.query.dsc_code] && globalWeather[req.query.dsc_code].time && (new Date().getTime() - globalWeather[req.query.dsc_code].time) < 600000) {
+            req.query.dsc_code = req.query.city_code.replace("CH", "")
+            if (globalWeather[req.query.dsc_code] && globalWeather[req.query.dsc_code].time && (new Date().getTime() - globalWeather[req.query.dsc_code].time) < 600000) {
                 res.send(globalWeather[req.query.dsc_code].data)
             } else {
                 http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
@@ -1951,7 +1908,7 @@ var mixioServer = async function() {
         } else
             res.send('-1')
     })
-    app.get("/api/getCurrentTime", function(req, res){
+    app.get("/api/getCurrentTime", function(req, res) {
         var sysTime = new Date();
         var year = sysTime.getFullYear();
         var month = sysTime.getMonth() + 1; // getMonth() 返回的月份是从0开始的
@@ -1959,14 +1916,14 @@ var mixioServer = async function() {
         var hours = sysTime.getHours();
         var minutes = sysTime.getMinutes();
         var seconds = sysTime.getSeconds();
-    
+
         // 补零操作
         month = month < 10 ? '0' + month : month;
         day = day < 10 ? '0' + day : day;
         hours = hours < 10 ? '0' + hours : hours;
         minutes = minutes < 10 ? '0' + minutes : minutes;
         seconds = seconds < 10 ? '0' + seconds : seconds;
-    
+
         sysTime = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
         res.send(JSON.stringify({
             "sysTime": sysTime
@@ -2088,7 +2045,7 @@ var mixioServer = async function() {
     })
 
     var filterPath = "storage/reserve/filter.json"
-    if(!fs.existsSync(filterPath)) 
+    if (!fs.existsSync(filterPath))
         filterPath = path.join(__dirname, filterPath)
     app.get('/startHook', function(req, res) {
         if (req.session.userName) {
@@ -2114,7 +2071,8 @@ var mixioServer = async function() {
         if (req.session.userName) {
             var condition = req.query.condition
             var userName = req.session.userName
-            var hash = 0,i, chr;
+            var hash = 0,
+                i, chr;
             for (i = 0; i < userName.length; i++) {
                 chr = userName.charCodeAt(i);
                 hash = ((hash << 5) - hash) + chr;
@@ -2158,18 +2116,18 @@ var mixioServer = async function() {
     app.use('/documentation', express.static(path.join(__dirname, 'documentation')));
 
     var mixlyPath = "../mixly"
-    if(fs.existsSync(mixlyPath)){
+    if (fs.existsSync(mixlyPath)) {
         app.use('/mixly', express.static(mixlyPath));
     }
-    
-    
 
-    
+
+
+
     var reserveJSON = JSON.parse(fs.readFileSync(filterPath), "utf8")
 
     var oldListen = app.listen
     app.listen = function(port, callback) {
-        if(port == 0)
+        if (port == 0)
             callback()
         else
             oldListen.call(app, port, callback)
@@ -2184,27 +2142,27 @@ var mixioServer = async function() {
                     console.log('[INFO] WebSocketS MQTT server listening on port', configs["MIXIO_WSS_PORT"])
                     httpServer2 = http.createServer(app)
                     httpServer2.listen(configs['MIXIO_HTTP_PORT'], function() {
-                        if(configs['MIXIO_HTTP_PORT'] != 0)
+                        if (configs['MIXIO_HTTP_PORT'] != 0)
                             console.log("[INFO] MixIO server listening on port", configs['MIXIO_HTTP_PORT'])
                         httpsServer2 = https.createServer(credentials, app)
                         httpsServer2.listen(configs['MIXIO_HTTPS_PORT'], function() {
-                            if(configs['MIXIO_HTTPS_PORT'] != 0)
+                            if (configs['MIXIO_HTTPS_PORT'] != 0)
                                 console.log("[INFO] MixIO server (HTTPS) listening on port", configs['MIXIO_HTTPS_PORT'])
                             var stopFunction = function() {
                                 return new Promise(resolve => {
                                     //MQTT
                                     plainServer.close(function() {
                                         console.log("[INFO] Plain MQTT server closed")
-                                        //MQTT Websocket
+                                            //MQTT Websocket
                                         httpServer.close(function() {
                                             console.log("[INFO] WebSocket MQTT server closed")
-                                            //MixIO HTTP
+                                                //MixIO HTTP
                                             httpServer2.close(function() {
                                                 console.log("[INFO] MixIO server closed")
-                                                //MQTT WebsocketS
+                                                    //MQTT WebsocketS
                                                 httpsServer.close(function() {
                                                     console.log("[INFO] WebSocketS MQTT server closed")
-                                                    //MixIO HTTPS
+                                                        //MixIO HTTPS
                                                     httpsServer2.close(function() {
                                                         console.log("[INFO] MixIO server (HTTPS) closed")
                                                         resolve("1")
@@ -2215,7 +2173,7 @@ var mixioServer = async function() {
                                     })
                                 })
                             }
-                            if(STORAGE_ENGINE == 'sqlite'){
+                            if (STORAGE_ENGINE == 'sqlite') {
                                 var dbPath = "storage/mixio.db"
                                 db = new sqlite3.Database(
                                     dbPath,
@@ -2235,8 +2193,8 @@ var mixioServer = async function() {
                                 reserveDBs = []
                                 for (var i = 1; i <= 8; i = i + 1) {
                                     var dbPath = "storage/reserve/" + i + ".db"
-                                    if(!fs.existsSync(dbPath)) {
-                                        dbPath = path.join(__dirname,'./reserve/' + i + ".db")
+                                    if (!fs.existsSync(dbPath)) {
+                                        dbPath = path.join(__dirname, './reserve/' + i + ".db")
                                     }
                                     reserveDBs.push(
                                         new sqlite3.Database(
@@ -2249,8 +2207,7 @@ var mixioServer = async function() {
                                         )
                                     )
                                 }
-                            }
-                            else if(STORAGE_ENGINE == 'mysql'){
+                            } else if (STORAGE_ENGINE == 'mysql') {
                                 db = mysql.createConnection({
                                     host: MYSQL_HOST,
                                     port: MYSQL_PORT,
@@ -2268,27 +2225,24 @@ var mixioServer = async function() {
                                 }
                                 db.run = function(sql, params, callback) {
                                     db.query(sql, params, function(err, result) {
-                                        if(err)
-                                        {
-                                            if(callback)
-                                            {
+                                        if (err) {
+                                            if (callback) {
                                                 callback(err)
                                             }
-                                        }
-                                        else if(callback)
+                                        } else if (callback)
                                             callback()
                                     })
                                 }
                                 db.all = function(sql, params, callback) {
-                                    db.query(sql, params, function(err, rows) {
-                                        if (err) {
-                                            callback(err, null)
-                                        } else {
-                                            callback(null, rows)
-                                        }
-                                    })
-                                }
-                                // create database if not exists
+                                        db.query(sql, params, function(err, rows) {
+                                            if (err) {
+                                                callback(err, null)
+                                            } else {
+                                                callback(null, rows)
+                                            }
+                                        })
+                                    }
+                                    // create database if not exists
                                 db.query('create database if not exists ' + MYSQL_DB, function(err) {
                                     if (err) {
                                         console.log(err.message)
@@ -2297,11 +2251,10 @@ var mixioServer = async function() {
                                         if (err) {
                                             console.log(err.message)
                                         }
-                                        init_mysql(function(status,reason){
-                                            if(status == "error")
+                                        init_mysql(function(status, reason) {
+                                            if (status == "error")
                                                 console.log(reason)
-                                            else if(status == "success")
-                                            {
+                                            else if (status == "success") {
                                                 console.log("[INFO] Database Initialized!")
                                                 db.query('delete from devices')
                                                 console.log('[INFO] Storage Engine: MySQL (' + MYSQL_HOST + ')')
@@ -2324,7 +2277,7 @@ var mixioServer = async function() {
 
 }
 
-function init_mysql(cb){
+function init_mysql(cb) {
     db.query(`CREATE TABLE IF NOT EXISTS devices (
         userName	VARCHAR(255),
         clientid	VARCHAR(255),
@@ -2333,8 +2286,7 @@ function init_mysql(cb){
     )`, function(err, result) {
         if (err) {
             cb("error", err)
-        }
-        else {
+        } else {
             db.query(`CREATE TABLE IF NOT EXISTS project (
                 projectName	VARCHAR(255),
                 userName	VARCHAR(255),
@@ -2346,8 +2298,7 @@ function init_mysql(cb){
             )`, function(err, result) {
                 if (err) {
                     cb("error", err)
-                }
-                else {
+                } else {
                     db.query(`CREATE TABLE IF NOT EXISTS share (
                         shareid VARCHAR(255),
                         userName	VARCHAR(255),
@@ -2361,8 +2312,7 @@ function init_mysql(cb){
                     )`, function(err, result) {
                         if (err) {
                             cb("error", err)
-                        }
-                        else {
+                        } else {
                             db.query(`CREATE TABLE IF NOT EXISTS share_key (
                                 userName	VARCHAR(255),
                                 projectPass	VARCHAR(255),
@@ -2371,8 +2321,7 @@ function init_mysql(cb){
                             )`, function(err, result) {
                                 if (err) {
                                     cb("error", err)
-                                }
-                                else {
+                                } else {
                                     db.query(`CREATE TABLE IF NOT EXISTS user (
                                         id	INTEGER AUTO_INCREMENT,
                                         username	VARCHAR(255),
@@ -2384,10 +2333,9 @@ function init_mysql(cb){
                                         answer	VARCHAR(255),
                                         PRIMARY KEY(id)
                                     )`, function(err, result) {
-                                        if(err){
+                                        if (err) {
                                             cb("error", err)
-                                        }
-                                        else{
+                                        } else {
                                             db.query(`CREATE TABLE IF NOT EXISTS reserve (
                                                 id	INTEGER AUTO_INCREMENT,
                                                 userName	VARCHAR(255),
@@ -2395,11 +2343,10 @@ function init_mysql(cb){
                                                 message	VARCHAR(1023),
                                                 time timestamp DEFAULT CURRENT_TIMESTAMP,
                                                 PRIMARY KEY(id)
-                                            )`,function(err, result) {
-                                                if(err){
+                                            )`, function(err, result) {
+                                                if (err) {
                                                     cb("error", err)
-                                                }
-                                                else{
+                                                } else {
                                                     cb("success", null)
                                                 }
                                             })
@@ -2422,61 +2369,51 @@ async function startOnce() {
 
 const args = process.argv.slice(2)
 
-var startMixIO = function(){
-    var parent_exit = function(child){
-        var logFile = fs.openSync(logFileName, 'r')
-        while(true){
-            // check log file for database connection
-            var data = fs.readFileSync(logFile, 'utf8')
-            if(data[data.length-1] == "\n")
-                data = data.slice(0, -1)
-            if(data!="")
-                console.log(data)
-            if(data.toString().indexOf("Database Connected!") != -1)
-            {
-                console.log("MixIO server is running now.")
-                child.unref()
-                for (var t = Date.now(); Date.now() - t <= 2000;);
-                process.exit()
-            }
-            else if(data.toString().indexOf("Error") != -1)
-            {   
-                console.error("An error occured while initializing MixIO server. Log file: " + process.cwd() + logFileName)
-                child.unref()
-                for (var t = Date.now(); Date.now() - t <= 2000;);
-                process.exit()
+var startMixIO = function() {
+    var parent_exit = function(child) {
+            var logFile = fs.openSync(logFileName, 'r')
+            while (true) {
+                // check log file for database connection
+                var data = fs.readFileSync(logFile, 'utf8')
+                if (data[data.length - 1] == "\n")
+                    data = data.slice(0, -1)
+                if (data != "")
+                    console.log(data)
+                if (data.toString().indexOf("Database Connected!") != -1) {
+                    console.log("MixIO server is running now.")
+                    child.unref()
+                    for (var t = Date.now(); Date.now() - t <= 2000;);
+                    process.exit()
+                } else if (data.toString().indexOf("Error") != -1) {
+                    console.error("An error occured while initializing MixIO server. Log file: " + process.cwd() + logFileName)
+                    child.unref()
+                    for (var t = Date.now(); Date.now() - t <= 2000;);
+                    process.exit()
+                }
             }
         }
-    }
-    // child process to run 'mixio' in background
+        // child process to run 'mixio' in background
     var logFile = fs.openSync(logFileName, 'a')
-    if(process.argv[0].indexOf("node") != -1)
-    {
-        var child = spawn(process.argv[0], [process.argv[1], "debug"], { detached: true , stdio:['ignore', logFile, logFile]})
+    if (process.argv[0].indexOf("node") != -1) {
+        var child = spawn(process.argv[0], [process.argv[1], "debug"], { detached: true, stdio: ['ignore', logFile, logFile] })
         parent_exit(child)
-    }
-    else
-    {
-        var child = spawn(process.argv[0], [process.argv[1], "debug"], { detached: true , stdio:['ignore', logFile, logFile]})
+    } else {
+        var child = spawn(process.argv[0], [process.argv[1], "debug"], { detached: true, stdio: ['ignore', logFile, logFile] })
         parent_exit(child)
     }
 }
 
-var stopMixIO = function(){
+var stopMixIO = function() {
     // kill 'mixio' process if it is running
-    if(process.argv[0].indexOf("node") != -1)
-    {
-        if(process.platform == "win32")
-        {
+    if (process.argv[0].indexOf("node") != -1) {
+        if (process.platform == "win32") {
             console.log("Shutting down MixIO server...")
             exec('taskkill /F /IM node.exe', function(err, stdout, stderr) {
                 if (err) {
                     console.log(err)
-                }   
+                }
             })
-        }
-        else
-        {
+        } else {
             console.log("Shutting down MixIO server...")
             exec('pkill node', function(err, stdout, stderr) {
                 if (err) {
@@ -2484,20 +2421,15 @@ var stopMixIO = function(){
                 }
             })
         }
-    }
-    else
-    {
-        if(process.platform == "win32")
-        {
+    } else {
+        if (process.platform == "win32") {
             console.log("Shutting down MixIO server...")
             exec('taskkill /F /IM mixio.exe', function(err, stdout, stderr) {
                 if (err) {
                     console.log(err)
                 }
             })
-        }
-        else
-        {
+        } else {
             console.log("Shutting down MixIO server...")
             exec('pkill mixio', function(err, stdout, stderr) {
                 if (err) {
@@ -2508,13 +2440,12 @@ var stopMixIO = function(){
     }
 }
 
-init(function(res){
-    if(res)
-    {   
+init(function(res) {
+    if (res) {
         configPath = "config/config.json"
         configs = fs.readFileSync(configPath);
         configs = JSON.parse(configs.toString());
-        if(! configs["FOOTER"])
+        if (!configs["FOOTER"])
             configs["FOOTER"] = ""
         STORAGE_ENGINE = configs["STORAGE_ENGINE"]
 
@@ -2532,8 +2463,8 @@ init(function(res){
         if (args.length > 1 || (args.length == 0 && process.platform != "win32")) {
             console.log("Invalid parameter(s). Use \"mixio help\" for help.")
         } else {
-            var show = function(){
-                if(args.length == 0){
+            var show = function() {
+                if (args.length == 0) {
                     // wait for user input, 1 for start, 2 for stop, 3 for autoStart, 4 for remove autoStart
                     console.log("1. Start MixIO server")
                     console.log("2. Stop MixIO server")
@@ -2584,29 +2515,19 @@ init(function(res){
                             console.log("Invalid option.")
                         }
                     })
-                }
-                else if (args[0] == "debug")
-                {   
-                    if(res){
+                } else if (args[0] == "debug") {
+                    if (res) {
                         daemon_start()
                         startOnce()
                     }
-                }
-                else if (args[0] == "start")
-                {   
+                } else if (args[0] == "start") {
                     startMixIO()
-            
-                }
-                else if (args[0] == "stop")
-                {
+
+                } else if (args[0] == "stop") {
                     stopMixIO()
-                }
-                else if (args[0] == "version")
-                {
+                } else if (args[0] == "version") {
                     console.log(VERSION)
-                }
-                else if (args[0] == "install" && process.platform == "linux")
-                {
+                } else if (args[0] == "install" && process.platform == "linux") {
                     var install_shell = `
                         service="
                         [UNIT]
@@ -2618,41 +2539,34 @@ init(function(res){
                         Type=forking
                         Restart=always
                         RestartSec=1
-                        WorkingDirectory="`+ process.argv[0].slice(0,process.argv[0].lastIndexOf("/"))+`"
-                        ExecStart=`+ process.argv[0].slice(0,process.argv[0].lastIndexOf("/"))+`/mixio start
-                        ExecStop=`+ process.argv[0].slice(0,process.argv[0].lastIndexOf("/"))+`/mixio stop
+                        WorkingDirectory="` + process.argv[0].slice(0, process.argv[0].lastIndexOf("/")) + `"
+                        ExecStart=` + process.argv[0].slice(0, process.argv[0].lastIndexOf("/")) + `/mixio start
+                        ExecStop=` + process.argv[0].slice(0, process.argv[0].lastIndexOf("/")) + `/mixio stop
                         
                         [Install]
                         WantedBy=multi-user.target
                         "
-                        echo "$`+`{service}" > /etc/systemd/system/mixio.service
+                        echo "$` + `{service}" > /etc/systemd/system/mixio.service
                     `
-                    //output shell script to install.sh
+                        //output shell script to install.sh
                     fs.writeFileSync("install.sh", install_shell)
-                    //run install.sh
+                        //run install.sh
                     exec('sh install.sh', function(err, stdout, stderr) {
                         if (err) {
                             console.log(err)
-                        }
-                        else
-                        {
+                        } else {
                             console.log(stdout)
                         }
-                    }
-                    )
-                }
-                else if (args[0] == "help")
-                {
+                    })
+                } else if (args[0] == "help") {
                     console.log("MixIO server help:")
                     console.log("mixio start: start MixIO server in background.")
                     console.log("mixio stop: stop MixIO server.")
                     console.log("mixio debug: start MixIO server in foreground.")
                     console.log("mixio version: show MixIO server version.")
-                    if(process.platform == "linux")
+                    if (process.platform == "linux")
                         console.log("mixio install: install MixIO service.")
-                }
-                else
-                {
+                } else {
                     console.log("Invalid parameter(s). Use \"mixio help\" for help.")
                 }
             }
@@ -2774,7 +2688,7 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
             "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather"
         ],
         this.zhcnTags = ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪"],
-        this.log = function(){},
+        this.log = function() {},
         /*合法的MixIO事件种类*/
         this.eventTags = {
             MQTT_MESSAGE_RECEIVED: "11", //收到MQTT消息
@@ -3499,15 +3413,15 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
                         ['user-content', user_content]
                     ]
                     var itemdiv = add_block(2, 2, contents, attrs)
-                    var sync_weather = function(){
+                    var sync_weather = function() {
                         var dsc_code = title.parent().parent().attr('user-content').split(',')[0].split('w')[0]
-                        if(globalWeather[dsc_code] && globalWeather[dsc_code].time && (new Date().getTime() - globalWeather[dsc_code].time) < 600000) {
+                        if (globalWeather[dsc_code] && globalWeather[dsc_code].time && (new Date().getTime() - globalWeather[dsc_code].time) < 600000) {
                             var result = globalWeather[dsc_code].data
                             var resJSON = JSON.parse(result)
                             weather_type = resJSON.result.now.text
                             temperature = resJSON.result.now.temp
                             humidity = resJSON.result.now.rh
-                            wind_dir = resJSON.result.now.wind_dir                                
+                            wind_dir = resJSON.result.now.wind_dir
                             wind_class = resJSON.result.now.wind_class
                             district = resJSON.result.location.name
                             title.parent().parent().attr('user-content', [title.parent().parent().attr('user-content').split(',')[0], district, weather_type, temperature, humidity, wind_dir, wind_class].join(','))
@@ -3525,8 +3439,7 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
                                     }
                                     var result = html
                                     var resJSON = JSON.parse(result)
-                                    if(resJSON.result && resJSON.result.now)
-                                    {
+                                    if (resJSON.result && resJSON.result.now) {
                                         weather_type = resJSON.result.now.text
                                         temperature = resJSON.result.now.temp
                                         humidity = resJSON.result.now.rh
