@@ -1868,19 +1868,25 @@ var mixioServer = async function() {
             if (globalWeather[req.query.dsc_code] && globalWeather[req.query.dsc_code].time && (new Date().getTime() - globalWeather[req.query.dsc_code].time) < 600000) {
                 res.send(globalWeather[req.query.dsc_code].data)
             } else {
-                http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
-                    var html = ''
-                    req2.on('data', function(data) {
-                        html += data;
-                    });
-                    req2.on('end', function() {
-                        globalWeather[req.query.dsc_code] = {
-                            time: new Date().getTime(),
-                            data: html
-                        }
-                        res.send(html)
-                    });
-                })
+                try {
+                    http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
+                        var html = ''
+                        req2.on('data', function(data) {
+                            html += data;
+                        });
+                        req2.on('end', function() {
+                            globalWeather[req.query.dsc_code] = {
+                                time: new Date().getTime(),
+                                data: html
+                            }
+                            res.send(html)
+                        });
+                    }).on('error', function(e) {
+                        res.send('-1')
+                    })
+                } catch (e) {
+                    res.send('-1')
+                }
             }
         } else
             res.send('-1')
@@ -1891,19 +1897,25 @@ var mixioServer = async function() {
             if (globalWeather[req.query.dsc_code] && globalWeather[req.query.dsc_code].time && (new Date().getTime() - globalWeather[req.query.dsc_code].time) < 600000) {
                 res.send(globalWeather[req.query.dsc_code].data)
             } else {
-                http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
-                    var html = ''
-                    req2.on('data', function(data) {
-                        html += data;
-                    });
-                    req2.on('end', function() {
-                        globalWeather[req.query.dsc_code] = {
-                            time: new Date().getTime(),
-                            data: html
-                        }
-                        res.send(html)
-                    });
-                })
+                try {
+                    http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
+                        var html = ''
+                        req2.on('data', function(data) {
+                            html += data;
+                        });
+                        req2.on('end', function() {
+                            globalWeather[req.query.dsc_code] = {
+                                time: new Date().getTime(),
+                                data: html
+                            }
+                            res.send(html)
+                        });
+                    }).on('error', function(e) {
+                        res.send('-1')
+                    })
+                } catch (e) {
+                    res.send('-1')
+                }
             }
         } else
             res.send('-1')
