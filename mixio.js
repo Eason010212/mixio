@@ -582,7 +582,7 @@ var mixioServer = async function() {
                 // 如果存在就覆盖
 
             // 下载文件
-            var resp = await axios.get(keyPath)
+            var resp = await axios.get(keyPath, { timeout: 5000 })
             body = resp.data
                 // 不存在就创建
             if (fs.existsSync(filePath)) {
@@ -616,7 +616,7 @@ var mixioServer = async function() {
             console.log("[INFO] Downloading certificate from", crtPath)
             var filePath = "config/certs/" + crtFileName
 
-            var resp = await axios.get(crtPath)
+            var resp = await axios.get(crtPath, { timeout: 5000 })
             body = resp.data
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath)
