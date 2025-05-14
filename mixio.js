@@ -2404,39 +2404,19 @@ var startMixIO = function() {
 }
 
 var stopMixIO = function() {
-    // kill 'mixio' process if it is running
-    if (process.argv[0].indexOf("node") != -1) {
-        if (process.platform == "win32") {
-            console.log("Shutting down MixIO server...")
-            exec('taskkill /F /IM node.exe', function(err, stdout, stderr) {
-                if (err) {
-                    console.log(err)
-                }
-            })
+    // try use pid.info to stop process
+    try {
+        var pid = fs.readFileSync("pid.info", 'utf8')
+        if (pid != "") {
+            // convert to int
+            pid = parseInt(pid)
+            process.kill(pid, 'SIGTERM')
+            console.log("MixIO server with PID " + pid + " is stopped.")
         } else {
-            console.log("Shutting down MixIO server...")
-            exec('pkill node', function(err, stdout, stderr) {
-                if (err) {
-                    console.log(err)
-                }
-            })
+            console.log("MixIO server is not running.")
         }
-    } else {
-        if (process.platform == "win32") {
-            console.log("Shutting down MixIO server...")
-            exec('taskkill /F /IM mixio.exe', function(err, stdout, stderr) {
-                if (err) {
-                    console.log(err)
-                }
-            })
-        } else {
-            console.log("Shutting down MixIO server...")
-            exec('pkill mixio', function(err, stdout, stderr) {
-                if (err) {
-                    console.log(err)
-                }
-            })
-        }
+    } catch (e) {
+        console.log("MixIO server is not running.")
     }
 }
 
@@ -2516,6 +2496,10 @@ init(function(res) {
                         }
                     })
                 } else if (args[0] == "debug") {
+                    // 记录当前的进程ID
+                    console.log("[INFO] MixIO server is running with PID " + process.pid)
+                        // 输出到当前目录下的pid.info文件
+                    fs.writeFileSync("pid.info", "" + process.pid)
                     if (res) {
                         daemon_start()
                         startOnce()
