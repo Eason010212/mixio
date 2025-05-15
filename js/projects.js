@@ -1974,7 +1974,7 @@ function add_widget() {
     //widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].tensorAI + "</h5>"))
     var blazeFace_add = $("<div class='widget_div'><div><img src='icons/blazeFace.svg'><span>" + JSLang[lang].blazeFace + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(blazeFace_add)
-    var ocr_add = $("<div class='widget_div'><div><img src='icons/mediaPipe.svg'><span>" + JSLang[lang].ocr + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
+    var ocr_add = $("<div class='widget_div'><div><img src='icons/mediaPipe.svg'><span>" + JSLang[lang].ocr + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(ocr_add)
     var qr_add = $("<div class='widget_div'><div><img src='icons/qrcode.svg'><span>" + JSLang[lang].qr + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(qr_add)
@@ -2185,8 +2185,6 @@ function add_widget() {
     })
 
     ocr_add.children("a").click(function() {
-        showtext("开发中")
-        return
         d.close().remove()
         var editForm = $('<div class="nnt"/>')
         editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/mediaPipe.svg" style="width:45px;"></div>'))
@@ -2198,21 +2196,18 @@ function add_widget() {
         editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
         var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
         var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input.val("beep")
         topic_input_div.append(topic_input)
-        topic_input.val("ocr")
         editForm.append(topic_input_div)
-        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerInterval + '</h5>'))
-        var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-        var trigger_interval = $("<input type='number' step='100' min='1000' max='100000' required class='form-control form-control-user'  style='text-align:center' readonly/>")
-        trigger_interval.val(10000)
-        trigger_interval_div.append(trigger_interval)
-        trigger_interval.change(function(){
-            if(trigger_interval.val()<1000)
-                trigger_interval.val(1000)
-        })
-        editForm.append(trigger_interval_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].beepAudio + '</h5>'))
+        var beep_select = $('<select class="form-control form-control-user" style="margin-top:15px;text-align:center"/>')
+        beep_select.append($('<option value="weak">弱提示</option>'))
+        beep_select.append($('<option value="strong">强提示</option>'))
+        beep_select.append($('<option value="alarm">警报音</option>'))
+        editForm.append(beep_select)
+        beep_select.val("weak")
         var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
-        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
         bottomDiv.append(confirmEdit)
         confirmEdit.click(function() {
             if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
@@ -2220,7 +2215,7 @@ function add_widget() {
                 if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
                     if (true) {
                         if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
-                            add_ocr(title_input.val(), topic_input.val(), trigger_interval.val())
+                            add_ocr(title_input.val(), topic_input.val(), beep_select.val())
                             modifyDia.close().remove()
                         } else
                             showtext(JSLang[lang].sameUnit)
@@ -2231,7 +2226,7 @@ function add_widget() {
             } else
                 showtext(JSLang[lang].nameLenIllegal)
         })
-        var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
+        var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
         cancelEdit.click(function() {
             modifyDia.close().remove()
             add_widget()

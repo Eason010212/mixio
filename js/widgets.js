@@ -6547,84 +6547,19 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
 }
 
 function add_ocr(user_title, user_topic, user_content, user_style, title_style) {
-    showtext("开发中")
-    return
     var isAlive = true
     var contents = []
-    var title = $("<h4 class='userTitle' style='margin-top:20px'>" + user_title + "</h4>")
+    var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
     title.attr("hidden", title_style)
     contents.push(title)
     var topicDiv = $("<div class='topicDiv'/>")
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
     topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
     topicDiv.append(topic)
-    var cameraDiv = $("<div class='cameraDiv' style='position:relative'/>")
-    contents.push(cameraDiv)
-    // add a real-time web camera
-    var video = $("<video autoplay style='width:100%;height:100%;'/>")
-    cameraDiv.append(video)
-    // 底部字幕
-    var bottomDiv11 = $("<div style='background-color:rgba(0,0,0,0.5);text-align:center;color:white;position:absolute;bottom:0;width:100%;height:40px'/>")
-    cameraDiv.append(bottomDiv11)
-    // 居中显示Loading...
-    navigator.mediaDevices.getUserMedia({
-        video: {
-            width: {
-                ideal: 1000
-            },
-            height: {
-                ideal: 1000
-            },
-            frameRate: {
-                ideal: 30,
-                min: 10
-            },
-            facingMode: "environment"
-        },
-        audio: false
-    }).then(function(stream) {
-        video[0].srcObject = stream
-        var canvas = $("<canvas style='width:100%;height:100%;'/>")
-        canvas[0].width = 1000
-        canvas[0].height = 1000
-        var ctx = canvas[0].getContext('2d')
-        setInterval(function(){
-            ctx.drawImage(video[0], 0, 0, 1000, 1000)
-            var base64 = canvas[0].toDataURL('image/png')
-            $.ajax({
-                type: "POST",
-                url: "proxy",
-                dataType: "json",
-                data: JSON.stringify({
-                    "url": "http://127.0.0.1:5000",
-                    "data":{
-                        "pic": base64
-                    }
-                }),
-                contentType: "application/json;charset=utf-8",
-                success: function (data) {
-                    var text = data["result"]
-                    if(text=="")
-                    {
-                        bottomDiv11.text("未检测到车牌")
-                    }
-                    else
-                    {
-                        bottomDiv11.text(text)
-                        if(isAlive && isRunning)
-                            publish(user_topic, text)
-                    }
-                },
-                error: function (data) {
-                    console.log(data)
-                }
-            });
-        },10000)
-        
-
-    })
-    
-
+    var icon_div = $('<div style="display:flex;flex-direction:row;align-items:center;justify-content:center"/>')
+    var bell_icon = $('<i class="fa fa-bell" style="font-size:40px;color:#858796"></i>')
+    icon_div.append(bell_icon)
+    contents.push(icon_div)
     attrs = [
         ['user-type', 'ocr'],
         ['user-title', user_title],
@@ -6632,7 +6567,8 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
         ['user-content', user_content],
         ['title-hidden', title_style]
     ]
-    var itemdiv = add_block(3, 3, contents, attrs)
+    var itemdiv = add_block(1, 1, contents, attrs)
+
 
     var delete_on_click = function() {
         title.parent().parent().remove();
@@ -6657,19 +6593,42 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
     var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
     topic_input_div.append(topic_input)
     editForm.append(topic_input_div)
-    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerInterval + '</h5>'))
-    var trigger_interval_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-    var trigger_interval = $("<input type='number' step='100' min='1000' max='100000' required class='form-control form-control-user'  style='text-align:center' readonly/>")
-    trigger_interval.val(10000)
-    trigger_interval.change(function(){
-        if(trigger_interval.val()<1000)
-            trigger_interval.val(1000)
-    })
-    trigger_interval_div.append(trigger_interval)
-    editForm.append(trigger_interval_div)
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].beepAudio + '</h5>'))
+    var beep_select = $('<select class="form-control form-control-user" style="margin-top:15px;text-align:center"/>')
+    beep_select.append($('<option value="weak">弱提示</option>'))
+    beep_select.append($('<option value="strong">强提示</option>'))
+    beep_select.append($('<option value="alarm">警报音</option>'))
+    editForm.append(beep_select)
     var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
+    client.on('message', function(topic1, message1) {
+        if (isAlive && isRunning)
+            if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
+                const music = new Audio('img/'+ title.parent().parent().attr('user-content') +'.mp3');
+                music.play();
+                music.loop = false;
+                if(title.parent().parent().attr('user-content') == "weak")
+                {
+                    bell_icon.css("color", "#4e73df")
+                    itemdiv.css("box-shadow", "#4e73df 1px 1px 10px")
+                }
+                if(title.parent().parent().attr('user-content') == "strong")
+                {
+                    bell_icon.css("color", "#1cc88a")
+                    itemdiv.css("box-shadow", "#1cc88a 1px 1px 10px")
+                }
+                if(title.parent().parent().attr('user-content') == "alarm")
+                {
+                    bell_icon.css("color", "#e74a3b")
+                    itemdiv.css("box-shadow", "#e74a3b 1px 1px 10px")
+                }
+                setTimeout(function(){
+                    bell_icon.css("color", "#858796")
+                    itemdiv.css("box-shadow", "")
+                },300)
+            }
+    })
     confirmEdit.click(function() {
         if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
             var re = /^[a-z0-9]+$/i;
@@ -6678,7 +6637,7 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
                     if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
                         title.parent().parent().attr('user-title', title_input.val())
                         title.parent().parent().attr('user-topic', topic_input.val())
-                        title.parent().parent().attr('user-content', trigger_interval.val())
+                        title.parent().parent().attr('user-content', beep_select.val())
                         title.text(title_input.val())
                         topic.text(topic_input.val())
                         modifyDia.close()
@@ -6723,7 +6682,7 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
             if (!isRunning)
                 bubble.append(deleteButton)
             if (!isRunning)
-                {
+            {
                 copyButton.attr("user-origin", title.text())
                 bubble.append(copyButton)
                 styleButton.attr("user-origin", title.text())
@@ -6733,7 +6692,7 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
             }
             title_input.val(title.text())
             topic_input.val(topic.text())
-            trigger_interval.val(title.parent().parent().attr('user-content'))
+            beep_select.val(title.parent().parent().attr('user-content'))
             if (!d.open)
             {
                 d.show(itemdiv[0]);

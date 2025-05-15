@@ -1,13 +1,14 @@
 var JSLang = {
     "zh": {
+        "beepAudio": "提示音类型",
         "tensorAI": "- 人工智能 -",
         "imageNet": "ImageNet 图像分类",
         "cocoSSD": "CocoSSD 对象检测",
         "deepLab": "DeepLab 图像分割",
         "blazeFace": "人脸识别",
         "mediaPipe": "手势检测",
-        "ocr": "车牌识别",
-        "qr": "图形码识别",
+        "ocr": "蜂鸣器",
+        "qr": "二维码识别",
         "MoveNet": "MoveNet 关节点识别",
         "Bert": "文本问答",
         "SpeechCMD": "SpeechCMD 语音指令",
@@ -228,13 +229,14 @@ var JSLang = {
         "fps": "帧率"
     },
     "tw": {
+        "beepAudio": "Audio",
         "tensorAI": "- AI·Tensorflow.js -",
         "imageNet": "ImageNet",
         "cocoSSD": "CocoSSD",
         "deepLab": "DeepLab",
         "blazeFace": "BlazeFace",
         "mediaPipe": "MediaPipe",
-        "ocr": "Real-time OCR",
+        "ocr": "Beep",
         "qr": "Code Recognition",
         "MoveNet": "MoveNet",
         "Bert": "BERT",
@@ -456,13 +458,14 @@ var JSLang = {
         "fps": "幀率"
     },
     "en": {
+        "beepAudio": "Beep Audio",
         "tensorAI": "- AI·Tensorflow.js -",
         "imageNet": "ImageNet",
         "cocoSSD": "CocoSSD",
         "deepLab": "DeepLab",
         "blazeFace": "BlazeFace",
         "mediaPipe": "MediaPipe",
-        "ocr": "Real-time OCR",
+        "ocr": "Beep",
         "qr": "Code Recognition",
         "MoveNet": "MoveNet",
         "Bert": "BERT",
