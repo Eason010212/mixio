@@ -5988,7 +5988,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
             var cameraDiv = $("<div class='cameraDiv' style='position:relative'/>")
             contents.push(cameraDiv)
             // add a real-time web camera
-            var video = $("<video autoplay style='width:100%;height:100%;'/>")
+            var video = $("<video autoplay style='width:100%;height:100%;object-position:top'/>")
             cameraDiv.append(video)
             // floating canvas on top of the video
             var canvas = $("<canvas style='position:absolute;top:0;left:0'/>")
@@ -6144,7 +6144,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                     dia.close().remove()
                 })
             })
-            var allDataTable = $('<div style="height:40%"/>')
+            var allDataTable = $('<div style="height:40%" class="facial"/>')
             contents.push(allDataTable)
             var ctx = canvas[0].getContext('2d')
             // 居中显示Loading...
