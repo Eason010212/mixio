@@ -1351,32 +1351,10 @@ var mixioServer = async function() {
         if (req.session.userName && req.query.projectName){
             var projectName = req.query.projectName
             // img/store/username/projectName
-            var imgStorePath = path.join(__dirname, 'img', 'store', req.session.userName, projectName)
+            var imgStorePath = 'img/store/' + req.session.userName + "/" + projectName
             // 文件名发送列表
             fs.readdir(imgStorePath, function(err, files) {
                 res.send(files || [])
-            })
-        } else
-            res.redirect('/')
-    })
-
-    app.get('/clearImgStore', function(req, res) {
-        if (req.session.userName && req.query.projectName){
-            var projectName = req.query.projectName
-            // img/store/username/projectName
-            var imgStorePath = path.join(__dirname, 'img', 'store', req.session.userName, projectName)
-            // 清空文件
-            fs.readdir(imgStorePath, function(err, files) {
-                files.forEach(function(file) {
-                    fs.unlink(path.join(imgStorePath, file), function(err) {
-                        if (err) {
-                            console.log(err)
-                        }
-                    })
-                })
-            })
-            res.send({
-                "status": "success"
             })
         } else
             res.redirect('/')
@@ -1387,7 +1365,7 @@ var mixioServer = async function() {
             var projectName = req.query.projectName
             var filename = req.query.filename
             // img/store/username/projectName
-            var imgStorePath = path.join(__dirname, 'img', 'store', req.session.userName, projectName)
+            var imgStorePath = 'img/store/' + req.session.userName + "/" + projectName
             // 删除文件
             fs.unlink(path.join(imgStorePath, filename), function(err) {
                 if (err) {
