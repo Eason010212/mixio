@@ -1351,7 +1351,7 @@ var mixioServer = async function() {
         if (req.session.userName && req.query.projectName){
             var projectName = req.query.projectName
             // img/store/username/projectName
-            var imgStorePath = 'img/store/' + req.session.userName + "/" + projectName
+            var imgStorePath = path.join(__dirname, 'img/store/' + req.session.userName + "/" + projectName)
             // 文件名发送列表
             fs.readdir(imgStorePath, function(err, files) {
                 res.send(files || [])
@@ -1367,7 +1367,7 @@ var mixioServer = async function() {
             // img/store/username/projectName
             var imgStorePath = 'img/store/' + req.session.userName + "/" + projectName
             // 删除文件
-            fs.unlink(path.join(imgStorePath, filename), function(err) {
+            fs.unlink(path.join(__dirname, imgStorePath, filename), function(err) {
                 if (err) {
                     console.log(err)
                 }
