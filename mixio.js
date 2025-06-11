@@ -843,7 +843,7 @@ var mixioServer = async function() {
                     const format = match[1];
                     const timeStamp = Date.now();
                     const fileName = `${timeStamp}.${format}`;
-                    const filePath = path.join('img', 'store', topic[0], topic[1], fileName);
+                    const filePath = path.join('store', topic[0], topic[1], fileName);
                     const base64Data = payload.replace(base64Reg, '');
                     const buffer = Buffer.from(base64Data, 'base64');
                     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -852,7 +852,7 @@ var mixioServer = async function() {
                     // 全部明文存为txt
                     const timeStamp = Date.now();
                     const fileName = `${timeStamp}.txt`;
-                    const filePath = path.join('img', 'store', topic[0], topic[1], fileName);
+                    const filePath = path.join('store', topic[0], topic[1], fileName);
                     fs.mkdirSync(path.dirname(filePath), { recursive: true});
                     fs.writeFileSync(filePath, payload);
                 }
