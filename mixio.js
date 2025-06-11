@@ -2176,6 +2176,8 @@ var mixioServer = async function() {
 
     app.use('/img', express.static(path.join(__dirname, 'img')));
 
+    app.use('/img/store', 'img/store')
+
     app.use('/fonts', express.static(path.join(__dirname, 'fonts')));
 
     app.use('/blockly', express.static(path.join(__dirname, 'blockly')));
