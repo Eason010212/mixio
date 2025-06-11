@@ -830,6 +830,30 @@ var mixioServer = async function() {
         var topic = packet.topic.split('/')
         var payload = String(packet.payload)
         if (topic.length == 3) {
+            if(topic[2] == 'storage') {
+                // 判断是否是base64, 开头为data:image/***;base64, ***可以为png,bmp,jpg,jpeg,gif,svg,ico
+                const allowFormats = ['png', 'bmp', 'jpg', 'jpeg', 'gif', 'svg', 'ico'];
+                const base64Reg = /^data:image\/(\w+);base64,/;
+                const match = payload.match(base64Reg);
+                if (match && allowFormats.includes(match[1])) {
+                    // 是base64
+                    const format = match[1];
+                    const timeStamp = Date.now();
+                    const fileName = `${timeStamp}.${format}`;
+                    const filePath = path.join(__dirname, 'img', 'store', topic[0], topic[1], fileName);
+                    const base64Data = payload.replace(base64Reg, '');
+                    const buffer = Buffer.from(base64Data, 'base64');
+                    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+                    fs.writeFileSync(filePath, buffer);
+                } else {
+                    // 全部明文存为txt
+                    const timeStamp = Date.now();
+                    const fileName = `${timeStamp}.txt`;
+                    const filePath = path.join(__dirname, 'img', 'store', topic[0], topic[1], fileName);
+                    fs.mkdirSync(path.dirname(filePath), { recursive: true});
+                    fs.writeFileSync(filePath, payload);
+                }
+            }
             if (topic[2] == 'b640a0ce465fa2a4150c36b305c1c11b') {
                 if (STORAGE_ENGINE == "sqlite")
                     db.run("insert or ignore into devices (userName, clientid) values (?,?)", [topic[0], payload])
@@ -1319,6 +1343,61 @@ var mixioServer = async function() {
             db.all("select clientid from devices where userName = ?", [userName], function(err, rows) {
                 res.send(JSON.stringify(rows))
             })
+        } else
+            res.redirect('/')
+    })
+
+    app.get('/getImgStore', function(req, res) {
+        if (req.session.userName && req.query.projectName){
+            var projectName = req.query.projectName
+            // img/store/username/projectName
+            var imgStorePath = path.join(__dirname, 'img', 'store', req.session.userName, projectName)
+            // 文件名发送列表
+            fs.readdir(imgStorePath, function(err, files) {
+                res.send(files || [])
+            })
+        } else
+            res.redirect('/')
+    })
+
+    app.get('/clearImgStore', function(req, res) {
+        if (req.session.userName && req.query.projectName){
+            var projectName = req.query.projectName
+            // img/store/username/projectName
+            var imgStorePath = path.join(__dirname, 'img', 'store', req.session.userName, projectName)
+            // 清空文件
+            fs.readdir(imgStorePath, function(err, files) {
+                files.forEach(function(file) {
+                    fs.unlink(path.join(imgStorePath, file), function(err) {
+                        if (err) {
+                            console.log(err)
+                        }
+                    })
+                })
+            })
+            res.send({
+                "status": "success"
+            })
+        } else
+            res.redirect('/')
+    })
+
+    app.get('/deleteImgStore', function(req, res) {
+        if (req.session.userName && req.query.projectName && req.query.filename){
+            var projectName = req.query.projectName
+            var filename = req.query.filename
+            // img/store/username/projectName
+            var imgStorePath = path.join(__dirname, 'img', 'store', req.session.userName, projectName)
+            // 删除文件
+            fs.unlink(path.join(imgStorePath, filename), function(err) {
+                if (err) {
+                    console.log(err)
+                }
+            })
+            res.send({
+                "status": "success"
+            }
+            )
         } else
             res.redirect('/')
     })
