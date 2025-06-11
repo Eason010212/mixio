@@ -105,6 +105,9 @@ function init(cb) {
     if (!fs.existsSync("logs")) {
         fs.mkdirSync("logs")
     }
+    if (!fs.existsSync("store")) {
+        fs.mkdirSync("store")
+    }
     if (!fs.existsSync("config")) {
         fs.mkdirSync("config")
         var defaultConfig = `{
