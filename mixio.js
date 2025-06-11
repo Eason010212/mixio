@@ -1350,8 +1350,8 @@ var mixioServer = async function() {
     app.get('/getImgStore', function(req, res) {
         if (req.session.userName && req.query.projectName){
             var projectName = req.query.projectName
-            // img/store/username/projectName
-            var imgStorePath = path.join('img/store/' + req.session.userName + "/" + projectName)
+            // store/username/projectName
+            var imgStorePath = path.join('store/' + req.session.userName + "/" + projectName)
             // 文件名发送列表
             fs.readdir(imgStorePath, function(err, files) {
                 res.send(files || [])
@@ -1364,8 +1364,8 @@ var mixioServer = async function() {
         if (req.session.userName && req.query.projectName && req.query.filename){
             var projectName = req.query.projectName
             var filename = req.query.filename
-            // img/store/username/projectName
-            var imgStorePath = 'img/store/' + req.session.userName + "/" + projectName
+            // store/username/projectName
+            var imgStorePath = 'store/' + req.session.userName + "/" + projectName
             // 删除文件
             fs.unlink(path.join(imgStorePath, filename), function(err) {
                 if (err) {
@@ -2176,7 +2176,7 @@ var mixioServer = async function() {
 
     app.use('/img', express.static(path.join(__dirname, 'img')));
 
-    app.use('/img/store', 'img/store')
+    app.use('/store', express.static('store'));
 
     app.use('/fonts', express.static(path.join(__dirname, 'fonts')));
 

@@ -4224,7 +4224,7 @@ function open_storage(){
             }
             for (let ri = 0; ri < res.length; ri++) {
             {
-                let url = "img/store/" + globalUserName + "/" + globalProjectName + "/" + res[ri]
+                let url = "store/" + globalUserName + "/" + globalProjectName + "/" + res[ri]
                 if (url.endsWith('.txt')) {
                     sampleMessages.push({ type: 'text', content: url })
                 } else{
