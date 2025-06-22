@@ -4205,115 +4205,217 @@ setInterval(function(){
     }
 }, 30000)
 
-
+storDia = false
 function open_storage(){
     var editForm = $('<div class="nnt" style="width:80vw;height:80vh;display:flex;flex-direction:column"/>')
     editForm.append($('<div style="margin-top:-63px;margin-left:calc(40vw - 43px);margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/store.svg" style="width:45px;"></div>'))
-    editForm.append($('<h3 style="text-align:center;margin-bottom:5px">所有发送到<span style="color:#4e73df;font-weight:bold">/storage</span>主题下的消息和图片会被自动保存</h3>'))
-    var messagesContainer = $('<div style="flex:1;overflow-y:auto;padding:20px;display:grid;grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));gap:15px;align-content:flex-start"/>')
-    var sync_stor = function(){
-        messagesContainer.empty()
-        var sampleMessages = [
-        ]
-        $.getJSON('getImgStore', {
-            'projectName': globalProjectName
-        }, function(res) {
-            if(res.length==0)
-            {
-                messagesContainer.append($('<div style="background:white;border-radius:8px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center">暂无存储</div>'))
-            }
-            for (let ri = 0; ri < res.length; ri++) {
-            {
-                let url = "store/" + globalUserName + "/" + globalProjectName + "/" + res[ri]
-                if (url.endsWith('.txt')) {
-                    sampleMessages.push({ type: 'text', content: url })
-                } else{
-                    sampleMessages.push({ type: 'image', content: url })
-                }
-            }
-            }
-            for(let ji = 0; ji < sampleMessages.length; ji++) {
-                let msg = sampleMessages[ji]
-                let messageBox = $('<div style="background:white;border-radius:8px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);height:150px;display:flex;flex-direction:column"/>')
-                
-                if (msg.type === 'text') {
-                    $.ajax({
-                        url: msg.content,
-                        success: function(res) {
-                            messageBox.append($('<div style="font-size:14px;word-break:break-all;height:100px"/>').text(res))
-                            // Add timestamp (sample)
-                            let timeStamp = parseInt(msg.content.split("/")[msg.content.split("/").length - 1].split(".")[0])
-                            let timeString = new Date(timeStamp).toLocaleString()
-                            let btdiv = $('<div style="font-size:11px;color:#999;margin-top:10px;text-align:right"></div>')
-                            btdiv.append("<span>" + timeString +"</span>")
-                            let deletebtn = $('<a class="btn btn-danger btn-sm" style="margin-left:10px"><i class="fa fa-trash"></i></a>')
-                            deletebtn.click(function(){
-                                $.getJSON('deleteImgStore', {
-                                    'projectName': globalProjectName,
-                                    'filename': msg.content.split("/")[msg.content.split("/").length - 1]
-                                }, function(){
-                                    sync_stor()
-                                })
-                            })
-                            btdiv.append(deletebtn)
-                            messageBox.append(btdiv)
-                        }
-                    })
-                } else if (msg.type === 'image') {
-                    messageBox.append($('<div style="width:100%;height:100px;text-align:center;overflow:hidden"/><img src="' + msg.content + '" style="max-width:100%;max-height:100px;object-fit:contain;margin:auto"/></div>'))
-                    // Add timestamp (sample)
-                    let timeStamp = parseInt(msg.content.split("/")[msg.content.split("/").length - 1].split(".")[0])
-                    let timeString = new Date(timeStamp).toLocaleString()
-                    let btdiv = $('<div style="font-size:11px;color:#999;margin-top:10px;text-align:right"></div>')
-                    btdiv.append("<span>" + timeString +"</span>")
-                    let viewbtn = $('<a class="btn btn-primary btn-sm" style="margin-left:10px"><i class="fa fa-eye"></i></a>')
-                    viewbtn.click(function(){
-                        // 全屏显示图片，点击任意退出
-                        let fullDialog = dialog({
-                            content: $('<div style="width:60vw;height:60vh;display:flex;align-items:center;justify-content:center"><img src="' + msg.content + '" style="max-width:100%;max-height:100%"/></div>')[0],
-                            cancel: true,
-                            cancelValue: '关闭'
-                        })
-                        fullDialog.showModal()
-                        
-                    })
-                    let deletebtn = $('<a class="btn btn-danger btn-sm" style="margin-left:10px"><i class="fa fa-trash"></i></a>')
-                    deletebtn.click(function(){
-                        $.getJSON('deleteImgStore', {
-                            'projectName': globalProjectName,
-                            'filename': msg.content.split("/")[msg.content.split("/").length - 1]
-                        }, function(){
-                            sync_stor()
-                        })
-                    })
-                    btdiv.append(viewbtn)
-                    btdiv.append(deletebtn)
-                    messageBox.append(btdiv)
-                }
-                messagesContainer.prepend(messageBox)
-            }
-        })
-    }
-    editForm.append(messagesContainer)
-    sync_stor()
-    client.on('message', function(topic, msg) {
-        if(topic.split("/")[2] == "storage")
-            sync_stor()
-    })
+    editForm.append($('<h3 style="text-align:center;margin-bottom:15px">所有前缀为<span style="color:#4e73df;font-weight:bold">$</span>主题下的消息和图片会被自动保存</h3>'))
+    
+    // Create table structure
+    var tableContainer = $('<div style="flex:1;overflow-y:auto;padding:10px;background-color:#f8f9fc;border-radius:5px"/>')
+    var fileTable = $('<table class="table table-bordered table-hover" style="background-color:white;margin-bottom:0"><thead><tr>' +
+        '<th width="40"><input type="checkbox" id="selectAll"></th>' +
+        '<th>文件名</th>' +
+        '<th width="150">类型</th>' +
+        '<th width="180">日期</th>' +
+        '<th width="120">大小</th>' +
+        '<th width="180">操作</th></tr></thead><tbody id="fileTableBody"></tbody></table>')
+    
+    // Add action buttons
+    var actionBar = $('<div style="margin-bottom:15px;display:flex;justify-content:space-between;align-items:center">' +
+        '<div><button id="deleteSelected" class="btn btn-danger btn-sm" disabled><i class="fa fa-trash"></i> 删除选中</button>' +
+        ' <button id="downloadSelected" class="btn btn-primary btn-sm" disabled><i class="fa fa-download"></i> 下载选中</button></div>')
+    
+    tableContainer.append(actionBar)
+    tableContainer.append(fileTable)
+    editForm.append(tableContainer)
+    
     // Bottom section
     var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
     var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
     bottomDiv.append(cancelEdit)
     editForm.append(bottomDiv)
     
-    var modifyDia = dialog({
-        content: editForm[0],
-        cancel: false
-    })
+    var selectedFiles = [];
+    
+    // Function to trigger file download
+    function downloadFile(filename) {
+        let url = "store/" + globalUserName + "/" + globalProjectName + "/" + filename;
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+    
+    var sync_stor = function(){
+        $('#fileTableBody').empty()
+        selectedFiles = [];
+        $('#deleteSelected').prop('disabled', true);
+        $('#downloadSelected').prop('disabled', true);
+        $('#selectAll').prop('checked', false);
+        
+        $.getJSON('getImgStore', {
+            'projectName': globalProjectName
+        }, function(res) {
+            if(res.length == 0) {
+                $('#fileTableBody').append('<tr><td colspan="6" style="text-align:center;padding:20px">暂无存储文件</td></tr>')
+                return;
+            }
+
+            for (let ri = 0; ri < res.length; ri++) {
+                let filename = res[ri];
+                let url = "store/" + globalUserName + "/" + globalProjectName + "/" + filename;
+                let isText = filename.endsWith('.txt');
+                let timeStamp;
+                if(filename.split("_").length>1) {
+                    timeStamp = parseInt(filename.split("_")[1].split('.')[0])
+                } else {
+                    timeStamp = parseInt(filename.split('.')[0]);
+                }
+                let timeString = new Date(timeStamp).toLocaleString();
+                let fileType = isText ? '文本' : '图片';
+                
+                let row = $('<tr></tr>');
+                
+                // Checkbox
+                row.append('<td><input type="checkbox" class="fileCheckbox" data-filename="' + filename + '"></td>');
+                
+                // Filename
+                row.append('<td style="word-break:break-all">' + filename + '</td>');
+                
+                // Type
+                row.append('<td>' + fileType + '</td>');
+                
+                // Date
+                row.append('<td>' + timeString + '</td>');
+                
+                // Size (placeholder - you might need to get actual file size from server)
+                row.append('<td>--</td>');
+                
+                // Actions
+                let actionCell = $('<td></td>');
+                
+                // Download button (added for each file)
+                let downloadBtn = $('<button class="btn btn-success btn-xs" style="margin-right:5px" title="下载"><i class="fa fa-download"></i></button>');
+                downloadBtn.click(function() {
+                    downloadFile(filename);
+                });
+                actionCell.append(downloadBtn);
+                
+                if (isText) {
+                    let viewBtn = $('<button class="btn btn-primary btn-xs" style="margin-right:5px" title="查看"><i class="fa fa-eye"></i></button>');
+                    viewBtn.click(function() {
+                        $.ajax({
+                            url: url,
+                            success: function(content) {
+                                let textDialog = dialog({
+                                    content: $('<div style="width:50vw;height:50vh;padding:20px;overflow:auto"><pre style="white-space:pre-wrap">' + content + '</pre></div>')[0],
+                                    cancel: true,
+                                    cancelValue: '关闭'
+                                });
+                                textDialog.showModal();
+                            }
+                        });
+                    });
+                    actionCell.append(viewBtn);
+                } else {
+                    let viewBtn = $('<button class="btn btn-primary btn-xs" style="margin-right:5px" title="查看"><i class="fa fa-eye"></i></button>');
+                    viewBtn.click(function() {
+                        let fullDialog = dialog({
+                            content: $('<div style="width:60vw;height:60vh;display:flex;align-items:center;justify-content:center"><img src="' + url + '" style="max-width:100%;max-height:100%"/></div>')[0],
+                            cancel: true,
+                            cancelValue: '关闭'
+                        });
+                        fullDialog.showModal();
+                    });
+                    actionCell.append(viewBtn);
+                }
+                
+                let deleteBtn = $('<button class="btn btn-danger btn-xs" title="删除"><i class="fa fa-trash"></i></button>');
+                deleteBtn.click(function() {
+                    if(confirm('确定要删除此文件吗？')) {
+                        $.getJSON('deleteImgStore', {
+                            'projectName': globalProjectName,
+                            'filename': filename
+                        }, function() {
+                            sync_stor();
+                        });
+                    }
+                });
+                actionCell.append(deleteBtn);
+                
+                row.append(actionCell);
+                $('#fileTableBody').append(row);
+            }
+            
+            // Add checkbox event handlers
+            $('.fileCheckbox').change(function() {
+                let filename = $(this).data('filename');
+                if($(this).is(':checked')) {
+                    if(!selectedFiles.includes(filename)) {
+                        selectedFiles.push(filename);
+                    }
+                } else {
+                    selectedFiles = selectedFiles.filter(f => f !== filename);
+                    $('#selectAll').prop('checked', false);
+                }
+                $('#deleteSelected').prop('disabled', selectedFiles.length === 0);
+                $('#downloadSelected').prop('disabled', selectedFiles.length === 0);
+            });
+        });
+    }
+    
+    sync_stor();
+    
+    client.on('message', function(topic, msg) {
+        if(topic.split("/")[2][0] == "$")
+            sync_stor();
+    });
+    
+    if(!storDia)
+        storDia = dialog({
+            content: editForm[0],
+            cancel: false
+        });
     
     cancelEdit.click(function() {
-        modifyDia.close().remove()
-    })
+        storDia.close();
+    });
     
-    modifyDia.showModal()
+    storDia.showModal();
+    
+    // Select all checkbox
+    $('#selectAll').change(function() {
+        $('.fileCheckbox').prop('checked', $(this).is(':checked')).trigger('change');
+    });
+    
+    // Delete selected button
+    $('#deleteSelected').click(function() {
+        if(selectedFiles.length === 0) return;
+        
+        if(confirm('确定要删除选中的 ' + selectedFiles.length + ' 个文件吗？')) {
+            let deletePromises = selectedFiles.map(filename => {
+                return $.getJSON('deleteImgStore', {
+                    'projectName': globalProjectName,
+                    'filename': filename
+                });
+            });
+            
+            Promise.all(deletePromises).then(() => {
+                sync_stor();
+            });
+        }
+    });
+    
+    // Download selected button
+    $('#downloadSelected').click(function() {
+        if(selectedFiles.length === 0) return;
+        
+        // Download each file one by one
+        selectedFiles.forEach(filename => {
+            downloadFile(filename);
+        });
+    });
 }

@@ -833,7 +833,7 @@ var mixioServer = async function() {
         var topic = packet.topic.split('/')
         var payload = String(packet.payload)
         if (topic.length == 3) {
-            if(topic[2] == 'storage') {
+            if(topic[2][0] == '$') {
                 // 判断是否是base64, 开头为data:image/***;base64, ***可以为png,bmp,jpg,jpeg,gif,svg,ico
                 const allowFormats = ['png', 'bmp', 'jpg', 'jpeg', 'gif', 'svg', 'ico'];
                 const base64Reg = /^data:image\/(\w+);base64,/;
@@ -842,7 +842,7 @@ var mixioServer = async function() {
                     // 是base64
                     const format = match[1];
                     const timeStamp = Date.now();
-                    const fileName = `${timeStamp}.${format}`;
+                    const fileName = topic[2] + '_' + `${timeStamp}.${format}`;
                     const filePath = path.join('store', topic[0], topic[1], fileName);
                     const base64Data = payload.replace(base64Reg, '');
                     const buffer = Buffer.from(base64Data, 'base64');
@@ -851,7 +851,7 @@ var mixioServer = async function() {
                 } else {
                     // 全部明文存为txt
                     const timeStamp = Date.now();
-                    const fileName = `${timeStamp}.txt`;
+                    const fileName = topic[2] + '_' + `${timeStamp}.txt`;
                     const filePath = path.join('store', topic[0], topic[1], fileName);
                     fs.mkdirSync(path.dirname(filePath), { recursive: true});
                     fs.writeFileSync(filePath, payload);
