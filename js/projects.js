@@ -942,12 +942,14 @@ function view_project(projectName, projectType) {
                         connected_hardwares = tempdevices
                         connected_devices = tmpclients
                         sync_connect_status()
+                        prepare_storDia()
                             //check_link()
                     })
                 else {
                     $("#title_phase2").css("margin-left", "0")
                     $("#connect_span").css("color", "#1cc88a")
                     $("#connect_span").html("<i class='fa fa-check-circle-o' style='margin-right:3px'></i>" + JSLang[lang].connected)
+                    prepare_storDia()
                 }
             })
             client.on('close', function() {
@@ -984,7 +986,17 @@ function view_project(projectName, projectType) {
                     var tp = stringendecoder.encodeHtml(topic1.split('/')[2])
                     var ms = message1.toString()
                     if(ms.length>500)
-                        ms = "[Too long to display]"
+                    {
+                        const allowFormats = ['png', 'bmp', 'jpg', 'jpeg', 'gif', 'svg', 'ico'];
+                        const base64Reg = /^data:image\/(\w+);base64,/;
+                        const match = ms.match(base64Reg);
+                        if(match && allowFormats.includes(match[1])) {
+                            ms = '[Image]'
+                        }
+                        else{
+                            ms = "[Too long to display]"
+                        }
+                    }
                     if(isJSON(ms))
                     {   
                         var msJSON = JSON.parse(ms)
@@ -1040,7 +1052,17 @@ function view_project(projectName, projectType) {
                     var tp = stringendecoder.encodeHtml(topic1.split('/')[3])
                     var ms = message1.toString()
                     if(ms.length>500)
-                        ms = "[Too long to display]"
+                    {
+                        const allowFormats = ['png', 'bmp', 'jpg', 'jpeg', 'gif', 'svg', 'ico'];
+                        const base64Reg = /^data:image\/(\w+);base64,/;
+                        const match = ms.match(base64Reg);
+                        if(match && allowFormats.includes(match[1])) {
+                            ms = '[Image]'
+                        }
+                        else{
+                            ms = "[Too long to display]"
+                        }
+                    }
                     if(isJSON(ms))
                     {   
                         var msJSON = JSON.parse(ms)
@@ -4206,29 +4228,47 @@ setInterval(function(){
 }, 30000)
 
 storDia = false
-function open_storage(){
+function prepare_storDia(){
     var editForm = $('<div class="nnt" style="width:80vw;height:80vh;display:flex;flex-direction:column"/>')
     editForm.append($('<div style="margin-top:-63px;margin-left:calc(40vw - 43px);margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/store.svg" style="width:45px;"></div>'))
     editForm.append($('<h3 style="text-align:center;margin-bottom:15px">所有前缀为<span style="color:#4e73df;font-weight:bold">$</span>主题下的消息和图片会被自动保存</h3>'))
     
     // Create table structure
     var tableContainer = $('<div style="flex:1;overflow-y:auto;padding:10px;background-color:#f8f9fc;border-radius:5px"/>')
-    var fileTable = $('<table class="table table-bordered table-hover" style="background-color:white;margin-bottom:0"><thead><tr>' +
-        '<th width="40"><input type="checkbox" id="selectAll"></th>' +
-        '<th>文件名</th>' +
-        '<th width="150">类型</th>' +
-        '<th width="180">日期</th>' +
-        '<th width="120">大小</th>' +
-        '<th width="180">操作</th></tr></thead><tbody id="fileTableBody"></tbody></table>')
+    var fileTable = $('<table id="fileTableBody" class="table table-bordered table-hover" style="background-color:white;margin-bottom:0"></table>')
+    var thead = $('<thead></thead>')
+    fileTable.append(thead)
+    var tr = $('<tr></tr>')
+    thead.append(tr)
+    var selectAll = $('<input type="checkbox" id="selectAll">')
+    var th = $('<th width="40"></th>')
+    th.append(selectAll)
+    tr.append(th)
+    tr.append('<th>文件名</th>')
+    tr.append('<th width="150">类型</th>')
+    tr.append('<th width="180">日期</th>')
+    tr.append('<th width="180">操作</th>')
+    var tableBody = $('<tbody></tbody>')
+    fileTable.append(tableBody)
+    
+    // Create grid view container (hidden by default)
+    var gridContainer = $('<div id="gridViewContainer" style="display:none;flex:1;overflow-y:auto;padding:10px;background-color:#f8f9fc;border-radius:5px;display:flex;flex-wrap:wrap;gap:15px;"></div>')
     
     // Add action buttons
-    var actionBar = $('<div style="margin-bottom:15px;display:flex;justify-content:space-between;align-items:center">' +
-        '<div><button id="deleteSelected" class="btn btn-danger btn-sm" disabled><i class="fa fa-trash"></i> 删除选中</button>' +
-        ' <button id="downloadSelected" class="btn btn-primary btn-sm" disabled><i class="fa fa-download"></i> 下载选中</button></div>')
+    var actionBar = $('<div style="margin-bottom:15px;display:flex;justify-content:space-between;align-items:center">')
+    var buttonDiv = $('<div style="display:flex;align-items:center"/>')
+    var deleteSelected = $('<button id="deleteSelected" class="btn btn-danger btn-sm" disabled><i class="fa fa-trash"></i> 删除选中</button>')
+    var downloadSelected = $('<button id="downloadSelected" class="btn btn-primary btn-sm" style="margin-left:5px" disabled><i class="fa fa-download"></i> 下载选中</button>')
+    var toggleViewBtn = $('<button id="toggleViewBtn" class="btn btn-secondary btn-sm" style="margin-left:5px"><i class="fa fa-th-large"></i> 平铺视图</button>')
+    buttonDiv.append(deleteSelected)
+    buttonDiv.append(downloadSelected)
+    buttonDiv.append(toggleViewBtn)
+    actionBar.append(buttonDiv)
     
-    tableContainer.append(actionBar)
+    editForm.append(actionBar)
     tableContainer.append(fileTable)
     editForm.append(tableContainer)
+    editForm.append(gridContainer) // Add grid container to the form
     
     // Bottom section
     var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
@@ -4236,9 +4276,6 @@ function open_storage(){
     bottomDiv.append(cancelEdit)
     editForm.append(bottomDiv)
     
-    var selectedFiles = [];
-    
-    // Function to trigger file download
     function downloadFile(filename) {
         let url = "store/" + globalUserName + "/" + globalProjectName + "/" + filename;
         let a = document.createElement('a');
@@ -4248,25 +4285,112 @@ function open_storage(){
         a.click();
         document.body.removeChild(a);
     }
+
+    selectedFiles = [];
+    var currentView = 'list'; // 'list' or 'grid'
     
-    var sync_stor = function(){
-        $('#fileTableBody').empty()
+    // Toggle view button
+    toggleViewBtn.click(function() {
+        if(currentView === 'list') {
+            currentView = 'grid';
+            toggleViewBtn.html('<i class="fa fa-list"></i> 列表视图');
+            tableContainer.hide();
+            gridContainer.show();
+        } else {
+            currentView = 'list';
+            toggleViewBtn.html('<i class="fa fa-th-large"></i> 平铺视图');
+            gridContainer.hide();
+            tableContainer.show();
+        }
+    });
+    gridContainer.hide()
+    
+    // Select all checkbox
+    selectAll.change(function() {
+        $('.fileCheckbox').prop('checked', $(this).is(':checked')).trigger('change');
+    });
+    
+    // Delete selected button
+    deleteSelected.click(function() {
+        if(selectedFiles.length === 0) return;
+        
+        if(confirm('确定要删除选中的 ' + selectedFiles.length + ' 个文件吗？')) {
+            let deletePromises = selectedFiles.map(filename => {
+                return $.getJSON('deleteImgStore', {
+                    'projectName': globalProjectName,
+                    'filename': filename
+                });
+            });
+            
+            Promise.all(deletePromises).then(() => {
+                sync_stor();
+            });
+        }
+    });
+    
+    // Download selected button
+    downloadSelected.click(function() {
+        if(selectedFiles.length === 0) return;
+        
+        // Download each file one by one
+        selectedFiles.forEach(filename => {
+            downloadFile(filename);
+        });
+    });
+    
+    storDia = dialog({
+        content: editForm[0],
+        cancel: false
+    });
+    
+    cancelEdit.click(function() {
+        storDia.close();
+    });
+    
+    sync_stor = function(){
+        tableBody.empty()
+        gridContainer.empty()
         selectedFiles = [];
-        $('#deleteSelected').prop('disabled', true);
-        $('#downloadSelected').prop('disabled', true);
-        $('#selectAll').prop('checked', false);
+        deleteSelected.prop('disabled', true);
+        downloadSelected.prop('disabled', true);
+        selectAll.prop('checked', false);
         
         $.getJSON('getImgStore', {
-            'projectName': globalProjectName
+            'projectName': globalProjectName,
+            'isMixly': isMixly
         }, function(res) {
             if(res.length == 0) {
-                $('#fileTableBody').append('<tr><td colspan="6" style="text-align:center;padding:20px">暂无存储文件</td></tr>')
+                tableBody.append('<tr><td colspan="6" style="text-align:center;padding:20px">暂无存储文件</td></tr>')
+                gridContainer.append('<div style="width:100%;text-align:center;padding:20px">暂无存储文件</div>')
                 return;
             }
-
+            var sortedRes = res.sort(function(a, b) {
+                // 提取时间戳
+                let getTimestamp = function(filename) {
+                    if(filename.split("_").length>1) {
+                        return parseInt(filename.split("_")[1].split('.')[0]);
+                    } else {
+                        return parseInt(filename.split('.')[0]);
+                    }
+                };
+                
+                let timeA = getTimestamp(a);
+                let timeB = getTimestamp(b);
+                
+                // 从新到旧排序 (最新的在前面)
+                return timeB - timeA;
+                
+                // 如果要从旧到新排序，使用下面这行代替上面那行
+                // return timeA - timeB;
+            });
+            
+            res = sortedRes;
             for (let ri = 0; ri < res.length; ri++) {
                 let filename = res[ri];
                 let url = "store/" + globalUserName + "/" + globalProjectName + "/" + filename;
+                if(isMixly) {
+                    url = "store/MixIO/" + globalUserName.substr(1) + "/" + globalProjectName + "/" + filename;
+                }
                 let isText = filename.endsWith('.txt');
                 let timeStamp;
                 if(filename.split("_").length>1) {
@@ -4277,6 +4401,7 @@ function open_storage(){
                 let timeString = new Date(timeStamp).toLocaleString();
                 let fileType = isText ? '文本' : '图片';
                 
+                // List view row
                 let row = $('<tr></tr>');
                 
                 // Checkbox
@@ -4290,9 +4415,6 @@ function open_storage(){
                 
                 // Date
                 row.append('<td>' + timeString + '</td>');
-                
-                // Size (placeholder - you might need to get actual file size from server)
-                row.append('<td>--</td>');
                 
                 // Actions
                 let actionCell = $('<td></td>');
@@ -4338,7 +4460,8 @@ function open_storage(){
                     if(confirm('确定要删除此文件吗？')) {
                         $.getJSON('deleteImgStore', {
                             'projectName': globalProjectName,
-                            'filename': filename
+                            'filename': filename,
+                            'isMixly': isMixly
                         }, function() {
                             sync_stor();
                         });
@@ -4347,10 +4470,96 @@ function open_storage(){
                 actionCell.append(deleteBtn);
                 
                 row.append(actionCell);
-                $('#fileTableBody').append(row);
+                tableBody.append(row);
+                
+                // Grid view item
+                let gridItem = $('<div class="grid-item" style="width:200px;height:257px;background:white;border-radius:5px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1);display:flex;flex-direction:column">');
+                
+                // File preview
+                let previewDiv = $('<div style="height:120px;display:flex;align-items:center;justify-content:center;background:#f5f5f5;cursor:pointer">');
+                
+                if (isText) {
+                    previewDiv.append('<i class="fa fa-file-text-o" style="font-size:48px;color:#4e73df"></i>');
+                } else {
+                    previewDiv.append('<img src="' + url + '" style="max-width:100%;max-height:100%;object-fit:contain">');
+                }
+                
+                previewDiv.click(function() {
+                    if (isText) {
+                        $.ajax({
+                            url: url,
+                            success: function(content) {
+                                let textDialog = dialog({
+                                    content: $('<div style="width:50vw;height:50vh;padding:20px;overflow:auto"><pre style="white-space:pre-wrap">' + content + '</pre></div>')[0],
+                                    cancel: true,
+                                    cancelValue: '关闭'
+                                });
+                                textDialog.showModal();
+                            }
+                        });
+                    } else {
+                        let fullDialog = dialog({
+                            content: $('<div style="width:60vw;height:60vh;display:flex;align-items:center;justify-content:center"><img src="' + url + '" style="max-width:100%;max-height:100%"/></div>')[0],
+                            cancel: true,
+                            cancelValue: '关闭'
+                        });
+                        fullDialog.showModal();
+                    }
+                });
+                
+                gridItem.append(previewDiv);
+                
+                // File info
+                let infoDiv = $('<div style="padding:10px;flex:1;display:flex;flex-direction:column">');
+                
+                // Filename (truncated)
+                let shortName = filename.length > 20 ? filename.substring(0, 17) + '...' : filename;
+                infoDiv.append('<div style="font-weight:bold;margin-bottom:5px;word-break:break-all" title="' + filename + '">' + shortName + '</div>');
+                
+                // File type and date
+                infoDiv.append('<div style="font-size:12px;color:#666;margin-bottom:5px">' + fileType + '</div>');
+                infoDiv.append('<div style="font-size:12px;color:#666">' + timeString + '</div>');
+                
+                gridItem.append(infoDiv);
+                
+                // Actions
+                let actionsDiv = $('<div style="padding:10px;border-top:1px solid #eee;display:flex;justify-content:space-between">');
+                
+                // Checkbox
+                actionsDiv.append('<div><input type="checkbox" class="fileCheckbox" style="min-width:0!important" data-filename="' + filename + '"> 选择</div>');
+                
+                // Buttons
+                let btnGroup = $('<div style="display:flex;gap:5px">');
+                
+                let gridDownloadBtn = $('<button class="btn btn-success btn-xs" title="下载"><i class="fa fa-download"></i></button>');
+                gridDownloadBtn.click(function(e) {
+                    e.stopPropagation();
+                    downloadFile(filename);
+                });
+                btnGroup.append(gridDownloadBtn);
+                
+                let gridDeleteBtn = $('<button class="btn btn-danger btn-xs" title="删除"><i class="fa fa-trash"></i></button>');
+                gridDeleteBtn.click(function(e) {
+                    e.stopPropagation();
+                    if(confirm('确定要删除此文件吗？')) {
+                        $.getJSON('deleteImgStore', {
+                            'projectName': globalProjectName,
+                            'filename': filename,
+                            'isMixly': isMixly
+                        }, function() {
+                            sync_stor();
+                        });
+                    }
+                });
+                btnGroup.append(gridDeleteBtn);
+                
+                actionsDiv.append(btnGroup);
+                gridItem.append(actionsDiv);
+                
+                gridContainer.append(gridItem);
             }
             
-            // Add checkbox event handlers
+            // Add checkbox event handlers for both views
             $('.fileCheckbox').change(function() {
                 let filename = $(this).data('filename');
                 if($(this).is(':checked')) {
@@ -4359,63 +4568,31 @@ function open_storage(){
                     }
                 } else {
                     selectedFiles = selectedFiles.filter(f => f !== filename);
-                    $('#selectAll').prop('checked', false);
+                    selectAll.prop('checked', false);
                 }
-                $('#deleteSelected').prop('disabled', selectedFiles.length === 0);
-                $('#downloadSelected').prop('disabled', selectedFiles.length === 0);
+                deleteSelected.prop('disabled', selectedFiles.length === 0);
+                downloadSelected.prop('disabled', selectedFiles.length === 0);
             });
         });
     }
     
     sync_stor();
-    
     client.on('message', function(topic, msg) {
-        if(topic.split("/")[2][0] == "$")
-            sync_stor();
-    });
-    
-    if(!storDia)
-        storDia = dialog({
-            content: editForm[0],
-            cancel: false
-        });
-    
-    cancelEdit.click(function() {
-        storDia.close();
-    });
-    
-    storDia.showModal();
-    
-    // Select all checkbox
-    $('#selectAll').change(function() {
-        $('.fileCheckbox').prop('checked', $(this).is(':checked')).trigger('change');
-    });
-    
-    // Delete selected button
-    $('#deleteSelected').click(function() {
-        if(selectedFiles.length === 0) return;
-        
-        if(confirm('确定要删除选中的 ' + selectedFiles.length + ' 个文件吗？')) {
-            let deletePromises = selectedFiles.map(filename => {
-                return $.getJSON('deleteImgStore', {
-                    'projectName': globalProjectName,
-                    'filename': filename
-                });
-            });
-            
-            Promise.all(deletePromises).then(() => {
+        if(isMixly)
+        {
+            if(topic.split("/")[3][0] == "$")
                 sync_stor();
-            });
+        }
+        else
+        {
+            if(topic.split("/")[2][0] == "$")
+            {
+                sync_stor();
+            }
         }
     });
-    
-    // Download selected button
-    $('#downloadSelected').click(function() {
-        if(selectedFiles.length === 0) return;
-        
-        // Download each file one by one
-        selectedFiles.forEach(filename => {
-            downloadFile(filename);
-        });
-    });
+}
+
+function open_storage(){
+    storDia.showModal();
 }
