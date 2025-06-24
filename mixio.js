@@ -841,7 +841,8 @@ var mixioServer = async function() {
                 if (match && allowFormats.includes(match[1])) {
                     // 是base64
                     const format = match[1];
-                    const timeStamp = Date.now();
+                    const currentDate = new Date();
+                    const timeStamp = `${currentDate.getFullYear()}_${(currentDate.getMonth() + 1).toString().padStart(2, '0')}_${currentDate.getDate().toString().padStart(2, '0')}_${currentDate.getHours().toString().padStart(2, '0')}_${currentDate.getMinutes().toString().padStart(2, '0')}_${currentDate.getSeconds().toString().padStart(2, '0')}`;
                     const fileName = topic[3] + '_' + `${timeStamp}.${format}`;
                     const filePath = path.join('store', topic[0], topic[1], topic[2], fileName);
                     const base64Data = payload.replace(base64Reg, '');
@@ -850,7 +851,8 @@ var mixioServer = async function() {
                     fs.writeFileSync(filePath, buffer);
                 } else {
                     // 全部明文存为txt
-                    const timeStamp = Date.now();
+                    const currentDate = new Date();
+                    const timeStamp = `${currentDate.getFullYear()}_${(currentDate.getMonth() + 1).toString().padStart(2, '0')}_${currentDate.getDate().toString().padStart(2, '0')}_${currentDate.getHours().toString().padStart(2, '0')}_${currentDate.getMinutes().toString().padStart(2, '0')}_${currentDate.getSeconds().toString().padStart(2, '0')}`;
                     const fileName = topic[3] + '_' + `${timeStamp}.txt`;
                     const filePath = path.join('store', topic[0], topic[1], topic[2], fileName);
                     fs.mkdirSync(path.dirname(filePath), { recursive: true});
@@ -868,7 +870,8 @@ var mixioServer = async function() {
                 if (match && allowFormats.includes(match[1])) {
                     // 是base64
                     const format = match[1];
-                    const timeStamp = Date.now();
+                    const currentDate = new Date();
+                    const timeStamp = `${currentDate.getFullYear()}_${(currentDate.getMonth() + 1).toString().padStart(2, '0')}_${currentDate.getDate().toString().padStart(2, '0')}_${currentDate.getHours().toString().padStart(2, '0')}_${currentDate.getMinutes().toString().padStart(2, '0')}_${currentDate.getSeconds().toString().padStart(2, '0')}`;
                     const fileName = topic[2] + '_' + `${timeStamp}.${format}`;
                     const filePath = path.join('store', topic[0], topic[1], fileName);
                     const base64Data = payload.replace(base64Reg, '');
@@ -877,7 +880,8 @@ var mixioServer = async function() {
                     fs.writeFileSync(filePath, buffer);
                 } else {
                     // 全部明文存为txt
-                    const timeStamp = Date.now();
+                    const currentDate = new Date();
+                    const timeStamp = `${currentDate.getFullYear()}_${(currentDate.getMonth() + 1).toString().padStart(2, '0')}_${currentDate.getDate().toString().padStart(2, '0')}_${currentDate.getHours().toString().padStart(2, '0')}_${currentDate.getMinutes().toString().padStart(2, '0')}_${currentDate.getSeconds().toString().padStart(2, '0')}`;
                     const fileName = topic[2] + '_' + `${timeStamp}.txt`;
                     const filePath = path.join('store', topic[0], topic[1], fileName);
                     fs.mkdirSync(path.dirname(filePath), { recursive: true});

@@ -4278,6 +4278,7 @@ function prepare_storDia(){
     
     function downloadFile(filename) {
         let url = "store/" + globalUserName + "/" + globalProjectName + "/" + filename;
+        console.log(url)
         let a = document.createElement('a');
         a.href = url;
         a.download = filename;
@@ -4367,11 +4368,32 @@ function prepare_storDia(){
             var sortedRes = res.sort(function(a, b) {
                 // 提取时间戳
                 let getTimestamp = function(filename) {
-                    if(filename.split("_").length>1) {
-                        return parseInt(filename.split("_")[1].split('.')[0]);
+                    // 提取文件名中的时间部分
+                    let timePart;
+                    if(filename.split("_").length > 1) {
+                        timePart = filename.split("_").slice(1).join('-').split('.')[0];
                     } else {
-                        return parseInt(filename.split('.')[0]);
+                        timePart = filename.split('.')[0];
                     }
+                    
+                    // 检查是否是纯数字（时间戳）
+                    if(/^\d+$/.test(timePart)) {
+                        return parseInt(timePart);
+                    }
+                    
+                    // 尝试解析 YYYY-MM-DD HH:MM:SS 格式
+                    const datePattern = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
+                    const match = timePart.match(datePattern);
+                    
+                    if(match) {
+                        const [_, year, month, day, hours, minutes, seconds] = match;
+                        const date = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
+                        return date.getTime(); // 返回时间戳
+                    }
+                    
+                    // 如果都不匹配，可以返回0或者抛出错误，根据你的需求
+                    return 0;
+                    // 或者 throw new Error("Invalid time format in filename");
                 };
                 
                 let timeA = getTimestamp(a);
@@ -4393,12 +4415,26 @@ function prepare_storDia(){
                 }
                 let isText = filename.endsWith('.txt');
                 let timeStamp;
+                let timeString;
                 if(filename.split("_").length>1) {
-                    timeStamp = parseInt(filename.split("_")[1].split('.')[0])
+                    if(/^\d+$/.test(filename.split("_").slice(1).join('-').split('.')[0])) {
+                        timeStamp = parseInt(filename.split("_").slice(1).join('-').split('.')[0])
+                        timeString = new Date(timeStamp).toLocaleString();
+                    }
+                    else{
+                        timeStamp = filename.split("_").slice(1).join('-').split('.')[0]
+                        timeString = timeStamp.substring(0,4) + "/" + timeStamp.substring(5,7) + "/" + timeStamp.substring(8,10) + " " + timeStamp.substring(11,13) + ":" + timeStamp.substring(14,16) + ":" + timeStamp.substring(17,19)
+                    }
                 } else {
-                    timeStamp = parseInt(filename.split('.')[0]);
+                    if(/^\d+$/.test(filename.split('.')[0])) {
+                        timeStamp = parseInt(filename.split('.')[0])
+                        timeString = new Date(timeStamp).toLocaleString();
+                    }
+                    else{
+                        timeStamp = filename.split('.')[0]
+                        timeString = new Date(timeStamp).toLocaleString();
+                    }
                 }
-                let timeString = new Date(timeStamp).toLocaleString();
                 let fileType = isText ? '文本' : '图片';
                 
                 // List view row
@@ -4473,7 +4509,7 @@ function prepare_storDia(){
                 tableBody.append(row);
                 
                 // Grid view item
-                let gridItem = $('<div class="grid-item" style="width:200px;height:257px;background:white;border-radius:5px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1);display:flex;flex-direction:column">');
+                let gridItem = $('<div class="grid-item" style="width:200px;max-height:250px;background:white;border-radius:5px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1);display:flex;flex-direction:column">');
                 
                 // File preview
                 let previewDiv = $('<div style="height:120px;display:flex;align-items:center;justify-content:center;background:#f5f5f5;cursor:pointer">');
@@ -4481,7 +4517,7 @@ function prepare_storDia(){
                 if (isText) {
                     previewDiv.append('<i class="fa fa-file-text-o" style="font-size:48px;color:#4e73df"></i>');
                 } else {
-                    previewDiv.append('<img src="' + url + '" style="max-width:100%;max-height:100%;object-fit:contain">');
+                    previewDiv.append('<img src="' + url + '" style="max-width:100%;max-height:120px;object-fit:contain">');
                 }
                 
                 previewDiv.click(function() {
@@ -4514,10 +4550,9 @@ function prepare_storDia(){
                 
                 // Filename (truncated)
                 let shortName = filename.length > 20 ? filename.substring(0, 17) + '...' : filename;
-                infoDiv.append('<div style="font-weight:bold;margin-bottom:5px;word-break:break-all" title="' + filename + '">' + shortName + '</div>');
+                infoDiv.append('<div style="font-weight:bold;margin-bottom:5px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" title="' + filename + '">' + shortName + '</div>');
                 
                 // File type and date
-                infoDiv.append('<div style="font-size:12px;color:#666;margin-bottom:5px">' + fileType + '</div>');
                 infoDiv.append('<div style="font-size:12px;color:#666">' + timeString + '</div>');
                 
                 gridItem.append(infoDiv);
