@@ -1424,6 +1424,40 @@ var mixioServer = async function() {
             res.redirect('/')
     })
 
+    app.get('/clearImgStore', function(req, res) {
+        if (req.session.userName && req.query.projectName && req.query.topicName){
+            var projectName = req.query.projectName
+            var isMixly = req.query.isMixly
+            // store/username/projectName
+            var imgStorePath = 'store/' + req.session.userName + "/" + projectName
+            if (isMixly == "true")
+            {
+                imgStorePath = path.join('store/MixIO/' + req.session.userName.substr(1) + "/" + projectName)
+            }
+            // 删除所有开头为$topicName_的文件
+            fs.readdir(imgStorePath, function(err, files) {
+                if (err) {
+                    console.log(err)
+                } else {
+                    files.forEach(function(file) {
+                        if (file.startsWith(req.query.topicName + "_")) {
+                            fs.unlink(path.join(imgStorePath, file), function(err) {
+                                if (err) {
+                                    console.log(err)
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+            res.send({
+                "status": "success"
+            }
+            )
+        } else
+            res.redirect('/')
+    })
+
     app.get('/projects', function(req, res) {
         if (req.session.userName) {
             ejs.renderFile(__dirname + '/ejs/projects.ejs', {

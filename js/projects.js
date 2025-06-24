@@ -1318,6 +1318,7 @@ function view_project(projectName, projectType) {
 
             clearAllButton.click(function() {
                 isChanged = true
+                
                 if (globalTableProjectInfo.currentTp != "$") {
                     if (globalTableProjectInfo.currentTp.split(",,").length == 1)
                         delete globalTableProjectInfo.received[globalTableProjectInfo.currentTp]
@@ -4278,7 +4279,8 @@ function prepare_storDia(){
     
     function downloadFile(filename) {
         let url = "store/" + globalUserName + "/" + globalProjectName + "/" + filename;
-        console.log(url)
+        if(isMixly)
+            url = "store/MixIO/" + globalUserName.substr(1) + "/" + globalProjectName + "/" + filename;
         let a = document.createElement('a');
         a.href = url;
         a.download = filename;
@@ -4319,7 +4321,8 @@ function prepare_storDia(){
             let deletePromises = selectedFiles.map(filename => {
                 return $.getJSON('deleteImgStore', {
                     'projectName': globalProjectName,
-                    'filename': filename
+                    'filename': filename,
+                    'isMixly': isMixly
                 });
             });
             
@@ -4380,9 +4383,9 @@ function prepare_storDia(){
                     if(/^\d+$/.test(timePart)) {
                         return parseInt(timePart);
                     }
-                    
+                    console.log("timePart:", timePart);
                     // 尝试解析 YYYY-MM-DD HH:MM:SS 格式
-                    const datePattern = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
+                    const datePattern = /^(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{2})$/;
                     const match = timePart.match(datePattern);
                     
                     if(match) {
@@ -4549,7 +4552,7 @@ function prepare_storDia(){
                 let infoDiv = $('<div style="padding:10px;flex:1;display:flex;flex-direction:column">');
                 
                 // Filename (truncated)
-                let shortName = filename.length > 20 ? filename.substring(0, 17) + '...' : filename;
+                let shortName = filename.split("_")[0]
                 infoDiv.append('<div style="font-weight:bold;margin-bottom:5px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" title="' + filename + '">' + shortName + '</div>');
                 
                 // File type and date
