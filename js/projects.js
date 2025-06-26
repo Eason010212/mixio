@@ -4468,15 +4468,43 @@ function prepare_storDia(){
                 if (isText) {
                     let viewBtn = $('<button class="btn btn-primary btn-xs" style="margin-right:5px" title="查看"><i class="fa fa-eye"></i></button>');
                     viewBtn.click(function() {
+                        let contentDiv = $('<div style="width:50vw;height:50vh;overflow:auto"></div>')
                         $.ajax({
                             url: url,
                             success: function(content) {
+                                contentDiv.append($('<pre style="white-space:pre-wrap">' + content + '</pre>'))
+                                let bottomDiv = $('<div style="position:absolute;top:0;right:0;padding:10px;border-radius:10px;background-color:rgba(0,0,0,0.5)"></div>')
+                                let closeBtn2 = $('<button class="btn btn-primary btn-xs" title="关闭"><i class="fa fa-close"></i></button>');
+                                let deleteBtn2 = $('<button class="btn btn-danger btn-xs" title="删除" style="margin-right:5px"><i class="fa fa-trash"></i></button>');
+                                let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px" title="下载"><i class="fa fa-download"></i></button>');
+                                let fileNameSpan = $('<span style="margin-right:5px;color:white">' + filename + '</span>')
+                                bottomDiv.append(fileNameSpan);
+                                bottomDiv.append(downloadBtn2);
+                                bottomDiv.append(deleteBtn2);
+                                bottomDiv.append(closeBtn2);
+                                contentDiv.append(bottomDiv);
                                 let textDialog = dialog({
-                                    content: $('<div style="width:50vw;height:50vh;padding:20px;overflow:auto"><pre style="white-space:pre-wrap">' + content + '</pre></div>')[0],
-                                    cancel: true,
-                                    cancelValue: '关闭'
+                                    content: contentDiv[0]
                                 });
                                 textDialog.showModal();
+                                closeBtn2.click(function(){
+                                    textDialog.close().remove()
+                                })
+                                deleteBtn2.click(function() {
+                                    if(confirm('确定要删除此文件吗？')) {
+                                        $.getJSON('deleteImgStore', {
+                                            'projectName': globalProjectName,
+                                            'filename': filename,
+                                            'isMixly': isMixly
+                                        }, function() {
+                                            textDialog.close().remove()
+                                            sync_stor();
+                                        });
+                                    }
+                                });
+                                downloadBtn2.click(function() {
+                                    downloadFile(filename);
+                                });
                             }
                         });
                     });
@@ -4484,12 +4512,41 @@ function prepare_storDia(){
                 } else {
                     let viewBtn = $('<button class="btn btn-primary btn-xs" style="margin-right:5px" title="查看"><i class="fa fa-eye"></i></button>');
                     viewBtn.click(function() {
+                        let contentDiv = $('<div style="height:50vh;text-align:center;overflow:auto"></div>')
+                        contentDiv.append($('<img src="' + url + '" style="height:100%"/>'))
+                        let bottomDiv = $('<div style="position:absolute;top:0;right:0;padding:10px;border-radius:10px;background-color:rgba(0,0,0,0.5)"></div>')
+                        let closeBtn2 = $('<button class="btn btn-primary btn-xs" title="关闭"><i class="fa fa-close"></i></button>');
+                        let deleteBtn2 = $('<button class="btn btn-danger btn-xs" title="删除" style="margin-right:5px"><i class="fa fa-trash"></i></button>');
+                        let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px" title="下载"><i class="fa fa-download"></i></button>');
+                        let fileNameSpan = $('<span style="margin-right:5px;color:white">' + filename + '</span>')
+                        bottomDiv.append(fileNameSpan);
+                        bottomDiv.append(downloadBtn2);
+                        bottomDiv.append(deleteBtn2);
+                        bottomDiv.append(closeBtn2);
+                        contentDiv.append(bottomDiv);
                         let fullDialog = dialog({
-                            content: $('<div style="width:60vw;height:60vh;display:flex;align-items:center;justify-content:center"><img src="' + url + '" style="max-width:100%;max-height:100%"/></div>')[0],
-                            cancel: true,
-                            cancelValue: '关闭'
+                            content: contentDiv[0],
+                            padding:0
                         });
                         fullDialog.showModal();
+                        closeBtn2.click(function(){
+                            fullDialog.close().remove()
+                        })
+                        deleteBtn2.click(function() {
+                            if(confirm('确定要删除此文件吗？')) {
+                                $.getJSON('deleteImgStore', {
+                                    'projectName': globalProjectName,
+                                    'filename': filename,
+                                    'isMixly': isMixly
+                                }, function() {
+                                    fullDialog.close().remove()
+                                    sync_stor();
+                                });
+                            }
+                        });
+                        downloadBtn2.click(function() {
+                            downloadFile(filename);
+                        });
                     });
                     actionCell.append(viewBtn);
                 }
@@ -4525,24 +4582,81 @@ function prepare_storDia(){
                 
                 previewDiv.click(function() {
                     if (isText) {
+                        let contentDiv = $('<div style="width:50vw;height:50vh;overflow:auto"></div>')
                         $.ajax({
                             url: url,
                             success: function(content) {
+                                contentDiv.append($('<pre style="white-space:pre-wrap">' + content + '</pre>'))
+                                let bottomDiv = $('<div style="position:absolute;top:0;right:0;padding:10px;border-radius:10px;background-color:rgba(0,0,0,0.5)"></div>')
+                                let closeBtn2 = $('<button class="btn btn-primary btn-xs" title="关闭"><i class="fa fa-close"></i></button>');
+                                let deleteBtn2 = $('<button class="btn btn-danger btn-xs" title="删除" style="margin-right:5px"><i class="fa fa-trash"></i></button>');
+                                let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px" title="下载"><i class="fa fa-download"></i></button>');
+                                let fileNameSpan = $('<span style="margin-right:5px;color:white">' + filename + '</span>')
+                                bottomDiv.append(fileNameSpan);
+                                bottomDiv.append(downloadBtn2);
+                                bottomDiv.append(deleteBtn2);
+                                bottomDiv.append(closeBtn2);
+                                contentDiv.append(bottomDiv);
                                 let textDialog = dialog({
-                                    content: $('<div style="width:50vw;height:50vh;padding:20px;overflow:auto"><pre style="white-space:pre-wrap">' + content + '</pre></div>')[0],
-                                    cancel: true,
-                                    cancelValue: '关闭'
+                                    content: contentDiv[0]
                                 });
                                 textDialog.showModal();
+                                closeBtn2.click(function(){
+                                    textDialog.close().remove()
+                                })
+                                deleteBtn2.click(function() {
+                                    if(confirm('确定要删除此文件吗？')) {
+                                        $.getJSON('deleteImgStore', {
+                                            'projectName': globalProjectName,
+                                            'filename': filename,
+                                            'isMixly': isMixly
+                                        }, function() {
+                                            textDialog.close().remove()
+                                            sync_stor();
+                                        });
+                                    }
+                                });
+                                downloadBtn2.click(function() {
+                                    downloadFile(filename);
+                                });
                             }
                         });
                     } else {
+                        let contentDiv = $('<div style="height:50vh;text-align:center;overflow:auto"></div>')
+                        contentDiv.append($('<img src="' + url + '" style="height:100%"/>'))
+                        let bottomDiv = $('<div style="position:absolute;top:0;right:0;padding:10px;border-radius:10px;background-color:rgba(0,0,0,0.5)"></div>')
+                        let closeBtn2 = $('<button class="btn btn-primary btn-xs" title="关闭"><i class="fa fa-close"></i></button>');
+                        let deleteBtn2 = $('<button class="btn btn-danger btn-xs" title="删除" style="margin-right:5px"><i class="fa fa-trash"></i></button>');
+                        let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px" title="下载"><i class="fa fa-download"></i></button>');
+                        let fileNameSpan = $('<span style="margin-right:5px;color:white">' + filename + '</span>')
+                        bottomDiv.append(fileNameSpan);
+                        bottomDiv.append(downloadBtn2);
+                        bottomDiv.append(deleteBtn2);
+                        bottomDiv.append(closeBtn2);
+                        contentDiv.append(bottomDiv);
                         let fullDialog = dialog({
-                            content: $('<div style="width:60vw;height:60vh;display:flex;align-items:center;justify-content:center"><img src="' + url + '" style="max-width:100%;max-height:100%"/></div>')[0],
-                            cancel: true,
-                            cancelValue: '关闭'
+                            content: contentDiv[0],
+                            padding:0
                         });
                         fullDialog.showModal();
+                        closeBtn2.click(function(){
+                            fullDialog.close().remove()
+                        })
+                        deleteBtn2.click(function() {
+                            if(confirm('确定要删除此文件吗？')) {
+                                $.getJSON('deleteImgStore', {
+                                    'projectName': globalProjectName,
+                                    'filename': filename,
+                                    'isMixly': isMixly
+                                }, function() {
+                                    fullDialog.close().remove()
+                                    sync_stor();
+                                });
+                            }
+                        });
+                        downloadBtn2.click(function() {
+                            downloadFile(filename);
+                        });
                     }
                 });
                 
