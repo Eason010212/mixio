@@ -3820,8 +3820,6 @@ function get_width() {
 }
 
 function listen_project(projectName) {
-    showtext("平台使用高峰期，后台运行功能暂时禁用。")
-    return
     var modald = showmodaltext("<div style='text-align:center' class='nnt'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].loading + "</p></div>")
     $.get('/startHost', {
         'projectName': projectName

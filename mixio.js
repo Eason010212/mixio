@@ -1,5 +1,5 @@
 var VERSION = "1.10.0"
-
+require('events').EventEmitter.defaultMaxListeners = 50;
 defaultCrt =
     `-----BEGIN CERTIFICATE-----
 MIID0TCCArmgAwIBAgICYxswDQYJKoZIhvcNAQELBQAwczELMAkGA1UEBhMCQ04x
@@ -3637,7 +3637,8 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
                     })
                 },
                 'decorate_text': function() {},
-                'decorate_pic': function() {}
+                'decorate_pic': function() {},
+                'magic': function() {}
             }
             for (var ct = 0; ct <= units_array.length - 1; ct = ct + 1) {
                 var un = $(units_array[ct])
