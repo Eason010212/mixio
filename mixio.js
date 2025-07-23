@@ -3638,7 +3638,8 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
                 },
                 'decorate_text': function() {},
                 'decorate_pic': function() {},
-                'magic': function() {}
+                'magic': function() {},
+                'ocr': function() {}
             }
             for (var ct = 0; ct <= units_array.length - 1; ct = ct + 1) {
                 var un = $(units_array[ct])
