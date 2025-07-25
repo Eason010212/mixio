@@ -77,7 +77,13 @@ const { spawn, exec } = require('child_process');
 var fs = require('fs-extra')
     // if windows, clear C:\Users\%username%\AppData\Local\Temp\pkg
 if (process.platform == "win32") {
-    fs.emptyDirSync(process.env.TEMP + "/pkg")
+    try{
+        fs.emptyDirSync(process.env.TEMP + "/pkg")
+    }
+    catch(e)
+    {
+        console.log('[WARN] Illegal pkg path: ' + process.env.TEMP + "/pkg, skipped")
+    }
 }
 var express = require('express');
 var session = require('express-session');
