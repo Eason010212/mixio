@@ -3762,342 +3762,662 @@ function add_dashboard(user_title, user_topic, user_content, user_style, title_s
 
 function add_map(user_title, user_topic, user_content, user_style, title_style) {
     var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载地图引擎...</p></div>")
-    $.getScript("//api.map.baidu.com/getscript?type=webgl&v=3.0&ak="+baidu_ak, function() {
-        modald.close().remove()
-        var isAlive = true
-        var contents = []
-        var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
-        title.attr("hidden", title_style)
-        contents.push(title)
-        var topicDiv = $("<div class='topicDiv'/>")
-        var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
-        topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
-        topicDiv.append(topic)
-        var randomName = randomString() + "map"
-        var mapDiv = $("<div style='width:calc(100% - 20px);height:calc(100% - 60px)'/>")
-        mapDiv.attr("id", randomName)
-        mapDiv.bind('click', function(event) {
-            event.stopPropagation()
-        })
-        mapDiv.bind('pointerdown', function(event) {
-            event.stopPropagation()
-        })
-        mapDiv.bind('mousedown', function(event) {
-            event.stopPropagation()
-        })
-        mapDiv[0].addEventListener('touchstart', function(event) {
-            event.stopPropagation()
-        }, { passive: false })
-        contents.push(mapDiv)
-        attrs = [
-            ['user-type', 'output_map'],
-            ['user-title', user_title],
-            ['user-topic', user_topic],
-            ['user-content', user_content],
-            ['title-hidden', title_style]
-        ]
-        var itemdiv = add_block(3, 3, contents, attrs)
-        var maxLeft = mapDiv[0].clientWidth
-        var maxTop = mapDiv[0].clientHeight
-        var markers = []
-        var setContent = function() {
-            var tmp = []
-            for (marker in markers) {
-                console.log(markers[marker])
-                tmp.push(markers[marker].long)
-                tmp.push(markers[marker].lat)
-                tmp.push(markers[marker].time)
-                tmp.push(markers[marker].message)
-                tmp.push(markers[marker].clientid)
+    if(baidu_ak!='')
+    {
+        $.getScript("//api.map.baidu.com/getscript?type=webgl&v=3.0&ak="+baidu_ak, function() {
+            modald.close().remove()
+            var isAlive = true
+            var contents = []
+            var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+            title.attr("hidden", title_style)
+            contents.push(title)
+            var topicDiv = $("<div class='topicDiv'/>")
+            var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+            topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+            topicDiv.append(topic)
+            var randomName = randomString() + "map"
+            var mapDiv = $("<div style='width:calc(100% - 20px);height:calc(100% - 60px)'/>")
+            mapDiv.attr("id", randomName)
+            mapDiv.bind('click', function(event) {
+                event.stopPropagation()
+            })
+            mapDiv.bind('pointerdown', function(event) {
+                event.stopPropagation()
+            })
+            mapDiv.bind('mousedown', function(event) {
+                event.stopPropagation()
+            })
+            mapDiv[0].addEventListener('touchstart', function(event) {
+                event.stopPropagation()
+            }, { passive: false })
+            contents.push(mapDiv)
+            attrs = [
+                ['user-type', 'output_map'],
+                ['user-title', user_title],
+                ['user-topic', user_topic],
+                ['user-content', user_content],
+                ['title-hidden', title_style]
+            ]
+            var itemdiv = add_block(3, 3, contents, attrs)
+            var maxLeft = mapDiv[0].clientWidth
+            var maxTop = mapDiv[0].clientHeight
+            var markers = []
+            var setContent = function() {
+                var tmp = []
+                for (marker in markers) {
+                    console.log(markers[marker])
+                    tmp.push(markers[marker].long)
+                    tmp.push(markers[marker].lat)
+                    tmp.push(markers[marker].time)
+                    tmp.push(markers[marker].message)
+                    tmp.push(markers[marker].clientid)
+                }
+                title.parent().parent().attr('user-content', tmp.join("@#@$@"))
             }
-            title.parent().parent().attr('user-content', tmp.join("@#@$@"))
-        }
-        itemdiv.bind(MixIO.actionTags.DATA_MAP_CHANGE, function(event, message) {
-            MixIO.publish(topic.text(), JSON.stringify(message))
-        })
-        itemdiv.bind(MixIO.actionTags.DATA_MAP_CLEAR, function() {
-            clear_on_click()
-        })
-        client.on('message', function(topic1, message1) {
+            itemdiv.bind(MixIO.actionTags.DATA_MAP_CHANGE, function(event, message) {
+                MixIO.publish(topic.text(), JSON.stringify(message))
+            })
+            itemdiv.bind(MixIO.actionTags.DATA_MAP_CLEAR, function() {
+                clear_on_click()
+            })
+            client.on('message', function(topic1, message1) {
 
-            if (isAlive && isRunning)
-                if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
+                if (isAlive && isRunning)
+                    if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
 
-                    var label = (new Date().getHours() + ":" + (new Date().getMinutes() < 10 ? "0" : "") + new Date().getMinutes() + ":" + (new Date().getSeconds() < 10 ? "0" : "") + new Date().getSeconds())
-                    if (isJSON(String(message1)) && ("long" in JSON.parse(String(message1))) && ("lat" in JSON.parse(String(message1))) && JSON.parse(String(message1)).clientid) {
-                        var jsonMessage = JSON.parse(String(message1))
-                        console.log(jsonMessage)
-                        itemdiv.trigger(MixIO.eventTags.DATA_MAP_CHANGED, [jsonMessage.clientid, jsonMessage.long, jsonMessage.lat, jsonMessage.message])
-                        var newOrNot = true
-                        var markerIndex = -1
-                        for (marker in markers) {
-                            if (jsonMessage.clientid == markers[marker].clientid) {
-                                newOrNot = false
-                                markerIndex = marker
-                                break
+                        var label = ((new Date().getHours() < 10 ? "0" : "") + new Date().getHours() + ":" + (new Date().getMinutes() < 10 ? "0" : "") + new Date().getMinutes() + ":" + (new Date().getSeconds() < 10 ? "0" : "") + new Date().getSeconds())
+                        if (isJSON(String(message1)) && ("long" in JSON.parse(String(message1))) && ("lat" in JSON.parse(String(message1))) && JSON.parse(String(message1)).clientid) {
+                            var jsonMessage = JSON.parse(String(message1))
+                            console.log(jsonMessage)
+                            itemdiv.trigger(MixIO.eventTags.DATA_MAP_CHANGED, [jsonMessage.clientid, jsonMessage.long, jsonMessage.lat, jsonMessage.message])
+                            var newOrNot = true
+                            var markerIndex = -1
+                            for (marker in markers) {
+                                if (jsonMessage.clientid == markers[marker].clientid) {
+                                    newOrNot = false
+                                    markerIndex = marker
+                                    break
+                                }
                             }
-                        }
-                        if (newOrNot) {
-                            var msgstr = ""
-                            if (typeof jsonMessage.message == "string")
-                                jsonMessage.message = JSON.parse(jsonMessage.message)
-                            for (msg in jsonMessage.message) {
-                                msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
-                            }
-                            var point = new BMapGL.Point(jsonMessage.long, jsonMessage.lat)
-                            var newMarker = new BMapGL.Marker(point)
-                            markerIndex = markers.length
-                            var bubble = create_a_map_bubble(msgstr, label, point)
-                            newMarker.bubble = bubble
-                            console.log(msgstr)
-                            markers.push({
-                                "clientid": jsonMessage.clientid,
-                                "long": jsonMessage.long,
-                                "lat": jsonMessage.lat,
-                                "time": label,
-                                "message": msgstr,
-                                "target": newMarker,
-                                "point": point
-                            })
-                            if (markers.length == 1) {
-                                map.centerAndZoom(markers[markerIndex].point, 17);
-                            }
-                            map.addOverlay(newMarker)
-                            newMarker.addEventListener('click', function() {
+                            if (newOrNot) {
+                                var msgstr = ""
+                                if (typeof jsonMessage.message == "string")
+                                    jsonMessage.message = JSON.parse(jsonMessage.message)
+                                for (msg in jsonMessage.message) {
+                                    msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
+                                }
+                                var point = new BMapGL.Point(jsonMessage.long, jsonMessage.lat)
+                                var newMarker = new BMapGL.Marker(point)
+                                markerIndex = markers.length
+                                var bubble = create_a_map_bubble(msgstr, label, point)
+                                newMarker.bubble = bubble
+                                console.log(msgstr)
+                                markers.push({
+                                    "clientid": jsonMessage.clientid,
+                                    "long": jsonMessage.long,
+                                    "lat": jsonMessage.lat,
+                                    "time": label,
+                                    "message": msgstr,
+                                    "target": newMarker,
+                                    "point": point
+                                })
+                                if (markers.length == 1) {
+                                    map.centerAndZoom(markers[markerIndex].point, 17);
+                                }
+                                map.addOverlay(newMarker)
+                                newMarker.addEventListener('click', function() {
+                                    if (map.getOverlays().indexOf(bubble) == -1)
+                                        map.addOverlay(bubble)
+                                    else
+                                        map.removeOverlay(bubble)
+                                })
+                                map.addOverlay(bubble)
+                            } else {
+                                markers[markerIndex].time = label
+                                var msgstr = ""
+                                if (typeof jsonMessage.message == "string")
+                                    jsonMessage.message = JSON.parse(jsonMessage.message)
+                                for (msg in jsonMessage.message) {
+                                    msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
+                                }
+                                var point = new BMapGL.Point(jsonMessage.long, jsonMessage.lat)
+                                markers[markerIndex].long = jsonMessage.long
+                                markers[markerIndex].lat = jsonMessage.lat
+                                markers[markerIndex].point = point
+                                markers[markerIndex].message = msgstr
+                                markers[markerIndex].target.bubble.setPosition(point)
+                                markers[markerIndex].target.setPosition(point)
+                                markers[markerIndex].target.bubble.setContent(label + "<br>" + msgstr)
                                 if (map.getOverlays().indexOf(bubble) == -1)
                                     map.addOverlay(bubble)
-                                else
-                                    map.removeOverlay(bubble)
-                            })
-                            map.addOverlay(bubble)
-                        } else {
-                            markers[markerIndex].time = label
-                            var msgstr = ""
-                            if (typeof jsonMessage.message == "string")
-                                jsonMessage.message = JSON.parse(jsonMessage.message)
-                            for (msg in jsonMessage.message) {
-                                msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
                             }
-                            var point = new BMapGL.Point(jsonMessage.long, jsonMessage.lat)
-                            markers[markerIndex].long = jsonMessage.long
-                            markers[markerIndex].lat = jsonMessage.lat
-                            markers[markerIndex].point = point
-                            markers[markerIndex].message = msgstr
-                            markers[markerIndex].target.bubble.setPosition(point)
-                            markers[markerIndex].target.setPosition(point)
-                            markers[markerIndex].target.bubble.setContent(label + "<br>" + msgstr)
-                            if (map.getOverlays().indexOf(bubble) == -1)
-                                map.addOverlay(bubble)
+                            setContent()
+                        } else {
+                            showtext(JSLang[lang].mapJSON)
                         }
-                        setContent()
-                    } else {
-                        showtext(JSLang[lang].mapJSON)
                     }
-                }
-        })
-        var map = new BMapGL.Map(randomName)
-        map.centerAndZoom(new BMapGL.Point(116.373, 39.967), 17)
-        map.enableScrollWheelZoom(true);
-        map.disableContinuousZoom();
-        map.disableInertialDragging();
-        var opts = {
-            offset: new BMapGL.Size(0, 0)
-        };
-        var label = new BMapGL.Label();
-        label.setStyle({
-            color: '#4e73df',
-            borderRadius: '5px',
-            borderColor: '#ccc',
-            backgroundColor: 'rgba(255,255,255,0.8)',
-            padding: '8px',
-            fontSize: '1rem',
-            fontFamily: 'Nunito'
-        });
-        map.addEventListener('mousemove', function(e) {
-            if (!isRunning) {
-                map.addOverlay(label)
-                label.setContent(e.latlng.lng.toFixed(4) + ',' + e.latlng.lat.toFixed(4))
-                label.setPosition(new BMapGL.Point(e.latlng.lng, e.latlng.lat))
-            } else
-                map.removeOverlay(label)
-        });
-        var toBeAdded = user_content.split("@#@$@")
-        var addLength = toBeAdded.length / 5
-        console.log(toBeAdded)
-        for (var tmpi = 0; tmpi <= addLength - 1; tmpi = tmpi + 1) {
-            var point = new BMapGL.Point(toBeAdded[tmpi * 5], toBeAdded[tmpi * 5 + 1])
-            var newMarker = new BMapGL.Marker(point)
-            var bubble = create_a_map_bubble(toBeAdded[tmpi * 5 + 3], toBeAdded[tmpi * 5 + 2], point)
-            newMarker.bubble = bubble
-            markers.push({
-                "long": toBeAdded[tmpi * 5],
-                "lat": toBeAdded[tmpi * 5 + 1],
-                "time": toBeAdded[tmpi * 5 + 2],
-                "message": toBeAdded[tmpi * 5 + 3],
-                "clientid": toBeAdded[tmpi * 5 + 4],
-                "target": newMarker,
-                "point": point
             })
-            if (markers.length == 1) {
-                map.centerAndZoom(point, 17);
-            }
-            map.addOverlay(newMarker)
-            newMarker.addEventListener('click', function(bubble) {
-                return function() {
-                    if (map.getOverlays().indexOf(bubble) == -1)
-                        map.addOverlay(bubble)
-                    else
-                        map.removeOverlay(bubble)
+            var map = new BMapGL.Map(randomName)
+            map.centerAndZoom(new BMapGL.Point(116.373, 39.967), 17)
+            map.enableScrollWheelZoom(true);
+            map.disableContinuousZoom();
+            map.disableInertialDragging();
+            var opts = {
+                offset: new BMapGL.Size(0, 0)
+            };
+            var label = new BMapGL.Label();
+            label.setStyle({
+                color: '#4e73df',
+                borderRadius: '5px',
+                borderColor: '#ccc',
+                backgroundColor: 'rgba(255,255,255,0.8)',
+                padding: '8px',
+                fontSize: '1rem',
+                fontFamily: 'Nunito'
+            });
+            map.addEventListener('mousemove', function(e) {
+                if (!isRunning) {
+                    map.addOverlay(label)
+                    label.setContent(e.latlng.lng.toFixed(4) + ',' + e.latlng.lat.toFixed(4))
+                    label.setPosition(new BMapGL.Point(e.latlng.lng, e.latlng.lat))
+                } else
+                    map.removeOverlay(label)
+            });
+            var toBeAdded = user_content.split("@#@$@")
+            var addLength = toBeAdded.length / 5
+            console.log(toBeAdded)
+            for (var tmpi = 0; tmpi <= addLength - 1; tmpi = tmpi + 1) {
+                var point = new BMapGL.Point(toBeAdded[tmpi * 5], toBeAdded[tmpi * 5 + 1])
+                var newMarker = new BMapGL.Marker(point)
+                var bubble = create_a_map_bubble(toBeAdded[tmpi * 5 + 3], toBeAdded[tmpi * 5 + 2], point)
+                newMarker.bubble = bubble
+                markers.push({
+                    "long": toBeAdded[tmpi * 5],
+                    "lat": toBeAdded[tmpi * 5 + 1],
+                    "time": toBeAdded[tmpi * 5 + 2],
+                    "message": toBeAdded[tmpi * 5 + 3],
+                    "clientid": toBeAdded[tmpi * 5 + 4],
+                    "target": newMarker,
+                    "point": point
+                })
+                if (markers.length == 1) {
+                    map.centerAndZoom(point, 17);
                 }
-            }(bubble))
-            map.addOverlay(bubble)
-        }
-        setContent()
-
-        var delete_on_click = function() {
-            $("#trashbin").append(mapDiv)
-            title.parent().parent().remove();
-            isAlive = false;
-            if (tbd)
-                tbd.remove()
-        }
-        var clear_on_click = function() {
-            map.clearOverlays()
-            markers = []
+                map.addOverlay(newMarker)
+                newMarker.addEventListener('click', function(bubble) {
+                    return function() {
+                        if (map.getOverlays().indexOf(bubble) == -1)
+                            map.addOverlay(bubble)
+                        else
+                            map.removeOverlay(bubble)
+                    }
+                }(bubble))
+                map.addOverlay(bubble)
+            }
             setContent()
-        }
-        var edit_on_click = function() {
-            modifyDia.showModal()
-            if (tbd)
-                tbd.remove()
-        }
-        var editForm = $('<div class="nnt"/>')
-        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_map.svg" style="width:45px;"></div>'))
-        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
-        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-        var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
-        title_input_div.append(title_input)
-        editForm.append(title_input_div)
-        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
-        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
-        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
-        topic_input_div.append(topic_input)
-        editForm.append(topic_input_div)
-        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
-        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
-        bottomDiv.append(confirmEdit)
-        confirmEdit.click(function() {
-            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
-                var re = /^[a-z0-9]+$/i;
-                if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
-                    if (true) {
-                        if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
-                            title.parent().parent().attr('user-title', title_input.val())
-                            title.parent().parent().attr('user-topic', topic_input.val())
-                            if (title.parent().parent().attr('user-content') == undefined)
-                                title.parent().parent().attr('user-content', "")
-                            title.text(title_input.val())
-                            topic.text(topic_input.val())
-                            modifyDia.close()
+
+            var delete_on_click = function() {
+                $("#trashbin").append(mapDiv)
+                title.parent().parent().remove();
+                isAlive = false;
+                if (tbd)
+                    tbd.remove()
+            }
+            var clear_on_click = function() {
+                map.clearOverlays()
+                markers = []
+                setContent()
+            }
+            var edit_on_click = function() {
+                modifyDia.showModal()
+                if (tbd)
+                    tbd.remove()
+            }
+            var editForm = $('<div class="nnt"/>')
+            editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_map.svg" style="width:45px;"></div>'))
+            editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+            var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+            var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+            title_input_div.append(title_input)
+            editForm.append(title_input_div)
+            editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+            var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+            var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+            topic_input_div.append(topic_input)
+            editForm.append(topic_input_div)
+            var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+            var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+            bottomDiv.append(confirmEdit)
+            confirmEdit.click(function() {
+                if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                    var re = /^[a-z0-9]+$/i;
+                    if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                        if (true) {
+                            if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                                title.parent().parent().attr('user-title', title_input.val())
+                                title.parent().parent().attr('user-topic', topic_input.val())
+                                if (title.parent().parent().attr('user-content') == undefined)
+                                    title.parent().parent().attr('user-content', "")
+                                title.text(title_input.val())
+                                topic.text(topic_input.val())
+                                modifyDia.close()
+                            } else
+                                showtext(JSLang[lang].sameUnit)
                         } else
-                            showtext(JSLang[lang].sameUnit)
-                    } else
-                        showtext("")
-                else
-                    showtext(JSLang[lang].topicLenIllegal)
-            } else
-                showtext(JSLang[lang].nameLenIllegal)
-        })
-        var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
-        cancelEdit.click(function() {
-            modifyDia.close()
-        })
-        bottomDiv.append(cancelEdit)
-        editForm.append(bottomDiv)
-        var modifyDia = dialog({
-            content: editForm[0],
-            cancel: false
-        })
-        var showEditBubble = function(event) {
-            if(tbd)
-                tbd.remove()
-            if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
-                var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
-                var clearButton = $('<a class="btn btn-warning btn-circle bbbt"><i class="fa fa-eraser"></i></a>')
-                var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
-                var bubble = $('<div style="text-align:center"/>')
-                bubble.append(topicDiv)
-                var d = dialog({
-                    align: 'top',
-                    content: bubble[0],
-                    quickClose: true,
-                    autofocus: false
-                });
-                tbd = d;
-                editButton.click(edit_on_click)
-                clearButton.click(clear_on_click)
-                deleteButton.click(delete_on_click)
-                if (!isRunning)
-                    bubble.append(editButton)
-                bubble.append(clearButton)
-                if (!isRunning)
-                    bubble.append(deleteButton)
-                if (!isRunning)
+                            showtext("")
+                    else
+                        showtext(JSLang[lang].topicLenIllegal)
+                } else
+                    showtext(JSLang[lang].nameLenIllegal)
+            })
+            var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+            cancelEdit.click(function() {
+                modifyDia.close()
+            })
+            bottomDiv.append(cancelEdit)
+            editForm.append(bottomDiv)
+            var modifyDia = dialog({
+                content: editForm[0],
+                cancel: false
+            })
+            var showEditBubble = function(event) {
+                if(tbd)
+                    tbd.remove()
+                if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+                    var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+                    var clearButton = $('<a class="btn btn-warning btn-circle bbbt"><i class="fa fa-eraser"></i></a>')
+                    var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+                    var bubble = $('<div style="text-align:center"/>')
+                    bubble.append(topicDiv)
+                    var d = dialog({
+                        align: 'top',
+                        content: bubble[0],
+                        quickClose: true,
+                        autofocus: false
+                    });
+                    tbd = d;
+                    editButton.click(edit_on_click)
+                    clearButton.click(clear_on_click)
+                    deleteButton.click(delete_on_click)
+                    if (!isRunning)
+                        bubble.append(editButton)
+                    bubble.append(clearButton)
+                    if (!isRunning)
+                        bubble.append(deleteButton)
+                    if (!isRunning)
+                        {
+                        copyButton.attr("user-origin", title.text())
+                        bubble.append(copyButton)
+                        styleButton.attr("user-origin", title.text())
+                        bubble.append(styleButton)
+                        helpButton.attr("user-origin", attrs[0][1])
+                        bubble.append(helpButton)
+                    }
+                    title_input.val(title.text())
+                    topic_input.val(topic.text())
+                    if (!d.open)
                     {
-                    copyButton.attr("user-origin", title.text())
-                    bubble.append(copyButton)
-                    styleButton.attr("user-origin", title.text())
-                    bubble.append(styleButton)
-                    helpButton.attr("user-origin", attrs[0][1])
-                    bubble.append(helpButton)
+                        d.show(itemdiv[0]);
+                        setTimeout(function() {
+                            $(".ui-popup-backdrop").css("pointer-events", "auto")
+                        },100)
+                    }
+                    else
+                        d.close()
                 }
-                title_input.val(title.text())
-                topic_input.val(topic.text())
-                if (!d.open)
-                {
-                    d.show(itemdiv[0]);
-                    setTimeout(function() {
-                        $(".ui-popup-backdrop").css("pointer-events", "auto")
-                    },100)
-                }
-                else
-                    d.close()
             }
-        }
-        if (window.screen.width > 800)
-        {
-            itemdiv.click(showEditBubble)
-            itemdiv.on('contextmenu', function(event) {
-                event.preventDefault()
+            if (window.screen.width > 800)
+            {
+                itemdiv.click(showEditBubble)
+                itemdiv.on('contextmenu', function(event) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    showEditBubble(event)
+                })
+            }
+            else
+                itemdiv[0].addEventListener('touchend', function(event) {
+                    event.preventDefault()
+                    showEditBubble(event)
+                })
+            itemdiv[0].addEventListener('touchmove', function(e) {
+                e.preventDefault()
+            })
+            if (user_style != undefined)
+                itemdiv.attr('style', user_style)
+            itemdiv.resizable({
+                minWidth: 300,
+                minHeight: 300,
+                onStopResize: function() {
+                    var stdLeft = parseInt(itemdiv.css('left')) - parseInt(itemdiv.css('left')) % 20 + (parseInt(itemdiv.css('left')) % 20 > 10 ? 1 : 0) * 20
+                    var stdTop = parseInt(itemdiv.css('top')) - parseInt(itemdiv.css('top')) % 20 + (parseInt(itemdiv.css('top')) % 20 > 10 ? 1 : 0) * 20
+                    itemdiv.css('left', stdLeft)
+                    itemdiv.css('top', stdTop)
+                    var stdWidth = parseInt(itemdiv.css('width')) - parseInt(itemdiv.css('width')) % 20 + (parseInt(itemdiv.css('width')) % 20 > 10 ? 1 : 0) * 20
+                    var stdHeight = parseInt(itemdiv.css('height')) - parseInt(itemdiv.css('height')) % 20 + (parseInt(itemdiv.css('height')) % 20 > 10 ? 1 : 0) * 20
+                    itemdiv.css('width', stdWidth)
+                    itemdiv.css('height', stdHeight)
+                }
+            })
+        },true);
+    }
+    else if(tencent_key!='')
+    {
+        $.getScript("//map.qq.com/api/gljs?v=1.exp&key="+tencent_key, function() {
+            modald.close().remove()
+            var isAlive = true
+            var contents = []
+            var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+            title.attr("hidden", title_style)
+            contents.push(title)
+            var topicDiv = $("<div class='topicDiv'/>")
+            var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+            topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+            topicDiv.append(topic)
+            var randomName = randomString() + "map"
+            var mapDiv = $("<div style='width:calc(100% - 20px);height:calc(100% - 60px)'/>")
+            mapDiv.attr("id", randomName)
+            mapDiv.bind('click', function(event) {
                 event.stopPropagation()
-                showEditBubble(event)
             })
-        }
-        else
-            itemdiv[0].addEventListener('touchend', function(event) {
-                event.preventDefault()
-                showEditBubble(event)
+            mapDiv.bind('pointerdown', function(event) {
+                event.stopPropagation()
             })
-        itemdiv[0].addEventListener('touchmove', function(e) {
-            e.preventDefault()
-        })
-        if (user_style != undefined)
-            itemdiv.attr('style', user_style)
-        itemdiv.resizable({
-            minWidth: 300,
-            minHeight: 300,
-            onStopResize: function() {
-                var stdLeft = parseInt(itemdiv.css('left')) - parseInt(itemdiv.css('left')) % 20 + (parseInt(itemdiv.css('left')) % 20 > 10 ? 1 : 0) * 20
-                var stdTop = parseInt(itemdiv.css('top')) - parseInt(itemdiv.css('top')) % 20 + (parseInt(itemdiv.css('top')) % 20 > 10 ? 1 : 0) * 20
-                itemdiv.css('left', stdLeft)
-                itemdiv.css('top', stdTop)
-                var stdWidth = parseInt(itemdiv.css('width')) - parseInt(itemdiv.css('width')) % 20 + (parseInt(itemdiv.css('width')) % 20 > 10 ? 1 : 0) * 20
-                var stdHeight = parseInt(itemdiv.css('height')) - parseInt(itemdiv.css('height')) % 20 + (parseInt(itemdiv.css('height')) % 20 > 10 ? 1 : 0) * 20
-                itemdiv.css('width', stdWidth)
-                itemdiv.css('height', stdHeight)
+            mapDiv.bind('mousedown', function(event) {
+                event.stopPropagation()
+            })
+            mapDiv[0].addEventListener('touchstart', function(event) {
+                event.stopPropagation()
+            }, { passive: false })
+            contents.push(mapDiv)
+            attrs = [
+                ['user-type', 'output_map'],
+                ['user-title', user_title],
+                ['user-topic', user_topic],
+                ['user-content', user_content],
+                ['title-hidden', title_style]
+            ]
+            var itemdiv = add_block(3, 3, contents, attrs)
+            var maxLeft = mapDiv[0].clientWidth
+            var maxTop = mapDiv[0].clientHeight
+            var markers = []
+            var setContent = function() {
+                var tmp = []
+                var markergeos = []
+                var layergeos = []
+                for (marker in markers) {
+                    tmp.push(markers[marker].long)
+                    tmp.push(markers[marker].lat)
+                    tmp.push(markers[marker].time)
+                    tmp.push(markers[marker].message)
+                    tmp.push(markers[marker].clientid)
+                    markergeos.push({
+                        "id": markers[marker].clientid + "marker",
+                        "styleId": "myStyle",
+                        "position": new TMap.LatLng(markers[marker].lat, markers[marker].long)
+                    })
+                    layergeos.push({
+                        "id": markers[marker].clientid + "layer",
+                        "styleId": "label",
+                        "position": new TMap.LatLng(markers[marker].lat, markers[marker].long),
+                        "content": markers[marker].message + " " + markers[marker].time
+                    })
+                }
+                console.log(markergeos)
+                if(markergeos.length == 1){
+                    map.setCenter(new TMap.LatLng(markers[0].lat, markers[0].long))
+                }
+                title.parent().parent().attr('user-content', tmp.join("@#@$@"))
+                markerLayer.setGeometries(markergeos)
+                mapTextLayer.setGeometries(layergeos)
             }
-        })
-    },true);
+            itemdiv.bind(MixIO.actionTags.DATA_MAP_CHANGE, function(event, message) {
+                MixIO.publish(topic.text(), JSON.stringify(message))
+            })
+            itemdiv.bind(MixIO.actionTags.DATA_MAP_CLEAR, function() {
+                clear_on_click()
+            })
+            client.on('message', function(topic1, message1) {
+
+                if (isAlive && isRunning)
+                    if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
+                        var label = ((new Date().getHours() < 10 ? "0" : "") + new Date().getHours() + ":" + (new Date().getMinutes() < 10 ? "0" : "") + new Date().getMinutes() + ":" + (new Date().getSeconds() < 10 ? "0" : "") + new Date().getSeconds())
+                        if (isJSON(String(message1)) && ("long" in JSON.parse(String(message1))) && ("lat" in JSON.parse(String(message1))) && JSON.parse(String(message1)).clientid) {
+                            var jsonMessage = JSON.parse(String(message1))
+                            console.log(jsonMessage)
+                            itemdiv.trigger(MixIO.eventTags.DATA_MAP_CHANGED, [jsonMessage.clientid, jsonMessage.long, jsonMessage.lat, jsonMessage.message])
+                            var newOrNot = true
+                            var markerIndex = -1
+                            for (marker in markers) {
+                                if (jsonMessage.clientid == markers[marker].clientid) {
+                                    newOrNot = false
+                                    markerIndex = marker
+                                    break
+                                }
+                            }
+                            if (newOrNot) {
+                                var msgstr = ""
+                                if (typeof jsonMessage.message == "string")
+                                    jsonMessage.message = JSON.parse(jsonMessage.message)
+                                for (msg in jsonMessage.message) {
+                                    msgstr = msgstr + jsonMessage.message[msg].label + ": " + jsonMessage.message[msg].value + " "
+                                }
+                                markers.push({
+                                    "clientid": jsonMessage.clientid,
+                                    "long": jsonMessage.long,
+                                    "lat": jsonMessage.lat,
+                                    "time": label,
+                                    "message": msgstr
+                                })
+                            } else {
+                                markers[markerIndex].time = label
+                                var msgstr = ""
+                                if (typeof jsonMessage.message == "string")
+                                    jsonMessage.message = JSON.parse(jsonMessage.message)
+                                for (msg in jsonMessage.message) {
+                                    msgstr = msgstr + jsonMessage.message[msg].label + ": " + jsonMessage.message[msg].value + " "
+                                }
+                                markers[markerIndex].long = jsonMessage.long
+                                markers[markerIndex].lat = jsonMessage.lat
+                                markers[markerIndex].message = msgstr
+                            }
+                            setContent()
+                        } else {
+                            showtext(JSLang[lang].mapJSON)
+                        }
+                    }
+            })
+            var map = new TMap.Map(document.getElementById(randomName), {
+                center: new TMap.LatLng(39.967, 116.373),
+                zoom: 17,
+                pitch: 43.5,
+                rotation: 45
+            });
+            var markerLayer = new TMap.MultiMarker({
+                map: map,  //指定地图容器
+                styles: {
+                    //创建一个styleId为"myStyle"的样式（styles的子属性名即为styleId）
+                    "myStyle": new TMap.MarkerStyle({ 
+                        "width": 25,  // 点标记样式宽度（像素）
+                        "height": 35, // 点标记样式高度（像素）
+                        "src": 'data:image/png;base64,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',  //图片路径
+                        //焦点在图片中的像素位置，一般大头针类似形式的图片以针尖位置做为焦点，圆形点以圆心位置为焦点
+                        "anchor": { x: 16, y: 32 }  
+                    }) 
+                }
+            });
+            var mapTextLayer = new TMap.MultiLabel({
+                id: 'mapTextLayer',
+                map: map,
+                styles: {
+                    'label': new TMap.LabelStyle({
+                        'color': '#3777FF', //颜色属性
+                        'strokeColor': '#ffffff',
+                        'size': 14, //文字大小属性
+                        'offset': { x: 0, y: 10 }, //文字偏移属性单位为像素
+                        'angle': 0, //文字旋转属性
+                        'alignment': 'center', //文字水平对齐属性
+                        'verticalAlignment': 'top' //文字垂直对齐属性
+                    })
+                }
+            });
+            var toBeAdded = user_content.split("@#@$@")
+            var addLength = toBeAdded.length / 5
+            for (var tmpi = 0; tmpi <= addLength - 1; tmpi = tmpi + 1) {
+                markers.push({
+                    "long": toBeAdded[tmpi * 5],
+                    "lat": toBeAdded[tmpi * 5 + 1],
+                    "time": toBeAdded[tmpi * 5 + 2],
+                    "message": toBeAdded[tmpi * 5 + 3],
+                    "clientid": toBeAdded[tmpi * 5 + 4]
+                })
+            }
+            setContent()
+
+            var delete_on_click = function() {
+                $("#trashbin").append(mapDiv)
+                title.parent().parent().remove();
+                isAlive = false;
+                if (tbd)
+                    tbd.remove()
+            }
+            var clear_on_click = function() {
+                markers = []
+                setContent()
+            }
+            var edit_on_click = function() {
+                modifyDia.showModal()
+                if (tbd)
+                    tbd.remove()
+            }
+            var editForm = $('<div class="nnt"/>')
+            editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_map.svg" style="width:45px;"></div>'))
+            editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+            var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+            var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+            title_input_div.append(title_input)
+            editForm.append(title_input_div)
+            editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+            var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+            var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+            topic_input_div.append(topic_input)
+            editForm.append(topic_input_div)
+            var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+            var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+            bottomDiv.append(confirmEdit)
+            confirmEdit.click(function() {
+                if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                    var re = /^[a-z0-9]+$/i;
+                    if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                        if (true) {
+                            if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                                title.parent().parent().attr('user-title', title_input.val())
+                                title.parent().parent().attr('user-topic', topic_input.val())
+                                if (title.parent().parent().attr('user-content') == undefined)
+                                    title.parent().parent().attr('user-content', "")
+                                title.text(title_input.val())
+                                topic.text(topic_input.val())
+                                modifyDia.close()
+                            } else
+                                showtext(JSLang[lang].sameUnit)
+                        } else
+                            showtext("")
+                    else
+                        showtext(JSLang[lang].topicLenIllegal)
+                } else
+                    showtext(JSLang[lang].nameLenIllegal)
+            })
+            var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+            cancelEdit.click(function() {
+                modifyDia.close()
+            })
+            bottomDiv.append(cancelEdit)
+            editForm.append(bottomDiv)
+            var modifyDia = dialog({
+                content: editForm[0],
+                cancel: false
+            })
+            var showEditBubble = function(event) {
+                if(tbd)
+                    tbd.remove()
+                if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+                    var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+                    var clearButton = $('<a class="btn btn-warning btn-circle bbbt"><i class="fa fa-eraser"></i></a>')
+                    var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+                    var bubble = $('<div style="text-align:center"/>')
+                    bubble.append(topicDiv)
+                    var d = dialog({
+                        align: 'top',
+                        content: bubble[0],
+                        quickClose: true,
+                        autofocus: false
+                    });
+                    tbd = d;
+                    editButton.click(edit_on_click)
+                    clearButton.click(clear_on_click)
+                    deleteButton.click(delete_on_click)
+                    if (!isRunning)
+                        bubble.append(editButton)
+                    bubble.append(clearButton)
+                    if (!isRunning)
+                        bubble.append(deleteButton)
+                    if (!isRunning)
+                        {
+                        copyButton.attr("user-origin", title.text())
+                        bubble.append(copyButton)
+                        styleButton.attr("user-origin", title.text())
+                        bubble.append(styleButton)
+                        helpButton.attr("user-origin", attrs[0][1])
+                        bubble.append(helpButton)
+                    }
+                    title_input.val(title.text())
+                    topic_input.val(topic.text())
+                    if (!d.open)
+                    {
+                        d.show(itemdiv[0]);
+                        setTimeout(function() {
+                            $(".ui-popup-backdrop").css("pointer-events", "auto")
+                        },100)
+                    }
+                    else
+                        d.close()
+                }
+            }
+            if (window.screen.width > 800)
+            {
+                itemdiv.click(showEditBubble)
+                itemdiv.on('contextmenu', function(event) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    showEditBubble(event)
+                })
+            }
+            else
+                itemdiv[0].addEventListener('touchend', function(event) {
+                    event.preventDefault()
+                    showEditBubble(event)
+                })
+            itemdiv[0].addEventListener('touchmove', function(e) {
+                e.preventDefault()
+            })
+            if (user_style != undefined)
+                itemdiv.attr('style', user_style)
+            itemdiv.resizable({
+                minWidth: 300,
+                minHeight: 300,
+                onStopResize: function() {
+                    var stdLeft = parseInt(itemdiv.css('left')) - parseInt(itemdiv.css('left')) % 20 + (parseInt(itemdiv.css('left')) % 20 > 10 ? 1 : 0) * 20
+                    var stdTop = parseInt(itemdiv.css('top')) - parseInt(itemdiv.css('top')) % 20 + (parseInt(itemdiv.css('top')) % 20 > 10 ? 1 : 0) * 20
+                    itemdiv.css('left', stdLeft)
+                    itemdiv.css('top', stdTop)
+                    var stdWidth = parseInt(itemdiv.css('width')) - parseInt(itemdiv.css('width')) % 20 + (parseInt(itemdiv.css('width')) % 20 > 10 ? 1 : 0) * 20
+                    var stdHeight = parseInt(itemdiv.css('height')) - parseInt(itemdiv.css('height')) % 20 + (parseInt(itemdiv.css('height')) % 20 > 10 ? 1 : 0) * 20
+                    itemdiv.css('width', stdWidth)
+                    itemdiv.css('height', stdHeight)
+                }
+            })
+        },true);
+    }
 }
 
 function create_a_map_bubble(messageBody, time, point) {

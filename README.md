@@ -101,13 +101,13 @@ https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
 16. BAIDU_MAP_AK - string，百度地图客户端应用AK（OFFLINE_MODE=false时可配置），默认为""
 17. BAIDU_MAP_SERVER_AK - string，百度地图服务端应用AK（OFFLINE_MODE=false时可配置），默认为""
 18. TENCENT_MAP_KEY - string, 腾讯地图key（OFFLINE_MODE=false时可配置），默认为""，和百度地图二选一进行配置即可，同时配置时优先启用百度地图
-18. BAIDU_STAT_LINK - string, 百度统计链接，通常以"https://hm.baidu.com/hm.js?"开头
-19. ADMIN_USERNAME - string，管理后台用户名，默认为"admin"
-20. ADMIN_PASSWORD - string，管理后台密码，默认为"public"
-21. STORAGE_ENGINE - string，数据库引擎，默认为"sqlite"
-22. MYSQL_HOST - string，MySQL地址（STORAGE_ENGINE="mysql"时必须配置），默认为"localhost"
-23. MYSQL_PORT - int，MySQL地址（STORAGE_ENGINE="mysql"时必须配置），默认为3306
-24. MYSQL_USER - string，MySQL用户名（STORAGE_ENGINE="mysql"时必须配置），默认为""
-25. MYSQL_PASS - string，MySQL密码（STORAGE_ENGINE="mysql"时必须配置），默认为""
-26. MYSQL_DB - string，MySQL数据库名（STORAGE_ENGINE="mysql"时必须配置），默认为"mixio",
-27. FOOTER - string，显示在首页的备案信息，公网部署时请务必配置此项（支持HTML语言，请注意为双引号添加转义字符\\），默认为""
+19. BAIDU_STAT_LINK - string, 百度统计链接，通常以"https://hm.baidu.com/hm.js?"开头
+20. ADMIN_USERNAME - string，管理后台用户名，默认为"admin"
+21. ADMIN_PASSWORD - string，管理后台密码，默认为"public"
+22. STORAGE_ENGINE - string，数据库引擎，默认为"sqlite"
+23. MYSQL_HOST - string，MySQL地址（STORAGE_ENGINE="mysql"时必须配置），默认为"localhost"
+24. MYSQL_PORT - int，MySQL地址（STORAGE_ENGINE="mysql"时必须配置），默认为3306
+25. MYSQL_USER - string，MySQL用户名（STORAGE_ENGINE="mysql"时必须配置），默认为""
+26. MYSQL_PASS - string，MySQL密码（STORAGE_ENGINE="mysql"时必须配置），默认为""
+27. MYSQL_DB - string，MySQL数据库名（STORAGE_ENGINE="mysql"时必须配置），默认为"mixio",
+28. FOOTER - string，显示在首页的备案信息，公网部署时请务必配置此项（支持HTML语言，请注意为双引号添加转义字符\\），默认为""

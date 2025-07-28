@@ -22,6 +22,9 @@
     <% if (configs['OFFLINE_MODE']==false) { %>
         <script>var baidu_ak = "<%=configs['BAIDU_MAP_AK']%>"</script>
     <% } %>
+    <% if (configs['OFFLINE_MODE']==false) { %>
+        <script>var tencent_key = "<%=configs['TENCENT_MAP_KEY']%>"</script>
+    <% } %>
     <script src="js/districts.js"></script>
     <script src="js/jsgrid.min.js"></script>
     <script src="js/tools.js?v=14"></script>
