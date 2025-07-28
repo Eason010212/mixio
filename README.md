@@ -98,8 +98,9 @@ https://gitee.com/bnu_mixly/mixio-linux-x86-dist/blob/darwin/mixio
 13. ALLOW_REGISTER - bool，是否允许自主注册，默认为true
 14. ALLOW_HOOK - bool，是否允许离线存储消息，默认为true
 15. OFFLINE_MODE - bool，是否禁用天气/地图数据，默认为true
-16. BAIDU_MAP_AK - string，百度地图客户端应用AK（OFFLINE_MODE=false时必须配置），默认为""
-17. BAIDU_MAP_SERVER_AK - string，百度地图服务端应用AK（OFFLINE_MODE=false时必须配置），默认为""
+16. BAIDU_MAP_AK - string，百度地图客户端应用AK（OFFLINE_MODE=false时可配置），默认为""
+17. BAIDU_MAP_SERVER_AK - string，百度地图服务端应用AK（OFFLINE_MODE=false时可配置），默认为""
+18. TENCENT_MAP_KEY - string, 腾讯地图key（OFFLINE_MODE=false时可配置），默认为""，和百度地图二选一进行配置即可，同时配置时优先启用百度地图
 18. BAIDU_STAT_LINK - string, 百度统计链接，通常以"https://hm.baidu.com/hm.js?"开头
 19. ADMIN_USERNAME - string，管理后台用户名，默认为"admin"
 20. ADMIN_PASSWORD - string，管理后台密码，默认为"public"

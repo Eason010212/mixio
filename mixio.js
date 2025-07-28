@@ -116,33 +116,34 @@ function init(cb) {
     }
     if (!fs.existsSync("config")) {
         fs.mkdirSync("config")
-        var defaultConfig = `{
-            "MIXIO_HTTP_PORT": 8080,
-            "MIXIO_HTTPS_PORT": 8443,
-            "MIXIO_MQTT_PORT": 1883,
-            "MIXIO_WS_PORT": 8083,
-            "MIXIO_WSS_PORT": 8084,
-            "HTTPS_CRT_FILE": "config/certs/file.crt",
-            "HTTPS_PRIVATE_PEM": "config/certs/private.pem",
-            "MAX_PROJECT_NUM_PER_USER": 20,
-            "MAX_MESSAGE_PER_USER": 1000,
-            "MAX_MESSAGE_PER_SECOND": 5,
-            "ALLOW_REGISTER": true,
-            "ALLOW_HOOK": true,
-            "OFFLINE_MODE": true,
-            "BAIDU_MAP_AK": "",
-            "BAIDU_MAP_SERVER_AK": "",
-            "BAIDU_STAT_LINK": "",
-            "ADMIN_USERNAME":"admin",
-            "ADMIN_PASSWORD":"public",
-            "STORAGE_ENGINE":"sqlite",
-            "MYSQL_HOST":"localhost",
-            "MYSQL_PORT":3306,
-            "MYSQL_USER":"",
-            "MYSQL_PASS":"",
-            "MYSQL_DB":"mixio",
-            "FOOTER":""
-          }`
+var defaultConfig = `{
+    "MIXIO_HTTP_PORT": 8080,
+    "MIXIO_HTTPS_PORT": 8443,
+    "MIXIO_MQTT_PORT": 1883,
+    "MIXIO_WS_PORT": 8083,
+    "MIXIO_WSS_PORT": 8084,
+    "HTTPS_CRT_FILE": "config/certs/file.crt",
+    "HTTPS_PRIVATE_PEM": "config/certs/private.pem",
+    "MAX_PROJECT_NUM_PER_USER": 20,
+    "MAX_MESSAGE_PER_USER": 1000,
+    "MAX_MESSAGE_PER_SECOND": 5,
+    "ALLOW_REGISTER": true,
+    "ALLOW_HOOK": true,
+    "OFFLINE_MODE": true,
+    "BAIDU_MAP_AK": "",
+    "BAIDU_MAP_SERVER_AK": "",
+    "TENCENT_MAP_KEY": "",
+    "BAIDU_STAT_LINK": "",
+    "ADMIN_USERNAME":"admin",
+    "ADMIN_PASSWORD":"public",
+    "STORAGE_ENGINE":"sqlite",
+    "MYSQL_HOST":"localhost",
+    "MYSQL_PORT":3306,
+    "MYSQL_USER":"",
+    "MYSQL_PASS":"",
+    "MYSQL_DB":"mixio",
+    "FOOTER":""
+}`
         fs.writeFileSync("config/config.json", defaultConfig)
         fs.mkdirSync("config/certs")
 
@@ -2010,22 +2011,65 @@ var mixioServer = async function() {
                 res.send(globalWeather[req.query.dsc_code].data)
             } else {
                 try {
-                    http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
-                        var html = ''
-                        req2.on('data', function(data) {
-                            html += data;
-                        });
-                        req2.on('end', function() {
-                            globalWeather[req.query.dsc_code] = {
-                                time: new Date().getTime(),
-                                data: html
-                            }
-                            res.send(html)
-                        });
-                    }).on('error', function(e) {
-                        res.send('-1')
-                    })
+                    if(configs["BAIDU_MAP_SERVER_AK"])
+                    {
+                        http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
+                            var html = ''
+                            req2.on('data', function(data) {
+                                html += data;
+                            });
+                            req2.on('end', function() {
+                                globalWeather[req.query.dsc_code] = {
+                                    time: new Date().getTime(),
+                                    data: html
+                                }
+                                res.send(html)
+                            });
+                        }).on('error', function(e) {
+                            res.send('-1')
+                        })
+                    }
+                    else if(configs["TENCENT_MAP_KEY"])
+                    {
+                        http.get('http://apis.map.qq.com/ws/weather/v1/?adcode=' + req.query.dsc_code + '&type=now&key=' + configs["TENCENT_MAP_KEY"], function(req2, res2) {
+                            var html = ''
+                            req2.on('data', function(data) {
+                                html += data;
+                            });
+                            req2.on('end', function() {
+                                try{
+                                    var newhtml = JSON.parse(html)['result']['realtime'][0]
+                                    html = JSON.stringify({
+                                        'status': 0,
+                                        'result':{
+                                            'location':{
+                                                'name': newhtml['province'] + newhtml['city'] + newhtml['district']
+                                            },
+                                            'now':{
+                                                'temp': newhtml['infos']['temperature'],
+                                                'text': newhtml['infos']['weather'],
+                                                'rh': newhtml['infos']['humidity'],
+                                                'wind_class': newhtml['infos']['wind_power'],
+                                                'wind_dir': newhtml['infos']['wind_direction']
+                                            }
+                                        }
+                                    })
+                                    globalWeather[req.query.dsc_code] = {
+                                        time: new Date().getTime(),
+                                        data: html
+                                    }
+                                    res.send(html)
+                                }
+                                catch(e){
+                                    res.send('-1')
+                                }
+                            });
+                        }).on('error', function(e) {
+                            res.send('-1')
+                        })
+                    }
                 } catch (e) {
+                    console.log(e)
                     res.send('-1')
                 }
             }
@@ -2039,22 +2083,65 @@ var mixioServer = async function() {
                 res.send(globalWeather[req.query.dsc_code].data)
             } else {
                 try {
-                    http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
-                        var html = ''
-                        req2.on('data', function(data) {
-                            html += data;
-                        });
-                        req2.on('end', function() {
-                            globalWeather[req.query.dsc_code] = {
-                                time: new Date().getTime(),
-                                data: html
-                            }
-                            res.send(html)
-                        });
-                    }).on('error', function(e) {
-                        res.send('-1')
-                    })
+                    if(configs["BAIDU_MAP_SERVER_AK"])
+                    {
+                        http.get('http://api.map.baidu.com/weather/v1/?district_id=' + req.query.dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
+                            var html = ''
+                            req2.on('data', function(data) {
+                                html += data;
+                            });
+                            req2.on('end', function() {
+                                globalWeather[req.query.dsc_code] = {
+                                    time: new Date().getTime(),
+                                    data: html
+                                }
+                                res.send(html)
+                            });
+                        }).on('error', function(e) {
+                            res.send('-1')
+                        })
+                    }
+                    else if(configs["TENCENT_MAP_KEY"])
+                    {
+                        http.get('http://apis.map.qq.com/ws/weather/v1/?adcode=' + req.query.dsc_code + '&type=now&key=' + configs["TENCENT_MAP_KEY"], function(req2, res2) {
+                            var html = ''
+                            req2.on('data', function(data) {
+                                html += data;
+                            });
+                            req2.on('end', function() {
+                                try{
+                                    var newhtml = JSON.parse(html)['result']['realtime'][0]
+                                    html = JSON.stringify({
+                                        'status': 0,
+                                        'result':{
+                                            'location':{
+                                                'name': newhtml['province'] + newhtml['city'] + newhtml['district']
+                                            },
+                                            'now':{
+                                                'temp': newhtml['infos']['temperature'],
+                                                'text': newhtml['infos']['weather'],
+                                                'rh': newhtml['infos']['humidity'],
+                                                'wind_class': newhtml['infos']['wind_power'],
+                                                'wind_dir': newhtml['infos']['wind_direction']
+                                            }
+                                        }
+                                    })
+                                    globalWeather[req.query.dsc_code] = {
+                                        time: new Date().getTime(),
+                                        data: html
+                                    }
+                                    res.send(html)
+                                }
+                                catch(e){
+                                    res.send('-1')
+                                }
+                            });
+                        }).on('error', function(e) {
+                            res.send('-1')
+                        })
+                    }
                 } catch (e) {
+                    console.log(e)
                     res.send('-1')
                 }
             }
@@ -3566,30 +3653,73 @@ var MixIOclosure = function(userName, projectName, projectPass, dataStorage, dom
                             title.parent().parent().attr('user-content', [title.parent().parent().attr('user-content').split(',')[0], district, weather_type, temperature, humidity, wind_dir, wind_class].join(','))
                             itemdiv.trigger(MixIO.eventTags.WEATHER_SYNCED, [district, weather_type, temperature, humidity, wind_dir, wind_class])
                         } else {
-                            http.get('http://api.map.baidu.com/weather/v1/?district_id=' + dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
-                                var html = ''
-                                req2.on('data', function(data) {
-                                    html += data;
-                                });
-                                req2.on('end', function() {
-                                    globalWeather[dsc_code] = {
-                                        time: new Date().getTime(),
-                                        data: html
-                                    }
-                                    var result = html
-                                    var resJSON = JSON.parse(result)
-                                    if (resJSON.result && resJSON.result.now) {
-                                        weather_type = resJSON.result.now.text
-                                        temperature = resJSON.result.now.temp
-                                        humidity = resJSON.result.now.rh
-                                        wind_dir = resJSON.result.now.wind_dir
-                                        wind_class = resJSON.result.now.wind_class
-                                        district = resJSON.result.location.name
-                                        title.parent().parent().attr('user-content', [title.parent().parent().attr('user-content').split(',')[0], district, weather_type, temperature, humidity, wind_dir, wind_class].join(','))
-                                        itemdiv.trigger(MixIO.eventTags.WEATHER_SYNCED, [district, weather_type, temperature, humidity, wind_dir, wind_class])
-                                    }
-                                });
-                            })
+                            if(configs["BAIDU_MAP_SERVER_AK"])
+                            {
+                                http.get('http://api.map.baidu.com/weather/v1/?district_id=' + dsc_code + '&data_type=now&ak=' + configs["BAIDU_MAP_SERVER_AK"], function(req2, res2) {
+                                    var html = ''
+                                    req2.on('data', function(data) {
+                                        html += data;
+                                    });
+                                    req2.on('end', function() {
+                                        globalWeather[dsc_code] = {
+                                            time: new Date().getTime(),
+                                            data: html
+                                        }
+                                        var result = html
+                                        var resJSON = JSON.parse(result)
+                                        if (resJSON.result && resJSON.result.now) {
+                                            weather_type = resJSON.result.now.text
+                                            temperature = resJSON.result.now.temp
+                                            humidity = resJSON.result.now.rh
+                                            wind_dir = resJSON.result.now.wind_dir
+                                            wind_class = resJSON.result.now.wind_class
+                                            district = resJSON.result.location.name
+                                            title.parent().parent().attr('user-content', [title.parent().parent().attr('user-content').split(',')[0], district, weather_type, temperature, humidity, wind_dir, wind_class].join(','))
+                                            itemdiv.trigger(MixIO.eventTags.WEATHER_SYNCED, [district, weather_type, temperature, humidity, wind_dir, wind_class])
+                                        }
+                                    });
+                                })
+                            }
+                            else if(configs["TENCENT_MAP_KEY"])
+                            {
+                                http.get('http://apis.map.qq.com/ws/weather/v1/?adcode=' + req.query.dsc_code + '&type=now&key=' + configs["TENCENT_MAP_KEY"], function(req2, res2) {
+                                    var html = ''
+                                    req2.on('data', function(data) {
+                                        html += data;
+                                    });
+                                    req2.on('end', function() {
+                                        try{
+                                            var newhtml = JSON.parse(html)['result']['realtime'][0]
+                                            html = JSON.stringify({
+                                                'status': 0,
+                                                'result':{
+                                                    'location':{
+                                                        'name': newhtml['province'] + newhtml['city'] + newhtml['district']
+                                                    },
+                                                    'now':{
+                                                        'temp': newhtml['infos']['temperature'],
+                                                        'text': newhtml['infos']['weather'],
+                                                        'rh': newhtml['infos']['humidity'],
+                                                        'wind_class': newhtml['infos']['wind_power'],
+                                                        'wind_dir': newhtml['infos']['wind_direction']
+                                                    }
+                                                }
+                                            })
+                                            globalWeather[req.query.dsc_code] = {
+                                                time: new Date().getTime(),
+                                                data: html
+                                            }
+                                            title.parent().parent().attr('user-content', [title.parent().parent().attr('user-content').split(',')[0], newhtml['province'] + newhtml['city'] + newhtml['district'], newhtml['infos']['weather'], newhtml['infos']['temperature'], newhtml['infos']['humidity'], newhtml['infos']['wind_direction'], newhtml['infos']['wind_power']].join(','))
+                                            itemdiv.trigger(MixIO.eventTags.WEATHER_SYNCED, [newhtml['province'] + newhtml['city'] + newhtml['district'], newhtml['infos']['weather'], newhtml['infos']['temperature'], newhtml['infos']['humidity'], newhtml['infos']['wind_direction'], newhtml['infos']['wind_power']])
+                                        }
+                                        catch(e){
+                                            res.send('-1')
+                                        }
+                                    });
+                                }).on('error', function(e) {
+                                    res.send('-1')
+                                })
+                            }
                         }
                     }
                     itemdiv.bind(MixIO.actionTags.WEATHER_SYNC, function() {
