@@ -4145,31 +4145,35 @@ function add_map(user_title, user_topic, user_content, user_style, title_style) 
                 var tmp = []
                 var markergeos = []
                 var layergeos = []
-                for (marker in markers) {
-                    tmp.push(markers[marker].long)
-                    tmp.push(markers[marker].lat)
-                    tmp.push(markers[marker].time)
-                    tmp.push(markers[marker].message)
-                    tmp.push(markers[marker].clientid)
-                    markergeos.push({
-                        "id": markers[marker].clientid + "marker",
-                        "styleId": "myStyle",
-                        "position": new TMap.LatLng(markers[marker].lat, markers[marker].long)
-                    })
-                    layergeos.push({
-                        "id": markers[marker].clientid + "layer",
-                        "styleId": "label",
-                        "position": new TMap.LatLng(markers[marker].lat, markers[marker].long),
-                        "content": markers[marker].message + " " + markers[marker].time
-                    })
+                try{
+                    for (marker in markers) {
+                        tmp.push(markers[marker].long)
+                        tmp.push(markers[marker].lat)
+                        tmp.push(markers[marker].time)
+                        tmp.push(markers[marker].message)
+                        tmp.push(markers[marker].clientid)
+                        markergeos.push({
+                            "id": markers[marker].clientid + "marker",
+                            "styleId": "myStyle",
+                            "position": new TMap.LatLng(markers[marker].lat, markers[marker].long)
+                        })
+                        layergeos.push({
+                            "id": markers[marker].clientid + "layer",
+                            "styleId": "label",
+                            "position": new TMap.LatLng(markers[marker].lat, markers[marker].long),
+                            "content": markers[marker].message + " " + markers[marker].time
+                        })
+                    }
+                    if(markergeos.length == 1){
+                        map.setCenter(new TMap.LatLng(markers[0].lat, markers[0].long))
+                    }
+                    title.parent().parent().attr('user-content', tmp.join("@#@$@"))
+                    markerLayer.setGeometries(markergeos)
+                    mapTextLayer.setGeometries(layergeos)
                 }
-                console.log(markergeos)
-                if(markergeos.length == 1){
-                    map.setCenter(new TMap.LatLng(markers[0].lat, markers[0].long))
+                catch(e){
+                    showtext(e)
                 }
-                title.parent().parent().attr('user-content', tmp.join("@#@$@"))
-                markerLayer.setGeometries(markergeos)
-                mapTextLayer.setGeometries(layergeos)
             }
             itemdiv.bind(MixIO.actionTags.DATA_MAP_CHANGE, function(event, message) {
                 MixIO.publish(topic.text(), JSON.stringify(message))
