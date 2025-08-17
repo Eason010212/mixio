@@ -4172,7 +4172,7 @@ function add_map(user_title, user_topic, user_content, user_style, title_style) 
                     mapTextLayer.setGeometries(layergeos)
                 }
                 catch(e){
-                    showtext(e)
+                    showtext(e.message.replace("LatLng.", ""))
                 }
             }
             itemdiv.bind(MixIO.actionTags.DATA_MAP_CHANGE, function(event, message) {
