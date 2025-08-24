@@ -73,7 +73,7 @@ Blockly.Blocks['GETJSON'] = {
   }
 };
 
-message_HUE = 350;
+message_HUE = '#1cc88a';
 
 Blockly.Blocks['recieve_any_message'] = {
     init: function() {
@@ -155,7 +155,7 @@ Blockly.Blocks['publish_project_message'] = {
   }
 };
 
-button_HUE = "#CFA45A";
+button_HUE = "#4e73df";
 
 Blockly.Blocks['button_down'] = {
     init: function() {
@@ -228,7 +228,7 @@ Blockly.Blocks['get_button_state'] = {
     }
 };
 
-slider_HUE = "#C43C4C";
+slider_HUE = "#4e73df";
 
 Blockly.Blocks['drag_slider'] = {
     init: function() {
@@ -291,7 +291,7 @@ Blockly.Blocks['get_slider_num'] = {
     }
 };
 
-textinput_HUE = "#E89F24";
+textinput_HUE = "#4e73df";
 
 Blockly.Blocks['when_textinput_send'] = {
     init: function() {
@@ -336,7 +336,7 @@ Blockly.Blocks['get_keyboard_input'] = {
   }
 };
 
-joystick_HUE = "#7D9AC3";
+joystick_HUE = "#4e73df";
 
 Blockly.Blocks['when_joystick_dragged'] = {
     init: function() {
@@ -396,7 +396,7 @@ Blockly.Blocks['get_joystick_y'] = {
 
 
 
-rgb_HUE = "#A3C16B";
+rgb_HUE = "#4e73df";
 
 Blockly.Blocks['RGB_selected'] = {
     init: function() {
@@ -461,7 +461,7 @@ Blockly.Blocks['get_RGB_color'] = {
     }
 };
 
-bulb_HUE = "#506AD4";
+bulb_HUE = "#4e73df";
 
 
 Blockly.Blocks['bulb_recieved'] = {
@@ -507,7 +507,7 @@ Blockly.Blocks['get_bulb_state'] = {
     }
 };
 
-textLED_HUE = "#479DA8";
+textLED_HUE = "#4e73df";
 
 Blockly.Blocks['textLED_recieved'] = {
     init: function() {
@@ -553,7 +553,7 @@ Blockly.Blocks['get_textLED'] = {
 };
 
 
-lineChart_HUE = "#1D33A8";
+lineChart_HUE = "#4e73df";
 
 
 Blockly.Blocks['lineChart_recieved'] = {
@@ -636,7 +636,7 @@ Blockly.Blocks['get_latest_message'] = {
 }
 };
 
-barChart_HUE = "#50A876";
+barChart_HUE = "#4e73df";
 
 Blockly.Blocks['barChart_recieved'] = {
     init: function() {
@@ -694,7 +694,7 @@ Blockly.Blocks['get_now_messages'] = {
 }
 };
 
-datasheet_HUE = "#541DA8";
+datasheet_HUE = "#4e73df";
 
 Blockly.Blocks['datasheet_recieved'] = {
     init: function() {
@@ -753,7 +753,7 @@ Blockly.Blocks['get_datasheet_all_messages'] = {
 };
 
 
-dashboard_HUE = "#CC4375";
+dashboard_HUE = "#4e73df";
 
 Blockly.Blocks['dashboard_recieved'] = {
     init: function() {
@@ -798,7 +798,7 @@ Blockly.Blocks['get_dashboard_now_messages'] = {
 }
 };
 
-datamap_HUE = "#DE4E49";
+datamap_HUE = "#4e73df";
 
 
 Blockly.Blocks['get_long'] = {
@@ -869,7 +869,7 @@ Blockly.Blocks['clear_datamap'] = {
   }
 };
 
-weathersynced_HUE = "#E06D39";
+weathersynced_HUE = "#4e73df";
 
 Blockly.Blocks['ws_updated'] = {
     init: function() {
@@ -1751,7 +1751,7 @@ Blockly.Blocks['text2json'] = {
 
 Blockly.Blocks['get_accessToken'] = {
   init: function() {
-      this.setColour("#1cc88a");
+      this.setColour(network_HUE);
       this.appendDummyInput().appendField(Blockly.USEAPIKEY);
       this.appendValueInput("name").setCheck("String");
       this.appendDummyInput().appendField(Blockly.USESECRETKEY);
@@ -1764,7 +1764,7 @@ Blockly.Blocks['get_accessToken'] = {
 
 Blockly.Blocks['translate'] = {
   init: function() {
-      this.setColour("#1cc88a");
+      this.setColour(network_HUE);
       this.appendDummyInput().appendField(Blockly.TRANSORIGIN);
       this.appendValueInput("name").setCheck("String");
       this.appendDummyInput().appendField(Blockly.USETEXT);
@@ -1785,7 +1785,7 @@ Blockly.Blocks['translate'] = {
 
 Blockly.Blocks['chat'] = {
   init: function() {
-      this.setColour("#1cc88a");
+      this.setColour(network_HUE);
       this.appendDummyInput().appendField(Blockly.TRANSORIGIN);
       this.appendValueInput("name").setCheck("String");
       this.appendDummyInput().appendField(Blockly.USETEXT2);

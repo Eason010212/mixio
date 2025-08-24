@@ -348,7 +348,7 @@
 
 
 
-    <category name="消息" colour="350" css-icon="customIcon fa fa-envelope">
+    <category name="MQTT消息" colour="#1cc88a" css-icon="customIcon fa fa-envelope">
         <block type="recieve_any_message"></block>
         <block type="recieve_topic_message">
             <value name="topic">
@@ -423,9 +423,6 @@
                 </shadow>    
             </value>
         </block>
-    </category>
-
-    <category name="人工智能" colour="#1cc88a" css-icon="customIcon fa fa-cloud">
         <block type="get_accessToken">
             <value name="name">
                 <shadow type="text">
@@ -469,8 +466,9 @@
         </block>
     </category>
 
-    <category name="组件操作" colour="#4e73df" css-icon="customIcon custom2 fa fa-list">
-    <category name="按键/开关" colour="#CFA45A" css-icon="customIcon fa fa-toggle-on">
+
+
+    <category name="开关/按键" colour="#4e73df" css-icon="customIcon fa fa-toggle-on">
         <block type="button_down">
             <value name="name">
             <shadow type="text">
@@ -508,7 +506,7 @@
         </block>
     </category>
         
-    <category name="滑杆" colour="#C43C4C" css-icon="customIcon fa fa-sliders">
+    <category name="滑杆" colour="#4e73df" css-icon="customIcon fa fa-sliders">
         <block type="drag_slider">
             <value name="name">
             <shadow type="text">
@@ -543,37 +541,7 @@
             </value>
         </block>
     </category>
-
-    <category name="文本输入" colour="#E89F24" css-icon="customIcon fa fa-i-cursor">
-        <block type="when_textinput_send">
-            <value name="name">
-            <shadow type="text">
-                <field name="TEXT">name</field>
-            </shadow>    
-            </value>
-        </block>
-        <block type="through_textinput_send">
-            <value name="name">
-            <shadow type="text">
-                <field name="TEXT">name</field>
-            </shadow>    
-            </value>
-            <value name="message">
-            <shadow type="text">
-                <field name="TEXT">message</field>
-            </shadow>    
-            </value>
-        </block>
-        <block type="get_keyboard_input">
-            <value name="name">
-            <shadow type="text">
-                <field name="TEXT">name</field>
-            </shadow>    
-            </value>
-        </block>
-    </category>
-
-    <category name="摇杆手柄" colour="#7D9AC3" css-icon="customIcon fa fa-gamepad">
+    <category name="摇杆手柄" colour="#4e73df" css-icon="customIcon fa fa-gamepad">
         <block type="when_joystick_dragged">
             <value name="name">
             <shadow type="text">
@@ -613,8 +581,10 @@
             </value>
         </block>
     </category>
+    
 
-    <category name="RGB色盘" colour="#A3C16B" css-icon="customIcon fa fa-paint-brush">
+
+    <category name="RGB色盘" colour="#4e73df" css-icon="customIcon fa fa-paint-brush">
         <block type="RGB_selected">
             <value name="name">
             <shadow type="text">
@@ -660,7 +630,7 @@
         </block>
     </category>
 
-    <category name="指示灯" colour="#506AD4" css-icon="customIcon fa fa-lightbulb-o">
+    <category name="指示灯" colour="#4e73df" css-icon="customIcon fa fa-lightbulb-o">
         <block type="bulb_recieved">
             <value name="name">
             <shadow type="text">
@@ -683,37 +653,13 @@
             </value>
         </block>
     </category>
-
-    <category name="文本显示屏" colour="#479DA8" css-icon="customIcon fa fa-tv">
-        <block type="textLED_recieved">
-            <value name="name">
-            <shadow type="text">
-                <field name="TEXT">name</field>
-            </shadow>    
-            </value>
-        </block>
-        <block type="textLED_send">
-            <value name="name">
-            <shadow type="text">
-                <field name="TEXT">name</field>
-            </shadow>    
-            </value>
-            <value name="message">
-            <shadow type="text">
-                <field name="TEXT">message</field>
-            </shadow>    
-            </value>
-        </block>
-        <block type="get_textLED">
-            <value name="name">
-            <shadow type="text">
-                <field name="TEXT">name</field>
-            </shadow>    
-            </value>
-        </block>
+    <category name="定时触发器" colour="#4e73df" css-icon="customIcon fa fa-clock-o">
     </category>
-
-    <category name="折线图表" colour="#1D33A8" css-icon="customIcon fa fa-area-chart">
+    <category name="条件触发器" colour="#4e73df" css-icon="customIcon fa fa-code-fork">
+    </category>
+    <category name="蓝牙转发器" colour="#4e73df" css-icon="customIcon fa fa-bluetooth-b">
+    </category>
+    <category name="折线图表" colour="#4e73df" css-icon="customIcon fa fa-area-chart">
         <block type="lineChart_recieved">
             <value name="name">
             <shadow type="text">
@@ -768,7 +714,7 @@
         </block>
     </category>
 
-    <category name="柱状图表" colour="#50A876" css-icon="customIcon fa fa-bar-chart">
+    <category name="投票器" colour="#4e73df" css-icon="customIcon fa fa-bar-chart">
         <block type="barChart_recieved">
             <value name="name">
             <shadow type="text">
@@ -803,8 +749,7 @@
             </value>
         </block>
     </category>
-
-    <category name="数据表格" colour="#541DA8" css-icon="customIcon fa fa-table">
+    <category name="数据表格" colour="#4e73df" css-icon="customIcon fa fa-table">
         <block type="datasheet_recieved">
             <value name="name">
             <shadow type="text">
@@ -837,37 +782,7 @@
             </value>
         </block>
     </category>
-
-    <category name="仪表盘" colour="#CC4375" css-icon="customIcon fa fa-dashboard">
-        <block type="dashboard_recieved">
-            <value name="name">
-            <shadow type="text">
-                <field name="TEXT">name</field>
-            </shadow>    
-            </value>
-        </block>
-        <block type="dashboard_send">
-            <value name="name">
-            <shadow type="text">
-                <field name="TEXT">name</field>
-            </shadow>    
-            </value>
-            <value name="message">
-            <shadow type="text">
-                <field name="TEXT">message</field>
-            </shadow>    
-            </value>
-        </block>
-        <block type="get_dashboard_now_messages">
-            <value name="name">
-            <shadow type="text">
-                <field name="TEXT">name</field>
-            </shadow>    
-            </value>
-        </block>
-    </category>
-
-    <category name="数据地图" colour="#DE4E49" css-icon="customIcon fa fa-map">
+    <category name="数据地图" colour="#4e73df" css-icon="customIcon fa fa-map">
         <block type="get_long">
 
         </block>
@@ -912,7 +827,36 @@
         </block>
     </category>
 
-    <category name="实时气象仪" colour="#E06D39" css-icon="customIcon fa fa-sun-o">
+    <category name="仪表盘" colour="#4e73df" css-icon="customIcon fa fa-dashboard">
+        <block type="dashboard_recieved">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="dashboard_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_dashboard_now_messages">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+
+    <category name="实时气象仪" colour="#4e73df" css-icon="customIcon fa fa-sun-o">
         <block type="ws_updated">
             <value name="name">
             <shadow type="text">
@@ -949,7 +893,71 @@
             </value>
         </block>
     </category>
-</category> 
-
+    <category name="摄像头" colour="#4e73df" css-icon="customIcon fa fa-camera"></category>
+    <category name="语音识别" colour="#4e73df" css-icon="customIcon fa fa-microphone"></category>
+    <category name="下拉选项" colour="#4e73df" css-icon="customIcon fa fa-list"></category>
+    <category name="文本输入" colour="#4e73df" css-icon="customIcon fa fa-i-cursor">
+        <block type="when_textinput_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="through_textinput_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_keyboard_input">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+    <category name="文本显示屏" colour="#4e73df" css-icon="customIcon fa fa-text-width">
+        <block type="textLED_recieved">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="textLED_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_textLED">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
+    <category name="点阵屏" colour="#4e73df" css-icon="customIcon fa fa-tv"></category>
+    <category name="标签" colour="#4e73df" css-icon="customIcon fa fa-tags"></category>
+    <category name="图片/视频" colour="#4e73df" css-icon="customIcon fa fa-picture-o"></category>
+    <category name="装饰框" colour="#4e73df" css-icon="customIcon fa fa-object-group"></category>
+    <category name="人脸识别" colour="#4e73df" css-icon="customIcon fa fa-smile-o"></category>
+    <category name="蜂鸣器" colour="#4e73df" css-icon="customIcon fa fa-bell-o"></category>
+    <category name="二维码识别" colour="#4e73df" css-icon="customIcon fa fa-qrcode"></category>
     </xml>
 </body>
