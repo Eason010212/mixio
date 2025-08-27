@@ -80,13 +80,14 @@ var MixIO = {
         DASHBOARD: 11,
         DATA_MAP: 12,
         WEATHER: 13,
-        TIMER: 14
+        TIMER: 14,
+        TRIGGER: 15
     },
 
     oldTags: ["input_button", "input_slider", "input_keyboard", "input_controller", "input_rgb", "output_bulb", "output_text",
-        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer"
+        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger"
     ],
-    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器"],
+    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器"],
 
     /*合法的MixIO事件种类*/
     eventTags: {
@@ -124,7 +125,9 @@ var MixIO = {
         WEATHER_SYNCED: "1311", //气象仪更新数据
         WEATHER_SENT: "1312", //气象仪发送数据
 
-        TIMER_TRIGGERED: "1411"
+        TIMER_TRIGGERED: "1411",
+
+        TRIGGER_TRIGGERED: "1511"
 
     },
 
@@ -332,7 +335,7 @@ var MixIO = {
             instance.getData = function(type) {
                 return sepMsgs[type]
             }
-        } else if (type === MixIO.typeTags.TIMER){
+        } else if (type === MixIO.typeTags.TIMER || type === MixIO.typeTags.TRIGGER){
             instance.getTriggerTimes = function(){
                 try{
                     return parseInt(instance.attr('user-times'))

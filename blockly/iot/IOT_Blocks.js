@@ -603,6 +603,35 @@ Blockly.Blocks['get_trigger_times'] = {
 }
 };
 
+Blockly.Blocks['trigger_triggered'] = {
+  init: function() {
+      this.setColour(lineChart_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.TRIGGER_TRIGGERED);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"value");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  },
+  getVars:function(){
+      return ["time","value"];
+  }
+};
+
+Blockly.Blocks['get_trigger_triggers'] = {
+  init: function() {
+      this.setColour(lineChart_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_PY_STORAGE_GET);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.GET_TRIGGER_TRIGGERS);
+      this.setOutput(true, null);
+      this.setTooltip("");
+}
+};
+
 Blockly.Blocks['lineChart_send'] = {
     init: function() {
     this.appendDummyInput().appendField(Blockly.TO);
@@ -2128,6 +2157,19 @@ Blockly.JavaScript.get_trigger_times=function(block) {
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
+Blockly.JavaScript.trigger_triggered=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.TRIGGER)\n"+".bind(MixIO.eventTags.TRIGGER_TRIGGERED, function(event,value){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
+Blockly.JavaScript.get_trigger_triggers=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.TRIGGER).getTriggerTimes()"
+  return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
 Blockly.JavaScript.lineChart_send=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
@@ -3111,6 +3153,9 @@ Blockly.LINECHART_LATEST_MESSAGE="折线图表的最新一条消息";
 
 Blockly.TIMER_TRIGGERED="定时触发器触发时";
 Blockly.GET_TRIGGER_TIMES="定时触发器的触发次数"
+
+Blockly.TRIGGER_TRIGGERED="条件触发器触发时";
+Blockly.GET_TRIGGER_TRIGGERS="条件触发器的触发次数"
 
 Blockly.BARCHART_RECIEVED="柱状图收到消息时";
 Blockly.BARCHART_SEND_MESSAGE="柱状图发送消息";

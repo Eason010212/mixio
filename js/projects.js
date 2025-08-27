@@ -800,7 +800,7 @@ function view_project(projectName, projectType) {
     }
 
     var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + JSLang[lang].downloading + "</p></div>")
-    $.post('getProject', { 'projectName': projectName }, function(res) {
+    $.post('getProject', { 'projectName': projectName }, async function(res) {
         console.log(JSON.parse(res))
         modald.close().remove()
         if (res == 0) {
@@ -1162,7 +1162,7 @@ function view_project(projectName, projectType) {
                     'input_mic': add_mic,
                     'tinydb': add_tinydb,
                 }
-                toolkits[un.attr('user-type')](un.attr('user-title'), un.attr('user-topic'), un.attr('user-content'), un.attr('style'), titleHidden)
+                await toolkits[un.attr('user-type')](un.attr('user-title'), un.attr('user-topic'), un.attr('user-content'), un.attr('style'), titleHidden)
             }
             var topicOuterDiv = $("<div style='width:100%;display:flex;align-items:center;'></div>")
             var topicDiv = $("<div style='z-index:1000;margin:0;display:flex;flex-direction:row;align-items:center;justify-content:center;margin-bottom:20px;width:320px;background-color:white;border-radius:0 0 40px 0;padding-left:10px;padding-right:10px;padding-top:5px;padding-bottom:10px;box-shadow:0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important;flex-wrap:wrap'></div>")

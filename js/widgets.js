@@ -2675,6 +2675,9 @@ async function add_trigger(user_title, user_topic, user_content, user_style, tit
             return true
     }
     MixIO.triggers[title.text()] = function() {
+        // Aug 2025
+        var localTime = 0
+        title.parent().parent().attr('user-times', localTime)
         MixIO.onMessage(function(topic1, message) {
             var message = String(message)
             if (topic1 == topic.text()) {
@@ -2685,6 +2688,9 @@ async function add_trigger(user_title, user_topic, user_content, user_style, tit
                             itemdiv.removeClass("triggered")
                         }, 150)
                         MixIO.publish(dstTopic, dstMessage)
+                        localTime = localTime + 1
+                        title.parent().parent().attr('user-times', localTime)
+                        itemdiv.trigger(MixIO.eventTags.TRIGGER_TRIGGERED, dstMessage)
                     } else {
                         itemdiv.addClass("imtriggered")
                         setTimeout(function() {
@@ -2698,6 +2704,9 @@ async function add_trigger(user_title, user_topic, user_content, user_style, tit
                             itemdiv.removeClass("triggered")
                         }, 150)
                         MixIO.publish(dstTopic, dstMessage)
+                        localTime = localTime + 1
+                        title.parent().parent().attr('user-times', localTime)
+                        itemdiv.trigger(MixIO.eventTags.TRIGGER_TRIGGERED, dstMessage)
                     } else {
                         itemdiv.addClass("imtriggered")
                         setTimeout(function() {
@@ -2711,6 +2720,9 @@ async function add_trigger(user_title, user_topic, user_content, user_style, tit
                             itemdiv.removeClass("triggered")
                         }, 150)
                         MixIO.publish(dstTopic, dstMessage)
+                        localTime = localTime + 1
+                        title.parent().parent().attr('user-times', localTime)
+                        itemdiv.trigger(MixIO.eventTags.TRIGGER_TRIGGERED, dstMessage)
                     } else {
                         itemdiv.addClass("imtriggered")
                         setTimeout(function() {
