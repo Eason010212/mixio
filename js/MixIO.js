@@ -81,13 +81,14 @@ var MixIO = {
         DATA_MAP: 12,
         WEATHER: 13,
         TIMER: 14,
-        TRIGGER: 15
+        TRIGGER: 15,
+        BLE: 16
     },
 
     oldTags: ["input_button", "input_slider", "input_keyboard", "input_controller", "input_rgb", "output_bulb", "output_text",
-        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger"
+        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger", "ble"
     ],
-    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器"],
+    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器", "蓝牙转发器"],
 
     /*合法的MixIO事件种类*/
     eventTags: {
@@ -127,7 +128,9 @@ var MixIO = {
 
         TIMER_TRIGGERED: "1411",
 
-        TRIGGER_TRIGGERED: "1511"
+        TRIGGER_TRIGGERED: "1511",
+
+        BLUETOOTH_TRIGGERED: "1611"
 
     },
 
@@ -167,7 +170,9 @@ var MixIO = {
         WEATHER_SYNC: "1321", //更新气象仪数据
         WEATHER_SEND: "1322", //发送气象仪数据
 
-        TRIGGER_TIMER: "1411"
+        TRIGGER_TIMER: "1411",
+
+        BLUETOOTH_SENT: "1611"
     },
     publish: function(topic, message) {
         // if message undefined
@@ -343,6 +348,10 @@ var MixIO = {
                 catch{
                     return 0
                 }
+            }
+        } else if (type === MixIO.typeTags.BLE){
+            instance.getBluetoothStatus = function() {
+                return instance.attr('user-content')
             }
         }
         return instance

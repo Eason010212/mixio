@@ -632,6 +632,49 @@ Blockly.Blocks['get_trigger_triggers'] = {
 }
 };
 
+Blockly.Blocks['bluetooth_triggered'] = {
+  init: function() {
+      this.setColour(lineChart_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.BLUETOOTH_TRIGGERED);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"value");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  },
+  getVars:function(){
+      return ["time","value"];
+  }
+};
+
+Blockly.Blocks['get_bluetooth_status'] = {
+  init: function() {
+      this.setColour(lineChart_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_PY_STORAGE_GET);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.GET_BLUETOOTH_STATUS);
+      this.setOutput(true, null);
+      this.setTooltip("");
+}
+};
+
+Blockly.Blocks['bluetooth_sent'] = {
+  init: function() {
+  this.appendDummyInput().appendField(Blockly.TO);
+  this.appendValueInput("name").setCheck("String");
+  this.appendDummyInput().appendField(Blockly.BLUETOOTH_SENT);
+  this.appendValueInput("message").setCheck("String");
+  this.setInputsInline(true);
+  this.setPreviousStatement(true);
+  this.setNextStatement(true);
+  this.setColour(lineChart_HUE);
+  this.setTooltip('');
+}
+};
+
 Blockly.Blocks['lineChart_send'] = {
     init: function() {
     this.appendDummyInput().appendField(Blockly.TO);
@@ -2170,6 +2213,26 @@ Blockly.JavaScript.get_trigger_triggers=function(block) {
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
+Blockly.JavaScript.bluetooth_triggered=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.BLE)\n"+".bind(MixIO.eventTags.BLUETOOTH_TRIGGERED, function(event,value){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
+Blockly.JavaScript.get_bluetooth_status=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.BLE).getBluetoothStatus()"
+  return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
+Blockly.JavaScript.bluetooth_sent=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.BLE)\n"+".trigger(MixIO.actionTags.BLUETOOTH_SENT,"+message+")\n"
+  return code; 
+};
+
 Blockly.JavaScript.lineChart_send=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
@@ -3156,6 +3219,10 @@ Blockly.GET_TRIGGER_TIMES="定时触发器的触发次数"
 
 Blockly.TRIGGER_TRIGGERED="条件触发器触发时";
 Blockly.GET_TRIGGER_TRIGGERS="条件触发器的触发次数"
+
+Blockly.BLUETOOTH_TRIGGERED="蓝牙转发器收到消息时";
+Blockly.GET_BLUETOOTH_STATUS="蓝牙转发器连接的设备";
+Blockly.BLUETOOTH_SENT = "蓝牙转发器发送消息"
 
 Blockly.BARCHART_RECIEVED="柱状图收到消息时";
 Blockly.BARCHART_SEND_MESSAGE="柱状图发送消息";

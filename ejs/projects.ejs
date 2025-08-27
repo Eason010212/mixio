@@ -696,6 +696,37 @@
         </block>
     </category>
     <category name="蓝牙转发器" colour="#4e73df" css-icon="customIcon fa fa-bluetooth-b">
+        <block type="bluetooth_triggered">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_bluetooth_status">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="bluetooth_sent">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
     </category>
     <category name="折线图表" colour="#4e73df" css-icon="customIcon fa fa-area-chart">
         <block type="lineChart_recieved">
@@ -931,7 +962,15 @@
             </value>
         </block>
     </category>
-    <category name="摄像头" colour="#4e73df" css-icon="customIcon fa fa-camera"></category>
+    <category name="摄像头" colour="#4e73df" css-icon="customIcon fa fa-camera">
+        <block type="camera_recognized">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
     <category name="语音识别" colour="#4e73df" css-icon="customIcon fa fa-microphone"></category>
     <category name="下拉选项" colour="#4e73df" css-icon="customIcon fa fa-list"></category>
     <category name="文本输入" colour="#4e73df" css-icon="customIcon fa fa-i-cursor">

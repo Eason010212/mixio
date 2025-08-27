@@ -2021,6 +2021,8 @@ function add_ble(user_title, user_topic, user_content, user_style, title_style) 
                                 if(isAlive)
                                 {
                                     publish(topic.text().split(",")[0], value)
+                                    // Aug 2025
+                                    itemdiv.trigger(MixIO.eventTags.BLUETOOTH_TRIGGERED, value)
                                     ble_icon.css('color', '#1cc88a')
                                     setTimeout(function() {
                                         ble_icon.css('color', '#4e73df')
@@ -2079,6 +2081,10 @@ function add_ble(user_title, user_topic, user_content, user_style, title_style) 
     icon_div.append(ble_icon)
     contents.push(icon_div)
     var itemdiv = add_block(1, 1, contents, attrs)
+    // Aug 2025
+    itemdiv.bind(MixIO.actionTags.BLUETOOTH_SENT, function(event, value) {
+        MixIO.publish(topic.text().split(",")[1], value)
+    })
     bleconnect()
 
     var delete_on_click = function() {
@@ -5609,7 +5615,6 @@ function add_chart(user_title, user_topic, user_content, user_style, title_style
     var itemdiv = add_block(3, 3, contents, attrs)
     itemdiv.addClass("moveDiv")
     itemdiv.bind(MixIO.actionTags.LINE_CHART_CHANGE, function(event, value) {
-        console.log(value)
         MixIO.publish(topic.text(), value)
     })
     itemdiv.bind(MixIO.actionTags.LINE_CHART_CLEAR, function() {
