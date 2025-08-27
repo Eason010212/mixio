@@ -49,8 +49,8 @@ function add_block(width, height, contents, attrs) {
         onStopDrag: function() {
             var stdLeft = parseInt(itemdiv.css('left')) - (parseInt(itemdiv.css('left')) % 20) + (parseInt(itemdiv.css('left')) % 20 > 10 ? 1 : 0) * 20
             var stdTop = parseInt(itemdiv.css('top')) - (parseInt(itemdiv.css('top')) % 20) + (parseInt(itemdiv.css('top')) % 20 > 10 ? 1 : 0) * 20
-            itemdiv.css('left', stdLeft + 'px')
-            itemdiv.css('top', stdTop + 'px')
+            itemdiv.css('left', (stdLeft>0?stdLeft:0) + 'px')
+            itemdiv.css('top', (stdTop>0?stdTop:0) + 'px')
             // 对于tmpInnerItems中的所有item，也进行同样的处理
             if(itemdiv.attr('user-type') == 'magic')
             {
@@ -59,8 +59,8 @@ function add_block(width, height, contents, attrs) {
                     var item = $(".item").eq(tmpInnerItems[i])
                     var left = parseInt(item.css('left')) - (parseInt(item.css('left')) % 20) + (parseInt(item.css('left')) % 20 > 10 ? 1 : 0) * 20
                     var top = parseInt(item.css('top')) - (parseInt(item.css('top')) % 20) + (parseInt(item.css('top')) % 20 > 10 ? 1 : 0) * 20
-                    item.css('left', left + 'px')
-                    item.css('top', top + 'px')
+                    item.css('left', (left>0?left:0) + 'px')
+                    item.css('top', (top>0?top:0) + 'px')
                 }
             }
             tmpInnerItems = []
