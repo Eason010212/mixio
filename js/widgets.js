@@ -6143,6 +6143,8 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
                 context.drawImage(video[0], 0, 0, resolutionX, resolutionY)
                 var dataURL = canvas[0].toDataURL('image/jpeg', 0.5)
                 publish(user_topic, dataURL)
+                // Aug 2025
+                itemdiv.trigger(MixIO.eventTags.CAMERA_SENT, dataURL)
             }
         }, 1000)
         var timer2 = setInterval(function() {
@@ -6153,6 +6155,8 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
                 context.drawImage(video[0], 0, 0, resolutionX, resolutionY)
                 var dataURL = canvas[0].toDataURL('image/jpeg', 0.5)
                 publish(user_topic, dataURL)
+                // Aug 2025
+                itemdiv.trigger(MixIO.eventTags.CAMERA_SENT, dataURL)
             }
         }, 500)
     }).catch(function(err) {

@@ -82,13 +82,14 @@ var MixIO = {
         WEATHER: 13,
         TIMER: 14,
         TRIGGER: 15,
-        BLE: 16
+        BLE: 16,
+        CAMERA: 17
     },
 
     oldTags: ["input_button", "input_slider", "input_keyboard", "input_controller", "input_rgb", "output_bulb", "output_text",
-        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger", "ble"
+        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger", "ble", "camera"
     ],
-    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器", "蓝牙转发器"],
+    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器", "蓝牙转发器", "摄像头"],
 
     /*合法的MixIO事件种类*/
     eventTags: {
@@ -130,7 +131,9 @@ var MixIO = {
 
         TRIGGER_TRIGGERED: "1511",
 
-        BLUETOOTH_TRIGGERED: "1611"
+        BLUETOOTH_TRIGGERED: "1611",
+
+        CAMERA_SENT: "1711"
 
     },
 
