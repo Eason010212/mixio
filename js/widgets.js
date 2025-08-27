@@ -2403,6 +2403,7 @@ function add_magic(user_title, user_topic, user_content, user_style, title_style
 async function add_timer(user_title, user_topic, user_content, user_style, title_style, isObserve) {
     if(MixIO.editor == undefined)
     {
+        initCodeMirror = true
         await init_codemirror()
     }
     var isAlive = true
@@ -2430,19 +2431,23 @@ async function add_timer(user_title, user_topic, user_content, user_style, title
     var itemdiv = add_block(1, 1, contents, attrs)
     MixIO.triggers[title.text()] = function() {
         var localTime = 0
+        title.parent().parent().attr('user-times', localTime)
         MixIO.setInterval(function() {
             if (triggerTimes == 0 || localTime < triggerTimes) {
                 itemdiv.addClass("triggered")
                 setTimeout(function() {
                     itemdiv.removeClass("triggered")
                 }, 150)
+                // Aug 2025
+                var sendMessage = triggerMessage
                 if(triggerMessage=="$CURR_TIME$")
-                    MixIO.publish(triggerTopic, (new Date().getHours() > 10 ? new Date().getHours()+"" : ("0" + new Date().getHours())) +":"+ (new Date().getMinutes() > 10 ? new Date().getMinutes()+"" : ("0" + new Date().getMinutes())) +":"+ (new Date().getSeconds() > 10 ? new Date().getSeconds()+"" : ("0" + new Date().getSeconds())))
+                    sendMessage = (new Date().getHours() > 10 ? new Date().getHours()+"" : ("0" + new Date().getHours())) +":"+ (new Date().getMinutes() > 10 ? new Date().getMinutes()+"" : ("0" + new Date().getMinutes())) +":"+ (new Date().getSeconds() > 10 ? new Date().getSeconds()+"" : ("0" + new Date().getSeconds()))
                 else if(triggerMessage=="$RAN_NUM$")
-                    MixIO.publish(triggerTopic, Math.round(Math.random()*99+1))
-                else
-                    MixIO.publish(triggerTopic, triggerMessage)
+                    sendMessage = Math.round(Math.random()*99+1)
+                MixIO.publish(triggerTopic, sendMessage)
                 localTime = localTime + 1
+                title.parent().parent().attr('user-times', localTime)
+                itemdiv.trigger(MixIO.eventTags.TIMER_TRIGGERED, sendMessage)
             }
         }, triggerInterval)
     }
@@ -2623,6 +2628,7 @@ async function add_timer(user_title, user_topic, user_content, user_style, title
 async function add_trigger(user_title, user_topic, user_content, user_style, title_style, isObserve) {
     if(MixIO.editor == undefined)
     {
+        initCodeMirror = true
         await init_codemirror()
     }
     var isAlive = true

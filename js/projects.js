@@ -1,5 +1,6 @@
 var globalVer = "MixIO ver 1.11.24"
 var isChanged = false;
+var initCodeMirror = false;
 var globalBLE = {}
 function copy(obj) {
     return JSON.parse(JSON.stringify(obj))
@@ -1917,7 +1918,7 @@ function view_project(projectName, projectType) {
         window.addEventListener("resize", function() {
             chart.resize();
         });
-        if (projectType == LOGIC_MODE && isCode) {
+        if (projectType == LOGIC_MODE && isCode && !initCodeMirror) {
             init_codemirror()
         }
     })

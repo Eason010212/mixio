@@ -79,13 +79,14 @@ var MixIO = {
         DATA_TABLE: 10,
         DASHBOARD: 11,
         DATA_MAP: 12,
-        WEATHER: 13
+        WEATHER: 13,
+        TIMER: 14
     },
 
     oldTags: ["input_button", "input_slider", "input_keyboard", "input_controller", "input_rgb", "output_bulb", "output_text",
-        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather"
+        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer"
     ],
-    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪"],
+    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器"],
 
     /*合法的MixIO事件种类*/
     eventTags: {
@@ -121,7 +122,9 @@ var MixIO = {
         DATA_MAP_CHANGED: "1211", //数据地图收到消息
 
         WEATHER_SYNCED: "1311", //气象仪更新数据
-        WEATHER_SENT: "1312" //气象仪发送数据
+        WEATHER_SENT: "1312", //气象仪发送数据
+
+        TIMER_TRIGGERED: "1411"
 
     },
 
@@ -159,8 +162,9 @@ var MixIO = {
         DATA_MAP_CLEAR: "1222", //清空数据地图数据
 
         WEATHER_SYNC: "1321", //更新气象仪数据
-        WEATHER_SEND: "1322" //发送气象仪数据
+        WEATHER_SEND: "1322", //发送气象仪数据
 
+        TRIGGER_TIMER: "1411"
     },
     publish: function(topic, message) {
         // if message undefined
@@ -327,6 +331,15 @@ var MixIO = {
                 //获取气象仪的信息
             instance.getData = function(type) {
                 return sepMsgs[type]
+            }
+        } else if (type === MixIO.typeTags.TIMER){
+            instance.getTriggerTimes = function(){
+                try{
+                    return parseInt(instance.attr('user-times'))
+                }
+                catch{
+                    return 0
+                }
             }
         }
         return instance
