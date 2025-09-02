@@ -1037,6 +1037,25 @@ Blockly.Blocks['datamap_recieved'] = {
     }
 };
 
+Blockly.Blocks['face_recognized'] = {
+  init: function() {
+      this.setColour(datamap_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.FACE_RECOGNIZED);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"id, status, faceName, isMouthOpen, faceProbability, happy, sad, angry, surprised, disgusted, fearful");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  },
+  getVars:function(){
+      return ["clientid","long","lat","message"];
+  }
+};
+
+
 Blockly.Blocks['datamap_send'] = {
     init: function() {
     this.appendDummyInput().appendField(Blockly.TO);
@@ -2500,6 +2519,13 @@ Blockly.JavaScript.datamap_recieved=function(block) {
   return code; 
 };
 
+Blockly.JavaScript.face_recognized =function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.FACE)\n"+".bind(MixIO.eventTags.FACE_RECOGNIZED, function(event,id,status,faceName,isMouthOpen,faceProbability,happy,sad,angry,surprised,disgusted,fearful){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
 Blockly.JavaScript.datamap_send=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var long = Blockly.JavaScript.valueToCode(this, 'long', Blockly.JavaScript.ORDER_ATOMIC);
@@ -3412,6 +3438,7 @@ Blockly.DATAMAP_LAT="纬度";
 Blockly.DATAMAP_SEND_MESSAGE="发送消息列表";
 Blockly.CLEAR_DATAMAP="数据地图清空";
 Blockly.CLEAR_PIXEL="点阵屏清空画布";
+Blockly.FACE_RECOGNIZED = "人脸识别组件识别到人脸时"
 
 Blockly.WS_UPDATED="气象仪更新数据时";
 Blockly.WS_SEND="气象仪发送数据时";
