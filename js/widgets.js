@@ -1307,6 +1307,7 @@ function add_tinydb(user_title, user_topic, user_content, user_style, title_styl
         sendIcon.bind('click', function(event) {
             event.stopPropagation()
             publish(topic.text(), messDiv.val())
+            itemdiv.trigger(MixIO.eventTags.SELECT_SENT, messDiv.val())
             sendIcon.removeClass("btn-primary")
             sendIcon.addClass("btn-success")
             sendIcon.children().removeClass('fa-paper-plane')
@@ -1322,6 +1323,7 @@ function add_tinydb(user_title, user_topic, user_content, user_style, title_styl
         sendIcon.bind('touchend', function(event) {
             event.stopPropagation()
             publish(topic.text(), messDiv.val())
+            itemdiv.trigger(MixIO.eventTags.SELECT_SENT, messDiv.val())
             sendIcon.removeClass("btn-primary")
             sendIcon.addClass("btn-success")
             sendIcon.children().removeClass('fa-paper-plane')
@@ -1335,7 +1337,8 @@ function add_tinydb(user_title, user_topic, user_content, user_style, title_styl
         })
     contents.push(keyDiv)
     var itemdiv = add_block(3, 1, contents, attrs)
-    itemdiv.bind(MixIO.actionTags.KEYBOARD_SEND, function(event, message) {
+    // Aug 2025
+    itemdiv.bind(MixIO.actionTags.SELECT_SEND, function(event, message) {
         messDiv.val(message)
         publish(topic.text(), messDiv.val())
         sendIcon.removeClass("btn-primary")
@@ -1526,6 +1529,7 @@ function add_mic(user_title, user_topic, user_content, user_style, title_style) 
     sendIcon.bind('mouseup', function(event) {
         event.stopPropagation()
     })
+    // Aug 2025
     if (window.screen.width > 800)
         sendIcon.bind('click', function(event) {
             event.stopPropagation()

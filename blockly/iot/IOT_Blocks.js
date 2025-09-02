@@ -325,12 +325,37 @@ Blockly.Blocks['through_textinput_send'] = {
     }
 };
 
+Blockly.Blocks['through_select_send'] = {
+  init: function() {
+      this.setColour(textinput_HUE);
+      this.appendDummyInput().appendField(Blockly.THROUGH);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.SELECT_SEND);
+      this.appendValueInput("message").setCheck("String");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  }
+};
+
 Blockly.Blocks['get_keyboard_input'] = {
   init: function() {
       this.setColour(textinput_HUE);
       this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_PY_STORAGE_GET);
       this.appendValueInput("name").setCheck("String");
       this.appendDummyInput().appendField(Blockly.GET_KEYBOARD_INPUT);
+      this.setOutput(true, null);
+      this.setTooltip("");
+  }
+};
+
+Blockly.Blocks['get_select_options'] = {
+  init: function() {
+      this.setColour(textinput_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_PY_STORAGE_GET);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.GET_SELECT_OPTIONS);
       this.setOutput(true, null);
       this.setTooltip("");
   }
@@ -699,6 +724,24 @@ Blockly.Blocks['mic_sent'] = {
       this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
       this.appendValueInput("name").setCheck("String");
       this.appendDummyInput().appendField(Blockly.MIC_SENT);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"value");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  },
+  getVars:function(){
+      return ["time","value"];
+  }
+};
+
+Blockly.Blocks['select_sent'] = {
+  init: function() {
+      this.setColour(lineChart_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.SELECT_SENT);
       this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"value");
       this.setInputsInline(true);
       this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
@@ -2110,7 +2153,14 @@ Blockly.JavaScript.when_textinput_send=function(block) {
 Blockly.JavaScript.through_textinput_send=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
-  var code="MixIO.getInstance("+name+",MixIO.typeTags.KEYBOARD)\n"+".trigger(MixIO.actionTags.KEYBOARD_SEND,"+message+")"
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.KEYBOARD)\n"+".trigger(MixIO.actionTags.KEYBOARD_SEND,"+message+")\n"
+  return code;
+};
+
+Blockly.JavaScript.through_select_send=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.SELECT)\n"+".trigger(MixIO.actionTags.SELECT_SEND,"+message+")\n"
   return code;
 };
 
@@ -2124,6 +2174,12 @@ Blockly.JavaScript.when_joystick_dragged=function(block) {
 Blockly.JavaScript.get_keyboard_input=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var code="MixIO.getInstance("+name+",MixIO.typeTags.KEYBOARD).getText()";
+  return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
+Blockly.JavaScript.get_select_options=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.SELECT).getOptions()";
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
@@ -2279,6 +2335,13 @@ Blockly.JavaScript.camera_sent=function(block) {
 Blockly.JavaScript.mic_sent=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var code="MixIO.getInstance("+name+",MixIO.typeTags.MIC)\n"+".bind(MixIO.eventTags.MIC_SENT, function(event,value){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
+Blockly.JavaScript.select_sent=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.SELECT)\n"+".bind(MixIO.eventTags.SELECT_SENT, function(event,value){\n"
   +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
   return code; 
 };
@@ -3235,6 +3298,7 @@ Blockly.SLIDER_NUM="滑杆的数值";
 Blockly.WHEN_TEXTINPUT_SEND="文本输入发送消息时";
 Blockly.THROUGH="通过";
 Blockly.TEXTINPUT_SEND="文本输入发送消息";
+Blockly.SELECT_SEND="下拉选项发送消息并变更选项为";
 
 Blockly.JOYSTICK_DRAGGED="摇杆被拖动时";
 Blockly.JOYSTICK_SENDXY="摇杆发送位置消息";
@@ -3276,6 +3340,7 @@ Blockly.BLUETOOTH_SENT = "蓝牙转发器发送消息"
 
 Blockly.CAMERA_SENT = "摄像头发送消息时"
 Blockly.MIC_SENT = "语音识别发送消息时"
+Blockly.SELECT_SENT = "下拉选项发送消息时"
 
 Blockly.BARCHART_RECIEVED="柱状图收到消息时";
 Blockly.BARCHART_SEND_MESSAGE="柱状图发送消息";
@@ -3351,6 +3416,7 @@ Blockly.GET_LONG = "获取当前经度";
 Blockly.GET_LATI = "获取当前纬度";
 
 Blockly.GET_KEYBOARD_INPUT="文本输入的文本";
+Blockly.GET_SELECT_OPTIONS = "下拉选项的选项列表"
 
 Blockly.JSON2TEXT = "字典转文本";
 Blockly.TEXT2JSON = "文本转字典";

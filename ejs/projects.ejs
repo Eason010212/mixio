@@ -980,7 +980,34 @@
             </value>
         </block>
     </category>
-    <category name="下拉选项" colour="#4e73df" css-icon="customIcon fa fa-list"></category>
+    <category name="下拉选项" colour="#4e73df" css-icon="customIcon fa fa-list">
+        <block type="select_sent">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="through_select_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="message">
+            <shadow type="text">
+                <field name="TEXT">message</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="get_select_options">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
     <category name="文本输入" colour="#4e73df" css-icon="customIcon fa fa-i-cursor">
         <block type="when_textinput_send">
             <value name="name">
