@@ -971,7 +971,15 @@
             </value>
         </block>
     </category>
-    <category name="语音识别" colour="#4e73df" css-icon="customIcon fa fa-microphone"></category>
+    <category name="语音识别" colour="#4e73df" css-icon="customIcon fa fa-microphone">
+        <block type="mic_sent">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
     <category name="下拉选项" colour="#4e73df" css-icon="customIcon fa fa-list"></category>
     <category name="文本输入" colour="#4e73df" css-icon="customIcon fa fa-i-cursor">
         <block type="when_textinput_send">

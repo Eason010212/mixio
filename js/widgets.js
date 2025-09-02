@@ -1558,6 +1558,7 @@ function add_mic(user_title, user_topic, user_content, user_style, title_style) 
                 sendIcon.children().addClass("fa-microphone")
                 recognition.stop();
                 publish(topic.text(), messDiv.val())
+                itemdiv.trigger(MixIO.eventTags.MIC_SENT, messDiv.val())
                 isRecording = false
             }
         })
@@ -1594,6 +1595,7 @@ function add_mic(user_title, user_topic, user_content, user_style, title_style) 
                 sendIcon.children().addClass("fa-microphone")
                 recognition.stop();
                 publish(topic.text(), messDiv.val())
+                itemdiv.trigger(MixIO.eventTags.MIC_SENT, messDiv.val())
                 isRecording = false
             }
         })

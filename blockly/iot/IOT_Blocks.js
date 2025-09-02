@@ -693,6 +693,24 @@ Blockly.Blocks['camera_sent'] = {
   }
 };
 
+Blockly.Blocks['mic_sent'] = {
+  init: function() {
+      this.setColour(lineChart_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.MIC_SENT);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"value");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  },
+  getVars:function(){
+      return ["time","value"];
+  }
+};
+
 Blockly.Blocks['lineChart_send'] = {
     init: function() {
     this.appendDummyInput().appendField(Blockly.TO);
@@ -2258,6 +2276,13 @@ Blockly.JavaScript.camera_sent=function(block) {
   return code; 
 };
 
+Blockly.JavaScript.mic_sent=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.MIC)\n"+".bind(MixIO.eventTags.MIC_SENT, function(event,value){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
 Blockly.JavaScript.lineChart_send=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
@@ -3250,6 +3275,7 @@ Blockly.GET_BLUETOOTH_STATUS="蓝牙转发器连接的设备";
 Blockly.BLUETOOTH_SENT = "蓝牙转发器发送消息"
 
 Blockly.CAMERA_SENT = "摄像头发送消息时"
+Blockly.MIC_SENT = "语音识别发送消息时"
 
 Blockly.BARCHART_RECIEVED="柱状图收到消息时";
 Blockly.BARCHART_SEND_MESSAGE="柱状图发送消息";
