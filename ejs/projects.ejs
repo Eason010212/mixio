@@ -1064,7 +1064,32 @@
             </value>
         </block>
     </category>
-    <category name="点阵屏" colour="#4e73df" css-icon="customIcon fa fa-tv"></category>
+    <category name="点阵屏" colour="#4e73df" css-icon="customIcon fa fa-tv">
+        <block type="pixel_switch">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+            <value name="X">
+            <shadow type="math_number">
+                <field name="X">X</field>
+            </shadow>    
+            </value>
+            <value name="Y">
+            <shadow type="math_number">
+                <field name="Y">Y</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="clear_pixel">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
     <category name="人脸识别" colour="#4e73df" css-icon="customIcon fa fa-smile-o"></category>
     <category name="蜂鸣器" colour="#4e73df" css-icon="customIcon fa fa-bell-o"></category>
     <category name="二维码识别" colour="#4e73df" css-icon="customIcon fa fa-qrcode"></category>

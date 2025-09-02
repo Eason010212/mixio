@@ -207,22 +207,37 @@ function add_pixel(user_title, user_topic, user_content, user_style, title_style
     var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
+    // Aug 2025
+    itemdiv.bind(MixIO.actionTags.PIXEL_SWITCH, function(event, x, y, status) {
+        var color = "#EEEEEE"
+        if(status)
+            color = "#4E73DF"
+        itemdiv.find('.pixelrow').eq(x).find('.pixel').eq(y).css('background-color', color)
+    })
     client.on('message', function(topic1, message1) {
         if (isAlive && isRunning)
             if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
+                // Aug 2025
                 var content = message1.toString()
-                var pixels = content.split(',')
-                for (var i = 0; i < pixels.length; i++) {
-                    var pixel = pixels[i].split('-')
-                    var x = parseInt(pixel[0])
-                    var y = parseInt(pixel[1])
-                    var color = pixel[2]
-                    if(color == '0')
-                        color = '#EEEEEE'
-                    else if(color == '1')
-                        color = '#4E73DF'
-                    var pixel = itemdiv.find('.pixelrow').eq(x).find('.pixel').eq(y)
-                    pixel.css('background-color', color)
+                if(content == "cls")
+                {
+                    itemdiv.find('.pixelrow').find('.pixel').css('background-color', "#EEEEEE")
+                }
+                else
+                {
+                    var pixels = content.split(',')
+                    for (var i = 0; i < pixels.length; i++) {
+                        var pixel = pixels[i].split('-')
+                        var x = parseInt(pixel[0])
+                        var y = parseInt(pixel[1])
+                        var color = pixel[2]
+                        if(color == '0')
+                            color = '#EEEEEE'
+                        else if(color == '1')
+                            color = '#4E73DF'
+                        var pixel = itemdiv.find('.pixelrow').eq(x).find('.pixel').eq(y)
+                        pixel.css('background-color', color)
+                    }
                 }
             }
     })
@@ -1303,6 +1318,7 @@ function add_tinydb(user_title, user_topic, user_content, user_style, title_styl
     sendIcon.bind('mouseup', function(event) {
         event.stopPropagation()
     })
+    // Aug 2025
     if (window.screen.width > 800)
         sendIcon.bind('click', function(event) {
             event.stopPropagation()

@@ -217,6 +217,25 @@ Blockly.Blocks['button_switch'] = {
     }
 };
 
+Blockly.Blocks['pixel_switch'] = {
+  init: function() {
+      this.setColour(button_HUE);
+      this.appendDummyInput().appendField(Blockly.PIXEL_SWITCH);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.PIXEL_SWITCH_STATE);
+      this.appendDummyInput().appendField("x");
+      this.appendValueInput("X").setCheck("Number");
+      this.appendDummyInput().appendField("y");
+      this.appendValueInput("Y").setCheck("Number");
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROPYTHON_SOCKET_TO);
+      this.appendDummyInput().appendField(new Blockly.FieldDropdown([["亮",'true'],["灭",'false']]), "state");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  }
+};
+
 Blockly.Blocks['get_button_state'] = {
     init: function() {
         this.setColour(button_HUE);
@@ -1047,6 +1066,19 @@ Blockly.Blocks['clear_datamap'] = {
     this.setColour(datamap_HUE);
     this.setTooltip('');
   }
+};
+
+Blockly.Blocks['clear_pixel'] = {
+  init: function() {
+  this.appendDummyInput().appendField(Blockly.LET);
+  this.appendValueInput("name").setCheck("String");
+  this.appendDummyInput().appendField(Blockly.CLEAR_PIXEL);
+  this.setInputsInline(true);
+  this.setPreviousStatement(true);
+  this.setNextStatement(true);
+  this.setColour(datamap_HUE);
+  this.setTooltip('');
+}
 };
 
 weathersynced_HUE = "#4e73df";
@@ -2110,6 +2142,15 @@ Blockly.JavaScript.button_switch=function(block) {
   return code;
 };
 
+Blockly.JavaScript.pixel_switch=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var state = this.getFieldValue('state');
+  var x = Blockly.JavaScript.valueToCode(this, 'X', Blockly.JavaScript.ORDER_ATOMIC);
+  var y = Blockly.JavaScript.valueToCode(this, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.PIXEL)\n"+".trigger(MixIO.actionTags.PIXEL_SWITCH,["+x + ","+y + "," + state+"])\n";
+  return code;
+};
+
 Blockly.JavaScript.get_button_state=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var code="MixIO.getInstance("+name+",MixIO.typeTags.BUTTON).isOn()";
@@ -2472,6 +2513,12 @@ Blockly.JavaScript.datamap_send=function(block) {
 Blockly.JavaScript.clear_datamap=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var code="MixIO.getInstance("+name+",MixIO.typeTags.DATA_MAP)\n"+".trigger(MixIO.actionTags.DATA_MAP_CLEAR)\n"
+  return code; 
+};
+
+Blockly.JavaScript.clear_pixel=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.PIXEL)\n"+".clearPixel()\n"
   return code; 
 };
 
@@ -3289,6 +3336,8 @@ Blockly.BUTTON_UP="按键/开关被松开时";
 Blockly.BUTTON_RECIEVE_MESSAGE="开关收到消息时";
 Blockly.BUTTON_SWITCH="切换";
 Blockly.BUTTON_SWITCH_STATE="开关的状态";
+Blockly.PIXEL_SWITCH="切换";
+Blockly.PIXEL_SWITCH_STATE="点阵屏的像素";
 
 Blockly.DRAG_SLIDER="滑杆被拖动时";
 Blockly.SLIDER_RECIEVE_MESSAGE="滑杆收到消息时";
@@ -3362,6 +3411,7 @@ Blockly.DATAMAP_LONG="经度";
 Blockly.DATAMAP_LAT="纬度";
 Blockly.DATAMAP_SEND_MESSAGE="发送消息列表";
 Blockly.CLEAR_DATAMAP="数据地图清空";
+Blockly.CLEAR_PIXEL="点阵屏清空画布";
 
 Blockly.WS_UPDATED="气象仪更新数据时";
 Blockly.WS_SEND="气象仪发送数据时";

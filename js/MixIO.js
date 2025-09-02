@@ -85,13 +85,14 @@ var MixIO = {
         BLE: 16,
         CAMERA: 17,
         MIC: 18,
-        SELECT: 19
+        SELECT: 19,
+        PIXEL: 20
     },
 
     oldTags: ["input_button", "input_slider", "input_keyboard", "input_controller", "input_rgb", "output_bulb", "output_text",
-        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger", "ble", "camera", "input_mic", "tinydb"
+        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger", "ble", "camera", "input_mic", "tinydb", "pixel"
     ],
-    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器", "蓝牙转发器", "摄像头", "语音识别", "下拉选项"],
+    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器", "蓝牙转发器", "摄像头", "语音识别", "下拉选项", "点阵屏"],
 
     /*合法的MixIO事件种类*/
     eventTags: {
@@ -183,7 +184,9 @@ var MixIO = {
 
         BLUETOOTH_SENT: "1621",
 
-        SELECT_SEND: "1921"
+        SELECT_SEND: "1921",
+
+        PIXEL_SWITCH: "2021"
     },
     publish: function(topic, message) {
         // if message undefined
@@ -367,6 +370,10 @@ var MixIO = {
         } else if (type === MixIO.typeTags.BLE){
             instance.getBluetoothStatus = function() {
                 return instance.attr('user-content')
+            }
+        } else if (type === MixIO.typeTags.PIXEL){
+            instance.clearPixel = function() {
+                MixIO.publish(instance.attr('user-topic'), "cls")
             }
         }
         return instance

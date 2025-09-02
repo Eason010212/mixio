@@ -304,6 +304,7 @@ async function run_project() {
             logicFunction()
         }
     } catch (e) {
+        console.log(e)
         MixIO.log(e)
         showtext(JSLang[lang].logicError)
         isRunning = false;
