@@ -1099,7 +1099,29 @@
             </value>
         </block>
     </category>
-    <category name="蜂鸣器" colour="#4e73df" css-icon="customIcon fa fa-bell-o"></category>
-    <category name="二维码识别" colour="#4e73df" css-icon="customIcon fa fa-qrcode"></category>
+    <category name="蜂鸣器" colour="#4e73df" css-icon="customIcon fa fa-bell-o">
+        <block type="beep_received">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+        <block type="beep_send">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+    </category>
+    <category name="二维码识别" colour="#4e73df" css-icon="customIcon fa fa-qrcode">
+        <block type="qr_recognized">
+            <value name="name">
+            <shadow type="text">
+                <field name="TEXT">name</field>
+            </shadow>    
+            </value>
+        </block>
+    </category>
     </xml>
 </body>

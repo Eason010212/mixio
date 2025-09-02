@@ -7003,6 +7003,8 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
                     bell_icon.css("color", "#e74a3b")
                     itemdiv.css("box-shadow", "#e74a3b 1px 1px 10px")
                 }
+                // Aug 2025
+                itemdiv.trigger(MixIO.eventTags.BEEP_RECEIVED);
                 setTimeout(function(){
                     bell_icon.css("color", "#858796")
                     itemdiv.css("box-shadow", "")
@@ -7158,7 +7160,11 @@ function add_qr(user_title, user_topic, user_content, user_style, title_style) {
                 {
                     bottomDiv11.text(code.data)
                     if(isRunning && isAlive)
+                    {
                         publish(user_topic, code.data)
+                        // Aug 2025
+                        itemdiv.trigger(MixIO.eventTags.QR_RECOGNIZED, [code.data]);
+                    }
                 }
                 else
                 {
@@ -7171,11 +7177,14 @@ function add_qr(user_title, user_topic, user_content, user_style, title_style) {
                             readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader", "i2of5_reader", "2of5_reader", "code_93_reader"] // 指定条形码格式
                         }
                     }, function(result){
-                        console.log(result)
                         if (result && result.codeResult) {
                             bottomDiv11.text(result.codeResult.code);
                             if(isRunning && isAlive)
+                            {
                                 publish(user_topic, result.codeResult.code)
+                                // Aug 2025
+                                itemdiv.trigger(MixIO.eventTags.QR_RECOGNIZED, [result.codeResult.code]);
+                            }
                         }
                         else
                             bottomDiv11.text("无二维码或条形码")

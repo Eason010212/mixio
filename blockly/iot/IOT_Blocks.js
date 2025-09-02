@@ -1049,9 +1049,48 @@ Blockly.Blocks['face_recognized'] = {
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip("");
-  },
-  getVars:function(){
-      return ["clientid","long","lat","message"];
+  }
+};
+
+Blockly.Blocks['beep_received'] = {
+  init: function() {
+      this.setColour(datamap_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.BEEP_RECEIVED);
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  }
+};
+
+Blockly.Blocks['qr_recognized'] = {
+  init: function() {
+      this.setColour(datamap_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.QR_RECOGNIZED);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"value");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  }
+};
+
+Blockly.Blocks['beep_send'] = {
+  init: function() {
+    this.appendDummyInput().appendField(Blockly.LET);
+    this.appendValueInput("name").setCheck("String");
+    this.appendDummyInput().appendField(Blockly.BEEP_SEND);
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour(datamap_HUE);
+    this.setTooltip('');
   }
 };
 
@@ -2526,6 +2565,26 @@ Blockly.JavaScript.face_recognized =function(block) {
   return code; 
 };
 
+Blockly.JavaScript.beep_received =function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.BEEP)\n"+".bind(MixIO.eventTags.BEEP_RECEIVED, function(event){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
+Blockly.JavaScript.qr_recognized =function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.QR)\n"+".bind(MixIO.eventTags.QR_RECOGNIZED, function(event, value){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
+Blockly.JavaScript.beep_send=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.BEEP)\n"+".beep()\n"
+  return code; 
+};
+
 Blockly.JavaScript.datamap_send=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var long = Blockly.JavaScript.valueToCode(this, 'long', Blockly.JavaScript.ORDER_ATOMIC);
@@ -3439,6 +3498,9 @@ Blockly.DATAMAP_SEND_MESSAGE="发送消息列表";
 Blockly.CLEAR_DATAMAP="数据地图清空";
 Blockly.CLEAR_PIXEL="点阵屏清空画布";
 Blockly.FACE_RECOGNIZED = "人脸识别组件识别到人脸时"
+Blockly.BEEP_RECEIVED = "蜂鸣器发出声音时"
+Blockly.BEEP_SEND = "蜂鸣器发出声音"
+Blockly.QR_RECOGNIZED = "二维码识别组件识别到二维码时"
 
 Blockly.WS_UPDATED="气象仪更新数据时";
 Blockly.WS_SEND="气象仪发送数据时";

@@ -87,13 +87,15 @@ var MixIO = {
         MIC: 18,
         SELECT: 19,
         PIXEL: 20,
-        FACE: 21
+        FACE: 21,
+        BEEP: 22,
+        QR: 23
     },
 
     oldTags: ["input_button", "input_slider", "input_keyboard", "input_controller", "input_rgb", "output_bulb", "output_text",
-        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger", "ble", "camera", "input_mic", "tinydb", "pixel", "face"
+        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger", "ble", "camera", "input_mic", "tinydb", "pixel", "face", "ocr", "qr"
     ],
-    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器", "蓝牙转发器", "摄像头", "语音识别", "下拉选项", "点阵屏", "人脸识别"],
+    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器", "蓝牙转发器", "摄像头", "语音识别", "下拉选项", "点阵屏", "人脸识别", "蜂鸣器", "二维码识别"],
 
     /*合法的MixIO事件种类*/
     eventTags: {
@@ -143,7 +145,11 @@ var MixIO = {
 
         SELECT_SENT: "1911",
 
-        FACE_RECOGNIZED: "2111"
+        FACE_RECOGNIZED: "2111",
+
+        BEEP_RECEIVED: "2211",
+
+        QR_RECOGNIZED: "2311"
 
     },
 
@@ -377,6 +383,10 @@ var MixIO = {
         } else if (type === MixIO.typeTags.PIXEL){
             instance.clearPixel = function() {
                 MixIO.publish(instance.attr('user-topic'), "cls")
+            }
+        } else if (type === MixIO.typeTags.BEEP){
+            instance.beep = function() {
+                MixIO.publish(instance.attr('user-topic'), 1)
             }
         }
         return instance
