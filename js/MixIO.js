@@ -83,13 +83,19 @@ var MixIO = {
         TIMER: 14,
         TRIGGER: 15,
         BLE: 16,
-        CAMERA: 17
+        CAMERA: 17,
+        MIC: 18,
+        SELECT: 19,
+        PIXEL: 20,
+        FACE: 21,
+        BEEP: 22,
+        QR: 23
     },
 
     oldTags: ["input_button", "input_slider", "input_keyboard", "input_controller", "input_rgb", "output_bulb", "output_text",
-        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger", "ble", "camera"
+        "output_chart", "output_bar", "table", "output_dashboard", "output_map", "input_weather", "timer", "trigger", "ble", "camera", "input_mic", "tinydb", "pixel", "face", "ocr", "qr"
     ],
-    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器", "蓝牙转发器", "摄像头"],
+    zhcnTags: ["按键/开关", "滑杆", "文本输入", "摇杆手柄", "RGB色盘", "指示灯", "文本显示屏", "折线图表", "柱状图表", "数据表格", "仪表盘", "数据地图", "实时气象仪", "定时触发器", "条件触发器", "蓝牙转发器", "摄像头", "语音识别", "下拉选项", "点阵屏", "人脸识别", "蜂鸣器", "二维码识别"],
 
     /*合法的MixIO事件种类*/
     eventTags: {
@@ -133,7 +139,17 @@ var MixIO = {
 
         BLUETOOTH_TRIGGERED: "1611",
 
-        CAMERA_SENT: "1711"
+        CAMERA_SENT: "1711",
+
+        MIC_SENT: "1811",
+
+        SELECT_SENT: "1911",
+
+        FACE_RECOGNIZED: "2111",
+
+        BEEP_RECEIVED: "2211",
+
+        QR_RECOGNIZED: "2311"
 
     },
 
@@ -173,9 +189,13 @@ var MixIO = {
         WEATHER_SYNC: "1321", //更新气象仪数据
         WEATHER_SEND: "1322", //发送气象仪数据
 
-        TRIGGER_TIMER: "1411",
+        TRIGGER_TIMER: "1421",
 
-        BLUETOOTH_SENT: "1611"
+        BLUETOOTH_SENT: "1621",
+
+        SELECT_SEND: "1921",
+
+        PIXEL_SWITCH: "2021"
     },
     publish: function(topic, message) {
         // if message undefined
@@ -244,6 +264,10 @@ var MixIO = {
         } else if (type === MixIO.typeTags.KEYBOARD) {
             instance.getText = function() {
                 return instance.attr('user-content')
+            }
+        } else if (type === MixIO.typeTags.SELECT) {
+            instance.getOptions = function() {
+                return instance.attr('user-content').split(",")
             }
         } else if (type === MixIO.typeTags.RGB_PICKER) {
             //获取RGB色盘当前颜色
@@ -355,6 +379,14 @@ var MixIO = {
         } else if (type === MixIO.typeTags.BLE){
             instance.getBluetoothStatus = function() {
                 return instance.attr('user-content')
+            }
+        } else if (type === MixIO.typeTags.PIXEL){
+            instance.clearPixel = function() {
+                MixIO.publish(instance.attr('user-topic'), "cls")
+            }
+        } else if (type === MixIO.typeTags.BEEP){
+            instance.beep = function() {
+                MixIO.publish(instance.attr('user-topic'), 1)
             }
         }
         return instance

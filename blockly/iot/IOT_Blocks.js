@@ -217,6 +217,25 @@ Blockly.Blocks['button_switch'] = {
     }
 };
 
+Blockly.Blocks['pixel_switch'] = {
+  init: function() {
+      this.setColour(button_HUE);
+      this.appendDummyInput().appendField(Blockly.PIXEL_SWITCH);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.PIXEL_SWITCH_STATE);
+      this.appendDummyInput().appendField("x");
+      this.appendValueInput("X").setCheck("Number");
+      this.appendDummyInput().appendField("y");
+      this.appendValueInput("Y").setCheck("Number");
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROPYTHON_SOCKET_TO);
+      this.appendDummyInput().appendField(new Blockly.FieldDropdown([["亮",'true'],["灭",'false']]), "state");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  }
+};
+
 Blockly.Blocks['get_button_state'] = {
     init: function() {
         this.setColour(button_HUE);
@@ -325,12 +344,37 @@ Blockly.Blocks['through_textinput_send'] = {
     }
 };
 
+Blockly.Blocks['through_select_send'] = {
+  init: function() {
+      this.setColour(textinput_HUE);
+      this.appendDummyInput().appendField(Blockly.THROUGH);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.SELECT_SEND);
+      this.appendValueInput("message").setCheck("String");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  }
+};
+
 Blockly.Blocks['get_keyboard_input'] = {
   init: function() {
       this.setColour(textinput_HUE);
       this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_PY_STORAGE_GET);
       this.appendValueInput("name").setCheck("String");
       this.appendDummyInput().appendField(Blockly.GET_KEYBOARD_INPUT);
+      this.setOutput(true, null);
+      this.setTooltip("");
+  }
+};
+
+Blockly.Blocks['get_select_options'] = {
+  init: function() {
+      this.setColour(textinput_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_PY_STORAGE_GET);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.GET_SELECT_OPTIONS);
       this.setOutput(true, null);
       this.setTooltip("");
   }
@@ -693,6 +737,42 @@ Blockly.Blocks['camera_sent'] = {
   }
 };
 
+Blockly.Blocks['mic_sent'] = {
+  init: function() {
+      this.setColour(lineChart_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.MIC_SENT);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"value");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  },
+  getVars:function(){
+      return ["time","value"];
+  }
+};
+
+Blockly.Blocks['select_sent'] = {
+  init: function() {
+      this.setColour(lineChart_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.SELECT_SENT);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"value");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  },
+  getVars:function(){
+      return ["time","value"];
+  }
+};
+
 Blockly.Blocks['lineChart_send'] = {
     init: function() {
     this.appendDummyInput().appendField(Blockly.TO);
@@ -957,6 +1037,64 @@ Blockly.Blocks['datamap_recieved'] = {
     }
 };
 
+Blockly.Blocks['face_recognized'] = {
+  init: function() {
+      this.setColour(datamap_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.FACE_RECOGNIZED);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"id, status, faceName, isMouthOpen, faceProbability, happy, sad, angry, surprised, disgusted, fearful");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  }
+};
+
+Blockly.Blocks['beep_received'] = {
+  init: function() {
+      this.setColour(datamap_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.BEEP_RECEIVED);
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  }
+};
+
+Blockly.Blocks['qr_recognized'] = {
+  init: function() {
+      this.setColour(datamap_HUE);
+      this.appendDummyInput().appendField(Blockly.MIXLY_MICROBIT_JS_CURRENT);
+      this.appendValueInput("name").setCheck("String");
+      this.appendDummyInput().appendField(Blockly.QR_RECOGNIZED);
+      this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS+"value");
+      this.setInputsInline(true);
+      this.appendStatementInput('DO0').appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip("");
+  }
+};
+
+Blockly.Blocks['beep_send'] = {
+  init: function() {
+    this.appendDummyInput().appendField(Blockly.LET);
+    this.appendValueInput("name").setCheck("String");
+    this.appendDummyInput().appendField(Blockly.BEEP_SEND);
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour(datamap_HUE);
+    this.setTooltip('');
+  }
+};
+
+
 Blockly.Blocks['datamap_send'] = {
     init: function() {
     this.appendDummyInput().appendField(Blockly.TO);
@@ -986,6 +1124,19 @@ Blockly.Blocks['clear_datamap'] = {
     this.setColour(datamap_HUE);
     this.setTooltip('');
   }
+};
+
+Blockly.Blocks['clear_pixel'] = {
+  init: function() {
+  this.appendDummyInput().appendField(Blockly.LET);
+  this.appendValueInput("name").setCheck("String");
+  this.appendDummyInput().appendField(Blockly.CLEAR_PIXEL);
+  this.setInputsInline(true);
+  this.setPreviousStatement(true);
+  this.setNextStatement(true);
+  this.setColour(datamap_HUE);
+  this.setTooltip('');
+}
 };
 
 weathersynced_HUE = "#4e73df";
@@ -2049,6 +2200,15 @@ Blockly.JavaScript.button_switch=function(block) {
   return code;
 };
 
+Blockly.JavaScript.pixel_switch=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var state = this.getFieldValue('state');
+  var x = Blockly.JavaScript.valueToCode(this, 'X', Blockly.JavaScript.ORDER_ATOMIC);
+  var y = Blockly.JavaScript.valueToCode(this, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.PIXEL)\n"+".trigger(MixIO.actionTags.PIXEL_SWITCH,["+x + ","+y + "," + state+"])\n";
+  return code;
+};
+
 Blockly.JavaScript.get_button_state=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var code="MixIO.getInstance("+name+",MixIO.typeTags.BUTTON).isOn()";
@@ -2092,7 +2252,14 @@ Blockly.JavaScript.when_textinput_send=function(block) {
 Blockly.JavaScript.through_textinput_send=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
-  var code="MixIO.getInstance("+name+",MixIO.typeTags.KEYBOARD)\n"+".trigger(MixIO.actionTags.KEYBOARD_SEND,"+message+")"
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.KEYBOARD)\n"+".trigger(MixIO.actionTags.KEYBOARD_SEND,"+message+")\n"
+  return code;
+};
+
+Blockly.JavaScript.through_select_send=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.SELECT)\n"+".trigger(MixIO.actionTags.SELECT_SEND,"+message+")\n"
   return code;
 };
 
@@ -2106,6 +2273,12 @@ Blockly.JavaScript.when_joystick_dragged=function(block) {
 Blockly.JavaScript.get_keyboard_input=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var code="MixIO.getInstance("+name+",MixIO.typeTags.KEYBOARD).getText()";
+  return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
+Blockly.JavaScript.get_select_options=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.SELECT).getOptions()";
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
@@ -2258,6 +2431,20 @@ Blockly.JavaScript.camera_sent=function(block) {
   return code; 
 };
 
+Blockly.JavaScript.mic_sent=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.MIC)\n"+".bind(MixIO.eventTags.MIC_SENT, function(event,value){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
+Blockly.JavaScript.select_sent=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.SELECT)\n"+".bind(MixIO.eventTags.SELECT_SENT, function(event,value){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
 Blockly.JavaScript.lineChart_send=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var message = Blockly.JavaScript.valueToCode(this, 'message', Blockly.JavaScript.ORDER_ATOMIC);
@@ -2371,6 +2558,33 @@ Blockly.JavaScript.datamap_recieved=function(block) {
   return code; 
 };
 
+Blockly.JavaScript.face_recognized =function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.FACE)\n"+".bind(MixIO.eventTags.FACE_RECOGNIZED, function(event,id,status,faceName,isMouthOpen,faceProbability,happy,sad,angry,surprised,disgusted,fearful){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
+Blockly.JavaScript.beep_received =function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.BEEP)\n"+".bind(MixIO.eventTags.BEEP_RECEIVED, function(event){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
+Blockly.JavaScript.qr_recognized =function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.QR)\n"+".bind(MixIO.eventTags.QR_RECOGNIZED, function(event, value){\n"
+  +Blockly.JavaScript.statementToCode(block, "DO0" )+"\n"+"})\n"
+  return code; 
+};
+
+Blockly.JavaScript.beep_send=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.BEEP)\n"+".beep()\n"
+  return code; 
+};
+
 Blockly.JavaScript.datamap_send=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var long = Blockly.JavaScript.valueToCode(this, 'long', Blockly.JavaScript.ORDER_ATOMIC);
@@ -2384,6 +2598,12 @@ Blockly.JavaScript.datamap_send=function(block) {
 Blockly.JavaScript.clear_datamap=function(block) {
   var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
   var code="MixIO.getInstance("+name+",MixIO.typeTags.DATA_MAP)\n"+".trigger(MixIO.actionTags.DATA_MAP_CLEAR)\n"
+  return code; 
+};
+
+Blockly.JavaScript.clear_pixel=function(block) {
+  var name = Blockly.JavaScript.valueToCode(this, 'name', Blockly.JavaScript.ORDER_ATOMIC);
+  var code="MixIO.getInstance("+name+",MixIO.typeTags.PIXEL)\n"+".clearPixel()\n"
   return code; 
 };
 
@@ -3201,6 +3421,8 @@ Blockly.BUTTON_UP="按键/开关被松开时";
 Blockly.BUTTON_RECIEVE_MESSAGE="开关收到消息时";
 Blockly.BUTTON_SWITCH="切换";
 Blockly.BUTTON_SWITCH_STATE="开关的状态";
+Blockly.PIXEL_SWITCH="切换";
+Blockly.PIXEL_SWITCH_STATE="点阵屏的像素";
 
 Blockly.DRAG_SLIDER="滑杆被拖动时";
 Blockly.SLIDER_RECIEVE_MESSAGE="滑杆收到消息时";
@@ -3210,6 +3432,7 @@ Blockly.SLIDER_NUM="滑杆的数值";
 Blockly.WHEN_TEXTINPUT_SEND="文本输入发送消息时";
 Blockly.THROUGH="通过";
 Blockly.TEXTINPUT_SEND="文本输入发送消息";
+Blockly.SELECT_SEND="下拉选项发送消息并变更选项为";
 
 Blockly.JOYSTICK_DRAGGED="摇杆被拖动时";
 Blockly.JOYSTICK_SENDXY="摇杆发送位置消息";
@@ -3250,6 +3473,8 @@ Blockly.GET_BLUETOOTH_STATUS="蓝牙转发器连接的设备";
 Blockly.BLUETOOTH_SENT = "蓝牙转发器发送消息"
 
 Blockly.CAMERA_SENT = "摄像头发送消息时"
+Blockly.MIC_SENT = "语音识别发送消息时"
+Blockly.SELECT_SENT = "下拉选项发送消息时"
 
 Blockly.BARCHART_RECIEVED="柱状图收到消息时";
 Blockly.BARCHART_SEND_MESSAGE="柱状图发送消息";
@@ -3271,6 +3496,11 @@ Blockly.DATAMAP_LONG="经度";
 Blockly.DATAMAP_LAT="纬度";
 Blockly.DATAMAP_SEND_MESSAGE="发送消息列表";
 Blockly.CLEAR_DATAMAP="数据地图清空";
+Blockly.CLEAR_PIXEL="点阵屏清空画布";
+Blockly.FACE_RECOGNIZED = "人脸识别组件识别到人脸时"
+Blockly.BEEP_RECEIVED = "蜂鸣器发出声音时"
+Blockly.BEEP_SEND = "蜂鸣器发出声音"
+Blockly.QR_RECOGNIZED = "二维码识别组件识别到二维码时"
 
 Blockly.WS_UPDATED="气象仪更新数据时";
 Blockly.WS_SEND="气象仪发送数据时";
@@ -3325,6 +3555,7 @@ Blockly.GET_LONG = "获取当前经度";
 Blockly.GET_LATI = "获取当前纬度";
 
 Blockly.GET_KEYBOARD_INPUT="文本输入的文本";
+Blockly.GET_SELECT_OPTIONS = "下拉选项的选项列表"
 
 Blockly.JSON2TEXT = "字典转文本";
 Blockly.TEXT2JSON = "文本转字典";

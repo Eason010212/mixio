@@ -207,22 +207,37 @@ function add_pixel(user_title, user_topic, user_content, user_style, title_style
     var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
     bottomDiv.append(confirmEdit)
+    // Aug 2025
+    itemdiv.bind(MixIO.actionTags.PIXEL_SWITCH, function(event, x, y, status) {
+        var color = "#EEEEEE"
+        if(status)
+            color = "#4E73DF"
+        itemdiv.find('.pixelrow').eq(x).find('.pixel').eq(y).css('background-color', color)
+    })
     client.on('message', function(topic1, message1) {
         if (isAlive && isRunning)
             if (topic1.split("/")[(isMixly ? 3 : 2)] == topic.text()) {
+                // Aug 2025
                 var content = message1.toString()
-                var pixels = content.split(',')
-                for (var i = 0; i < pixels.length; i++) {
-                    var pixel = pixels[i].split('-')
-                    var x = parseInt(pixel[0])
-                    var y = parseInt(pixel[1])
-                    var color = pixel[2]
-                    if(color == '0')
-                        color = '#EEEEEE'
-                    else if(color == '1')
-                        color = '#4E73DF'
-                    var pixel = itemdiv.find('.pixelrow').eq(x).find('.pixel').eq(y)
-                    pixel.css('background-color', color)
+                if(content == "cls")
+                {
+                    itemdiv.find('.pixelrow').find('.pixel').css('background-color', "#EEEEEE")
+                }
+                else
+                {
+                    var pixels = content.split(',')
+                    for (var i = 0; i < pixels.length; i++) {
+                        var pixel = pixels[i].split('-')
+                        var x = parseInt(pixel[0])
+                        var y = parseInt(pixel[1])
+                        var color = pixel[2]
+                        if(color == '0')
+                            color = '#EEEEEE'
+                        else if(color == '1')
+                            color = '#4E73DF'
+                        var pixel = itemdiv.find('.pixelrow').eq(x).find('.pixel').eq(y)
+                        pixel.css('background-color', color)
+                    }
                 }
             }
     })
@@ -1303,10 +1318,12 @@ function add_tinydb(user_title, user_topic, user_content, user_style, title_styl
     sendIcon.bind('mouseup', function(event) {
         event.stopPropagation()
     })
+    // Aug 2025
     if (window.screen.width > 800)
         sendIcon.bind('click', function(event) {
             event.stopPropagation()
             publish(topic.text(), messDiv.val())
+            itemdiv.trigger(MixIO.eventTags.SELECT_SENT, messDiv.val())
             sendIcon.removeClass("btn-primary")
             sendIcon.addClass("btn-success")
             sendIcon.children().removeClass('fa-paper-plane')
@@ -1322,6 +1339,7 @@ function add_tinydb(user_title, user_topic, user_content, user_style, title_styl
         sendIcon.bind('touchend', function(event) {
             event.stopPropagation()
             publish(topic.text(), messDiv.val())
+            itemdiv.trigger(MixIO.eventTags.SELECT_SENT, messDiv.val())
             sendIcon.removeClass("btn-primary")
             sendIcon.addClass("btn-success")
             sendIcon.children().removeClass('fa-paper-plane')
@@ -1335,7 +1353,8 @@ function add_tinydb(user_title, user_topic, user_content, user_style, title_styl
         })
     contents.push(keyDiv)
     var itemdiv = add_block(3, 1, contents, attrs)
-    itemdiv.bind(MixIO.actionTags.KEYBOARD_SEND, function(event, message) {
+    // Aug 2025
+    itemdiv.bind(MixIO.actionTags.SELECT_SEND, function(event, message) {
         messDiv.val(message)
         publish(topic.text(), messDiv.val())
         sendIcon.removeClass("btn-primary")
@@ -1526,6 +1545,7 @@ function add_mic(user_title, user_topic, user_content, user_style, title_style) 
     sendIcon.bind('mouseup', function(event) {
         event.stopPropagation()
     })
+    // Aug 2025
     if (window.screen.width > 800)
         sendIcon.bind('click', function(event) {
             event.stopPropagation()
@@ -1558,6 +1578,7 @@ function add_mic(user_title, user_topic, user_content, user_style, title_style) 
                 sendIcon.children().addClass("fa-microphone")
                 recognition.stop();
                 publish(topic.text(), messDiv.val())
+                itemdiv.trigger(MixIO.eventTags.MIC_SENT, messDiv.val())
                 isRecording = false
             }
         })
@@ -1594,6 +1615,7 @@ function add_mic(user_title, user_topic, user_content, user_style, title_style) 
                 sendIcon.children().addClass("fa-microphone")
                 recognition.stop();
                 publish(topic.text(), messDiv.val())
+                itemdiv.trigger(MixIO.eventTags.MIC_SENT, messDiv.val())
                 isRecording = false
             }
         })
@@ -6615,10 +6637,17 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                             }
                             if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= interval)
                             {   
+                                // Aug 2025
                                 if(min_index == -1)
+                                {
                                     publish(user_topic, JSON.stringify({id: min_index, status: (min_index==-1?0:1), name: "Unknown", isMouthOpen: isMouthOpen, faceProbability: resizedDetections[0].detection.score.toFixed(3), happy: resizedDetections[0].expressions.happy.toFixed(3), sad: resizedDetections[0].expressions.sad.toFixed(3), angry: resizedDetections[0].expressions.angry.toFixed(3), surprised: resizedDetections[0].expressions.surprised.toFixed(3), disgusted: resizedDetections[0].expressions.disgusted.toFixed(3), fearful: resizedDetections[0].expressions.fearful.toFixed(3)}))
+                                    itemdiv.trigger(MixIO.eventTags.FACE_RECOGNIZED, [min_index, (min_index==-1?0:1), "Unknown", isMouthOpen, resizedDetections[0].detection.score.toFixed(3), resizedDetections[0].expressions.happy.toFixed(3), resizedDetections[0].expressions.sad.toFixed(3), resizedDetections[0].expressions.angry.toFixed(3), resizedDetections[0].expressions.surprised.toFixed(3), resizedDetections[0].expressions.disgusted.toFixed(3), resizedDetections[0].expressions.fearful.toFixed(3)])
+                                }
                                 else
+                                {
                                     publish(user_topic, JSON.stringify({id: min_index, status: (min_index==-1?0:1), name: user_data[min_index]["name"], isMouthOpen: isMouthOpen, faceProbability: resizedDetections[0].detection.score.toFixed(3), happy: resizedDetections[0].expressions.happy.toFixed(3), sad: resizedDetections[0].expressions.sad.toFixed(3), angry: resizedDetections[0].expressions.angry.toFixed(3), surprised: resizedDetections[0].expressions.surprised.toFixed(3), disgusted: resizedDetections[0].expressions.disgusted.toFixed(3), fearful: resizedDetections[0].expressions.fearful.toFixed(3)}))
+                                    itemdiv.trigger(MixIO.eventTags.FACE_RECOGNIZED, [min_index, (min_index==-1?0:1), user_data[min_index]["name"], isMouthOpen, resizedDetections[0].detection.score.toFixed(3), resizedDetections[0].expressions.happy.toFixed(3), resizedDetections[0].expressions.sad.toFixed(3), resizedDetections[0].expressions.angry.toFixed(3), resizedDetections[0].expressions.surprised.toFixed(3), resizedDetections[0].expressions.disgusted.toFixed(3), resizedDetections[0].expressions.fearful.toFixed(3)])
+                                }
                                 lastFacePublishTime = new Date().getTime()
                             }
                         }
@@ -6980,6 +7009,8 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
                     bell_icon.css("color", "#e74a3b")
                     itemdiv.css("box-shadow", "#e74a3b 1px 1px 10px")
                 }
+                // Aug 2025
+                itemdiv.trigger(MixIO.eventTags.BEEP_RECEIVED);
                 setTimeout(function(){
                     bell_icon.css("color", "#858796")
                     itemdiv.css("box-shadow", "")
@@ -7135,7 +7166,11 @@ function add_qr(user_title, user_topic, user_content, user_style, title_style) {
                 {
                     bottomDiv11.text(code.data)
                     if(isRunning && isAlive)
+                    {
                         publish(user_topic, code.data)
+                        // Aug 2025
+                        itemdiv.trigger(MixIO.eventTags.QR_RECOGNIZED, [code.data]);
+                    }
                 }
                 else
                 {
@@ -7148,11 +7183,14 @@ function add_qr(user_title, user_topic, user_content, user_style, title_style) {
                             readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader", "i2of5_reader", "2of5_reader", "code_93_reader"] // 指定条形码格式
                         }
                     }, function(result){
-                        console.log(result)
                         if (result && result.codeResult) {
                             bottomDiv11.text(result.codeResult.code);
                             if(isRunning && isAlive)
+                            {
                                 publish(user_topic, result.codeResult.code)
+                                // Aug 2025
+                                itemdiv.trigger(MixIO.eventTags.QR_RECOGNIZED, [result.codeResult.code]);
+                            }
                         }
                         else
                             bottomDiv11.text("无二维码或条形码")
