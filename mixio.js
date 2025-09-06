@@ -755,7 +755,7 @@ del "%~f0"`;
     rm -f "mixio"
     mv "mixio.tmp" "mixio"
     chmod +x "mixio"
-    "mixio" start
+    "./mixio" start
     rm -- "$0"`;
                             try {
                                 // 写入sh脚本
