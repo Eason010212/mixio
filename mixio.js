@@ -726,7 +726,6 @@ async function daemon_start() {
 ping 127.0.0.1 -n 5 >nul
 del "mixio.exe"
 rename "mixio.exe.tmp" "mixio.exe"
-start "" "mixio.exe" start
 del "%~f0"`;
                         try {
                             // 写入bat脚本
@@ -754,8 +753,7 @@ del "%~f0"`;
     sleep 5
     rm -f "mixio"
     mv "mixio.tmp" "mixio"
-    chmod +x "mixio"
-    "./mixio" start
+    chmod +x "./mixio"
     rm -- "$0"`;
                             try {
                                 // 写入sh脚本
