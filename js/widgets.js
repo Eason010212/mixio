@@ -2664,18 +2664,24 @@ async function add_trigger(user_title, user_topic, user_content, user_style, tit
     var dstMessage = user_content.split("$$$")[6]
     var itemdiv = add_block(1, 1, contents, attrs)
     var relationLogic = function(message, condition_1, condition_2) {
+        try{
+            message = parseFloat(message)
+        }
+        catch{
+
+        }
         var condition_2 = parseFloat(condition_2)
-        if (condition_1 == ">")
+        if (condition_1 == "gt")
             return message > condition_2
-        else if (condition_1 == "≥")
+        else if (condition_1 == "gte")
             return message >= condition_2
-        else if (condition_1 == "<")
+        else if (condition_1 == "lt")
             return message < condition_2
-        else if (condition_1 == "≤")
+        else if (condition_1 == "lte")
             return message <= condition_2
-        else if (condition_1 == "=")
+        else if (condition_1 == "eq")
             return message == condition_2
-        else if (condition_1 == "≠")
+        else if (condition_1 == "neq")
             return message != condition_2
         else if (condition_1 == "--")
             return true
@@ -2772,12 +2778,12 @@ async function add_trigger(user_title, user_topic, user_content, user_style, tit
     editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].condition + '1</h5>'))
     var condition1_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
     var condition1_input1 = $("<select class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-right:5px'/>")
-    condition1_input1.append($("<option value='\>'>\></option>"))
-    condition1_input1.append($("<option value='≥'>\≥</option>"))
-    condition1_input1.append($("<option value='\<'>\<</option>"))
-    condition1_input1.append($("<option value='≤'>\≤</option>"))
-    condition1_input1.append($("<option value='\='>\=</option>"))
-    condition1_input1.append($("<option value='≠'>≠</option>"))
+    condition1_input1.append($("<option value='gt'>大于</option>"))
+    condition1_input1.append($("<option value='gte'>大于等于</option>"))
+    condition1_input1.append($("<option value='lt'>小于</option>"))
+    condition1_input1.append($("<option value='lte'>小于等于</option>"))
+    condition1_input1.append($("<option value='eq'>等于</option>"))
+    condition1_input1.append($("<option value='neq'>不等于</option>"))
     var condition1_input2 = $("<input class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-left:5px'/>")
     condition1_input_div.append(condition1_input1)
     condition1_input_div.append(condition1_input2)
@@ -2786,12 +2792,12 @@ async function add_trigger(user_title, user_topic, user_content, user_style, tit
     var condition2_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
     var condition2_input1 = $("<select class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-right:5px'/>")
     condition2_input1.append($("<option value='--'>--</option>"))
-    condition2_input1.append($("<option value='\>'>\></option>"))
-    condition2_input1.append($("<option value='≥'>\≥</option>"))
-    condition2_input1.append($("<option value='\<'>\<</option>"))
-    condition2_input1.append($("<option value='≤'>\≤</option>"))
-    condition2_input1.append($("<option value='\='>\=</option>"))
-    condition2_input1.append($("<option value='≠'>≠</option>"))
+    condition2_input1.append($("<option value='gt'>大于</option>"))
+    condition2_input1.append($("<option value='gte'>大于等于</option>"))
+    condition2_input1.append($("<option value='lt'>小于</option>"))
+    condition2_input1.append($("<option value='lte'>小于等于</option>"))
+    condition2_input1.append($("<option value='eq'>等于</option>"))
+    condition2_input1.append($("<option value='neq'>不等于</option>"))
     var condition2_input2 = $("<input disabled class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-left:5px'/>")
     condition2_input_div.append(condition2_input1)
     condition2_input_div.append(condition2_input2)
@@ -7312,7 +7318,6 @@ copyButton.click(function() {
     var user_style = itemdiv.attr("style")
     // add the item, use the function of user-type
     toolkits[user_type](itemTitle + "_copy", user_topic, user_content, user_style)
-
 })
 
 var styleButton = $('<a class="btn btn-danger btn-circle bbbt button-7colors"><i class="fa fa-paint-brush"></i></a>')

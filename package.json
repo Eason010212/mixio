@@ -6,6 +6,7 @@
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+    "extract-zip": "^2.0.1",
     "forever-monitor": "^3.0.3",
     "fs-extra": "^11.3.0",
     "iconv-lite": "^0.6.3",

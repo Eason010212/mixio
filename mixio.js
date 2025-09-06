@@ -1,5 +1,6 @@
-var VERSION = "1.10.0"
+var VERSION = "1.10.5.0906"
 require('events').EventEmitter.defaultMaxListeners = 50;
+const extract = require('extract-zip')
 defaultCrt =
     `-----BEGIN CERTIFICATE-----
 MIID0TCCArmgAwIBAgICYxswDQYJKoZIhvcNAQELBQAwczELMAkGA1UEBhMCQ04x
@@ -106,6 +107,11 @@ var request = require('request');
 const cors = require('cors');
 const axios = require('axios');
 var globalQPSControl = {}
+const os = require('os');
+const arch = os.arch(); // 或者 process.arch
+// 获取操作系统平台（如win32, linux, darwin）
+const platform = os.platform(); // 或者 process.platform
+const platformString = `${arch}-${platform}`;
 
 function init(cb) {
     if (!fs.existsSync("logs")) {
@@ -419,8 +425,10 @@ async function daemon_start() {
         if (req.session.admin) {
             ejs.renderFile(__dirname + '/ejs/manage.ejs', {
                 'configs': configs,
+                'platform': platformString,
                 'status': serverStatus ? "运行中" : "已暂停",
-                'version': VERSION
+                'version': VERSION,
+                'versionmixly': getLocalVersion('mixly', '') 
             }, function(err, data) {
                 res.send(data)
             })
@@ -559,6 +567,234 @@ async function daemon_start() {
         } else
             res.send('-1')
     })
+
+    const VERSION_FILE = 'versions.json';
+    function getLocalVersion(product, platform) {
+        if(product == "mixly")
+        {
+            if(fs.existsSync("../mixly"))
+            {
+                try {
+                    if (fs.existsSync(VERSION_FILE)) {
+                        return fs.readFileSync(VERSION_FILE, 'utf8');
+                    }
+                } catch (error) {
+                    console.error('读取版本文件失败:', error);
+                }
+                return '2025.09.06';
+            }
+            return 'None'
+        }
+        else if(product == "mixio"){
+            return VERSION
+        }
+    }
+    function saveVersionInfo(version) {
+        fs.writeFileSync(VERSION_FILE, version);
+    }
+    async function getCloudVersion(product,platform) {
+        try {
+            const response = await axios.get('http://update.mixly.cn/index.php');
+            return response.data[product][platform];
+        } catch (error) {
+            console.error('获取云端版本信息失败:', error);
+            return "2025.09.06"
+        }
+    }
+    async function checkUpdate(product, platform) {
+        try {
+            const localVersion = getLocalVersion(product,platform);
+            const cloudVersions = await getCloudVersion(product, platform);
+            const cloudVersion = cloudVersions["version"]
+            const cloudFile = 'http://update.mixly.cn/download.php?file=' + cloudVersions["file"]
+            return {
+                needsUpdate: localVersion !== cloudVersion,
+                localVersion: localVersion,
+                cloudVersion: cloudVersion,
+                cloudFile: cloudFile,
+                error: ""
+            };
+        } catch (error) {
+            return {
+                needsUpdate: false,
+                localVersion: '',
+                cloudVersion: '',
+                cloudFile: '',
+                error: error.message
+            }
+        }
+    }
+    // 检查更新接口
+    app.post('/api/check-update', async (req, res) => {
+        var product = req.body.product
+        var platform = req.body.platform
+        const updateInfo = await checkUpdate(product, platform);
+        res.json(updateInfo);
+    });
+
+    // 下载进度返回
+    function deleteFolderRecursive(dirPath) {
+        if (fs.existsSync(dirPath)) {
+          fs.readdirSync(dirPath).forEach(file => {
+            const curPath = path.join(dirPath, file);
+            if (fs.lstatSync(curPath).isDirectory()) {
+              deleteFolderRecursive(curPath);
+            } else {
+              fs.unlinkSync(curPath);
+            }
+          });
+          fs.rmdirSync(dirPath);
+        }
+      }
+
+    app.get('/api/download', async (req, res) => {
+        try {
+            const {url, cloudVersion} = req.query;
+            var filePath, fileStream
+            if(url.indexOf(".zip")==-1)
+            {
+                filePath = "."
+                if(process.platform == 'win32')
+                {
+                    fileStream = fs.createWriteStream(filePath + "/mixio.exe.tmp")
+                }
+                else
+                {
+                    fileStream = fs.createWriteStream(filePath + "/mixio.tmp")
+                }
+            }
+            else
+            {
+                filePath = "../mixly"
+                if(fs.existsSync(filePath)){
+                    deleteFolderRecursive(filePath)
+                }
+                fs.mkdirSync("../mixly")
+                fileStream = fs.createWriteStream(filePath + "/mixly.zip")
+            }
+            // 设置响应头
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Transfer-Encoding', 'chunked');
+
+            // 发起下载请求
+            const response = await axios({
+                method: 'GET',
+                url: url,
+                responseType: 'stream'
+            });
+
+            const totalSize = parseInt(response.headers['content-length'], 10);
+            let downloadedSize = 0;
+            var lastProgress = 0;
+            // 发送进度信息
+            const sendProgress = (progress) => {
+                if(progress != lastProgress)
+                {
+                    res.write('data:' + JSON.stringify({ type: 'progress', progress }) + '\n\n');
+                    lastProgress = progress
+                }
+            };
+
+            // 发送完成信息
+            const sendComplete = (version) => {
+                res.write('data:' + JSON.stringify({ type: 'complete', version }) + '\n\n');
+                res.end();
+            };
+            response.data.pipe(fileStream);
+            // 处理数据流
+            response.data.on('data', (chunk) => {
+                downloadedSize += chunk.length;
+                const progress = Math.round((downloadedSize / totalSize) * 100);
+                sendProgress(progress);
+            });
+
+            fileStream.on('finish', async () => {
+                // 获取版本信息并保存
+                if(url.indexOf(".zip")!=-1)
+                {
+                    saveVersionInfo(cloudVersion);
+                    res.write('data:' + JSON.stringify({ type: 'unzip'}) + '\n\n');
+                    extract("../mixly/mixly.zip", { dir: path.join(path.dirname(process.execPath), '../mixly') }).then(()=>{
+                        sendComplete("mixly");
+                    })
+                }
+                else{
+                    sendComplete("mixio");
+                    if (process.platform === "win32") {
+                        // Windows平台
+                        const batScriptContent = `
+ping 127.0.0.1 -n 5 >nul
+del "mixio.exe"
+rename "mixio.exe.tmp" "mixio.exe"
+start "" "mixio.exe" start
+del "%~f0"`;
+                        try {
+                            // 写入bat脚本
+                            fs.writeFileSync('update_mixio.bat', batScriptContent, 'utf8');
+                            // 执行bat脚本（异步执行，不等待完成）
+                            const child = spawn('update_mixio.bat', [], {
+                                stdio: 'ignore',  // 分离后不再需要继承stdio
+                                shell: true,
+                                windowsHide: true,
+                                detached: true,  
+                                windowsVerbatimArguments: false
+                            });
+                            // 解除关联
+                            child.unref();
+                            setTimeout(() => {
+                                process.exit(0);
+                            }, 1000);
+                            
+                        } catch (error) {
+                            console.error('创建或执行bat脚本时出错:', error);
+                        }
+                    } else {
+                        // Linux/macOS平台
+                            const shScriptContent = `#!/bin/bash
+    sleep 5
+    rm -f "mixio"
+    mv "mixio.tmp" "mixio"
+    chmod +x "mixio"
+    "mixio" start
+    rm -- "$0"`;
+                            try {
+                                // 写入sh脚本
+                                fs.writeFileSync('update_mixio.sh', shScriptContent, 'utf8');
+                                
+                                // 给脚本添加执行权限
+                                await fs.chmod('update_mixio.sh', '755');
+                                
+                                // 执行sh脚本（异步执行，不等待完成）
+                                const child = spawn('nohup', ['./update_mixio.sh'], {
+                                    stdio: 'ignore',
+                                    detached: true,
+                                    shell: false
+                                });
+                                
+                                // 解除关联
+                                child.unref();
+                                
+                                // 关闭服务器
+                                setTimeout(() => {
+                                    process.exit(0);
+                                }, 1000);
+                                
+                            } catch (error) {
+                                console.error('创建或执行sh脚本时出错:', error);
+                            }
+                    }
+                }
+            });
+            response.data.on('error', (error) => {
+                res.status(500).json({ error: '下载失败' });
+            });
+
+
+        } catch (error) {
+            console.log(error.message)
+            res.status(500).json({ error: '下载失败' });
+        }
+    });
 
 
     app.use('/js', express.static(path.join(__dirname, 'js')));
