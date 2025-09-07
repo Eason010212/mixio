@@ -1,4 +1,4 @@
-var VERSION = "1.10.5.0906"
+var VERSION = "1.10.5.0907"
 require('events').EventEmitter.defaultMaxListeners = 50;
 const extract = require('extract-zip')
 defaultCrt =
@@ -56,7 +56,6 @@ HKqIhewfd473iyVbGW5PfCPXEH4oJI5NLbd2MvUJPi8oSHupmc+JbkD8n2uMU7s3
 mUGpI4CFOgtRwpo9KRebaqfq
 -----END PRIVATE KEY-----
 `
-
 // change pwd to src
 if (process.argv[0].indexOf("node") != -1) {
     // exec from source
@@ -110,7 +109,28 @@ var globalQPSControl = {}
 const os = require('os');
 const arch = os.arch(); // 或者 process.arch
 // 获取操作系统平台（如win32, linux, darwin）
+function isOpenWrt() {
+    try {
+      // 检查 /etc/openwrt_release 文件是否存在
+      fs.accessSync('/etc/openwrt_release');
+      return true;
+    } catch (e) {
+      // 如果文件不存在，再检查 /etc/openwrt_version
+      try {
+        fs.accessSync('/etc/openwrt_version');
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+  }
+
 const platform = os.platform(); // 或者 process.platform
+if(isOpenWrt())
+{
+    platform = "openwrt"
+}
+
 const platformString = `${arch}-${platform}`;
 
 function init(cb) {
@@ -344,6 +364,84 @@ stringendecoder = function() {
 stringendecoder.call(stringendecoder)
 
 async function daemon_start() {
+    var keyPath = HTTPS_PRIVATE_PEM
+    var crtPath = HTTPS_CRT_FILE
+    var privateKey = ""
+    var certificate = ""
+    if (keyPath.indexOf("http") == 0) {
+        try {
+            var privateKeyFileName = keyPath.split("/").pop()
+            console.log("[INFO] Downloading private key from", keyPath)
+            var filePath = "config/certs/" + privateKeyFileName
+            var resp = await axios.get(keyPath, { timeout: 5000 })
+            body = resp.data
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath)
+            }
+            fs.writeFileSync(filePath, body, 'utf8')
+            privateKey = fs.readFileSync(filePath, 'utf8')
+            console.log("[INFO] Private key downloaded to", filePath)
+        } catch (e) {
+            console.log("[ERROR] Failed to download private key from", keyPath)
+            if (fs.existsSync(filePath)) {
+                console.log("[INFO] Using existing private key with the same file name")
+                privateKey = fs.readFileSync(filePath, 'utf8')
+            } else {
+                console.log("[INFO] Falling back to default private key")
+                privateKey = defaultPem
+            }
+        }
+    } else {
+        if (fs.existsSync(keyPath)) {
+            privateKey = fs.readFileSync(keyPath, 'utf8')
+        } else {
+            console.log("[ERROR] Private key path not found")
+            console.log("[INFO] Falling back to default private key")
+            privateKey = defaultPem
+        }
+    }
+    if (crtPath.indexOf("http") == 0) {
+        try {
+            var crtFileName = crtPath.split("/").pop()
+            console.log("[INFO] Downloading certificate from", crtPath)
+            var filePath = "config/certs/" + crtFileName
+
+            var resp = await axios.get(crtPath, { timeout: 5000 })
+            body = resp.data
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath)
+            }
+            fs.writeFileSync(filePath, body, 'utf8')
+            certificate = fs.readFileSync(filePath, 'utf8')
+            console.log("[INFO] Certificate downloaded to", filePath)
+        } catch (e) {
+            console.log("[ERROR] Failed to download certificate from", crtPath)
+            if (fs.existsSync(filePath)) {
+                console.log("[INFO] Using existing certificate with the same file name")
+                certificate = fs.readFileSync(filePath, 'utf8')
+            } else {
+                console.log("[INFO] Falling back to default certificate")
+                certificate = defaultCrt
+            }
+        }
+    } else {
+        if (fs.existsSync(crtPath)) {
+            certificate = fs.readFileSync(crtPath, 'utf8')
+        } else {
+            console.log("[ERROR] Certificate path not found")
+            console.log("[INFO] Falling back to default certificate")
+            certificate = defaultCrt
+        }
+    }
+
+    credentials = {
+        key: privateKey,
+        cert: certificate
+    };
+
+    var chainPath = "config/certs/chain.crt"
+    if (fs.existsSync(chainPath))
+        credentials['ca'] = fs.readFileSync(chainPath, 'utf8')
     var app = express();
     app.use(bodyParser.json({
         limit: '50mb'
@@ -424,7 +522,7 @@ async function daemon_start() {
     app.get('/admin', function(req, res) {
         if (req.session.admin) {
             ejs.renderFile(__dirname + '/ejs/manage.ejs', {
-                'configs': configs,
+                'configs': JSON.stringify(configs),
                 'platform': platformString,
                 'status': serverStatus ? "运行中" : "已暂停",
                 'version': VERSION,
@@ -808,94 +906,14 @@ del "%~f0"`;
     app.use('/icons', express.static(path.join(__dirname, 'icons')));
 
     app.use('/documentation', express.static(path.join(__dirname, 'documentation')));
-    app.listen(18084, function() {
+    backServer = https.createServer(credentials, app)
+    backServer.listen(18084, function() {
         console.log("[INFO] MixIO Admin server listening on port", 18084)
     })
 }
 
 var mixioServer = async function() {
-    var keyPath = HTTPS_PRIVATE_PEM
-    var crtPath = HTTPS_CRT_FILE
-    var privateKey = ""
-    var certificate = ""
-    if (keyPath.indexOf("http") == 0) {
-        try {
-            var privateKeyFileName = keyPath.split("/").pop()
-            console.log("[INFO] Downloading private key from", keyPath)
-            var filePath = "config/certs/" + privateKeyFileName
-                // 如果存在就覆盖
 
-            // 下载文件
-            var resp = await axios.get(keyPath, { timeout: 5000 })
-            body = resp.data
-                // 不存在就创建
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath)
-            }
-            fs.writeFileSync(filePath, body, 'utf8')
-            privateKey = fs.readFileSync(filePath, 'utf8')
-            console.log("[INFO] Private key downloaded to", filePath)
-        } catch (e) {
-            console.log("[ERROR] Failed to download private key from", keyPath)
-            if (fs.existsSync(filePath)) {
-                console.log("[INFO] Using existing private key with the same file name")
-                privateKey = fs.readFileSync(filePath, 'utf8')
-            } else {
-                console.log("[INFO] Falling back to default private key")
-                privateKey = defaultPem
-            }
-        }
-    } else {
-        if (fs.existsSync(keyPath)) {
-            privateKey = fs.readFileSync(keyPath, 'utf8')
-        } else {
-            console.log("[ERROR] Private key path not found")
-            console.log("[INFO] Falling back to default private key")
-            privateKey = defaultPem
-        }
-    }
-    if (crtPath.indexOf("http") == 0) {
-        try {
-            var crtFileName = crtPath.split("/").pop()
-            console.log("[INFO] Downloading certificate from", crtPath)
-            var filePath = "config/certs/" + crtFileName
-
-            var resp = await axios.get(crtPath, { timeout: 5000 })
-            body = resp.data
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath)
-            }
-            fs.writeFileSync(filePath, body, 'utf8')
-            certificate = fs.readFileSync(filePath, 'utf8')
-            console.log("[INFO] Certificate downloaded to", filePath)
-        } catch (e) {
-            console.log("[ERROR] Failed to download certificate from", crtPath)
-            if (fs.existsSync(filePath)) {
-                console.log("[INFO] Using existing certificate with the same file name")
-                certificate = fs.readFileSync(filePath, 'utf8')
-            } else {
-                console.log("[INFO] Falling back to default certificate")
-                certificate = defaultCrt
-            }
-        }
-    } else {
-        if (fs.existsSync(crtPath)) {
-            certificate = fs.readFileSync(crtPath, 'utf8')
-        } else {
-            console.log("[ERROR] Certificate path not found")
-            console.log("[INFO] Falling back to default certificate")
-            certificate = defaultCrt
-        }
-    }
-
-    var credentials = {
-        key: privateKey,
-        cert: certificate
-    };
-
-    var chainPath = "config/certs/chain.crt"
-    if (fs.existsSync(chainPath))
-        credentials['ca'] = fs.readFileSync(chainPath, 'utf8')
 
     aedes = aedesmodule()
     const httpServer = http.createServer()

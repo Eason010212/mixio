@@ -9,7 +9,7 @@ function showmodaltext(text) {
     return d
 }
 $(function() {
-    $("#admin").attr("href", "http://" + window.location.href.split("//")[1].split(":")[0].replace("/", "") + ":18084")
+    $("#admin").attr("href", "https://" + window.location.href.split("//")[1].split(":")[0].replace("/", "") + ":18084")
     fullHeight = $("#cd").height() + "px"
     halfHeight = "calc( " + ($("#cd").height() - $("#ref1").height() - $("#reset_text").height() - 10) + "px - 1rem)"
     if (window.screen.width < 800)
