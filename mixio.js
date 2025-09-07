@@ -125,7 +125,7 @@ function isOpenWrt() {
     }
   }
 
-const platform = os.platform(); // 或者 process.platform
+var platform = os.platform(); // 或者 process.platform
 if(isOpenWrt())
 {
     platform = "openwrt"
