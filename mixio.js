@@ -2995,8 +2995,9 @@ init(function(res) {
                         // 输出到当前目录下的pid.info文件
                     fs.writeFileSync("pid.info", "" + process.pid)
                     if (res) {
-                        daemon_start()
-                        startOnce()
+                        daemon_start().then(()=>{
+                            startOnce()
+                        })
                     }
                 } else if (args[0] == "start") {
                     startMixIO()
