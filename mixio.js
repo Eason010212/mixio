@@ -1290,6 +1290,209 @@ var mixioServer = async function() {
         })
     })
 
+    // tinyWebDB Implementation
+    function validateRequiredParams(req, res) {
+        return new Promise((resolve) => {
+            const { user, secret, action } = req.body;
+            
+            db.get("SELECT * FROM `user` WHERE username = ?", [user], function(err, row) {
+                if (err) {
+                    return res.json({ status: 'error', message: '数据库查询错误' });
+                }
+                
+                if (row) {
+                    if (row.password === secret) {
+                        if (!action) {
+                            res.json({ status: 'error', message: '缺少操作类型参数' });
+                            return resolve(true); // 表示已处理响应
+                        }
+                        
+                        const validActions = ['update', 'get', 'delete', 'count', 'search'];
+                        if (!validActions.includes(action)) {
+                            res.json({ status: 'error', message: '无效的操作类型' });
+                            return resolve(true);
+                        }
+                        
+                        return resolve(false); // 验证通过，未处理响应
+                    } else {
+                        res.json({ status: 'error', message: '用户名或密钥错误' });
+                        return resolve(true);
+                    }
+                } else {
+                    res.json({ status: 'error', message: '用户名或密钥错误' });
+                    return resolve(true);
+                }
+            });
+        });
+    }
+    
+    app.post('/tinydb', async (req, res) => {
+        const hasError = await validateRequiredParams(req, res);
+        // 如果 validateRequiredParams 已经发送了响应，直接返回
+        if (hasError) {
+            return;
+        }
+        const { user, action, tag, value } = req.body;
+        var hash = 0,
+        i, chr;
+        for (i = 0; i < user.length; i++) {
+            chr = user.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+        hash = Math.abs(hash) % 8
+        switch (action) {
+            case 'update':
+                handleUpdate(req, res, hash);
+                break;
+            case 'get':
+                handleGet(req, res, hash);
+                break;
+            case 'delete':
+                handleDelete(req, res, hash);
+                break;
+            case 'count':
+                handleCount(req, res, hash);
+                break;
+            case 'search':
+                handleSearch(req, res, hash);
+                break;
+            default:
+                res.json({ status: 'error', message: '未知操作类型' });
+        }
+    });
+    
+    // 更新操作
+    function handleUpdate(req, res, hash) {
+        const { user, tag, value } = req.body;
+        if (!tag || value === undefined) {
+            return res.json({ status: 'error', message: '更新操作需要 tag 和 value 参数' });
+        }
+        reserveDBs[hash].get("SELECT * FROM reserve WHERE topic = ? AND userName = ?", ['$' + tag, user], (err, row) => {
+            if (err) {
+                return res.json({ status: 'error', message: '数据库查询错误' });
+            }
+            if (row) {
+                reserveDBs[hash].run("UPDATE reserve SET message = ?, time = CURRENT_TIMESTAMP WHERE topic = ? AND userName = ?", 
+                       [value, '$' + tag, user], function(err) {
+                    if (err) {
+                        return res.json({ status: 'error', message: '更新失败' });
+                    }
+                    res.json({ status: 'success', message: '更新成功' });
+                });
+            } else {
+                // 插入新记录
+                reserveDBs[hash].run("INSERT INTO reserve (userName, topic, message) VALUES (?, ?, ?)", 
+                       [user, '$' + tag, value], function(err) {
+                    if (err) {
+                        return res.json({ status: 'error', message: '插入失败' });
+                    }
+                    res.json({ status: 'success', message: '更新成功' });
+                });
+            }
+        });
+    }
+    
+    // 读取操作
+    function handleGet(req, res, hash) {
+        const { user, tag } = req.body;
+        
+        if (!tag) {
+            return res.json({ status: 'error', message: '读取操作需要 tag 参数' });
+        }
+        
+        reserveDBs[hash].get("SELECT * FROM reserve WHERE topic = ? AND userName = ?", ['$' + tag, user], (err, row) => {
+            if (err) {
+                return res.json({ status: 'error', message: '数据库查询错误' });
+            }
+            
+            if (row) {
+                res.json({ status: 'success', value: row.message });
+            } else {
+                res.json({ status: 'error', message: '变量不存在' });
+            }
+        });
+    }
+    
+    // 删除操作
+    function handleDelete(req, res, hash) {
+        const { user, tag } = req.body;
+        
+        if (!tag) {
+            return res.json({ status: 'error', message: '删除操作需要 tag 参数' });
+        }
+        
+        reserveDBs[hash].run("DELETE FROM reserve WHERE topic = ? AND userName = ?", ['$' + tag, user], function(err) {
+            if (err) {
+                return res.json({ status: 'error', message: '删除失败' });
+            }
+            
+            if (this.changes > 0) {
+                res.json({ status: 'success', message: '删除成功' });
+            } else {
+                res.json({ status: 'error', message: '变量不存在' });
+            }
+        });
+    }
+    
+    // 计数操作
+    function handleCount(req, res, hash) {
+        const { user } = req.body;
+        reserveDBs[hash].get("SELECT COUNT(*) as count FROM reserve WHERE userName = ?", [user], (err, row) => {
+            if (err) {
+                return res.json({ status: 'error', message: '数据库查询错误' });
+            }
+            res.json({ status: 'success', count: row.count });
+        });
+    }
+    
+    // 查询操作
+    function handleSearch(req, res, hash) {
+        const { no = 1, count = 1, tag = '', type = 'both', user} = req.body;
+        const startIndex = Math.max(0, parseInt(no) - 1);
+        const limitCount = Math.min(100, parseInt(count)); // 最多返回100条
+        
+        let sql = "SELECT * FROM reserve WHERE userName = ?";
+        let params = [user];
+        
+        if (tag) {
+            sql += " AND topic LIKE ?";
+            params.push(`%${tag}%`);
+        }
+        
+        sql += " ORDER BY time DESC LIMIT ? OFFSET ?";
+        params.push(limitCount, startIndex);
+        
+        reserveDBs[hash].all(sql, params, (err, rows) => {
+            if (err) {
+                console.log(err)
+                return res.json({ status: 'error', message: '数据库查询错误' });
+            }
+            
+            // 筛选以$开头的tag，并在返回时去掉$
+            const formattedResult = rows
+                .filter(row => row.topic && row.topic.startsWith('$')) // 筛选$开头的tag
+                .map(row => {
+                    const cleanTopic = row.topic.substring(1); // 去掉开头的$
+                    
+                    if (type === 'tag') {
+                        return { tag: cleanTopic };
+                    } else if (type === 'value') {
+                        return { value: row.message };
+                    } else {
+                        return { tag: cleanTopic, value: row.message };
+                    }
+                });
+            
+            res.json({ 
+                status: 'success', 
+                data: formattedResult
+            });
+        });
+    }
+
+
+
     app.get('/api/v1/getData', function(req, res) {
         try {
             if (!(req.query.user && req.query.password && req.query.project && req.query.topic)) {
