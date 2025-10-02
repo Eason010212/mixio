@@ -1,48 +1,4 @@
-function init_special_table(rows) {
-    var tableBody = $('#special_data');
-    tableBody.empty();
-    
-    rows.forEach(function(row) {
-        var tr = $('<tr></tr>');
-        tr.append('<td>' + (row.topic || '') + '</td>');
-        tr.append('<td>' + (row.message || '') + '</td>');
-        tr.append('<td>' + (row.time || '') + '</td>');
-        tableBody.append(tr);
-    });
-    
-    // 初始化DataTable（如果已初始化则销毁重新初始化）
-    if ($.fn.DataTable.isDataTable('#special_table')) {
-        $('#special_table').DataTable().destroy();
-    }
-    $('#special_table').DataTable({
-        "pageLength": 10,
-        "order": [[2, "desc"]],
-        language: {
-            "sProcessing": "处理中...",
-            "sLengthMenu": "每页 _MENU_ 项",
-            "sZeroRecords": "没有匹配结果",
-            "sInfo": "显示第 _START_ 项至 第 _END_ 项结果，共 _TOTAL_ 项",
-            "sInfoEmpty": "显示第 0 项至 0 项结果，共 0 项",
-            "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
-            "sInfoPostFix": "",
-            "sSearch": "搜索:",
-            "sUrl": "",
-            "sEmptyTable": "表中数据为空",
-            "sLoadingRecords": "载入中...",
-            "sInfoThousands": ",",
-            "oPaginate": {
-                "sFirst": "首页",
-                "sPrevious": "上页",
-                "sNext": "下页",
-                "sLast": "末页"
-            },
-            "oAria": {
-                "sSortAscending": ": 以升序排列此列",
-                "sSortDescending": ": 以降序排列此列"
-            }
-        },
-    });
-}
+
 
 function get_data() {
     $.get('queryHook', function(res) {
@@ -61,17 +17,10 @@ function get_data() {
             $("#prj_num_bar").css("width", (res['count'] * 100 / max) + "%")
             
             // 筛选数据：topic不以$开头的存入globalRows，以$开头的存入globalRows2并去掉$
-            globalRows = res["rows"].filter(row => !row.topic || !row.topic.startsWith('$'));
-            globalRows2 = res["rows"]
-                .filter(row => row.topic && row.topic.startsWith('$'))
-                .map(row => ({
-                    ...row,
-                    topic: row.topic.substring(1) // 去掉开头的$
-                }));
+            globalRows = res["rows"]
             
             init_table(globalRows)  // 初始化表格使用非$开头的数据
             sync_chart()
-            init_special_table(globalRows2)
         })
     })
 

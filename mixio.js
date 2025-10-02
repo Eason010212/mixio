@@ -1167,7 +1167,7 @@ var mixioServer = async function() {
                     hash |= 0;
                 }
                 var targetDB = reserveDBs[Math.abs(hash) % 8]
-                targetDB.get("select count(*) from `reserve` where userName = ?", [userName, ], function(err, row) {
+                targetDB.get("select count(*) from `reserve` where userName = ? and topic not like '$%'", [userName, ], function(err, row) {
                     if (err) {
                         console.log(err.message)
                     } else {
@@ -1409,7 +1409,7 @@ var mixioServer = async function() {
             if (row) {
                 res.json({ status: 'success', value: row.message });
             } else {
-                res.json({ status: 'error', message: '变量不存在' });
+                res.json({ status: 'success', value: "None" });
             }
         });
     }
@@ -1948,6 +1948,19 @@ var mixioServer = async function() {
             res.redirect('/')
     })
 
+    app.get('/tinydata', function(req, res) {
+        if (req.session.userName) {
+            ejs.renderFile(__dirname + '/ejs/tinydb.ejs', {
+                userName: req.session.userName,
+                projectPass: req.session.projectPass,
+                'configs': configs
+            }, function(err, data) {
+                res.send(data)
+            })
+        } else
+            res.redirect('/')
+    })
+
     app.get('/projects-mixly', function(req, res) {
         ejs.renderFile(__dirname + '/ejs/projects.ejs', {
             isMixly: 1,
@@ -2007,7 +2020,7 @@ var mixioServer = async function() {
                 hash = ((hash << 5) - hash) + chr;
                 hash |= 0;
             }
-            reserveDBs[Math.abs(hash) % 8].all("select * from `reserve` where userName=?", [req.session.userName], function(err, rows) {
+            reserveDBs[Math.abs(hash) % 8].all("select * from `reserve` where userName=? and topic not like '$%'", [req.session.userName], function(err, rows) {
                 if (err) {
                     console.log(err)
                 } else {

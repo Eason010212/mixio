@@ -226,7 +226,8 @@ var JSLang = {
         "mic": "语音识别",
         "tinydb": "下拉选项",
         "resolution": "分辨率",
-        "fps": "帧率"
+        "fps": "帧率",
+        'tdb': "TinyDB"
     },
     "tw": {
         "beepAudio": "Audio",
@@ -455,7 +456,8 @@ var JSLang = {
         "mic": "麥克風",
         "tinydb": "下拉選項",
         "resolution": "分辨率",
-        "fps": "幀率"
+        "fps": "幀率",
+        'tdb': "TinyDB"
     },
     "en": {
         "beepAudio": "Beep Audio",
@@ -684,7 +686,8 @@ var JSLang = {
         "mic": "Microphone",
         "tinydb": "Options",
         "resolution": "Resolution",
-        "fps": "FPS"
+        "fps": "FPS",
+        'tdb': "TinyDB"
     }
 }
 

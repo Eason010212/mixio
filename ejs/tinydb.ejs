@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>MixIO - TinyDB</title>
+    <link rel="shortcut icon" href="img/shortcut.png"/>
+    
+    <!-- Custom fonts for this template-->
+    <link rel="stylesheet" href="css/all.css">
+    <link rel="stylesheet" href="css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="css/flatpkr.css">
+    
+    <!-- Bootstrap core JavaScript-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/lang.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="js/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="js/echarts.min.js"></script>
+    <script src="js/jquery.easyui.min.js"></script>
+    <script src="js/mqtt.min.js"></script>
+    <script src="js/jquery.dataTables.min.js"></script>
+    <script src="js/flatpkr.js"></script>
+    <script src="js/dataTables.bootstrap4.min.js"></script>
+    <script src="js/tools.js"></script>
+    <script>var projectPass = "<%=projectPass%>";</script>
+    <script>var userName = "<%=userName%>";</script>
+    
+    <style>
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border: 1px solid #e3e6f0;
+        }
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
+        .btn-success {
+            background-color: #1cc88a;
+            border-color: #1cc88a;
+        }
+        .btn-danger {
+            background-color: #e74a3b;
+            border-color: #e74a3b;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .action-buttons {
+            white-space: nowrap;
+        }
+        .alert {
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .new-row {
+            background-color: #f8fff8;
+        }
+        .new-row input, .new-row textarea {
+            border: 1px solid #c1e6c1;
+        }
+    </style>
+</head>
+<body id="page-top" class="sidebar-toggled">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+                <div class="sidebar-brand-icon">
+                    <img src="img/logo.png" style="width:35px" alt="">
+                </div>
+                <div class="sidebar-brand-text mx-3">MixIO</div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading lang" key="MANAGE"></div>
+            <li class="nav-item">
+                <a class="nav-link" href="projects" id="manage_prj">
+                    <i class="fa fa-fw fa-tachometer"></i>
+                    <span class="lang" key="PROJECTSMANAGE"></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="mqttdata" id="manage_data">
+                    <i class="fa fa-fw fa-table"></i>
+                    <span class="lang" key="DATAMANAGE"></span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="tinydata" id="tiny_data">
+                    <i class="fa fa-fw fa-database"></i>
+                    <span>Tiny DB</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="webapps" id="share_app">
+                    <i class="fa fa-fw fa-share"></i>
+                    <span class="lang" key="SHAREMANAGE"></span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading lang" key="SETTINGS"></div>
+            <li class="nav-item">
+                <a class="nav-link" href="logout">
+                    <i class="fa fa-fw fa-arrow-circle-left"></i>
+                    <span class="lang" key="LOGOUT"></span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style="display:flex;justify-content:space-between">
+                    <div style="display:flex;align-items:center;justify-content:center">
+                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                            <i class="fa fa-bars"></i>
+                        </button> 
+                        <h1 class="d-sm-inline-block h3 mb-0 text-gray-800" style="margin-left:10px;font-size:1.5rem;display:inline-block;cursor:pointer">TinyDB 数据管理</h1>
+                    </div>
+                </nav>
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+                    <!-- 警告信息 -->
+                    <div class="alert alert-success" id="successAlert" role="alert">
+                        操作成功！
+                    </div>
+                    <div class="alert alert-danger" id="errorAlert" role="alert">
+                        操作失败！
+                    </div>
+
+                    <div class="row">
+                        <!-- 数据列表 -->
+                        <div class="col-xl-12">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">数据列表</h6>
+                                    <div>
+                                        <button class="btn btn-success btn-sm" id="refreshData">
+                                            <i class="fa fa-sync-alt"></i> 刷新
+                                        </button>
+                                        <button class="btn btn-primary btn-sm" id="addNewRow">
+                                            <i class="fa fa-plus"></i> 新增
+                                        </button>
+                                        <button class="btn btn-info btn-sm" id="searchBtn" data-toggle="modal" data-target="#searchModal">
+                                            <i class="fa fa-search"></i> 搜索
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <th width="25%">标签</th>
+                                                    <th width="60%">值</th>
+                                                    <th width="15%">操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="dataTableBody">
+                                                <!-- 数据将通过JavaScript动态填充 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; mixio.mixly.org 2021</span>
+                    </div>
+                </div>
+            </footer>
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- 搜索模态框 -->
+    <div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="searchModalLabel">搜索数据</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="searchForm">
+                        <div class="form-group">
+                            <label for="searchTag">标签关键字</label>
+                            <input type="text" class="form-control" id="searchTag" placeholder="输入标签关键字">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchType">返回类型</label>
+                            <select class="form-control" id="searchType">
+                                <option value="both">标签和值</option>
+                                <option value="tag">仅标签</option>
+                                <option value="value">仅值</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="searchCount">返回数量</label>
+                            <input type="number" class="form-control" id="searchCount" value="10" min="1" max="100">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="performSearch">搜索</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page level custom scripts -->
+    <script src="js/sb-admin-2.min.js?v=2"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // 全局变量
+            let currentData = [];
+            
+            // 从localStorage获取用户信息
+            function getUserInfo() {
+                return {
+                    user: userName,
+                    secret: projectPass
+                };
+            }
+            
+            // 显示/隐藏警告信息
+            function showAlert(message, type) {
+                const alertId = type === 'success' ? 'successAlert' : 'errorAlert';
+                const alert = $('#' + alertId);
+                alert.text(message);
+                alert.fadeIn();
+                setTimeout(() => {
+                    alert.fadeOut();
+                }, 3000);
+            }
+            
+            // 添加新行
+            $('#addNewRow').on('click', function() {
+                const tbody = $('#dataTableBody');
+                
+                // 检查是否已经存在新行
+                if ($('.new-row').length > 0) {
+                    showAlert('请先保存或取消当前新增的数据', 'error');
+                    return;
+                }
+                
+                const newRow = $('<tr class="new-row">');
+                newRow.append($('<td>').append($('<input type="text" class="form-control form-control-sm" placeholder="输入标签">')));
+                newRow.append($('<td>').append($('<textarea class="form-control form-control-sm" rows="2" placeholder="输入值"></textarea>')));
+                
+                const actions = $('<td class="action-buttons">');
+                actions.append($('<button class="btn btn-sm btn-success mr-1 save-new-btn">').html('<i class="fa fa-check"></i> 保存'));
+                actions.append($('<button class="btn btn-sm btn-secondary cancel-new-btn">').html('<i class="fa fa-times"></i> 取消'));
+                
+                newRow.append(actions);
+                tbody.prepend(newRow);
+            });
+            
+            // 保存新数据
+            $(document).on('click', '.save-new-btn', function() {
+                const row = $(this).closest('tr');
+                const tagInput = row.find('input');
+                const valueInput = row.find('textarea');
+                
+                const tag = tagInput.val().trim();
+                const value = valueInput.val().trim();
+                
+                if (!tag) {
+                    showAlert('标签不能为空', 'error');
+                    tagInput.focus();
+                    return;
+                }
+                
+                if (!value) {
+                    showAlert('值不能为空', 'error');
+                    valueInput.focus();
+                    return;
+                }
+                
+                const userInfo = getUserInfo();
+                
+                // 发送请求到后端
+                $.ajax({
+                    url: '/tinydb',
+                    method: 'POST',
+                    data: {
+                        user: userInfo.user,
+                        secret: userInfo.secret,
+                        action: 'update',
+                        tag: tag,
+                        value: value
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            showAlert('数据添加成功', 'success');
+                            loadData();
+                        } else {
+                            showAlert('添加失败: ' + response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        showAlert('网络错误，请稍后重试', 'error');
+                    }
+                });
+            });
+            
+            // 取消新增
+            $(document).on('click', '.cancel-new-btn', function() {
+                $(this).closest('tr').remove();
+            });
+            
+            // 加载数据列表
+            function loadData() {
+                const userInfo = getUserInfo();
+                console.log(userInfo)
+                if (!userInfo.user || !userInfo.secret) {
+                    showAlert('未找到用户信息，请重新登录', 'error');
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/tinydb',
+                    method: 'POST',
+                    data: {
+                        user: userInfo.user,
+                        secret: userInfo.secret,
+                        action: 'search',
+                        no: 1,
+                        count: 100,
+                        type: 'both'
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            currentData = response.data;
+                            renderDataTable(currentData);
+                        } else {
+                            showAlert('加载数据失败: ' + response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        showAlert('网络错误，请稍后重试', 'error');
+                    }
+                });
+            }
+            
+            // 渲染数据表格
+            function renderDataTable(data) {
+                const tbody = $('#dataTableBody');
+                tbody.empty();
+                
+                if (data.length === 0) {
+                    tbody.append('<tr><td colspan="3" class="text-center">暂无数据</td></tr>');
+                    return;
+                }
+                
+                data.forEach(item => {
+                    const row = $('<tr>');
+                    row.append($('<td>').text(item.tag));
+                    row.append($('<td>').text(item.value));
+                    
+                    const actions = $('<td class="action-buttons">');
+                    actions.append($('<button class="btn btn-sm btn-primary mr-1 edit-btn">').html('<i class="fa fa-edit"></i>').attr('data-tag', item.tag).attr('data-value', item.value));
+                    actions.append($('<button class="btn btn-sm btn-danger delete-btn">').html('<i class="fa fa-trash"></i>').attr('data-tag', item.tag));
+                    
+                    row.append(actions);
+                    tbody.append(row);
+                });
+                
+                // 绑定编辑按钮事件
+                $('.edit-btn').on('click', function() {
+                    const tag = $(this).data('tag');
+                    const value = $(this).data('value');
+                    
+                    // 将当前行转换为编辑模式
+                    const row = $(this).closest('tr');
+                    row.empty();
+                    
+                    row.append($('<td>').append($('<input readonly type="text" class="form-control form-control-sm" value="' + tag + '">')));
+                    row.append($('<td>').append($('<textarea class="form-control form-control-sm" rows="2">' + value + '</textarea>')));
+                    
+                    const actions = $('<td class="action-buttons">');
+                    actions.append($('<button class="btn btn-sm btn-success mr-1 save-edit-btn">').html('<i class="fa fa-check"></i> 保存'));
+                    actions.append($('<button class="btn btn-sm btn-secondary cancel-edit-btn">').html('<i class="fa fa-times"></i> 取消'));
+                    
+                    row.append(actions);
+                });
+                
+                // 保存编辑
+                $(document).on('click', '.save-edit-btn', function() {
+                    const row = $(this).closest('tr');
+                    const tagInput = row.find('input');
+                    const valueInput = row.find('textarea');
+                    
+                    const newTag = tagInput.val().trim();
+                    const newValue = valueInput.val().trim();
+                    const oldTag = $(this).data('old-tag'); // 如果需要保留原标签用于更新
+                    
+                    if (!newTag) {
+                        showAlert('标签不能为空', 'error');
+                        tagInput.focus();
+                        return;
+                    }
+                    
+                    if (!newValue) {
+                        showAlert('值不能为空', 'error');
+                        valueInput.focus();
+                        return;
+                    }
+                    
+                    const userInfo = getUserInfo();
+                    
+                    // 发送请求到后端
+                    $.ajax({
+                        url: '/tinydb',
+                        method: 'POST',
+                        data: {
+                            user: userInfo.user,
+                            secret: userInfo.secret,
+                            action: 'update',
+                            tag: newTag,
+                            value: newValue
+                        },
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                showAlert('数据更新成功', 'success');
+                                loadData();
+                            } else {
+                                showAlert('更新失败: ' + response.message, 'error');
+                            }
+                        },
+                        error: function() {
+                            showAlert('网络错误，请稍后重试', 'error');
+                        }
+                    });
+                });
+                
+                // 取消编辑
+                $(document).on('click', '.cancel-edit-btn', function() {
+                    loadData(); // 重新加载数据恢复原状
+                });
+                
+                // 绑定删除按钮事件
+                $('.delete-btn').on('click', function() {
+                    const tag = $(this).data('tag');
+                    
+                    if (confirm(`确定要删除标签为 "${tag}" 的数据吗？`)) {
+                        deleteData(tag);
+                    }
+                });
+            }
+            
+            // 删除数据
+            function deleteData(tag) {
+                const userInfo = getUserInfo();
+                
+                $.ajax({
+                    url: '/tinydb',
+                    method: 'POST',
+                    data: {
+                        user: userInfo.user,
+                        secret: userInfo.secret,
+                        action: 'delete',
+                        tag: tag
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            showAlert('数据删除成功', 'success');
+                            loadData();
+                        } else {
+                            showAlert('删除失败: ' + response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        showAlert('网络错误，请稍后重试', 'error');
+                    }
+                });
+            }
+            
+            // 搜索数据
+            $('#performSearch').on('click', function() {
+                const userInfo = getUserInfo();
+                const tag = $('#searchTag').val();
+                const type = $('#searchType').val();
+                const count = $('#searchCount').val();
+                
+                $.ajax({
+                    url: '/tinydb',
+                    method: 'POST',
+                    data: {
+                        user: userInfo.user,
+                        secret: userInfo.secret,
+                        action: 'search',
+                        tag: tag,
+                        type: type,
+                        count: count
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            currentData = response.data;
+                            renderDataTable(currentData);
+                            $('#searchModal').modal('hide');
+                            showAlert('搜索完成', 'success');
+                        } else {
+                            showAlert('搜索失败: ' + response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        showAlert('网络错误，请稍后重试', 'error');
+                    }
+                });
+            });
+            
+            // 绑定刷新按钮事件
+            $('#refreshData').on('click', function() {
+                loadData();
+            });
+            
+            // 初始化页面
+            loadData();
+        });
+    </script>
+</body>
+</html>
