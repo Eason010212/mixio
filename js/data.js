@@ -53,7 +53,7 @@ function init_table(rows) {
             ],
             language: {
                 "sProcessing": "处理中...",
-                "sLengthMenu": "每页 _MENU_ 项",
+                "sLengthMenu": " _MENU_ 项/页",
                 "sZeroRecords": "没有匹配结果",
                 "sInfo": "显示第 _START_ 项至 第 _END_ 项结果，共 _TOTAL_ 项",
                 "sInfoEmpty": "显示第 0 项至 0 项结果，共 0 项",
