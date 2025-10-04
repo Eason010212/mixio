@@ -289,7 +289,7 @@
         setInterval(() => {
             $("#time").html(new Date().toLocaleTimeString())
         }, 1000);
-        var configs = JSON.parse(stringendecoder.decodeHtml("<%=configs%>"))
+        var configs = <%-configs%>
         $("#OFFLINE_MODE").bind('change',function(){
             if($("#OFFLINE_MODE").prop("checked"))
             {
