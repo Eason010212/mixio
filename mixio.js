@@ -1,5 +1,21 @@
-var VERSION = "1.10.5.1002"
+var VERSION = "1.10.5.1013"
 require('events').EventEmitter.defaultMaxListeners = 50;
+
+const NTPServer = require('ntp-time').Server;
+const nserver = new NTPServer();
+nserver.handle((message, response) => {
+	message.transmitTimestamp = Math.floor(Date.now() / 1000);
+	response(message);
+});
+nserver.listen(123, err => {
+	if(err){
+		console.log("[INFO] NTP server failed to start");
+	}
+	else{
+		console.log("[INFO] NTP server is listening on port", 123);
+	}
+});
+
 const extract = require('extract-zip')
 defaultCrt =
     `-----BEGIN CERTIFICATE-----
