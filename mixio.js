@@ -1,21 +1,6 @@
 var VERSION = "1.10.5.1013"
 require('events').EventEmitter.defaultMaxListeners = 50;
 
-const NTPServer = require('ntp-time').Server;
-const nserver = new NTPServer();
-nserver.handle((message, response) => {
-	message.transmitTimestamp = Math.floor(Date.now() / 1000);
-	response(message);
-});
-nserver.listen(123, err => {
-	if(err){
-		console.log("[INFO] NTP server failed to start");
-	}
-	else{
-		console.log("[INFO] NTP server is listening on port", 123);
-	}
-});
-
 const extract = require('extract-zip')
 defaultCrt =
     `-----BEGIN CERTIFICATE-----
@@ -384,6 +369,20 @@ async function daemon_start() {
     var crtPath = HTTPS_CRT_FILE
     var privateKey = ""
     var certificate = ""
+    const NTPServer = require('ntp-time').Server;
+    const nserver = new NTPServer();
+    nserver.handle((message, response) => {
+        message.transmitTimestamp = Math.floor(Date.now() / 1000);
+        response(message);
+    });
+    nserver.listen(123, err => {
+        if(err){
+            console.log("[INFO] NTP server failed to start");
+        }
+        else{
+            console.log("[INFO] NTP server is listening on port", 123);
+        }
+    });
     if (keyPath.indexOf("http") == 0) {
         try {
             var privateKeyFileName = keyPath.split("/").pop()
