@@ -1,4 +1,4 @@
-var VERSION = "1.10.5.1013"
+var VERSION = "1.10.5.1015"
 require('events').EventEmitter.defaultMaxListeners = 50;
 
 const extract = require('extract-zip')

@@ -3896,7 +3896,10 @@ function add_map(user_title, user_topic, user_content, user_style, title_style) 
                                 if (typeof jsonMessage.message == "string")
                                     jsonMessage.message = JSON.parse(jsonMessage.message)
                                 for (msg in jsonMessage.message) {
-                                    msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
+                                    if(!jsonMessage.message[msg].label || !jsonMessage.message[msg].value)
+                                        msgstr = msgstr + JSON.stringify(jsonMessage.message[msg])
+                                    else
+                                        msgstr = msgstr + jsonMessage.message[msg].label + ": " + jsonMessage.message[msg].value + "<br>"
                                 }
                                 var point = new BMapGL.Point(jsonMessage.long, jsonMessage.lat)
                                 var newMarker = new BMapGL.Marker(point)
@@ -3930,7 +3933,10 @@ function add_map(user_title, user_topic, user_content, user_style, title_style) 
                                 if (typeof jsonMessage.message == "string")
                                     jsonMessage.message = JSON.parse(jsonMessage.message)
                                 for (msg in jsonMessage.message) {
-                                    msgstr = msgstr + jsonMessage.message[msg].label + ":" + jsonMessage.message[msg].value + "<br>"
+                                    if(!jsonMessage.message[msg].label || !jsonMessage.message[msg].value)
+                                        msgstr = msgstr + JSON.stringify(jsonMessage.message[msg])
+                                    else
+                                        msgstr = msgstr + jsonMessage.message[msg].label + ": " + jsonMessage.message[msg].value + "<br>"
                                 }
                                 var point = new BMapGL.Point(jsonMessage.long, jsonMessage.lat)
                                 markers[markerIndex].long = jsonMessage.long
@@ -4256,7 +4262,10 @@ function add_map(user_title, user_topic, user_content, user_style, title_style) 
                                 if (typeof jsonMessage.message == "string")
                                     jsonMessage.message = JSON.parse(jsonMessage.message)
                                 for (msg in jsonMessage.message) {
-                                    msgstr = msgstr + jsonMessage.message[msg].label + ": " + jsonMessage.message[msg].value + " "
+                                    if(!jsonMessage.message[msg].label || !jsonMessage.message[msg].value)
+                                        msgstr = msgstr + JSON.stringify(jsonMessage.message[msg])
+                                    else
+                                        msgstr = msgstr + jsonMessage.message[msg].label + ": " + jsonMessage.message[msg].value + " "
                                 }
                                 markers.push({
                                     "clientid": jsonMessage.clientid,
@@ -4271,7 +4280,10 @@ function add_map(user_title, user_topic, user_content, user_style, title_style) 
                                 if (typeof jsonMessage.message == "string")
                                     jsonMessage.message = JSON.parse(jsonMessage.message)
                                 for (msg in jsonMessage.message) {
-                                    msgstr = msgstr + jsonMessage.message[msg].label + ": " + jsonMessage.message[msg].value + " "
+                                    if(!jsonMessage.message[msg].label || !jsonMessage.message[msg].value)
+                                        msgstr = msgstr + JSON.stringify(jsonMessage.message[msg])
+                                    else
+                                        msgstr = msgstr + jsonMessage.message[msg].label + ": " + jsonMessage.message[msg].value + " "
                                 }
                                 markers[markerIndex].long = jsonMessage.long
                                 markers[markerIndex].lat = jsonMessage.lat
