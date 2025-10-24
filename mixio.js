@@ -1,4 +1,4 @@
-var VERSION = "1.10.5.1015"
+var VERSION = "1.10.5.1024"
 require('events').EventEmitter.defaultMaxListeners = 50;
 
 const extract = require('extract-zip')
@@ -656,17 +656,52 @@ async function daemon_start() {
         var question = req.query.question
         var answer = req.query.answer
         if (userName && password && question && answer) {
-            require('http').get('http://localhost:' + configs["MIXIO_HTTP_PORT"] + "/addAccount?userName=" + userName + "&password=" + password + "&question=" + question + "&answer=" + answer, function(req, res) {
-                var html = '';
-                req.on('data', function(data) {
-                    html += data;
-                });
-                req.on('end', function() {
-                    res2.send(html)
-                });
-            }).on('error', function() {
-                res2.send('3')
-            })
+            if(configs["MIXIO_HTTP_PORT"] !=0)
+                {
+                    require('http').get('http://localhost:' + configs["MIXIO_HTTP_PORT"] + "/addAccount?userName=" + userName + "&password=" + password + "&question=" + question + "&answer=" + answer, function(req, res) {
+                        var html = '';
+                        req.on('data', function(data) {
+                            html += data;
+                        });
+                        req.on('end', function() {
+                            res2.send(html)
+                        });
+                    }).on('error', function() {
+                        res2.send('3')
+                    })
+                }
+                else
+                    {
+                        const https = require('https');
+    
+                        // 对参数进行编码
+                        const encodedPath = "/addAccount?userName=" + encodeURIComponent(userName) + 
+                                           "&password=" + encodeURIComponent(password) + 
+                                           "&question=" + encodeURIComponent(question) + 
+                                           "&answer=" + encodeURIComponent(answer);
+                        
+                        const options = {
+                            hostname: 'localhost',
+                            port: configs["MIXIO_HTTPS_PORT"],
+                            path: encodedPath,
+                            method: 'GET',
+                            rejectUnauthorized: false,  // 忽略证书验证
+                            agent: false
+                        };
+                        
+                        https.get(options, function(res) {
+                            var html = '';
+                            res.on('data', function(data) {
+                                html += data;
+                            });
+                            res.on('end', function() {
+                                res2.send(html);
+                            });
+                        }).on('error', function(e) {
+                            console.log(e);
+                            res2.send('3');
+                        });
+                    }
         }
 
     })
