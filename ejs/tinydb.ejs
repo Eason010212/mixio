@@ -75,6 +75,14 @@
         .new-row input, .new-row textarea {
             border: 1px solid #c1e6c1;
         }
+        .pagination {
+            margin-bottom: 0;
+        }
+        .page-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
     </style>
 </head>
 <body id="page-top" class="sidebar-toggled">
@@ -205,6 +213,17 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    <!-- 分页控件 -->
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div class="page-info">
+                                            显示第 <span id="startItem">0</span> 到 <span id="endItem">0</span> 条，共 <span id="totalItems">0</span> 条记录
+                                        </div>
+                                        <nav>
+                                            <ul class="pagination" id="pagination">
+                                                <!-- 分页按钮将通过JavaScript动态生成 -->
+                                            </ul>
+                                        </nav>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -277,6 +296,8 @@
         $(document).ready(function() {
             // 全局变量
             let currentData = [];
+            let currentPage = 1;
+            const itemsPerPage = 10;
             
             // 从localStorage获取用户信息
             function getUserInfo() {
@@ -389,13 +410,15 @@
                         secret: userInfo.secret,
                         action: 'search',
                         no: 1,
-                        count: 100,
+                        count: 1000, // 获取更多数据用于分页
                         type: 'both'
                     },
                     success: function(response) {
                         if (response.status === 'success') {
                             currentData = response.data;
+                            currentPage = 1; // 重置到第一页
                             renderDataTable(currentData);
+                            updatePagination();
                         } else {
                             showAlert('加载数据失败: ' + response.message, 'error');
                         }
@@ -416,7 +439,12 @@
                     return;
                 }
                 
-                data.forEach(item => {
+                // 计算当前页的数据
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = Math.min(startIndex + itemsPerPage, data.length);
+                const pageData = data.slice(startIndex, endIndex);
+                
+                pageData.forEach(item => {
                     const row = $('<tr>');
                     row.append($('<td>').text(item.tag));
                     row.append($('<td>').text(item.value));
@@ -428,6 +456,11 @@
                     row.append(actions);
                     tbody.append(row);
                 });
+                
+                // 更新分页信息显示
+                $('#startItem').text(startIndex + 1);
+                $('#endItem').text(endIndex);
+                $('#totalItems').text(data.length);
                 
                 // 绑定编辑按钮事件
                 $('.edit-btn').on('click', function() {
@@ -512,6 +545,75 @@
                 });
             }
             
+            // 更新分页控件
+            function updatePagination() {
+                const totalPages = Math.ceil(currentData.length / itemsPerPage);
+                const pagination = $('#pagination');
+                pagination.empty();
+                
+                // 上一页按钮
+                const prevLi = $('<li class="page-item">').addClass(currentPage === 1 ? 'disabled' : '');
+                const prevLink = $('<a class="page-link" href="#" aria-label="Previous">')
+                    .append($('<span aria-hidden="true">').html('&laquo;'))
+                    .append($('<span class="sr-only">上一页</span>'));
+                
+                if (currentPage > 1) {
+                    prevLink.on('click', function(e) {
+                        e.preventDefault();
+                        currentPage--;
+                        renderDataTable(currentData);
+                        updatePagination();
+                    });
+                }
+                
+                prevLi.append(prevLink);
+                pagination.append(prevLi);
+                
+                // 页码按钮
+                const maxVisiblePages = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                
+                if (endPage - startPage + 1 < maxVisiblePages) {
+                    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                }
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageLi = $('<li class="page-item">').addClass(i === currentPage ? 'active' : '');
+                    const pageLink = $('<a class="page-link" href="#">').text(i);
+                    
+                    if (i !== currentPage) {
+                        pageLink.on('click', function(e) {
+                            e.preventDefault();
+                            currentPage = i;
+                            renderDataTable(currentData);
+                            updatePagination();
+                        });
+                    }
+                    
+                    pageLi.append(pageLink);
+                    pagination.append(pageLi);
+                }
+                
+                // 下一页按钮
+                const nextLi = $('<li class="page-item">').addClass(currentPage === totalPages ? 'disabled' : '');
+                const nextLink = $('<a class="page-link" href="#" aria-label="Next">')
+                    .append($('<span aria-hidden="true">').html('&raquo;'))
+                    .append($('<span class="sr-only">下一页</span>'));
+                
+                if (currentPage < totalPages) {
+                    nextLink.on('click', function(e) {
+                        e.preventDefault();
+                        currentPage++;
+                        renderDataTable(currentData);
+                        updatePagination();
+                    });
+                }
+                
+                nextLi.append(nextLink);
+                pagination.append(nextLi);
+            }
+            
             // 删除数据
             function deleteData(tag) {
                 const userInfo = getUserInfo();
@@ -560,7 +662,9 @@
                     success: function(response) {
                         if (response.status === 'success') {
                             currentData = response.data;
+                            currentPage = 1; // 搜索后重置到第一页
                             renderDataTable(currentData);
+                            updatePagination();
                             $('#searchModal').modal('hide');
                             showAlert('搜索完成', 'success');
                         } else {
