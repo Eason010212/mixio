@@ -4221,7 +4221,7 @@ var exportProjects = function() {
 }
 
 setInterval(function(){
-    if(isChanged)
+    if(isChanged && !isRunning)
     {
         save_layout(false, true)
         isChanged = false
