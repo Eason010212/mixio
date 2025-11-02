@@ -706,6 +706,106 @@ async function daemon_start() {
 
     })
 
+    app.get('/resetf', function(req, res2) {
+        var userName = req.query.username
+        var password = req.query.password
+        if (userName && password) {
+            if(configs["MIXIO_HTTP_PORT"] !=0)
+                {
+                    require('http').get('http://localhost:' + configs["MIXIO_HTTP_PORT"] + "/resetf?target=" + userName + "&pass=" + password, function(req, res) {
+                        var html = '';
+                        req.on('data', function(data) {
+                            html += data;
+                        });
+                        req.on('end', function() {
+                            res2.send(html)
+                        });
+                    }).on('error', function() {
+                        res2.send('3')
+                    })
+                }
+                else
+                    {
+                        const https = require('https');
+    
+                        // 对参数进行编码
+                        const encodedPath = "/resetf?target=" + encodeURIComponent(userName) + 
+                                           "&pass=" + encodeURIComponent(password)
+                        
+                        const options = {
+                            hostname: 'localhost',
+                            port: configs["MIXIO_HTTPS_PORT"],
+                            path: encodedPath,
+                            method: 'GET',
+                            rejectUnauthorized: false,  // 忽略证书验证
+                            agent: false
+                        };
+                        
+                        https.get(options, function(res) {
+                            var html = '';
+                            res.on('data', function(data) {
+                                html += data;
+                            });
+                            res.on('end', function() {
+                                res2.send(html);
+                            });
+                        }).on('error', function(e) {
+                            console.log(e);
+                            res2.send('3');
+                        });
+                    }
+        }
+
+    })
+    app.get('/deletef', function(req, res2) {
+        var userName = req.query.username
+        if (userName) {
+            if(configs["MIXIO_HTTP_PORT"] !=0)
+                {
+                    require('http').get('http://localhost:' + configs["MIXIO_HTTP_PORT"] + "/deletef?target=" + userName, function(req, res) {
+                        var html = '';
+                        req.on('data', function(data) {
+                            html += data;
+                        });
+                        req.on('end', function() {
+                            res2.send(html)
+                        });
+                    }).on('error', function() {
+                        res2.send('3')
+                    })
+                }
+                else
+                    {
+                        const https = require('https');
+    
+                        // 对参数进行编码
+                        const encodedPath = "/deletef?target=" + encodeURIComponent(userName)
+                        
+                        const options = {
+                            hostname: 'localhost',
+                            port: configs["MIXIO_HTTPS_PORT"],
+                            path: encodedPath,
+                            method: 'GET',
+                            rejectUnauthorized: false,  // 忽略证书验证
+                            agent: false
+                        };
+                        
+                        https.get(options, function(res) {
+                            var html = '';
+                            res.on('data', function(data) {
+                                html += data;
+                            });
+                            res.on('end', function() {
+                                res2.send(html);
+                            });
+                        }).on('error', function(e) {
+                            console.log(e);
+                            res2.send('3');
+                        });
+                    }
+        }
+
+    })
     app.get('/start', async function(req, res) {
         if (!serverStatus) {
             console.log("[INFO] Starting MixIO Server...")
@@ -1739,6 +1839,40 @@ var mixioServer = async function() {
                         res.send('2')
                 } else
                     res.send('2')
+            })
+        } else
+            res.send('2')
+    })
+
+    app.get('/resetf', function(req, res) {
+        if (req.query.target && req.query.pass) {
+            db.get("select * from `user` where username=?", [req.query.target], function(err, row) {
+                if (err)
+                    console.log(err)
+                else
+                if (row) {
+                    var salt = randomString(16, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+                    var password = md5(req.query.pass + salt)
+                    db.run("update `user` set password = ?,salt = ?, verified = 0 where username=?", [password, salt, req.query.target], function(err) {
+                        if (err)
+                            console.log(err)
+                        else
+                            res.send('1')
+                    })
+                } else
+                    res.send('2')
+            })
+        } else
+            res.send('2')
+    })
+
+    app.get('/deletef', function(req, res) {
+        if (req.query.target) {
+            db.get("delete from `user` where username=?", [req.query.target], function(err, row) {
+                if (err)
+                    console.log(err)
+                else
+                    res.send('1')
             })
         } else
             res.send('2')

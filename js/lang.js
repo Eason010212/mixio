@@ -769,7 +769,7 @@ var arrLang = {
         "ADMIN": "管理",
         "BASICADMIN": "基础设置",
         "USERADMIN": "批量注册",
-        "DATAADMIN": "数据管理",
+        "DATAADMIN": "用户管理",
         "UPEMAIL": "注册邮箱：",
         "EMAIL": "placeholder$请输入电子邮箱地址",
         "PASSWORD": "placeholder$请输入密码",

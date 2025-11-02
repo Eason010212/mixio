@@ -2,7 +2,7 @@ $(function(){
     $.getJSON("queryData",function(res){
         for(var i = 0;i<=res.length-1;i = i+1)
         {
-            $("#tbody").append("<tr><td>"+res[i]["username"]+"</td><td>"+res[i]["projects"]+"</td><td>"+res[i]["messages"]+"</td><td>"+ "<a class='btn btn-primary' style='cursor:pointer;' onclick=\"clearMessage('"+res[i]["username"]+"')\" >清空消息</a>"+"</td></tr>")
+            $("#tbody").append("<tr><td>"+res[i]["username"]+"</td><td>"+res[i]["projects"]+"</td><td>"+res[i]["messages"]+"</td><td>"+ "<a class='btn btn-primary' style='cursor:pointer;' onclick=\"clearMessage('"+res[i]["username"]+"')\" >清空消息</a>&nbsp;"+ "<a class='btn btn-success' style='cursor:pointer;' onclick=\"resetPassword('"+res[i]["username"]+"')\" >重置密码</a>&nbsp;"+"<a class='btn btn-danger' style='cursor:pointer;' onclick=\"removeUser('"+res[i]["username"]+"')\" >删除用户</a>"+"</td></tr>")
         }
         datatable = $("#table").DataTable({
         "order": [[ 2, "desc" ]],

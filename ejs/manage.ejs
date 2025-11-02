@@ -174,7 +174,7 @@
                         </div>
                     </div>
                     <div id="detail2" hidden>
-                        <div class="col-xl-8 col-md-6 mb-4">
+                        <div class="col-xl-12 col-md-6 mb-4">
                             <div class="card shadow" style="margin-top:1.5rem;border-radius:10px">
                                 <div class="card-body" >
                                     <table id="table">
@@ -188,7 +188,7 @@
                                             <td style="min-width:100px">
                                                 消息量
                                             </td>
-                                            <td style="min-width:100px">
+                                            <td style="min-width:300px">
                                                 执行操作
                                             </td>
                                         </thead>
@@ -281,6 +281,53 @@
                 }
                 else
                 {
+                    showtext("操作失败")
+                }
+            })
+        }
+        var resetPassword = function(userName){
+            if (!confirm(`确定要重置用户 ${userName} 的密码吗？新密码将设置为 "123456"`)) {
+                return;
+            }
+            const modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>重置密码中...</p></div>");
+            $.get('resetf',{
+                "username":userName,
+                "password":"123456"
+            },function(res){
+                if(res == 1)
+                {
+                    modald.close()
+                    showtext("操作成功！")
+                    setTimeout(function(){
+                        window.location.href = window.location.href
+                    },1000)
+                }
+                else
+                {
+                    modald.close()
+                    showtext("操作失败")
+                }
+            })
+        }
+        var removeUser = function(userName){
+            if (!confirm(`确定要删除用户 ${userName} 的账号吗？此操作将不可恢复！`)) {
+                return;
+            }
+            const modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>重置密码中...</p></div>");
+            $.get('deletef',{
+                "username":userName
+            },function(res){
+                if(res == 1)
+                {
+                    modald.close()
+                    showtext("操作成功！")
+                    setTimeout(function(){
+                        window.location.href = window.location.href
+                    },1000)
+                }
+                else
+                {
+                    modald.close()
                     showtext("操作失败")
                 }
             })
