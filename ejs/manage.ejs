@@ -38,17 +38,17 @@
             <div class="sidebar-heading lang" key="MANAGE">
             </div>
             <li class="nav-item active" id="view1">
-                <a class="nav-link" onclick="view(1)" style="cursor: pointer;" id="manage_prj">
+                <a class="nav-link" href="/admin?page=basic" style="cursor: pointer;" id="manage_prj">
                     <i class="fa fa-fw fa-tachometer"></i>
                     <span class="lang" key="BASICADMIN"></span></a>
             </li>
             <li class="nav-item" id="view2">
-                <a class="nav-link" onclick="view(2)" style="cursor: pointer;" id="manage_data">
+                <a class="nav-link" href="/admin?page=user" style="cursor: pointer;" id="manage_data">
                     <i class="fa fa-fw fa-database"></i>
                     <span class="lang" key="DATAADMIN"></span></a>
             </li>
             <li class="nav-item" id="view3">
-                <a class="nav-link" onclick="view(3)" style="cursor: pointer;" id="manage_strg">
+                <a class="nav-link" href="/admin?page=batch" style="cursor: pointer;" id="manage_strg">
                     <i class="fa fa-fw fa-user"></i>
                     <span class="lang" key="USERADMIN"></span></a>
             </li>
@@ -161,7 +161,7 @@
                         </div>
                     </div>
                     <div id="detail3" hidden>
-                        <div class="col-xl-4 col-md-6 mb-4">
+                        <div class="col-xl-8 col-md-6 mb-4">
                             <div class="card shadow" style="margin-top:1.5rem;border-radius:10px">
                                 <div class="card-body" style="display: flex;align-items: center;justify-content: center;flex-direction: column;">
                                     <p>格式（每个账号一行）: 账号,密码,密保问题,问题答案</p>
@@ -234,8 +234,8 @@
             background-color: #e8f4fc;
         }
         td, th {
-            padding: 12px 15px;
-            vertical-align: middle;
+            padding: 0.5rem !important;
+            vertical-align: middle !important;
         }
         .action-buttons {
             display: flex;
@@ -276,7 +276,7 @@
                 {
                     showtext("操作成功！")
                     setTimeout(function(){
-                        window.location.href = window.location.href
+                        window.location.href = window.location.href.split("?")[0] + "?page=user"
                     },1000)
                 }
                 else
@@ -299,7 +299,7 @@
                     modald.close()
                     showtext("操作成功！")
                     setTimeout(function(){
-                        window.location.href = window.location.href
+                        window.location.href = window.location.href.split("?")[0] + "?page=user"
                     },1000)
                 }
                 else
@@ -322,7 +322,7 @@
                     modald.close()
                     showtext("操作成功！")
                     setTimeout(function(){
-                        window.location.href = window.location.href
+                        window.location.href = window.location.href.split("?")[0] + "?page=user"
                     },1000)
                 }
                 else
@@ -589,6 +589,16 @@
                     $("#view"+v).removeClass("active")
                 }
             }
+        }
+        // 尝试获取page参数
+        if(window.location.href.split("?").length > 1){
+            var page = window.location.href.split("?")[1].split("=")[1]
+            if (page == "user")
+                view(2)
+            else if(page == "basic")
+                view(1)
+            else if(page == "batch")
+                view(3)
         }
         var addAcc = function(){
             var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>"+JSLang[lang].loading2+"</p></div>")
