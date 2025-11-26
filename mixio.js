@@ -1382,7 +1382,8 @@ var mixioServer = async function() {
     app.get('/', function(req, res) {
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
             'footer': configs["FOOTER"],
-            'mixly': fs.existsSync("../mixly")
+            'mixly': fs.existsSync("../mixly"),
+            'mixai': fs.existsSync("../mixai")
         }, function(err, data) {
             res.send(data)
         })
