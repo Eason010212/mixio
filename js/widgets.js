@@ -5123,6 +5123,14 @@ function add_weather(user_title, user_topic, user_content, user_style, title_sty
             if (resJSON.status == 0) {
                 sendIcon.removeAttr('disabled')
                 weatherDiv.css('background-color', '#1cc88a')
+                if(resJSON.result.location.name == "香港特别行政区香港特别行政区")
+                {
+                    resJSON.result.location.name = "香港特别行政区"
+                }
+                if(resJSON.result.location.name == "澳门特别行政区澳门特别行政区")
+                {
+                    resJSON.result.location.name = "澳门特别行政区"
+                }
                 dscname.html(resJSON.result.location.name)
                 district = resJSON.result.location.name
                 tmmper.html(resJSON.result.now.temp + "℃&nbsp;&nbsp;" + resJSON.result.now.text + "&nbsp;&nbsp;" + resJSON.result.now.rh + "%RH")
