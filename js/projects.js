@@ -535,7 +535,7 @@ function shareKey() {
                 sharekey.html(res)
                 globalShareKey = res
                 sharelink.html(window.location.href.split("/")[0] + "//"+window.location.host + "/observe?sid=" + globalShareKey)
-                sharelink.attr("href", "http://"+window.location.host + "/observe?sid=" + globalShareKey)
+                sharelink.attr("href", window.location.href.split("/")[0] + "//"+window.location.host + "/observe?sid=" + globalShareKey)
                 sharelink.css("color","#1cc88a")
             } else
                 showtext(res)
