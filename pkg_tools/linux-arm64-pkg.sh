@@ -6,7 +6,7 @@ mkdir mixio_linux_arm64
 chmod -R 777 mixio
 cd mixio
 npm install
-pkg -t node16-linux-arm64 package.json
+pkg -t node18-linux-arm64 package.json
 mv -f mixio ../mixio_linux_arm64/
 cd ../
 chmod -R 777 mixio_linux_arm64
