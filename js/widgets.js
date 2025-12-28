@@ -169,7 +169,7 @@ function add_pixel(user_title, user_topic, user_content, user_style, title_style
         if (tbd)
             tbd.remove()
     }
-    attrs = [
+    var attrs = [
         ['user-type', 'pixel'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -476,7 +476,7 @@ function add_button(user_title, user_topic, user_content, user_style, title_styl
         if (tbd)
             tbd.remove()
     }
-    attrs = [
+    var attrs = [
         ['user-type', 'input_button'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -701,7 +701,7 @@ function add_slider(user_title, user_topic, user_content, user_style, title_styl
         if (tbd)
             tbd.remove()
     }
-    attrs = [
+    var attrs = [
         ['user-type', 'input_slider'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -881,7 +881,7 @@ function add_controller(user_title, user_topic, user_content, user_style, title_
     contents.push(controllerDiv)
     var controllerID = randomString() + 'con'
     controllerDiv.attr('id', controllerID)
-    attrs = [
+    var attrs = [
         ['user-type', 'input_controller'],
         ['user-title', user_title],
         ['user-content', "0,0"],
@@ -1061,7 +1061,7 @@ function add_keyboard(user_title, user_topic, user_content, user_style, title_st
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
     topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
     topicDiv.append(topic)
-    attrs = [
+    var attrs = [
         ['user-type', 'input_keyboard'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -1280,7 +1280,7 @@ function add_tinydb(user_title, user_topic, user_content, user_style, title_styl
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
     topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
     topicDiv.append(topic)
-    attrs = [
+    var attrs = [
         ['user-type', 'tinydb'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -1514,7 +1514,7 @@ function add_mic(user_title, user_topic, user_content, user_style, title_style) 
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
     topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
     topicDiv.append(topic)
-    attrs = [
+    var attrs = [
         ['user-type', 'input_mic'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -1765,7 +1765,7 @@ function add_bulb(user_title, user_topic, user_content, user_style, title_style)
         bulb.attr('class', 'bulb2')
     else if (user_content == 3)
         bulb.attr('class', 'bulb3')
-    attrs = [
+    var attrs = [
         ['user-type', 'output_bulb'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -1966,7 +1966,7 @@ function add_ble(user_title, user_topic, user_content, user_style, title_style) 
     var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
     topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
     topicDiv.append(topic)
-    attrs = [
+    var attrs = [
         ['user-type', 'ble'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -2289,7 +2289,7 @@ function add_magic(user_title, user_topic, user_content, user_style, title_style
     var transparentDiv = $('<div style="width:100%;height:100%;position:absolute;top:0;left:0;background-color:rgba(0,0,0,0);z-index:-9999"/>')
     contents.push(title)
     contents.push(transparentDiv)
-    attrs = [
+    var attrs = [
         ['user-type', 'magic'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -2445,7 +2445,7 @@ async function add_timer(user_title, user_topic, user_content, user_style, title
     topicDiv.append(topic)
     var bulb = $("<img src='icons/timer.svg' style='width:50%;height:50%'></img>")
     contents.push(bulb)
-    attrs = [
+    var attrs = [
         ['user-type', 'timer'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -2670,7 +2670,7 @@ async function add_trigger(user_title, user_topic, user_content, user_style, tit
     topicDiv.append(topic)
     var bulb = $("<img src='icons/trigger.svg' style='width:50%;height:50%'></img>")
     contents.push(bulb)
-    attrs = [
+    var attrs = [
         ['user-type', 'trigger'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -3050,7 +3050,7 @@ function add_rgb(user_title, user_topic, user_content, user_style, title_style) 
     pickerRGBDiv.append(pickerDiv)
     pickerRGBDiv.append(RGBDiv)
     contents.push(pickerRGBDiv)
-    attrs = [
+    var attrs = [
         ['user-type', 'input_rgb'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -3381,7 +3381,7 @@ function add_bar(user_title, user_topic, user_content, user_style, title_style) 
         if (tbd)
             tbd.remove()
     }
-    attrs = [
+    var attrs = [
         ['user-type', 'output_bar'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -3638,7 +3638,7 @@ function add_dashboard(user_title, user_topic, user_content, user_style, title_s
     var dashID = randomString() + "dash"
     dashCanvas.attr('id', dashID)
     contents.push(dashDiv)
-    attrs = [
+    var attrs = [
         ['user-type', 'output_dashboard'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -3843,7 +3843,7 @@ function add_map(user_title, user_topic, user_content, user_style, title_style) 
                 event.stopPropagation()
             }, { passive: false })
             contents.push(mapDiv)
-            attrs = [
+            var attrs = [
                 ['user-type', 'output_map'],
                 ['user-title', user_title],
                 ['user-topic', user_topic],
@@ -4188,7 +4188,7 @@ function add_map(user_title, user_topic, user_content, user_style, title_style) 
                 event.stopPropagation()
             }, { passive: false })
             contents.push(mapDiv)
-            attrs = [
+            var attrs = [
                 ['user-type', 'output_map'],
                 ['user-title', user_title],
                 ['user-topic', user_topic],
@@ -4525,7 +4525,7 @@ function add_text(user_title, user_topic, user_content, user_style, title_style)
     textDiv.css('font-size', fontSize + 'rem')
     textDiv.attr('class', 'mid_screen')
     contents.push(textDiv)
-    attrs = [
+    var attrs = [
         ['user-type', 'output_text'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -4772,7 +4772,7 @@ function add_table(user_title, user_topic, user_content, user_style, title_style
     textDiv.text(stringendecoder.decodeHtml(user_content))
     textDiv.attr('class', 'mid_screen')
         //contents.push(textDiv)
-    attrs = [
+    var attrs = [
         ['user-type', 'table'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -5155,7 +5155,7 @@ function add_weather(user_title, user_topic, user_content, user_style, title_sty
 
     buttonDiv.append(sendIcon)
     contents.push(buttonDiv)
-    attrs = [
+    var attrs = [
         ['user-type', 'input_weather'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -5653,7 +5653,7 @@ function add_chart(user_title, user_topic, user_content, user_style, title_style
         if (tbd)
             tbd.remove()
     }
-    attrs = [
+    var attrs = [
         ['user-type', 'output_chart'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -5853,7 +5853,7 @@ function add_decorate_text(user_title, user_topic, user_content, user_style, tit
     var contents = []
     var ctt = $("<h4 class='userTitle' style='margin:0'>" + user_content.replaceAll('\n', '<br>') + "</h4>")
     contents.push(ctt)
-    attrs = [
+    var attrs = [
         ['user-type', 'decorate_text'],
         ['user-title', randomString()],
         ['user-content', user_content],
@@ -5986,7 +5986,7 @@ function add_decorate_pic(user_title, user_topic, user_content, user_style, titl
         var ctt = $("<img style='height:100%;width:100%' src='" + user_content + "'></img>")
     }
     contents.push(ctt)
-    attrs = [
+    var attrs = [
         ['user-type', 'decorate_pic'],
         ['user-topic', user_topic],
         ['user-title', randomString()],
@@ -6216,7 +6216,7 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
     var fps = parseInt(user_content.split(",")[1])
     var resolutionX = parseInt(resolution.split("x")[0])
     var resolutionY = parseInt(resolution.split("x")[1])
-    attrs = [
+    var attrs = [
         ['user-type', 'camera'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -6676,7 +6676,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
             })
             
 
-            attrs = [
+            var attrs = [
                 ['user-type', 'face'],
                 ['user-title', user_title],
                 ['user-topic', user_topic],
@@ -6966,7 +6966,7 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
     var bell_icon = $('<i class="fa fa-bell" style="font-size:40px;color:#858796"></i>')
     icon_div.append(bell_icon)
     contents.push(icon_div)
-    attrs = [
+    var attrs = [
         ['user-type', 'ocr'],
         ['user-title', user_title],
         ['user-topic', user_topic],
@@ -7220,7 +7220,7 @@ function add_qr(user_title, user_topic, user_content, user_style, title_style) {
         })
         
 
-        attrs = [
+        var attrs = [
             ['user-type', 'qr'],
             ['user-title', user_title],
             ['user-topic', user_topic],
@@ -7455,7 +7455,7 @@ var helpButton = $('<a class="btn btn-dark btn-circle bbbt"><i class="fa fa-book
 helpButton.click(function() {
     if(tbd)
         tbd.remove()
-    var helpurl = window.location.href.replace("projects", "documentation/") + "#" + $(this).attr("user-origin")
+    var helpurl = window.location.href.replace("projects-mixly", "documentation/").replace("projects", "documentation/") + "#" + $(this).attr("user-origin")
     // add a floating window to show the help, it can be moved and closed
     var helpWindow = $('<div style=""/>')
     helpWindow.css("width", "300px")

@@ -43,22 +43,22 @@
     </div>
     <div class="content-menu">
         <ul>
-            <li class="scroll-to-link active" data-target="switch">
+            <li class="scroll-to-link active" data-target="input_button">
                 <a>开关</a>
             </li>
             <li class="scroll-to-link" data-target="button">
                 <a>按键</a>
             </li>
-            <li class="scroll-to-link" data-target="slider">
+            <li class="scroll-to-link" data-target="input_slider">
                 <a>滑杆</a>
             </li>
-            <li class="scroll-to-link" data-target="joystick">
+            <li class="scroll-to-link" data-target="input_controller">
                 <a>摇杆手柄</a>
             </li>
-            <li class="scroll-to-link" data-target="rgb">
+            <li class="scroll-to-link" data-target="input_rgb">
                 <a>RGB色盘</a>
             </li>
-            <li class="scroll-to-link" data-target="bulb">
+            <li class="scroll-to-link" data-target="output_bulb">
                 <a>指示灯</a>
             </li>
             <li class="scroll-to-link" data-target="timer">
@@ -70,25 +70,34 @@
             <li class="scroll-to-link" data-target="ble">
                 <a>蓝牙转发器</a>
             </li>
-            <li class="scroll-to-link" data-target="chart">
+            <li class="scroll-to-link" data-target="output_chart">
                 <a>折线图表</a>
             </li>
-            <li class="scroll-to-link" data-target="bar">
+            <li class="scroll-to-link" data-target="output_bar">
                 <a>投票器</a>
             </li>
             <li class="scroll-to-link" data-target="table">
                 <a>数据表格</a>
             </li>
-            <li class="scroll-to-link" data-target="map">
+            <li class="scroll-to-link" data-target="output_map">
                 <a>数据地图</a> 
             </li>
-            <li class="scroll-to-link" data-target="dashboard">
+            <li class="scroll-to-link" data-target="output_dashboard">
                 <a>仪表盘</a>
             </li>
-            <li class="scroll-to-link" data-target="weather">
+            <li class="scroll-to-link" data-target="input_weather">
                 <a>实时气象仪</a>
             </li>
-            <li class="scroll-to-link" data-target="input">
+            <li class="scroll-to-link" data-target="camera">
+                <a>摄像头</a>
+            </li>
+            <li class="scroll-to-link" data-target="input_mic">
+                <a>语音识别</a>
+            </li>
+            <li class="scroll-to-link" data-target="tinydb">
+                <a>下拉选项</a>
+            </li> 
+            <li class="scroll-to-link" data-target="input_keyboard">
                 <a>文本输入</a>
             </li>
             <li class="scroll-to-link" data-target="output_text">
@@ -97,15 +106,24 @@
             <li class="scroll-to-link" data-target="pixel">
                 <a>点阵屏</a>
             </li>
-            <li class="scroll-to-link" data-target="label">
+            <li class="scroll-to-link" data-target="decorate_text">
                 <a>标签</a>、
             </li>
-            <li class="scroll-to-link" data-target="image">
-                <a>图片</a>
+            <li class="scroll-to-link" data-target="decorate_pic">
+                <a>图片 / 视频</a>
             </li>
-            <li class="scroll-to-link" data-target="video">
-                <a>视频</a>
+            <li class="scroll-to-link" data-target="magic">
+                <a>装饰框</a>
             </li> 
+            <li class="scroll-to-link" data-target="face">
+                <a>人脸识别</a>
+            </li>
+            <li class="scroll-to-link" data-target="ocr">
+                <a>蜂鸣器</a>
+            </li>
+            <li class="scroll-to-link" data-target="qr">
+                <a>二维码识别</a>
+            </li>
         </ul>
     </div>
 </div>
@@ -113,8 +131,8 @@
 
 <div class="content-page">
     <div class="content">
-        <div class="overflow-hidden content-section" id="content-switch">
-            <h1 id="switch">开关</h1>
+        <div class="overflow-hidden content-section" id="content-input_button">
+            <h1 id="input_button">开关（可切换为按键）</h1>
             <h3>组件总览</h3>
             <p>
                 以“关/开”两种状态响应用户输入，向消息主题发送0/1信号；同时接收消息主题的0/1信号，实现对应的关/开状态呈现。
@@ -131,7 +149,7 @@
             </p>
         </div>
         <div class="overflow-hidden content-section" id="content-button">
-            <h1 id="button">按键</h1>
+            <h1 id="button">按键（可切换为开关）</h1>
             <h3>组件总览</h3>
             <p>
                 以“按下/松开”模式响应用户输入，向消息主题发送0/1信号（按下=1，松开=0）。
@@ -147,8 +165,8 @@
                 <span style="color:#4e73df;">反馈模式</span> - 组件的反馈模式，可在此处将“按键”组件转换为“开关”组件。
             </p>
         </div>
-        <div class="overflow-hidden content-section" id="content-slider">
-            <h1 id="slider">滑杆</h1>
+        <div class="overflow-hidden content-section" id="content-input_slider">
+            <h1 id="input_slider">滑杆</h1>
             <h3>组件总览</h3>
             <p>
                 以“滑动”模式响应用户输入，向消息主题发送数字；同时接收消息主题的数字，实现对应的滑动位置呈现。
@@ -164,8 +182,8 @@
                 <span style="color:#4e73df;">滑动范围</span> - 滑杆的最小值、最大值和步长值。
             </p>
         </div>
-        <div class="overflow-hidden content-section" id="content-joystick">
-            <h1 id="joystick">摇杆手柄</h1>
+        <div class="overflow-hidden content-section" id="content-input_controller">
+            <h1 id="input_controller">摇杆手柄</h1>
             <h3>组件总览</h3>
             <p>
                 以“摇杆”模式响应用户输入，向消息主题发送"X,Y"格式的字符串, 其中X和Y分别为摇杆的X轴和Y轴的值（范围均为-100~100），每500ms采样一次。
@@ -178,8 +196,8 @@
                 <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
             </p>
         </div>
-        <div class="overflow-hidden content-section" id="content-rgb">
-            <h1 id="rgb">RGB色盘</h1>
+        <div class="overflow-hidden content-section" id="content-input_rgb">
+            <h1 id="input_rgb">RGB色盘</h1>
             <h3>组件总览</h3>
             <p>
                 以“拖动”或“点击”模式响应用户输入，向三个消息主题分别发送R、G、B通道的颜色值（范围均为0~255）。
@@ -198,8 +216,8 @@
                 <span style="color:#4e73df;">消息主题（B）</span> - 组件的消息主题（B通道）。
             </p>
         </div>
-        <div class="overflow-hidden content-section" id="content-bulb">
-            <h1 id="bulb">指示灯</h1>
+        <div class="overflow-hidden content-section" id="content-output_bulb">
+            <h1 id="output_bulb">指示灯</h1>
             <h3>组件总览</h3>
             <p>
                 接收消息主题的0/1/2/3信号，实现对应的状态呈现（0=关闭，1=<b style="color: #1cc88a;">绿灯</b>，2=<b style="color:#f6c23e">黄灯</b>，3=<b style="color:#e74a3b">红灯</b>）。
@@ -311,8 +329,8 @@
                 <span style="color:#4e73df;">蓝牙设备</span> - 组件连接的蓝牙设备。
             </p>
         </div>
-        <div class="overflow-hidden content-section" id="content-chart">
-            <h1 id="chart">折线图表</h1>
+        <div class="overflow-hidden content-section" id="content-output_chart">
+            <h1 id="output_chart">折线图表</h1>
             <h3>组件总览</h3>
             <p>
                 接收单一数值数据或JSON格式的多个数值数据，显示为折线统计图。
@@ -325,8 +343,8 @@
                 <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
             </p>
         </div>
-        <div class="overflow-hidden content-section" id="content-bar">
-            <h1 id="bar">投票器</h1>
+        <div class="overflow-hidden content-section" id="content-output_bar">
+            <h1 id="output_bar">投票器</h1>
             <h3>组件总览</h3>
             <p>
                 接收文本数据，增加对应选项的计数。
@@ -363,8 +381,8 @@
                 <span style="color:#4e73df;">列名</span> - 用英文逗号分隔的表格列名列表。
             </p>
         </div>
-        <div class="overflow-hidden content-section" id="content-map">
-            <h1 id="map">数据地图</h1>
+        <div class="overflow-hidden content-section" id="content-output_map">
+            <h1 id="output_map">数据地图</h1>
             <h3>组件总览</h3>
             <p>
                 接收JSON格式的地图标记数据，并进行显示。<br>
@@ -380,6 +398,125 @@
                 }<br>
                 其中，clientid为地图标记的唯一id，long和lat为地图标记的经纬度，message为地图标记的信息，须由包含label和value两个键的元素列表构成。<br>
                 同一clientid的新消息将覆盖旧消息，更新显示。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-output_dashboard">
+            <h1 id="output_dashboard">仪表盘</h1>
+            <h3>组件总览</h3>
+            <p>
+                接收数值消息，进行仪表盘显示。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">指示范围</span> - 仪表盘的最小值和最大值。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-input_weather">
+            <h1 id="input_weather">实时气象仪</h1>
+            <h3>组件总览</h3>
+            <p>
+                查询天气信息，主动发送消息。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">自动更新频率</span> - 自动更新天气信息的频率。
+            </p>
+            <p>
+                <span style="color:#4e73df;">自动发送频率</span> - 自动发送天气信息的频率。
+            </p>
+            <p>
+                <span style="color:#4e73df;">采集位置</span> - 天气信息的地理位置。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-camera">
+            <h1 id="camera">摄像头</h1>
+            <h3>组件总览</h3>
+            <p>
+                拍摄实时画面，发送BASE64编码的画面截图。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">分辨率</span> - 拍摄画面的分辨率。
+            </p>
+            <p>
+                <span style="color:#4e73df;">帧率</span> - 每秒捕捉画面的次数。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-input_mic">
+            <h1 id="input_mic">语音识别</h1>
+            <h3>组件总览</h3>
+            <p>
+                点击录制语音，转文字发送。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-tinydb">
+            <h1 id="tinydb">下拉选项</h1>
+            <h3>组件总览</h3>
+            <p>
+                设置下拉列表，快速选择发送消息。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">选项列表</span> - 下拉列表的选项，使用逗号分隔。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-input_keyboard">
+            <h1 id="input_keyboard">文本输入</h1>
+            <h3>组件总览</h3>
+            <p>
+                输入文本，点击发送消息。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件的消息主题。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-output_text">
+            <h1 id="output_text">文本显示屏</h1>
+            <h3>组件总览</h3>
+            <p>
+                接收并呈现消息。
             </p>
             <h3>可配置项</h3>
             <p>
@@ -414,6 +551,93 @@
             </p>
             <p>
                 <span style="color:#4e73df;">垂直像素</span> - 点阵屏垂直像素的个数。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-decorate_text">
+            <h1 id="decorate_text">标签</h1>
+            <h3>组件总览</h3>
+            <p>
+                呈现文本信息。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">显示文本</span> - 呈现的文本信息。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-decorate_pic">
+            <h1 id="decorate_pic">图片 / 视频</h1>
+            <h3>组件总览</h3>
+            <p>
+                接收外部链接或BASE64格式的字符串，呈现图片/视频。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">图片链接</span> - 默认呈现的图片/视频链接或BASE64字符串。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 接收消息、动态更新图片/视频的主题。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-magic">
+            <h1 id="magic">装饰框</h1>
+            <h3>组件总览</h3>
+            <p>
+                将组件组合起来。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">颜色</span> - 框体颜色。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-face">
+            <h1 id="face">人脸识别</h1>
+            <h3>组件总览</h3>
+            <p>
+                录入并识别人脸，输出人脸识别信息。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件发送消息的主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">触发间隔</span> - 检测人脸的最短时间间隔。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-ocr">
+            <h1 id="ocr">蜂鸣器</h1>
+            <h3>组件总览</h3>
+            <p>
+                收到消息时，发出提示音。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件接收消息的主题。
+            </p>
+            <p>
+                <span style="color:#4e73df;">提示音类型</span> - 收到消息时发出提示音的类型。
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-qr">
+            <h1 id="qr">二维码识别</h1>
+            <h3>组件总览</h3>
+            <p>
+                识别二维码/条形码，发送消息。
+            </p>
+            <h3>可配置项</h3>
+            <p>
+                <span style="color:#4e73df;">组件名称</span> - 组件的名称，用于在页面上显示，并作为逻辑视图控制的唯一id。
+            </p>
+            <p>
+                <span style="color:#4e73df;">消息主题</span> - 组件发送消息的主题。
             </p>
         </div>
     </div>
