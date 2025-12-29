@@ -4049,7 +4049,7 @@ function publish(topic, message, omit) {
             lastPublishTime.push(new Date())
         } else {
             showtext(JSLang[lang].speedLimit)
-            MixIO.log(JSLang[lang].speedLimit)
+            //MixIO.log(JSLang[lang].speedLimit)
             stop_project()
         }
     }

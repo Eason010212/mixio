@@ -642,8 +642,10 @@ function add_slider(user_title, user_topic, user_content, user_style, title_styl
     var slider = $("<input type='range' min='0' max='10' step='1' value='0'></input>")
     slider.on('input propertychange', () => {
         mark.val(slider.val())
-        publish(topic.text(), slider.val())
         title.parent().parent().attr('user-content', slider.attr('min') + "," + slider.attr('max') + "," + slider.attr('step') + "," + slider.val())
+    })
+    slider.on('mouseup touchend', () => {
+        publish(topic.text(), slider.val())
         itemdiv.trigger(MixIO.eventTags.SLIDER_SLIDED)
     })
     var mark = $("<input style='width:20%;min-width:0!important;height:25px;line-height:25px;margin-top:5px;margin-bottom:5px;text-align:center;color:black;border:solid lightgray 2px;border-radius:5px;display:flex;align-items:center;justify-content:center;display:inline;margin-left:5px;border:solid gray 1px'></input>")
