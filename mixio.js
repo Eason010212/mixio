@@ -1,4 +1,4 @@
-var VERSION = "1.10.5.1230"
+var VERSION = "1.10.5.1230b"
 require('events').EventEmitter.defaultMaxListeners = 50;
 
 const extract = require('extract-zip')
@@ -998,7 +998,7 @@ del "%~f0"`;
                     } else {
                         // Linux/macOS平台
                             const shScriptContent = `#!/bin/bash
-    sleep 5
+    sleep 30
     rm -f "mixio"
     mv "mixio.tmp" "mixio"
     chmod +x "./mixio"
