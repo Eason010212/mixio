@@ -551,17 +551,14 @@
                                 setTimeout(
                                     function(){
                                         alert("更新已完成，请务必手动重启MIXIO服务，请务必手动重启MIXIO服务，如果是支持自动启动，那么请直接重启服务器机器即可！！！")
+                                        window.location.reload()
                                     }
                                 , 30000)
                             }
                             else{
                                 alert("更新已完成！")
+                                window.location.reload()
                             }
-                            add_text('5秒后自动退出...');
-                            setTimeout(function(){
-                                d.close()
-                            }, 5000)
-                            window.location.reload()
                         }
                     };
                     eventSource.onerror = function(error) {
