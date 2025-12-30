@@ -454,14 +454,25 @@
                 }
             });
             console.log(configs)
-            $.get('/saveAndRestart',{'configs':JSON.stringify(configs,null,2)},function(res){
-                if(res=="1")
-                {
-                    showtext('保存成功, 正在重新启动服务器。')
-                }
-                else
+            // 改为ajax, 超时设置为60s
+            $.ajax({
+                url: '/saveAndRestart',
+                type: 'GET',
+                data: {'configs':JSON.stringify(configs,null,2)},
+                timeout: 60000,
+                success: function(res){
+                    if(res=="1")
+                    {
+                        showtext('保存成功, 正在重新启动服务器。')
+                    }
+                    else
+                        showtext('保存失败')
+                    modald.close()
+                },
+                error: function(res){
+                    modald.close()
                     showtext('保存失败')
-                modald.close()
+                }
             })
         }
         var stopServer = function(){
@@ -534,15 +545,14 @@
                             add_text(`解压中...`)
                         } 
                         else if (data.type === 'complete') {
-                            add_text(`${data.version}更新完成！`);
                             eventSource.close();
                             if(data.version == "mixio"){
+                                add_text(`${data.version}解压完成，等待系统清理缓存，大约需要30秒...`);
                                 setTimeout(
                                     function(){
-                                        window.location.reload()
+                                        alert("更新已完成，请务必手动重启MIXIO服务，请务必手动重启MIXIO服务，如果是支持自动启动，那么请直接重启服务器机器即可！！！")
                                     }
-                                , 10000)
-                                alert("更新已完成，请务必手动重启MIXIO服务，请务必手动重启MIXIO服务，如果是支持自动启动，那么请直接重启服务器机器即可！！！")
+                                , 30000)
                             }
                             else{
                                 alert("更新已完成！")
