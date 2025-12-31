@@ -523,14 +523,14 @@
             .then((result) => {
                 add_text("本地版本：" + result["localVersion"])
                 add_text("云端版本：" + result["cloudVersion"])
-                add_text("需要更新：" + result["needsUpdate"])
+                add_text("需要更新：" + result["cloudVersion"] && result["needsUpdate"])
                 var url = result["cloudFile"]
                 var error = result["error"]
                 if(error)
                 {
                     add_text(error)
                 }
-                if(result["needsUpdate"])
+                if(result["cloudVersion"] && result["needsUpdate"])
                 {
                     const eventSource = new EventSource(`/api/download?url=${encodeURIComponent(url)}&cloudVersion=${result["cloudVersion"]}`);
                     add_text("下载开始...")
