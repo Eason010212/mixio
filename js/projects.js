@@ -1125,6 +1125,34 @@ function view_project(projectName, projectType) {
             }
             var prev_layout = stringendecoder.decodeHtml(resJSON.layout_info)
             var units_array = $(prev_layout)
+            toolkits = {
+                'input_button': add_button,
+                'input_slider': add_slider,
+                'input_keyboard': add_keyboard,
+                'input_controller': add_controller,
+                'input_rgb': add_rgb,
+                'output_bulb': add_bulb,
+                'output_text': add_text,
+                'output_chart': add_chart,
+                'output_bar': add_bar,
+                'output_dashboard': add_dashboard,
+                'output_map': add_map,
+                'input_weather': add_weather,
+                'trigger': add_trigger,
+                'magic': add_magic,
+                'pixel': add_pixel,
+                'table': add_table,
+                'decorate_text': add_decorate_text,
+                'decorate_pic': add_decorate_pic,
+                'timer': add_timer,
+                'ble': add_ble,
+                'camera': add_camera,
+                'face': add_face,
+                'ocr': add_ocr,
+                'qr':add_qr,
+                'input_mic': add_mic,
+                'tinydb': add_tinydb,
+            }
             for (var ct = 0; ct <= units_array.length - 1; ct = ct + 1) {
                 var un = $(units_array[ct])
                 var titleHidden = un.attr('title-hidden')
@@ -1135,34 +1163,6 @@ function view_project(projectName, projectType) {
                     titleHidden = true
                 if (titleHidden == "false")
                     titleHidden = false
-                toolkits = {
-                    'input_button': add_button,
-                    'input_slider': add_slider,
-                    'input_keyboard': add_keyboard,
-                    'input_controller': add_controller,
-                    'input_rgb': add_rgb,
-                    'output_bulb': add_bulb,
-                    'output_text': add_text,
-                    'output_chart': add_chart,
-                    'output_bar': add_bar,
-                    'output_dashboard': add_dashboard,
-                    'output_map': add_map,
-                    'input_weather': add_weather,
-                    'trigger': add_trigger,
-                    'magic': add_magic,
-                    'pixel': add_pixel,
-                    'table': add_table,
-                    'decorate_text': add_decorate_text,
-                    'decorate_pic': add_decorate_pic,
-                    'timer': add_timer,
-                    'ble': add_ble,
-                    'camera': add_camera,
-                    'face': add_face,
-                    'ocr': add_ocr,
-                    'qr':add_qr,
-                    'input_mic': add_mic,
-                    'tinydb': add_tinydb,
-                }
                 await toolkits[un.attr('user-type')](un.attr('user-title'), un.attr('user-topic'), un.attr('user-content'), un.attr('style'), titleHidden)
             }
             var topicOuterDiv = $("<div style='width:100%;display:flex;align-items:center;'></div>")
