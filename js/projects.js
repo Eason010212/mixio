@@ -1,4 +1,4 @@
-var globalVer = "MixIO ver 1.11.24"
+var globalVer = "MixIO ver 1.10.6.0103"
 var isChanged = false;
 var initCodeMirror = false;
 var globalBLE = {}
