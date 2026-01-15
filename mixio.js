@@ -1383,7 +1383,8 @@ var mixioServer = async function() {
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
             'footer': configs["FOOTER"],
             'mixly': fs.existsSync("../mixly"),
-            'mixai': fs.existsSync("../mixai")
+            'mixai': fs.existsSync("../mixai"),
+            'mixnt': fs.existsSync("../mixnt"),
         }, function(err, data) {
             res.send(data)
         })
@@ -1420,6 +1421,7 @@ var mixioServer = async function() {
             'main': fs.existsSync("config/certs/chain.crt"),
             'mixly': fs.existsSync("../mixly"),
             'mixai': fs.existsSync("../mixai"),
+            'mixnt': fs.existsSync("../mixnt"),
             'configs': configs
         }, function(err, data) {
             res.send(data)
@@ -3018,6 +3020,10 @@ var mixioServer = async function() {
     var mixaiPath = "../mixai"
     if (fs.existsSync(mixaiPath)) {
         app.use('/mixai', express.static(mixaiPath));
+    }
+    var mixntPath = "../mixnt"
+    if (fs.existsSync(mixntPath)) {
+        app.use('/mixnt', express.static(mixntPath));
     }
 
 
