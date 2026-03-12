@@ -56,17 +56,6 @@ $(function() {
                 save_layout();
             }
     };
-    /*
-    if (Math.random() > 0.6) {
-        var d = dialog({
-            title: '限时推广',
-            content: '<div style="width:250px">尊敬的MixIO用户，您好！<br>现邀请您参与《MixIO平台技术接受度调查》，共计10题，预计用时5-8分钟。您的作答数据将被用于科学研究和平台改进设计，感谢您的参与！ <a href="https://wj.qq.com/s2/11118283/89a9/">点击此处进入调查</a></div>',
-            cancelValue: '我知道了',
-            cancel: function() {}
-        });
-        d.showModal();
-    }
-    */
 })
 
 const DATA_MODE = 0;
@@ -1152,6 +1141,8 @@ function view_project(projectName, projectType) {
                 'qr':add_qr,
                 'input_mic': add_mic,
                 'tinydb': add_tinydb,
+                //0312
+                'coco': add_coco
             }
             for (var ct = 0; ct <= units_array.length - 1; ct = ct + 1) {
                 var un = $(units_array[ct])
@@ -1996,16 +1987,15 @@ function add_widget() {
     widget_list.append(decorate_pic_add)
     var magic_add = $("<div class='widget_div'><div><img src='icons/magic.svg'><span>" + JSLang[lang].magic + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(magic_add)
-
-    //widget_list.append($("<h5 style='width:100%;text-align:center;margin-bottom:5px;margin-top:10px;color:#4e73df;font-size:1.3rem;font-weight:bold'>" + JSLang[lang].tensorAI + "</h5>"))
     var blazeFace_add = $("<div class='widget_div'><div><img src='icons/blazeFace.svg'><span>" + JSLang[lang].blazeFace + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(blazeFace_add)
     var ocr_add = $("<div class='widget_div'><div><img src='icons/mediaPipe.svg'><span>" + JSLang[lang].ocr + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(ocr_add)
     var qr_add = $("<div class='widget_div'><div><img src='icons/qrcode.svg'><span>" + JSLang[lang].qr + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
     widget_list.append(qr_add)
-    //var bertQA_add = $("<div class='widget_div'><div><img src='icons/Bert.svg'><span>" + JSLang[lang].Bert + "</span></div><a class='btn btn-secondary btn-block'><i class='fa fa-plus'></i></a></div>")
-    //widget_list.append(bertQA_add)
+    //0312
+    var coco_add = $("<div class='widget_div'><div><img src='icons/coco.svg'><span>" + JSLang[lang].coco + "</span></div><a class='btn btn-success btn-block'><i class='fa fa-plus'></i></a></div>")
+    widget_list.append(coco_add)
 
     ble_add.children("a").click(function() {
         d.close().remove()
@@ -2307,6 +2297,56 @@ function add_widget() {
                     if (true) {
                         if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
                             add_camera(title_input.val(), topic_input.val(), resolution_input.val() + "," + fps_input.val())
+                            modifyDia.close().remove()
+                        } else
+                            showtext(JSLang[lang].sameUnit)
+                    } else
+                        showtext("")
+                else
+                    showtext(JSLang[lang].topicLenIllegal)
+            } else
+                showtext(JSLang[lang].nameLenIllegal)
+        })
+        var cancelEdit = $('<a class="btn btn-danger btn-circle"><i class="fa fa-arrow-left"></i></a>')
+        cancelEdit.click(function() {
+            modifyDia.close().remove()
+            add_widget()
+        })
+        bottomDiv.append(cancelEdit)
+        editForm.append(bottomDiv)
+        var modifyDia = dialog({
+            content: editForm[0],
+            cancel: false
+        })
+        modifyDia.showModal()
+    })
+    //0312
+    coco_add.children("a").click(function() {
+        d.close().remove()
+        var editForm = $('<div class="nnt"/>')
+        editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/coco.svg" style="width:45px;"></div>'))
+        editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+        var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var title_input = $("<input class='form-control form-control-user'  style='text-align:center' autofocus='autofocus'/>")
+        title_input_div.append(title_input)
+        editForm.append(title_input_div)
+        editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+        var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+        var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+        topic_input_div.append(topic_input)
+        topic_input.val("coco")
+        editForm.append(topic_input_div)
+
+        var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+        var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df;"><i class="fa fa-check"></i></a>')
+        bottomDiv.append(confirmEdit)
+        confirmEdit.click(function() {
+            if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                var re = /^[a-z0-9]+$/i;
+                if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                    if (true) {
+                        if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= 0) {
+                            add_coco(title_input.val(), topic_input.val())
                             modifyDia.close().remove()
                         } else
                             showtext(JSLang[lang].sameUnit)

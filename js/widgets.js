@@ -8,6 +8,7 @@
 
 tbd = undefined;
 lastFacePublishTime = false;
+lastCocoPublishTime = false;
 function add_block(width, height, contents, attrs) {
     var itemdiv = $("<div/>")
     itemdiv.attr("class", "item")
@@ -6372,6 +6373,216 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
         itemdiv.attr('style', user_style)
 }
 
+//0312
+function add_coco(user_title, user_topic, user_content, user_style, title_style) {
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载AI引擎...</p></div>")
+    $.getScript("js/tf.min.js", function() {
+        $.getScript("js/coco-ssd.js", async function() {
+            var model = await cocoSsd.load({ 
+                modelUrl: 'js/models/coco/model.json' 
+            });
+            modald.close().remove()
+            var isAlive = true
+            var contents = []
+            var title = $("<h4 class='userTitle'>" + user_title + "</h4>")
+            title.attr("hidden", title_style)
+            contents.push(title)
+            var topicDiv = $("<div class='topicDiv'/>")
+            var topic = $("<span class='index-topic' style='margin:0;color:#858796;'>" + user_topic + "</span>")
+            topicDiv.append($("<i class='fa fa-podcast' style='color:#858796;margin-right:3px'></i>"))
+            topicDiv.append(topic)
+            var cameraDiv = $("<div class='cameraDiv' style='margin-bottom:20px;position:relative'/>")
+            contents.push(cameraDiv)
+            // add a real-time web camera
+            var video = $("<video autoplay style='width:100%;height:100%;'/>")
+            cameraDiv.append(video)
+            var canvas = $("<canvas style='position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);' />")
+            cameraDiv.append(canvas)
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    frameRate: {
+                        ideal: 30,
+                        min: 10
+                    }
+                },
+                audio: false
+            }).then(function(stream) {
+                video[0].srcObject = stream
+                video[0].onloadedmetadata = function() {
+                    canvas[0].width = video[0].videoWidth;
+                    canvas[0].height = video[0].videoHeight;
+                    
+                    const containerWidth = video[0].videoWidth/video[0].videoHeight*video[0].clientHeight;
+                    const containerHeight = video[0].clientHeight;
+                    canvas.css("width", containerWidth)
+                    canvas.css("height", containerHeight)
+
+                    detectLoop()
+                }
+                
+                async function detectLoop() {
+                    if (!isAlive) return
+                    try {
+                        const predictions = await model.detect(video[0])
+                        const ctx = canvas[0].getContext('2d')
+                        ctx.clearRect(0, 0, canvas[0].width, canvas[0].height)
+                        if (predictions.length > 0) {
+                            const obj = predictions[0]
+                            if (obj.score > 0.6) {
+                                ctx.strokeStyle = "#4e73df"
+                                ctx.lineWidth = 4
+                                ctx.strokeRect(obj.bbox[0], obj.bbox[1], obj.bbox[2], obj.bbox[3])
+                                ctx.fillStyle = "rgba(78, 115, 223, 0.8)"
+                                const label = `${obj.class} ${Math.round(obj.score*100)}%`
+                                ctx.font = "bold 16px 'Inter', sans-serif"
+                                const textWidth = ctx.measureText(label).width
+                                ctx.fillRect(obj.bbox[0], obj.bbox[1] - 30, textWidth + 20, 30)
+                                ctx.fillStyle = "white"
+                                ctx.fillText(label, obj.bbox[0] + 10, obj.bbox[1] - 10)
+                                if(!lastCocoPublishTime || new Date().getTime() - lastCocoPublishTime >= 1000)
+                                {   
+                                    publish(user_topic, JSON.stringify({class: obj.class, score: obj.score, bbox: obj.bbox}))
+                                    lastCocoPublishTime = new Date().getTime()
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error("检测错误:", e)
+                    }
+                    requestAnimationFrame(detectLoop)
+                }
+            }).catch(function(err) {
+                showtext("Error: " + err.name + " " + err.message)
+            })
+            var attrs = [
+                ['user-type', 'coco'],
+                ['user-title', user_title],
+                ['user-topic', user_topic],
+                ['user-content', user_content],
+                ['title-hidden', title_style]
+            ]
+            var itemdiv = add_block(4, 3, contents, attrs)
+
+            var delete_on_click = function() {
+                title.parent().parent().remove();
+                isAlive = false
+                if (tbd)
+                    tbd.remove()
+            }
+            var edit_on_click = function() {
+                modifyDia.showModal()
+                if (tbd)
+                    tbd.remove()
+            }
+            var editForm = $('<div class="nnt"/>')
+            editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/coco.svg" style="width:45px;"></div>'))
+            editForm.append($('<h5 style="text-align:center">' + JSLang[lang].unitName + '</h5>'))
+            var title_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+            var title_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+            title_input_div.append(title_input)
+            editForm.append(title_input_div)
+            editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].messTopic + '</h5>'))
+            var topic_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
+            var topic_input = $("<input class='form-control form-control-user'  style='text-align:center'/>")
+            topic_input_div.append(topic_input)
+            editForm.append(topic_input_div)
+            var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
+            var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
+            bottomDiv.append(confirmEdit)
+            confirmEdit.click(function() {
+                if (getByteLen(title_input.val()) > 0 && getByteLen(title_input.val()) < 21) {
+                    var re = /^[a-z0-9]+$/i;
+                    if (getByteLen(topic_input.val()) > 0 && getByteLen(topic_input.val()) < 11)
+                        if (true) {
+                            if (countSubstr(grid.html(), 'user-title=\"' + title_input.val() + '\"', false) <= (title_input.val() == title.text() ? 1 : 0)) {
+                                title.parent().parent().attr('user-title', title_input.val())
+                                title.parent().parent().attr('user-topic', topic_input.val())
+                                modifyDia.close()
+                            } else
+                                showtext(JSLang[lang].sameUnit)
+                        } else
+                            showtext("")
+                    else
+                        showtext(JSLang[lang].topicLenIllegal)
+                } else
+                    showtext(JSLang[lang].nameLenIllegal)
+            })
+            var cancelEdit = $('<a class="btn btn-danger btn-circle" style="box-shadow:1px 1px 5px #e74a3b"><i class="fa fa-arrow-left"></i></a>')
+            cancelEdit.click(function() {
+                modifyDia.close()
+            })
+            bottomDiv.append(cancelEdit)
+            editForm.append(bottomDiv)
+            var modifyDia = dialog({
+                content: editForm[0],
+                cancel: false
+            })
+            var showEditBubble = function(event) {
+                if(tbd)
+                    tbd.remove()
+                if (typeof startX != "undefined" && (startX - endX < 5 && endX - startX < 5) && (startY - endY < 5 && endY - startY < 5)) {
+                    var editButton = $('<a class="btn btn-primary btn-circle bbbt"><i class="fa fa-cog"></i></a>')
+                    var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
+                    var bubble = $('<div style="text-align:center"/>')
+                    bubble.append(topicDiv)
+                    var d = dialog({
+                        align: 'top',
+                        content: bubble[0],
+                        quickClose: true,
+                        autofocus: false
+                    });
+                    tbd = d;
+                    editButton.click(edit_on_click)
+                    deleteButton.click(delete_on_click)
+                    if (!isRunning)
+                        bubble.append(editButton)
+                    if (!isRunning)
+                        bubble.append(deleteButton)
+                    if (!isRunning)
+                        {
+                        copyButton.attr("user-origin", title.text())
+                        bubble.append(copyButton)
+                        styleButton.attr("user-origin", title.text())
+                        bubble.append(styleButton)
+                        helpButton.attr("user-origin", attrs[0][1])
+                        bubble.append(helpButton)
+                    }
+                    title_input.val(title.text())
+                    topic_input.val(topic.text())
+                    if (!d.open)
+                    {
+                        d.show(itemdiv[0]);
+                        setTimeout(function() {
+                            $(".ui-popup-backdrop").css("pointer-events", "auto")
+                        },100)
+                    }
+                    else
+                        d.close()
+                }
+            }
+            if (window.screen.width > 800)
+            {
+                itemdiv.click(showEditBubble)
+                itemdiv.on('contextmenu', function(event) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    showEditBubble(event)
+                })
+            }
+            else
+                itemdiv[0].addEventListener('touchend', function(event) {
+                    event.preventDefault()
+                    showEditBubble(event)
+                })
+            itemdiv[0].addEventListener('touchmove', function(e) {
+                e.preventDefault()
+            })
+            if (user_style != undefined)
+                itemdiv.attr('style', user_style)
+        }, true);
+    }, true);
+}
+
 function add_face(user_title, user_topic, user_content, user_style, title_style) {
     var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载AI引擎...</p></div>")
     $.getScript("js/tf.min.js", function() {
@@ -6657,7 +6868,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                                 const drawBox = new faceapi.draw.DrawBox(resizedDetections[0].detection.box, {"label":"ID:" + min_index + "     Name:" + user_data[min_index]["name"] +"    Mouth: " + (isMouthOpen == 1 ? "Open" : "Close")})
                                 drawBox.draw(canvas[0])
                             }
-                            if(!lastPublishTime || new Date().getTime() - lastFacePublishTime >= interval)
+                            if(!lastFacePublishTime || new Date().getTime() - lastFacePublishTime >= interval)
                             {   
                                 // Aug 2025
                                 if(min_index == -1)
