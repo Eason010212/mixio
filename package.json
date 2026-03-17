@@ -21,7 +21,9 @@
     "request": "^2.88.2",
     "sqlite3": "^5.1.7",
     "sync-request": "^6.1.0",
-    "websocket-stream": "^5.5.2"
+    "websocket-stream": "^5.5.2",
+    "ws": "^8.19.0",
+    "y-websocket": "^1.5.4"
   },
   "devDependencies": {
     "pkg": "^5.8.1"
