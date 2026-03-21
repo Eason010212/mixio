@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="MixIO CoDrive - 协同云盘，支持文档、表格、图片管理">
+    <title>MixIO</title>
+    <link rel="shortcut icon" href="img/shortcut.png">
+    <!-- CSS 资源 -->
+    <link rel="stylesheet" href="css/all.css">
+    <link rel="stylesheet" href="css/dataTables.bootstrap4.min.css">
+    <style>
+        /* 文件管理区域 - 列表视图样式 */
+        .file-manager-container {
+            padding: 20px 30px;
+            background: #f8f9fc;
+            min-height: calc(100vh - 200px);
+        }
+        .action-bar {
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e3e6f0;
+            padding-bottom: 15px;
+        }
+        .btn-group-custom {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-icon {
+            margin-right: 6px;
+        }
+        /* 列表视图样式 */
+        .file-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 0.15rem 1.25rem 0 rgba(0,0,0,.05);
+            overflow: hidden;
+            border: 1px solid #e3e6f0;
+        }
+        .file-table {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .file-table th {
+            background: #f8f9fc;
+            border-bottom: 2px solid #e3e6f0;
+            padding: 14px 16px;
+            font-weight: 600;
+            color: #4e73df;
+            font-size: 0.85rem;
+        }
+        .file-table td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            border-bottom: 1px solid #eaecf4;
+        }
+        .file-table tr:hover {
+            background: #f8f9fc;
+            cursor: pointer;
+        }
+        .file-name-cell {
+            font-weight: 500;
+            color: #2c3e50;
+            word-break: break-all;
+        }
+        .file-name-cell i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            width: 24px;
+            color: #4e73df;
+        }
+        .type-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .type-document {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .type-spreadsheet {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        .type-image {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .action-btn {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            border: none;
+            background: none;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .btn-edit-link {
+            background: #e8f0fe;
+            color: #4e73df;
+        }
+        .btn-edit-link:hover {
+            background: #d9e6ff;
+        }
+        .btn-copy {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        .btn-copy:hover {
+            background: #ffe0b3;
+        }
+        .btn-download {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        .btn-download:hover {
+            background: #c8e6c9;
+        }
+        .btn-delete {
+            color: #e74a3b;
+        }
+        .btn-delete:hover {
+            background: #fee2df;
+        }
+        .empty-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            border: 1px dashed #cbd5e0;
+        }
+        .toast-notify {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            z-index: 1050;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+        }
+        .import-file-input {
+            display: none;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .loading-spinner {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        /* 新建文件对话框样式 */
+        .modal-dialog-custom {
+            max-width: 450px;
+        }
+        .extension-hint {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+    <!-- 脚本资源 -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/lang.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery.easing.min.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <script src="js/jquery.easyui.min.js"></script>
+    <script src="js/mqtt.min.js"></script>
+    <script src="js/jquery.dataTables.min.js"></script>
+    <script src="js/dataTables.bootstrap4.min.js"></script>
+    <script src="js/tools.js"></script>
+    <script src="js/sb-admin-2.min.js?v=2"></script>
+</head>
+<body id="page-top" class="sidebar-toggled">
+
+<div id="wrapper">
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center">
+            <div class="sidebar-brand-icon">
+                <img src="img/logo.png" style="width:35px" alt="">
+            </div>
+            <div class="sidebar-brand-text mx-3" >MixIO</div>
+        </a>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
+
+        
+
+        <!-- Nav Item - Dashboard -->
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Heading -->
+        <div class="sidebar-heading lang" key="MANAGE">
+        </div>
+        <li class="nav-item">
+            <a class="nav-link" href="projects" id="manage_prj">
+                <i class="fa fa-fw fa-tachometer"></i>
+                <span class="lang" key="PROJECTSMANAGE"></span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="mqttdata" id="manage_data">
+                <i class="fa fa-fw fa-table"></i>
+                <span class="lang" key="DATAMANAGE"></span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="tinydata" id="tiny_data">
+                <i class="fa fa-fw fa-database"></i>
+                <span>Tiny DB</span></a>
+        </li>
+        <li class="nav-item active">
+            <a class="nav-link" href="codrive" id="co_drive">
+                <i class="fa fa-fw fa-cloud"></i>
+                <span class="lang" key="CODRIVE"></span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="webapps" id="share_app">
+                <i class="fa fa-fw fa-share"></i>
+                <span class="lang" key="SHAREMANAGE"></span></a>
+        </li>
+
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading lang" key="SETTINGS">
+        </div>
+        <li class="nav-item">
+            <a class="nav-link" href="logout">
+                <i class="fa fa-fw fa-arrow-circle-left"></i>
+                <span class="lang" key="LOGOUT"></span></a>
+        </li>
+
+       
+
+        <!-- Divider -->
+        <hr class="sidebar-divider d-none d-md-block">
+
+        <!-- Sidebar Toggler (Sidebar) -->
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
+
+    </ul>
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style="display:flex;justify-content:space-between">
+                <div style="display:flex;align-items:center;justify-content:center">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3"><i class="fa fa-bars"></i></button> 
+                    <h1 class="d-sm-inline-block h3 mb-0 text-gray-800 lang" key="CODRIVE" style="margin-left:10px;font-size:1.5rem;display:inline-block;cursor:pointer">协同云盘</h1>
+                </div>
+            </nav>
+            <!-- 主要功能区域：文件列表管理 -->
+            <div class="file-manager-container">
+                <div class="action-bar">
+                    <div class="btn-group-custom">
+                        <!-- 新建文件下拉菜单 -->
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="newFileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-plus-circle btn-icon"></i>新建文件
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="newFileDropdown">
+                                <a class="dropdown-item" href="#" data-type="document"><i class="fa fa-file"></i> 文档</a>
+                                <a class="dropdown-item" href="#" data-type="spreadsheet"><i class="fa fa-table"></i> 表格</a>
+                                <a class="dropdown-item" href="#" data-type="image"><i class="fa fa-image"></i> 图片</a>
+                            </div>
+                        </div>
+                        <!-- 导入文件按钮 -->
+                        <button id="importFileBtn" class="btn btn-outline-success"><i class="fa fa-upload btn-icon"></i>导入文件</button>
+                        <input type="file" id="importFileInput" class="import-file-input" accept=".txt,.md,.json,.csv,.xlsx,.xls,.png,.jpg,.jpeg,.gif,.bmp" />
+                    </div>
+                    <div class="text-muted small">
+                        <i class="fa fa-list"></i> 列表视图 · 点击行可编辑
+                    </div>
+                </div>
+
+                <!-- 文件列表展示区 -->
+                <div id="fileListContainer" class="file-table-container">
+                    <!-- 动态渲染表格 -->
+                    <div class="text-center p-5">加载中...</div>
+                </div>
+            </div>
+        </div>
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <a href="//mixly.org" target="_blank" class="d-none d-md-block" style="margin-right:30px;color:gray;font-size:0.7rem;user-select:none">
+                        Copyright© Mixly Team @ BNU, CHINA
+                    </a> 
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- 新建文件对话框 -->
+<div class="modal fade" id="newFileModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-custom" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newFileModalTitle">新建文件</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>文件名</label>
+                    <input type="text" class="form-control" id="newFileName" placeholder="请输入文件名">
+                    <div class="extension-hint" id="extensionHint"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="confirmCreateBtn">创建</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">确认删除</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除文件 <strong id="deleteFileName"></strong> 吗？</p>
+                <p class="text-muted small">此操作不可撤销</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 加载遮罩 -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <i class="fa fa-spinner fa-spin fa-2x"></i>
+        <p class="mt-2">处理中...</p>
+    </div>
+</div>
+
+<!-- 轻提示 -->
+<div id="toastMsg" class="toast-notify"></div>
+
+<script>
+    let pendingDeleteId = null;
+    let pendingCreateType = null;
+    
+    // API 基础路径
+    const API_BASE = window.location.origin;
+    
+    // 显示加载中
+    function showLoading() {
+        $('#loadingOverlay').show();
+    }
+    
+    function hideLoading() {
+        $('#loadingOverlay').hide();
+    }
+    
+    // 显示提示消息
+    function showToast(msg, isError = false) {
+        const toast = $('#toastMsg');
+        toast.text(msg).css('opacity', '1');
+        if (isError) {
+            toast.css('background', '#e74a3b');
+        } else {
+            toast.css('background', '#2c3e50');
+        }
+        setTimeout(() => { 
+            toast.css('opacity', '0');
+            toast.css('background', '#2c3e50');
+        }, 3000);
+    }
+    
+    // 获取文件类型样式类
+    function getTypeClass(type) {
+        if(type === 'document') return 'type-document';
+        if(type === 'spreadsheet') return 'type-spreadsheet';
+        if(type === 'image') return 'type-image';
+        return 'type-document';
+    }
+    
+    // 获取文件类型显示名称
+    function getTypeDisplayName(type) {
+        if(type === 'document') return '文档';
+        if(type === 'spreadsheet') return '表格';
+        if(type === 'image') return '图片';
+        return '文件';
+    }
+    
+    // 获取文件图标
+    function getFileIcon(type) {
+        if(type === 'document') return 'fa-file';
+        if(type === 'spreadsheet') return 'fa-table';
+        if(type === 'image') return 'fa-image';
+        return 'fa-file';
+    }
+    
+    // 格式化日期
+    function formatDate(iso) {
+        if(!iso) return '未知';
+        const d = new Date(iso);
+        return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+    }
+    
+    // 格式化文件大小
+    function formatSize(bytes) {
+        if(!bytes) return '--';
+        if(bytes < 1024) return bytes + ' B';
+        if(bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+    
+    // HTML转义
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // 触发编辑跳转
+    const currentUser = '<%= userName %>';
+    
+    // 然后在 JavaScript 函数中使用
+    function triggerEditJump(fileId, fileName, fileType) {
+        window.location.href = `/editFile/${currentUser}/${fileId}?type=${fileType}&name=${encodeURIComponent(fileName)}`;
+    }
+    
+    // 下载文件
+    function downloadFile(fileId, fileName) {
+        window.location.href = `/downloadFile/${fileId}`;
+    }
+    
+    // 从后端加载文件列表
+    function loadFileList() {
+        showLoading();
+        $.ajax({
+            url: '/getFileList',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    renderFileList(response.files || []);
+                } else {
+                    showToast(response.message || '加载文件列表失败', true);
+                    renderFileList([]);
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                console.error('加载文件列表失败:', error);
+                showToast('加载文件列表失败，请检查网络连接', true);
+                renderFileList([]);
+            }
+        });
+    }
+    
+    // 渲染列表视图
+    function renderFileList(files) {
+        const container = $('#fileListContainer');
+        if(!files || files.length === 0) {
+            container.html(`
+                <div class="empty-placeholder">
+                    <i class="fa fa-cloud-upload-alt fa-3x text-gray-300 mb-3"></i>
+                    <h5 class="text-gray-500">暂无文件</h5>
+                    <p class="text-muted small">点击"新建文件"或"导入文件"开始使用协同云盘</p>
+                </div>
+            `);
+            return;
+        }
+        
+        let html = `
+            <table class="file-table">
+                <thead>
+                    <tr>
+                        <th style="width: 35%">文件名</th>
+                        <th style="width: 12%">类型</th>
+                        <th style="width: 20%">修改时间</th>
+                        <th style="width: 10%">大小</th>
+                        <th style="width: 23%">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        files.forEach(file => {
+            const typeClass = getTypeClass(file.type);
+            const typeName = getTypeDisplayName(file.type);
+            const iconClass = getFileIcon(file.type);
+            const sizeStr = formatSize(file.size);
+            // 在 renderFileList 函数中，找到 action-buttons div，添加复制按钮
+            html += `
+                <tr class="file-row" data-id="${file.id}" data-type="${file.type}" data-name="${escapeHtml(file.name)}">
+                    <td class="file-name-cell">
+                        <i class="fa ${iconClass}"></i>
+                        <span>${escapeHtml(file.name)}</span>
+                    </td>
+                    <td>
+                        <span class="type-badge ${typeClass}">${typeName}</span>
+                    </td>
+                    <td class="text-muted small">${formatDate(file.uploadTime || file.updatedAt)}</td>
+                    <td class="text-muted small">${sizeStr}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn btn-edit-link edit-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}">
+                                <i class="fa fa-edit"></i> 编辑
+                            </button>
+                            <button class="action-btn btn-download download-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}">
+                                <i class="fa fa-download"></i> 下载
+                            </button>
+                            <button class="action-btn btn-copy copy-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" style="background: #fff3e0; color: #f57c00;">
+                                <i class="fa fa-share"></i> 分享
+                            </button>
+                            <button class="action-btn btn-delete delete-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}">
+                                <i class="fa fa-trash"></i> 删除
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;})
+        
+        html += `</tbody></table>`;
+        container.html(html);
+        
+        // 绑定行点击事件（整行点击触发编辑）
+        $('.file-row').off('click').on('click', function(e) {
+            if($(e.target).closest('.action-buttons').length) return;
+            const fileId = $(this).data('id');
+            const fileName = $(this).data('name');
+            const fileType = $(this).data('type');
+            triggerEditJump(fileId, fileName, fileType);
+        });
+        $('.copy-btn').off('click').on('click', function(e) {
+            e.stopPropagation();
+            const fileId = $(this).data('id');
+            const fileName = $(this).data('name');
+            const fileType = $(this).data('type');
+            copyShareLink(fileId, fileName, fileType);
+        });
+        // 绑定编辑按钮事件
+        $('.edit-btn').off('click').on('click', function(e) {
+            e.stopPropagation();
+            const fileId = $(this).data('id');
+            const fileName = $(this).data('name');
+            const fileType = $(this).data('type');
+            triggerEditJump(fileId, fileName, fileType);
+        });
+        
+        // 绑定下载按钮事件
+        $('.download-btn').off('click').on('click', function(e) {
+            e.stopPropagation();
+            const fileId = $(this).data('id');
+            const fileName = $(this).data('name');
+            downloadFile(fileId, fileName);
+        });
+        
+        // 绑定删除按钮事件
+        $('.delete-btn').off('click').on('click', function(e) {
+            e.stopPropagation();
+            const fileId = $(this).data('id');
+            const fileName = $(this).data('name');
+            showDeleteConfirm(fileId, fileName);
+        });
+    }
+    
+    // 显示删除确认弹窗
+    function showDeleteConfirm(fileId, fileName) {
+        pendingDeleteId = fileId;
+        $('#deleteFileName').text(fileName);
+        $('#deleteConfirmModal').modal('show');
+    }
+
+    // 复制分享链接
+    // 显示链接分享对话框
+    function showShareDialog(fileId, fileName, fileType) {
+        const shareUrl = `${window.location.origin}/editFile/${currentUser}/${fileId}?type=${fileType}&name=${encodeURIComponent(fileName)}`;
+        
+        // 创建模态框
+        const modalHtml = `
+            <div class="modal fade" id="shareLinkModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fa fa-share-alt" style="color: #f57c00;"></i> 分享链接
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>分享以下链接给他人，即可协同编辑文档 <strong>${escapeHtml(fileName)}</strong></p>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="shareUrlInput" value="${shareUrl}" readonly>
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" id="copyShareUrlBtn" type="button">
+                                        <i class="fa fa-copy"></i> 复制
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="alert alert-info small mt-2">
+                                <i class="fa fa-info-circle"></i> 
+                                任何人拥有此链接都可以查看和编辑文档
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // 移除已存在的模态框
+        if ($('#shareLinkModal').length) {
+            $('#shareLinkModal').remove();
+        }
+        
+        // 添加模态框到页面
+        $('body').append(modalHtml);
+        
+        // 显示模态框
+        $('#shareLinkModal').modal('show');
+        
+        // 自动选中输入框内容
+        $('#shareLinkModal').on('shown.bs.modal', function() {
+            $('#shareUrlInput').focus().select();
+        });
+        
+        // 复制按钮事件
+        $('#copyShareUrlBtn').off('click').on('click', function() {
+            const urlInput = $('#shareUrlInput');
+            urlInput.select();
+            urlInput[0].setSelectionRange(0, 99999);
+            
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                // 显示复制成功提示
+                const copyBtn = $(this);
+                const originalHtml = copyBtn.html();
+                copyBtn.html('<i class="fa fa-check"></i> 已复制');
+                setTimeout(() => {
+                    copyBtn.html(originalHtml);
+                }, 2000);
+                
+                // 同时显示 toast 提示
+                showToast('链接已复制到剪贴板');
+            }).catch(err => {
+                console.error('复制失败:', err);
+                // 降级方案
+                document.execCommand('copy');
+                showToast('链接已复制', true);
+            });
+        });
+        
+        // 点击输入框自动全选
+        $('#shareUrlInput').off('click').on('click', function() {
+            $(this).select();
+        });
+    }
+
+    // 复制分享链接（改为显示对话框）
+    function copyShareLink(fileId, fileName, fileType) {
+        showShareDialog(fileId, fileName, fileType);
+    }
+
+    
+    // 执行删除
+    function executeDelete() {
+        if(!pendingDeleteId) return;
+        
+        showLoading();
+        $.ajax({
+            url: `/deleteFile/${pendingDeleteId}`,
+            type: 'DELETE',
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    showToast('文件删除成功');
+                    loadFileList();
+                } else {
+                    showToast(response.message || '删除失败', true);
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                console.error('删除文件失败:', error);
+                showToast('删除文件失败，请稍后重试', true);
+            }
+        });
+        
+        pendingDeleteId = null;
+        $('#deleteConfirmModal').modal('hide');
+    }
+    
+    // 显示新建文件对话框
+    function showNewFileDialog(type) {
+        pendingCreateType = type;
+        let title = '';
+        let extension = '';
+        let hint = '';
+        
+        if(type === 'document') {
+            title = '新建文档';
+            extension = '.md';
+            hint = '文件名将自动添加 .md 扩展名';
+        } else if(type === 'spreadsheet') {
+            title = '新建表格';
+            extension = '.csv';
+            hint = '文件名将自动添加 .csv 扩展名';
+        } else if(type === 'image') {
+            title = '新建图片';
+            extension = '.jpg';
+            hint = '文件名将自动添加 .jpg 扩展名（1920×1080 白色背景）';
+        }
+        
+        $('#newFileModalTitle').text(title);
+        $('#extensionHint').text(hint);
+        $('#newFileName').val('');
+        $('#newFileModal').modal('show');
+    }
+    
+    // 创建新文件
+    function createNewFile() {
+        let fileName = $('#newFileName').val().trim();
+        
+        if (!fileName) {
+            showToast('请输入文件名', true);
+            return;
+        }
+        
+        // 添加扩展名
+        let fullFileName = '';
+        let content = '';
+        let contentType = '';
+        
+        if (pendingCreateType === 'document') {
+            if (!fileName.endsWith('.md')) {
+                fullFileName = fileName + '.md';
+            } else {
+                fullFileName = fileName;
+            }
+            content = ''; // 空文档
+            contentType = 'text/markdown';
+        } else if (pendingCreateType === 'spreadsheet') {
+            if (!fileName.endsWith('.csv')) {
+                fullFileName = fileName + '.csv';
+            } else {
+                fullFileName = fileName;
+            }
+            content = ''; // 空表格
+            contentType = 'text/csv';
+        } else if (pendingCreateType === 'image') {
+            if (!fileName.endsWith('.jpg') && !fileName.endsWith('.jpeg')) {
+                fullFileName = fileName + '.jpg';
+            } else {
+                fullFileName = fileName;
+            }
+            // 创建 1920x1080 的白色 JPEG 图片
+            content = createWhiteJpegBase64();
+            contentType = 'image/jpeg';
+        } else {
+            return;
+        }
+        
+        showLoading();
+        
+        // 将内容转换为 Blob
+        let blob;
+        if (pendingCreateType === 'image') {
+            // 图片内容已经是 base64，需要转换为 Blob
+            const byteString = atob(content.split(',')[1]);
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            blob = new Blob([ab], { type: contentType });
+        } else {
+            blob = new Blob([content], { type: contentType });
+        }
+        
+        const formData = new FormData();
+        formData.append('file', blob, fullFileName);
+        
+        $.ajax({
+            url: '/uploadFile',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                $('#newFileModal').modal('hide');
+                if (response.success) {
+                    showToast(`已创建${getTypeDisplayName(pendingCreateType)}: ${fullFileName}`);
+                    loadFileList();
+                    // 不自动跳转编辑
+                } else {
+                    showToast(response.message || '创建文件失败', true);
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                console.error('创建文件失败:', error);
+                showToast('创建文件失败，请稍后重试', true);
+            }
+        });
+    }
+    
+    // 创建 1920x1080 白色 JPEG 图片的 Base64
+    function createWhiteJpegBase64() {
+        // 创建一个 canvas 元素
+        const canvas = document.createElement('canvas');
+        canvas.width = 1920;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
+        
+        // 填充白色背景
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 转换为 base64
+        return canvas.toDataURL('image/jpeg', 0.95);
+    }
+    
+    // 导入文件（上传到后端）
+    function importFiles(fileInputEvent) {
+        const file = fileInputEvent.target.files[0];
+        if(!file) return;
+        
+        showLoading();
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        $.ajax({
+            url: '/uploadFile',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    showToast(`上传成功: ${file.name}`);
+                    loadFileList();
+                } else {
+                    showToast(response.message || '上传失败', true);
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                console.error('文件上传失败:', error);
+                let errorMsg = '文件上传失败';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                showToast(errorMsg, true);
+            }
+        });
+        
+        $('#importFileInput').val('');
+    }
+    
+    // 页面初始化
+    $(document).ready(function() {
+        // 加载文件列表
+        loadFileList();
+        
+        // 新建文件下拉选项
+        $('.dropdown-item[data-type]').on('click', function(e) {
+            e.preventDefault();
+            const type = $(this).data('type');
+            showNewFileDialog(type);
+        });
+        
+        // 确认创建按钮
+        $('#confirmCreateBtn').on('click', createNewFile);
+        
+        // 导入文件按钮
+        $('#importFileBtn').on('click', function() { 
+            $('#importFileInput').click(); 
+        });
+        $('#importFileInput').on('change', importFiles);
+        
+        // 删除确认
+        $('#confirmDeleteBtn').on('click', executeDelete);
+        
+        // 回车键确认创建
+        $('#newFileName').on('keypress', function(e) {
+            if (e.which === 13) {
+                createNewFile();
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -2,6 +2,10 @@ var VERSION = "1.10.6.0115"
 require('events').EventEmitter.defaultMaxListeners = 50;
 
 const extract = require('extract-zip')
+const WebSocket = require('ws')
+const multer = require('multer');
+const iconv = require('iconv-lite');
+const { setupWSConnection } = require('./node_modules/y-websocket/bin/utils.js')
 defaultCrt =
     `-----BEGIN CERTIFICATE-----
 MIID0TCCArmgAwIBAgICYxswDQYJKoZIhvcNAQELBQAwczELMAkGA1UEBhMCQ04x
@@ -102,7 +106,6 @@ var jq = require("jquery");
 const mqtt = require('mqtt');
 const path = require('path');
 var readline = require('readline');
-var iconv = require('iconv-lite');
 var request = require('request');
 const cors = require('cors');
 const axios = require('axios');
@@ -1428,6 +1431,858 @@ var mixioServer = async function() {
         })
     })
 
+    //0321
+    function generateId() {
+        return Date.now() + '-' + Math.random().toString(36).substr(2, 8);
+    }
+    function getCorrectFileName(originalName) {
+        try {
+            if (Buffer.isBuffer(originalName)) {
+                return iconv.decode(originalName, 'utf8');
+            }
+            if (typeof originalName === 'string') {
+                const latin1Buffer = Buffer.from(originalName, 'latin1');
+                const utf8String = iconv.decode(latin1Buffer, 'utf8');
+                if (/[\u4e00-\u9fa5]/.test(utf8String)) {
+                    return utf8String;
+                }
+                if (/[\u4e00-\u9fa5]/.test(originalName)) {
+                    return originalName;
+                }
+                return originalName;
+            }
+            
+            return originalName.toString();
+        } catch (err) {
+            console.error('文件名编码转换失败:', err);
+            return originalName.toString();
+        }
+    }
+
+    function sanitizeFileName(fileName) {
+        const illegalChars = /[\\/:*?"<>|]/g;
+        let sanitized = fileName.replace(illegalChars, '_');
+        sanitized = sanitized.replace(/[\x00-\x1f\x7f]/g, '');
+        if (sanitized.length > 200) {
+            const ext = path.extname(sanitized);
+            const name = sanitized.substring(0, 200 - ext.length);
+            sanitized = name + ext;
+        }
+        return sanitized;
+    }
+
+    function getFileType(filename) {
+        const ext = path.extname(filename).toLowerCase();
+        const documentTypes = [
+            '.txt', '.md', '.doc', '.docx', '.pdf', '.json', 
+            '.xml', '.html', '.htm', '.css', '.js', '.markdown'
+        ];
+        const spreadsheetTypes = ['.csv', '.xls', '.xlsx'];
+        const imageTypes = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+        
+        if (imageTypes.includes(ext)) return 'image';
+        if (spreadsheetTypes.includes(ext)) return 'spreadsheet';
+        if (documentTypes.includes(ext)) return 'document';
+        return 'document';
+    }
+
+    function saveFileRecord(fileInfo, userName) {
+        const recordFile = `storage/drive/${userName}/files.json`;
+        let records = [];
+        const recordDir = path.dirname(recordFile);
+        if (!fs.existsSync(recordDir)) {
+            fs.mkdirSync(recordDir, { recursive: true });
+        }
+        if (fs.existsSync(recordFile)) {
+            try {
+                const content = fs.readFileSync(recordFile, 'utf8');
+                records = JSON.parse(content);
+            } catch (e) {
+                console.error('读取记录文件错误:', e);
+                records = [];
+            }
+        }
+        records.push(fileInfo);
+        try {
+            fs.writeFileSync(recordFile, JSON.stringify(records, null, 2), 'utf8');
+        } catch (e) {
+            console.error('保存记录文件错误:', e);
+            throw e;
+        }
+    }
+
+    function getFileRecords(userName) {
+        const recordFile = `storage/drive/${userName}/files.json`;
+        
+        if (!fs.existsSync(recordFile)) {
+            return [];
+        }
+        
+        try {
+            const content = fs.readFileSync(recordFile, 'utf8');
+            return JSON.parse(content);
+        } catch (e) {
+            console.error('读取文件记录错误:', e);
+            return [];
+        }
+    }
+
+    const fileFilter = (req, file, cb) => {
+        const allowedExtensions = [
+            '.txt', '.md', '.doc', '.docx', '.pdf', '.json', '.xml',
+            '.html', '.htm', '.css', '.js', '.csv', '.xls', '.xlsx',
+            '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'
+        ];
+        
+        const ext = path.extname(file.originalname).toLowerCase();
+        
+        if (allowedExtensions.includes(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`不支持的文件类型: ${file.originalname}`), false);
+        }
+    };
+
+    const storage = multer.diskStorage({
+        destination: function(req, file, cb) {
+            const userName = req.session.userName;
+            
+            if (!userName) {
+                return cb(new Error('未登录'), null);
+            }
+            
+            const userDir = `storage/drive/${userName}`;
+            
+            if (!fs.existsSync(userDir)) {
+                fs.mkdirSync(userDir, { recursive: true });
+            }
+            
+            cb(null, userDir);
+        },
+        filename: function(req, file, cb) {
+            try {
+                let originalName = getCorrectFileName(file.originalname);
+                
+                const cleanName = sanitizeFileName(originalName);
+                
+                const timestamp = Date.now();
+                const random = Math.floor(Math.random() * 10000);
+                const ext = path.extname(cleanName);
+                const baseName = path.basename(cleanName, ext);
+                
+                const finalFileName = `${timestamp}_${random}_${baseName}${ext}`;
+                
+                file.correctOriginalName = originalName;
+                
+                console.log(`[上传] 原始文件名: ${originalName}`);
+                console.log(`[上传] 保存文件名: ${finalFileName}`);
+                
+                cb(null, finalFileName);
+            } catch (err) {
+                console.error('文件名处理错误:', err);
+                const timestamp = Date.now();
+                const random = Math.floor(Math.random() * 10000);
+                const ext = path.extname(file.originalname) || '';
+                cb(null, `${timestamp}_${random}${ext}`);
+            }
+        }
+    });
+
+    const upload = multer({
+        storage: storage,
+        fileFilter: fileFilter,
+        limits: {
+            fileSize: 50 * 1024 * 1024,
+            files: 1
+        }
+    });
+
+    app.post('/uploadFile', function(req, res) {
+        upload.single('file')(req, res, function(err) {
+            const userName = req.session.userName;
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录或会话已过期'
+                });
+            }
+            
+            if (err) {
+                console.error('Multer 错误:', err);
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    return res.status(400).json({
+                        success: false,
+                        message: '文件大小超过限制（最大 50MB）'
+                    });
+                }
+                return res.status(400).json({
+                    success: false,
+                    message: err.message || '文件上传失败'
+                });
+            }
+            
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: '请选择要上传的文件'
+                });
+            }
+            
+            try {
+                const file = req.file;
+                
+                let originalName = file.correctOriginalName;
+                if (!originalName) {
+                    originalName = getCorrectFileName(file.originalname);
+                }
+                
+                const fileInfo = {
+                    id: generateId(),
+                    name: originalName,
+                    filename: file.filename,
+                    path: file.path,
+                    size: file.size,
+                    type: getFileType(originalName),
+                    mimeType: file.mimetype,
+                    uploadTime: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    userName: userName
+                };
+                
+                saveFileRecord(fileInfo, userName);
+                
+                console.log(`[成功] 文件上传成功: ${originalName} (${file.size} bytes)`);
+                
+                res.json({
+                    success: true,
+                    message: '文件上传成功',
+                    file: fileInfo
+                });
+                
+            } catch (error) {
+                console.error('文件上传处理错误:', error);
+                
+                if (req.file && fs.existsSync(req.file.path)) {
+                    try {
+                        fs.unlinkSync(req.file.path);
+                    } catch (e) {
+                        console.error('删除失败文件错误:', e);
+                    }
+                }
+                
+                res.status(500).json({
+                    success: false,
+                    message: '文件上传失败: ' + error.message
+                });
+            }
+        });
+    });
+
+    app.get('/getFileList', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录或会话已过期'
+                });
+            }
+            
+            const files = getFileRecords(userName);
+            
+            files.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+            
+            res.json({
+                success: true,
+                files: files
+            });
+            
+        } catch (error) {
+            console.error('获取文件列表错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '获取文件列表失败: ' + error.message
+            });
+        }
+    });
+
+    app.delete('/deleteFile/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const fileId = req.params.fileId;
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录或会话已过期'
+                });
+            }
+            
+            const recordFile = `storage/drive/${userName}/files.json`;
+            
+            if (!fs.existsSync(recordFile)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件记录不存在'
+                });
+            }
+            
+            const content = fs.readFileSync(recordFile, 'utf8');
+            let records = JSON.parse(content);
+            
+            const fileIndex = records.findIndex(f => f.id === fileId);
+            if (fileIndex === -1) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件不存在'
+                });
+            }
+            
+            const file = records[fileIndex];
+            
+            if (fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+                console.log('物理文件已删除:', file.path);
+            }
+            
+            records.splice(fileIndex, 1);
+            fs.writeFileSync(recordFile, JSON.stringify(records, null, 2), 'utf8');
+            
+            res.json({
+                success: true,
+                message: '文件删除成功'
+            });
+            
+        } catch (error) {
+            console.error('删除文件错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '删除文件失败: ' + error.message
+            });
+        }
+    });
+
+    app.get('/downloadFile/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const fileId = req.params.fileId;
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+            
+            const records = getFileRecords(userName);
+            const file = records.find(f => f.id === fileId);
+            
+            if (!file) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件不存在'
+                });
+            }
+            
+            if (!fs.existsSync(file.path)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件物理路径不存在'
+                });
+            }
+            
+            const encodedFileName = encodeURIComponent(file.name);
+            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodedFileName}`);
+            
+            res.download(file.path, file.name, function(err) {
+                if (err) {
+                    console.error('下载文件错误:', err);
+                    if (!res.headersSent) {
+                        res.status(500).json({
+                            success: false,
+                            message: '下载失败'
+                        });
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error('下载文件错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '下载失败: ' + error.message
+            });
+        }
+    });
+
+    app.get('/getFileInfo/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const fileId = req.params.fileId;
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+            
+            const records = getFileRecords(userName);
+            const file = records.find(f => f.id === fileId);
+            
+            if (!file) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件不存在'
+                });
+            }
+            
+            res.json({
+                success: true,
+                file: file
+            });
+            
+        } catch (error) {
+            console.error('获取文件信息错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '获取文件信息失败: ' + error.message
+            });
+        }
+    });
+
+    app.put('/updateFileContent/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const fileId = req.params.fileId;
+            const { content } = req.body;
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+            
+            if (content === undefined) {
+                return res.status(400).json({
+                    success: false,
+                    message: '文件内容不能为空'
+                });
+            }
+            
+            const recordFile = `storage/drive/${userName}/files.json`;
+            const records = getFileRecords(userName);
+            
+            const fileIndex = records.findIndex(f => f.id === fileId);
+            if (fileIndex === -1) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件不存在'
+                });
+            }
+            
+            const file = records[fileIndex];
+            
+            if (file.type === 'document' || file.type === 'spreadsheet') {
+                fs.writeFileSync(file.path, content, 'utf8');
+                
+                file.updatedAt = new Date().toISOString();
+                file.size = Buffer.byteLength(content, 'utf8');
+                records[fileIndex] = file;
+                fs.writeFileSync(recordFile, JSON.stringify(records, null, 2), 'utf8');
+                
+                res.json({
+                    success: true,
+                    message: '文件更新成功',
+                    file: file
+                });
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: '不支持更新此类型文件的内容'
+                });
+            }
+            
+        } catch (error) {
+            console.error('更新文件内容错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '更新文件失败: ' + error.message
+            });
+        }
+    });
+
+    app.get('/readFileContent/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const fileId = req.params.fileId;
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+            
+            const records = getFileRecords(userName);
+            const file = records.find(f => f.id === fileId);
+            
+            if (!file) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件不存在'
+                });
+            }
+            
+            if (!fs.existsSync(file.path)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件物理路径不存在'
+                });
+            }
+            
+            let content = '';
+            if (file.type === 'image') {
+                const imageBuffer = fs.readFileSync(file.path);
+                const base64 = imageBuffer.toString('base64');
+                content = `data:${file.mimeType};base64,${base64}`;
+            } else {
+                content = fs.readFileSync(file.path, 'utf8');
+            }
+            
+            res.json({
+                success: true,
+                file: {
+                    ...file,
+                    content: content
+                }
+            });
+            
+        } catch (error) {
+            console.error('读取文件内容错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '读取文件失败: ' + error.message
+            });
+        }
+    });
+
+    // 8. 重命名文件
+    app.put('/renameFile/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const fileId = req.params.fileId;
+            const { newName } = req.body;
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+            
+            if (!newName || newName.trim() === '') {
+                return res.status(400).json({
+                    success: false,
+                    message: '新文件名不能为空'
+                });
+            }
+            
+            const recordFile = `storage/drive/${userName}/files.json`;
+            let records = getFileRecords(userName);
+            
+            const fileIndex = records.findIndex(f => f.id === fileId);
+            if (fileIndex === -1) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件不存在'
+                });
+            }
+            
+            const file = records[fileIndex];
+            const oldName = file.name;
+            
+            // 更新文件名
+            file.name = newName.trim();
+            file.updatedAt = new Date().toISOString();
+            
+            // 保存更新
+            records[fileIndex] = file;
+            fs.writeFileSync(recordFile, JSON.stringify(records, null, 2), 'utf8');
+            
+            console.log(`[重命名] ${oldName} -> ${newName}`);
+            
+            res.json({
+                success: true,
+                message: '文件重命名成功',
+                file: file
+            });
+            
+        } catch (error) {
+            console.error('重命名文件错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '重命名失败: ' + error.message
+            });
+        }
+    });
+    //0321b
+    app.get('/editFile/:creator/:fileId', function(req, res) {
+        const userName = req.session.userName;
+        const { creator, fileId } = req.params;
+        const fileType = req.query.type;
+        const fileName = req.query.name;
+        
+        if (!userName) {
+            return res.redirect('/login');
+        }
+        
+        if (!fileId || !fileType) {
+            return res.status(400).send('缺少必要参数');
+        }
+        
+        // 使用 EJS 渲染
+        ejs.renderFile('ejs/edit.ejs', {
+            userName: userName,
+            creator: creator,
+            fileId: fileId,
+            fileType: fileType,
+            fileName: decodeURIComponent(fileName || '')
+        }, function(err, html) {
+            if (err) {
+                console.error('渲染文件错误:', err);
+                return res.status(500).send('渲染文件错误');
+            }
+            res.send(html);
+        });
+    });
+
+    // 获取文档内容 - 使用 username/fileId 两层路由
+    app.get('/api/getDocumentContent/:username/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const { username, fileId } = req.params; // 从路由参数获取 username 和 fileId
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+            
+            // 从指定用户的文件夹读取文件
+            const recordFile = `storage/drive/${username}/files.json`;
+            
+            if (!fs.existsSync(recordFile)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件记录不存在'
+                });
+            }
+            
+            const content = fs.readFileSync(recordFile, 'utf8');
+            const records = JSON.parse(content);
+            const file = records.find(f => f.id === fileId);
+            
+            if (!file) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件不存在'
+                });
+            }
+            
+            if (!fs.existsSync(file.path)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件物理路径不存在'
+                });
+            }
+            
+            // 读取文件内容
+            let fileContent = fs.readFileSync(file.path, 'utf8');
+            
+            res.json({
+                success: true,
+                file: {
+                    id: file.id,
+                    name: file.name,
+                    content: fileContent,
+                    type: file.type,
+                    size: file.size,
+                    updatedAt: file.updatedAt,
+                    creator: username
+                }
+            });
+            
+        } catch (error) {
+            console.error('获取文档内容错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '获取文档内容失败: ' + error.message
+            });
+        }
+    });
+
+    // 保存文档内容 - 使用 username/fileId 两层路由
+    app.post('/api/saveDocumentContent/:username/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const { username, fileId } = req.params; // 从路由参数获取 username 和 fileId
+            const { content } = req.body;
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+            
+            // 从指定用户的文件夹读取文件
+            const recordFile = `storage/drive/${username}/files.json`;
+            
+            if (!fs.existsSync(recordFile)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件记录不存在'
+                });
+            }
+            
+            let records = [];
+            try {
+                const fileContent = fs.readFileSync(recordFile, 'utf8');
+                records = JSON.parse(fileContent);
+            } catch (e) {
+                records = [];
+            }
+            
+            const fileIndex = records.findIndex(f => f.id === fileId);
+            if (fileIndex === -1) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件不存在'
+                });
+            }
+            
+            const file = records[fileIndex];
+            
+            // 保存文件内容
+            fs.writeFileSync(file.path, content, 'utf8');
+            
+            // 更新记录
+            file.updatedAt = new Date().toISOString();
+            file.size = Buffer.byteLength(content, 'utf8');
+            records[fileIndex] = file;
+            fs.writeFileSync(recordFile, JSON.stringify(records, null, 2), 'utf8');
+            
+            res.json({
+                success: true,
+                message: '保存成功',
+                updatedAt: file.updatedAt
+            });
+            
+        } catch (error) {
+            console.error('保存文档内容错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '保存失败: ' + error.message
+            });
+        }
+    });
+
+    // 重命名文件 - 使用 username/fileId 两层路由
+    app.put('/api/renameFile/:username/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const { username, fileId } = req.params; // 从路由参数获取 username 和 fileId
+            const { newName } = req.body;
+            
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+            
+            if (!newName || newName.trim() === '') {
+                return res.status(400).json({
+                    success: false,
+                    message: '新文件名不能为空'
+                });
+            }
+            
+            // 从指定用户的文件夹读取文件
+            const recordFile = `storage/drive/${username}/files.json`;
+            
+            if (!fs.existsSync(recordFile)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件记录不存在'
+                });
+            }
+            
+            let records = [];
+            try {
+                const fileContent = fs.readFileSync(recordFile, 'utf8');
+                records = JSON.parse(fileContent);
+            } catch (e) {
+                records = [];
+            }
+            
+            const fileIndex = records.findIndex(f => f.id === fileId);
+            if (fileIndex === -1) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件不存在'
+                });
+            }
+            
+            const file = records[fileIndex];
+            
+            // 检查扩展名是否匹配
+            const oldExt = path.extname(file.name);
+            const newExt = path.extname(newName);
+            
+            if (oldExt !== newExt && newExt !== '') {
+                return res.status(400).json({
+                    success: false,
+                    message: '不能修改文件扩展名'
+                });
+            }
+            
+            // 确保扩展名正确
+            let finalName = newName;
+            if (!path.extname(finalName) && oldExt) {
+                finalName = finalName + oldExt;
+            }
+            
+            file.name = finalName;
+            file.updatedAt = new Date().toISOString();
+            records[fileIndex] = file;
+            fs.writeFileSync(recordFile, JSON.stringify(records, null, 2), 'utf8');
+            
+            res.json({
+                success: true,
+                message: '重命名成功',
+                file: {
+                    id: file.id,
+                    name: file.name,
+                    updatedAt: file.updatedAt
+                }
+            });
+            
+        } catch (error) {
+            console.error('重命名文件错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '重命名失败: ' + error.message
+            });
+        }
+    });
+    //0321
+
     app.get('/observe', function(req, res) {
         ejs.renderFile(__dirname + '/ejs/observe.ejs', {
             'configs': configs
@@ -1731,6 +2586,14 @@ var mixioServer = async function() {
 
     })
 
+    app.get('/codrive', function(req, res) { 
+        // codrive.ejs
+        ejs.renderFile(__dirname + '/ejs/codrive.ejs', {
+            userName: req.session.userName
+        }, function(err, data) {
+            res.send(data)
+        })
+    })
 
     app.get('/webapps', function(req, res) {
         if (req.session.userName) {
@@ -3089,9 +3952,19 @@ var mixioServer = async function() {
                                         }
                                         db.run('delete from devices')
                                         console.log('[INFO] Storage Engine: SQLite')
-                                        console.log('[INFO] Database Connected!')
-                                        resolve({
-                                            stop: stopFunction
+                                        const njsserver = http.createServer(app)
+                                        const njswss = new WebSocket.Server({ 
+                                            server: njsserver
+                                        })
+                                        njswss.on('connection', (conn, req) => {
+                                            setupWSConnection(conn, req)
+                                        })
+                                        njsserver.listen(8082, () => {
+                                            console.log('[INFO] Njs-WebSocket server listening on port', 8082)
+                                            console.log('[INFO] Database Connected!')
+                                            resolve({
+                                                stop: stopFunction
+                                            })
                                         })
                                     }
                                 )
@@ -3163,9 +4036,19 @@ var mixioServer = async function() {
                                                 console.log("[INFO] Database Initialized!")
                                                 db.query('delete from devices')
                                                 console.log('[INFO] Storage Engine: MySQL (' + MYSQL_HOST + ')')
-                                                console.log('[INFO] Database Connected!')
-                                                resolve({
-                                                    stop: stopFunction
+                                                const njsserver = http.createServer(app)
+                                                const njswss = new WebSocket.Server({ 
+                                                    server: njsserver
+                                                })
+                                                njswss.on('connection', (conn, req) => {
+                                                    setupWSConnection(conn, req)
+                                                })
+                                                njsserver.listen(8082, () => {
+                                                    console.log('[INFO] Njs-WebSocket server listening on port', 8082)
+                                                    console.log('[INFO] Database Connected!')
+                                                    resolve({
+                                                        stop: stopFunction
+                                                    })
                                                 })
                                             }
                                         })
