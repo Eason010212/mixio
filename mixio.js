@@ -2087,23 +2087,6 @@ var mixioServer = async function() {
 
                 const file = records[fileIndex];
 
-                // 创建恢复前的版本快照
-                const restoreVersionId = `restore_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-                const restoreVersionFile = `storage/drive/${username}/versions/${fileId}/${restoreVersionId}.json`;
-                const currentContent = fs.readFileSync(file.path, 'utf8');
-
-                const restoreVersionData = {
-                    id: restoreVersionId,
-                    fileId: fileId,
-                    content: currentContent,
-                    createdAt: new Date().toISOString(),
-                    createdBy: userName,
-                    note: '恢复版本前的快照',
-                    checksum: crypto.createHash('sha256').update(currentContent).digest('hex')
-                };
-
-                fs.writeFileSync(restoreVersionFile, JSON.stringify(restoreVersionData, null, 2), 'utf8');
-
                 // 恢复版本内容到主文件
                 fs.writeFileSync(file.path, versionContent.content, 'utf8');
 
@@ -2120,8 +2103,7 @@ var mixioServer = async function() {
                 res.json({
                     success: true,
                     message: '版本恢复成功',
-                    updatedAt: file.updatedAt,
-                    restoreVersionId: restoreVersionId
+                    updatedAt: file.updatedAt
                 });
 
                 // 清理备份

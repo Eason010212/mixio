@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../../css/all.css">
     <link rel="stylesheet" href="../../css/bootstrap.min.css">
     <link rel="stylesheet" href="../../js/libs/easymde.min.css">
+    <link rel="stylesheet" href="../../css/handsontable.full.min.css">
     <style>
         * {
             margin: 0;
@@ -676,12 +677,11 @@
         <div id="spreadsheetToolbar" style="display: none;">
             <button id="addRowBtn" class="toolbar-btn"><i class="fa fa-plus"></i> 添加行</button>
             <button id="addColBtn" class="toolbar-btn"><i class="fa fa-plus"></i> 添加列</button>
-            <button id="formatCsvBtn" class="toolbar-btn"><i class="fa fa-magic"></i> 格式化CSV</button>
         </div>
     </div>
     
     <!-- 协同用户面板 -->
-    <div class="collab-panel collapsed" id="collabPanel" style="display: none;">
+    <div class="collab-panel collapsed" id="collabPanel" style="display: none;z-index:999">
         <div class="collab-header" id="collabHeader">
             <div class="collab-title">
                 <i class="fa fa-users"></i>
@@ -738,6 +738,7 @@
     <script src="../../js/jquery.min.js"></script>
     <script src="../../js/bootstrap.bundle.min.js"></script>
     <script src="../../js/libs/easymde.min.js"></script>
+    <script src="../../js/handsontable.full.min.js"></script>
     
     <script type="module">
         // 使用 ES6 模块方式导入 Yjs
@@ -1513,39 +1514,48 @@
 
             const editorElement = document.getElementById('editor');
 
-            // 设置CSV编辑器的样式
-            editorElement.style.fontFamily = 'monospace';
-            editorElement.style.fontSize = '14px';
-            editorElement.style.lineHeight = '1.5';
-            editorElement.style.padding = '15px';
-            editorElement.style.whiteSpace = 'pre';
-            editorElement.style.overflow = 'auto';
-            editorElement.style.borderRadius = '8px';
-            editorElement.style.border = '1px solid #e3e6f0';
-            editorElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-            editorElement.style.background = 'white';
+            // 将textarea转换为div，用于handsontable
+            const container = document.createElement('div');
+            container.id = 'editor';
+            container.style.height = 'calc(100vh - 140px)';
+            container.style.width = '100%';
 
-            // 设置初始内容
-            if (initialContent) {
-                editorElement.value = initialContent;
+            // 替换textarea为div
+            editorElement.parentNode.replaceChild(container, editorElement);
+
+            // 解析CSV数据
+            let data = [['']];
+            if (initialContent && initialContent.trim()) {
+                const lines = initialContent.split('\n').filter(line => line.trim());
+                data = lines.map(line => line.split(','));
             }
 
-            // 监听CSV编辑器的输入
-            editorElement.addEventListener('input', function() {
-                if (isYjsReady && ytext) {
-                    const newVal = editorElement.value;
-                    ydoc.transact(() => {
-                        ytext.delete(0, ytext.length);
-                        ytext.insert(0, newVal);
-                    });
-                } else {
-                    // 未连接协同模式，标记为本地修改
-                    if (!isDirty) {
-                        isDirty = true;
-                        updateSaveStatus('saving', '未保存');
+            // 初始化handsontable
+            const hot = new Handsontable(container, {
+                data: data,
+                rowHeaders: true,
+                colHeaders: true,
+                height: '100%',
+                width: '100%',
+                licenseKey: 'non-commercial-and-evaluation',
+                stretchH: 'all',
+                afterChange: function(changes, source) {
+                    if (source !== 'loadData' && isYjsReady && ytext) {
+                        // 转换为CSV
+                        const csvData = hot.getData().map(row => row.join(',')).join('\n');
+                        ydoc.transact(() => {
+                            ytext.delete(0, ytext.length);
+                            ytext.insert(0, csvData);
+                        });
+                    } else if (source !== 'loadData') {
+                        // 未连接协同模式
+                        if (!isDirty) {
+                            isDirty = true;
+                            updateSaveStatus('saving', '未保存');
+                        }
+                        if (saveTimer) clearTimeout(saveTimer);
+                        saveTimer = setTimeout(() => autoSave(), 3000);
                     }
-                    if (saveTimer) clearTimeout(saveTimer);
-                    saveTimer = setTimeout(() => autoSave(), 3000);
                 }
             });
 
@@ -1553,25 +1563,34 @@
             simplemde = {
                 value: function(newValue) {
                     if (newValue !== undefined) {
-                        editorElement.value = newValue;
+                        // 解析CSV数据
+                        if (newValue && newValue.trim()) {
+                            const lines = newValue.split('\n').filter(line => line.trim());
+                            const data = lines.map(line => line.split(','));
+                            hot.loadData(data);
+                        } else {
+                            hot.loadData([['']]);
+                        }
                     } else {
-                        return editorElement.value;
+                        // 返回CSV格式
+                        return hot.getData().map(row => row.join(',')).join('\n');
                     }
                 },
+                hot: hot,
                 codemirror: {
                     on: function(event, callback) {
-                        editorElement.addEventListener(event, callback);
+                        // handsontable不需要
                     }
                 }
             };
 
             // 绑定表格工具栏按钮事件
             $('#addRowBtn').on('click', function() {
-                addCSVRow();
+                hot.alter('insert_row_below');
             });
 
             $('#addColBtn').on('click', function() {
-                addCSVColumn();
+                hot.alter('insert_col_end');
             });
 
             $('#formatCsvBtn').on('click', function() {
@@ -1579,75 +1598,6 @@
             });
 
             isEditorInitialized = true;
-        }
-
-        // 添加CSV行
-        function addCSVRow() {
-            const editor = document.getElementById('editor');
-            const content = editor.value.trim();
-
-            if (!content) {
-                editor.value = 'A,B,C,D\n';
-                return;
-            }
-
-            const lines = content.split('\n');
-            const firstLine = lines[0];
-            const colCount = firstLine.split(',').length;
-
-            const newRow = ','.repeat(colCount - 1);
-            editor.value = content + '\n' + newRow;
-
-            // 触发保存
-            if (isYjsReady && ytext) {
-                ydoc.transact(() => {
-                    ytext.delete(0, ytext.length);
-                    ytext.insert(0, editor.value);
-                });
-            } else {
-                isDirty = true;
-                updateSaveStatus('saving', '未保存');
-                if (saveTimer) clearTimeout(saveTimer);
-                saveTimer = setTimeout(() => autoSave(), 3000);
-            }
-
-            showToast('已添加新行');
-        }
-
-        // 添加CSV列
-        function addCSVColumn() {
-            const editor = document.getElementById('editor');
-            let content = editor.value.trim();
-
-            if (!content) {
-                editor.value = 'A,B,C,D\n';
-                return;
-            }
-
-            const lines = content.split('\n');
-            const updatedLines = lines.map(line => {
-                if (line.trim()) {
-                    return line + ',';
-                }
-                return line;
-            });
-
-            editor.value = updatedLines.join('\n');
-
-            // 触发保存
-            if (isYjsReady && ytext) {
-                ydoc.transact(() => {
-                    ytext.delete(0, ytext.length);
-                    ytext.insert(0, editor.value);
-                });
-            } else {
-                isDirty = true;
-                updateSaveStatus('saving', '未保存');
-                if (saveTimer) clearTimeout(saveTimer);
-                saveTimer = setTimeout(() => autoSave(), 3000);
-            }
-
-            showToast('已添加新列');
         }
 
         // 清理编辑器状态
@@ -1687,12 +1637,16 @@
             // 清理编辑器
             if (simplemde) {
                 try {
+                    // 清理handsontable
+                    if (simplemde.hot && typeof simplemde.hot.destroy === 'function') {
+                        simplemde.hot.destroy();
+                    }
                     // 如果是SimpleMDE实例
                     if (typeof simplemde.toTextArea === 'function') {
                         simplemde.toTextArea();
                     }
                 } catch (error) {
-                    console.error('清理SimpleMDE失败:', error);
+                    console.error('清理编辑器失败:', error);
                 }
                 simplemde = null;
             }
@@ -1700,10 +1654,16 @@
             // 重置编辑器初始化标志
             isEditorInitialized = false;
 
-            // 清空编辑器容器
-            const editorContainer = document.getElementById('editor');
+            // 恢复textarea结构
+            const editorContainer = document.querySelector('.editor-container');
             if (editorContainer) {
-                editorContainer.value = '';
+                const oldEditor = document.getElementById('editor');
+                if (oldEditor) {
+                    oldEditor.remove();
+                }
+                const textarea = document.createElement('textarea');
+                textarea.id = 'editor';
+                editorContainer.appendChild(textarea);
             }
 
             // 清理自动保存定时器
@@ -1720,38 +1680,25 @@
 
         // 格式化CSV
         function formatCSV() {
-            const editor = document.getElementById('editor');
-            let content = editor.value.trim();
-
-            if (!content) {
-                showToast('CSV内容为空', true);
+            if (!simplemde || !simplemde.hot) {
                 return;
             }
 
             try {
-                // 解析CSV并重新格式化
-                const lines = content.split('\n').filter(line => line.trim());
+                const hot = simplemde.hot;
+                const data = hot.getData();
 
-                // 统一分隔符和引号
-                const formatted = lines.map(line => {
-                    const cells = line.split(',');
-                    return cells.map(cell => {
-                        cell = cell.trim();
-                        // 如果包含逗号或引号，需要用引号包裹
-                        if (cell.includes(',') || cell.includes('"')) {
-                            return `"${cell.replace(/"/g, '""')}"`;
-                        }
-                        return cell;
-                    }).join(',');
-                }).join('\n');
+                // 去除空格
+                const formatted = data.map(row => row.map(cell => cell.trim()));
 
-                editor.value = formatted;
+                hot.loadData(formatted);
 
                 // 触发保存
                 if (isYjsReady && ytext) {
+                    const csvData = formatted.map(row => row.join(',')).join('\n');
                     ydoc.transact(() => {
                         ytext.delete(0, ytext.length);
-                        ytext.insert(0, editor.value);
+                        ytext.insert(0, csvData);
                     });
                 } else {
                     isDirty = true;
@@ -1763,7 +1710,7 @@
                 showToast('CSV格式化完成');
             } catch (error) {
                 console.error('CSV格式化失败:', error);
-                showToast('CSV格式化失败，请检查格式', true);
+                showToast('CSV格式化失败', true);
             }
         }
 
