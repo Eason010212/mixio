@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="MixIO CoDrive - 协同云盘，支持文档、表格、图片管理">
+    <meta name="description" content="MixIO CoDrive - 协同云盘，支持文档、表格管理">
     <title>MixIO</title>
     <link rel="shortcut icon" href="img/shortcut.png">
     <!-- CSS 资源 -->
@@ -88,10 +88,6 @@
         .type-spreadsheet {
             background: #e8f5e9;
             color: #388e3c;
-        }
-        .type-image {
-            background: #fff3e0;
-            color: #f57c00;
         }
         .action-buttons {
             display: flex;
@@ -292,12 +288,11 @@
                             <div class="dropdown-menu" aria-labelledby="newFileDropdown">
                                 <a class="dropdown-item" href="#" data-type="document"><i class="fa fa-file"></i> 文档</a>
                                 <a class="dropdown-item" href="#" data-type="spreadsheet"><i class="fa fa-table"></i> 表格</a>
-                                <a class="dropdown-item" href="#" data-type="image"><i class="fa fa-image"></i> 图片</a>
                             </div>
                         </div>
                         <!-- 导入文件按钮 -->
                         <button id="importFileBtn" class="btn btn-outline-success"><i class="fa fa-upload btn-icon"></i>导入文件</button>
-                        <input type="file" id="importFileInput" class="import-file-input" accept=".txt,.md,.json,.csv,.xlsx,.xls,.png,.jpg,.jpeg,.gif,.bmp" />
+                        <input type="file" id="importFileInput" class="import-file-input" accept=".txt,.md,.json,.csv,.xlsx,.xls" />
                     </div>
                     <div class="text-muted small">
                         <i class="fa fa-list"></i> 列表视图 · 点击行可编辑
@@ -416,7 +411,6 @@
     function getTypeClass(type) {
         if(type === 'document') return 'type-document';
         if(type === 'spreadsheet') return 'type-spreadsheet';
-        if(type === 'image') return 'type-image';
         return 'type-document';
     }
     
@@ -424,7 +418,6 @@
     function getTypeDisplayName(type) {
         if(type === 'document') return '文档';
         if(type === 'spreadsheet') return '表格';
-        if(type === 'image') return '图片';
         return '文件';
     }
     
@@ -432,7 +425,6 @@
     function getFileIcon(type) {
         if(type === 'document') return 'fa-file';
         if(type === 'spreadsheet') return 'fa-table';
-        if(type === 'image') return 'fa-image';
         return 'fa-file';
     }
     
@@ -744,7 +736,7 @@
         let title = '';
         let extension = '';
         let hint = '';
-        
+
         if(type === 'document') {
             title = '新建文档';
             extension = '.md';
@@ -752,13 +744,9 @@
         } else if(type === 'spreadsheet') {
             title = '新建表格';
             extension = '.csv';
-            hint = '文件名将自动添加 .csv 扩展名';
-        } else if(type === 'image') {
-            title = '新建图片';
-            extension = '.jpg';
-            hint = '文件名将自动添加 .jpg 扩展名（1920×1080 白色背景）';
+            hint = '文件中将自动添加 .csv 扩展名';
         }
-        
+
         $('#newFileModalTitle').text(title);
         $('#extensionHint').text(hint);
         $('#newFileName').val('');
@@ -778,7 +766,7 @@
         let fullFileName = '';
         let content = '';
         let contentType = '';
-        
+
         if (pendingCreateType === 'document') {
             if (!fileName.endsWith('.md')) {
                 fullFileName = fileName + '.md';
@@ -795,35 +783,14 @@
             }
             content = ''; // 空表格
             contentType = 'text/csv';
-        } else if (pendingCreateType === 'image') {
-            if (!fileName.endsWith('.jpg') && !fileName.endsWith('.jpeg')) {
-                fullFileName = fileName + '.jpg';
-            } else {
-                fullFileName = fileName;
-            }
-            // 创建 1920x1080 的白色 JPEG 图片
-            content = createWhiteJpegBase64();
-            contentType = 'image/jpeg';
         } else {
             return;
         }
-        
+
         showLoading();
-        
+
         // 将内容转换为 Blob
-        let blob;
-        if (pendingCreateType === 'image') {
-            // 图片内容已经是 base64，需要转换为 Blob
-            const byteString = atob(content.split(',')[1]);
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-            blob = new Blob([ab], { type: contentType });
-        } else {
-            blob = new Blob([content], { type: contentType });
-        }
+        const blob = new Blob([content], { type: contentType });
         
         const formData = new FormData();
         formData.append('file', blob, fullFileName);
@@ -854,21 +821,6 @@
         });
     }
     
-    // 创建 1920x1080 白色 JPEG 图片的 Base64
-    function createWhiteJpegBase64() {
-        // 创建一个 canvas 元素
-        const canvas = document.createElement('canvas');
-        canvas.width = 1920;
-        canvas.height = 1080;
-        const ctx = canvas.getContext('2d');
-        
-        // 填充白色背景
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // 转换为 base64
-        return canvas.toDataURL('image/jpeg', 0.95);
-    }
     
     // 导入文件（上传到后端）
     function importFiles(fileInputEvent) {

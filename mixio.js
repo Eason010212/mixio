@@ -1,6 +1,7 @@
 var VERSION = "1.10.6.0115"
 require('events').EventEmitter.defaultMaxListeners = 50;
 
+const crypto = require('crypto')
 const extract = require('extract-zip')
 const WebSocket = require('ws')
 const multer = require('multer');
@@ -1513,17 +1514,47 @@ var mixioServer = async function() {
 
     function getFileRecords(userName) {
         const recordFile = `storage/drive/${userName}/files.json`;
-        
+
         if (!fs.existsSync(recordFile)) {
             return [];
         }
-        
+
         try {
             const content = fs.readFileSync(recordFile, 'utf8');
             return JSON.parse(content);
         } catch (e) {
             console.error('读取文件记录错误:', e);
             return [];
+        }
+    }
+
+    function getLatestVersion(versionsDir) {
+        if (!fs.existsSync(versionsDir)) {
+            return null;
+        }
+
+        try {
+            const versions = fs.readdirSync(versionsDir)
+                .filter(f => f.endsWith('.json'))
+                .sort((a, b) => {
+                    // 解析版本ID中的时间戳进行比较
+                    const getTimeFromVersion = (filename) => {
+                        const match = filename.match(/^(\d+)_/);
+                        return match ? parseInt(match[1]) : 0;
+                    };
+                    return getTimeFromVersion(b) - getTimeFromVersion(a);
+                });
+
+            if (versions.length === 0) {
+                return null;
+            }
+
+            const latestVersionFile = `${versionsDir}/${versions[0]}`;
+            const versionContent = fs.readFileSync(latestVersionFile, 'utf8');
+            return JSON.parse(versionContent);
+        } catch (error) {
+            console.error('获取最新版本失败:', error);
+            return null;
         }
     }
 
@@ -1754,12 +1785,463 @@ var mixioServer = async function() {
                 success: true,
                 message: '文件删除成功'
             });
-            
+
         } catch (error) {
             console.error('删除文件错误:', error);
             res.status(500).json({
                 success: false,
                 message: '删除文件失败: ' + error.message
+            });
+        }
+    });
+
+    // 保存文件版本
+    app.post('/api/saveFileVersion/:username/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const { username, fileId } = req.params;
+            const { content, versionNote } = req.body;
+
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+
+            // 创建版本目录
+            const versionsDir = `storage/drive/${username}/versions/${fileId}`;
+            if (!fs.existsSync(versionsDir)) {
+                fs.mkdirSync(versionsDir, { recursive: true });
+            }
+
+            // 生成版本ID
+            const versionId = Date.now().toString();
+
+            // 保存版本内容
+            const versionFile = `${versionsDir}/${versionId}.json`;
+            const versionData = {
+                id: versionId,
+                fileId: fileId,
+                content: content,
+                createdAt: new Date().toISOString(),
+                createdBy: userName,
+                note: versionNote || ''
+            };
+
+            fs.writeFileSync(versionFile, JSON.stringify(versionData, null, 2), 'utf8');
+
+            // 限制版本数量（保留最近20个版本）
+            const versions = fs.readdirSync(versionsDir)
+                .filter(f => f.endsWith('.json'))
+                .map(f => {
+                    const versionPath = `${versionsDir}/${f}`;
+                    const versionContent = JSON.parse(fs.readFileSync(versionPath, 'utf8'));
+                    return {
+                        id: versionContent.id,
+                        createdAt: versionContent.createdAt,
+                        createdBy: versionContent.createdBy,
+                        note: versionContent.note
+                    };
+                })
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            // 如果版本数量超过20个，删除最旧的
+            if (versions.length > 20) {
+                const versionsToDelete = versions.slice(20);
+                versionsToDelete.forEach(version => {
+                    const oldVersionFile = `${versionsDir}/${version.id}.json`;
+                    if (fs.existsSync(oldVersionFile)) {
+                        fs.unlinkSync(oldVersionFile);
+                        console.log('删除旧版本:', version.id);
+                    }
+                });
+            }
+
+            res.json({
+                success: true,
+                version: {
+                    id: versionId,
+                    createdAt: versionData.createdAt,
+                    createdBy: userName,
+                    note: versionNote
+                }
+            });
+
+        } catch (error) {
+            console.error('保存文件版本错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '保存文件版本失败: ' + error.message
+            });
+        }
+    });
+
+    // 获取文件版本列表
+    app.get('/api/getFileVersions/:username/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const { username, fileId } = req.params;
+
+            // 参数验证
+            if (!userName || !username || !fileId) {
+                return res.status(400).json({
+                    success: false,
+                    message: '参数无效'
+                });
+            }
+
+            // 验证用户权限
+            if (userName !== username) {
+                return res.status(403).json({
+                    success: false,
+                    message: '无权访问其他用户的文件版本'
+                });
+            }
+
+            // 验证文件ID格式
+            if (!/^[a-zA-Z0-9\-_]+$/.test(fileId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: '文件ID格式无效'
+                });
+            }
+
+            const versionsDir = `storage/drive/${username}/versions/${fileId}`;
+
+            if (!fs.existsSync(versionsDir)) {
+                return res.json({
+                    success: true,
+                    versions: []
+                });
+            }
+
+            const versions = fs.readdirSync(versionsDir)
+                .filter(f => f.endsWith('.json'))
+                .map(f => {
+                    const versionPath = `${versionsDir}/${f}`;
+                    try {
+                        const versionContent = JSON.parse(fs.readFileSync(versionPath, 'utf8'));
+
+                        // 验证版本数据完整性
+                        if (!versionContent.id || !versionContent.createdAt || !versionContent.createdBy) {
+                            console.warn(`版本数据不完整，跳过: ${f}`);
+                            return null;
+                        }
+
+                        return {
+                            id: versionContent.id,
+                            fileId: versionContent.fileId,
+                            createdAt: versionContent.createdAt,
+                            createdBy: versionContent.createdBy,
+                            note: versionContent.note || '',
+                            checksum: versionContent.checksum || ''
+                        };
+                    } catch (parseError) {
+                        console.warn(`版本文件解析失败，跳过: ${f}`);
+                        return null;
+                    }
+                })
+                .filter(v => v !== null)
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            res.json({
+                success: true,
+                versions: versions,
+                count: versions.length
+            });
+
+        } catch (error) {
+            console.error('获取文件版本列表错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '获取文件版本列表失败: ' + error.message
+            });
+        }
+    });
+
+    // 获取特定版本内容
+    app.get('/api/getFileVersion/:username/:fileId/:versionId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const { username, fileId, versionId } = req.params;
+
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+
+            const versionFile = `storage/drive/${username}/versions/${fileId}/${versionId}.json`;
+
+            if (!fs.existsSync(versionFile)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '版本不存在'
+                });
+            }
+
+            const versionContent = JSON.parse(fs.readFileSync(versionFile, 'utf8'));
+
+            res.json({
+                success: true,
+                version: versionContent
+            });
+
+        } catch (error) {
+            console.error('获取文件版本内容错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '获取文件版本内容失败: ' + error.message
+            });
+        }
+    });
+
+    // 恢复文件版本
+    app.post('/api/restoreFileVersion/:username/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const { username, fileId } = req.params;
+            const { versionId } = req.body;
+
+            // 参数验证
+            if (!userName || !username || !fileId || !versionId) {
+                return res.status(400).json({
+                    success: false,
+                    message: '参数无效'
+                });
+            }
+
+            // 验证用户权限
+            if (userName !== username) {
+                return res.status(403).json({
+                    success: false,
+                    message: '无权恢复其他用户的文件版本'
+                });
+            }
+
+            // 验证文件ID和版本ID格式
+            if (!/^[a-zA-Z0-9\-_]+$/.test(fileId) || !/^[a-zA-Z0-9\-_]+$/.test(versionId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: '文件ID或版本ID格式无效'
+                });
+            }
+
+            const versionFile = `storage/drive/${username}/versions/${fileId}/${versionId}.json`;
+
+            if (!fs.existsSync(versionFile)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '版本不存在'
+                });
+            }
+
+            // 使用事务处理确保数据一致性
+            const recordFile = `storage/drive/${username}/files.json`;
+            const backupFile = `${recordFile}.backup.${Date.now()}`;
+
+            if (!fs.existsSync(recordFile)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件记录不存在'
+                });
+            }
+
+            // 创建备份
+            fs.copyFileSync(recordFile, backupFile);
+
+            try {
+                const versionContent = JSON.parse(fs.readFileSync(versionFile, 'utf8'));
+
+                // 验证版本数据完整性
+                if (!versionContent.id || !versionContent.content) {
+                    fs.unlinkSync(backupFile);
+                    return res.status(400).json({
+                        success: false,
+                        message: '版本数据不完整'
+                    });
+                }
+
+                // 验证版本内容checksum
+                const checksum = crypto.createHash('sha256').update(versionContent.content).digest('hex');
+                if (versionContent.checksum && checksum !== versionContent.checksum) {
+                    fs.unlinkSync(backupFile);
+                    return res.status(400).json({
+                        success: false,
+                        message: '版本内容损坏'
+                    });
+                }
+
+                const records = JSON.parse(fs.readFileSync(recordFile, 'utf8'));
+                const fileIndex = records.findIndex(f => f.id === fileId);
+
+                if (fileIndex === -1) {
+                    fs.unlinkSync(backupFile);
+                    return res.status(404).json({
+                        success: false,
+                        message: '文件不存在'
+                    });
+                }
+
+                const file = records[fileIndex];
+
+                // 创建恢复前的版本快照
+                const restoreVersionId = `restore_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+                const restoreVersionFile = `storage/drive/${username}/versions/${fileId}/${restoreVersionId}.json`;
+                const currentContent = fs.readFileSync(file.path, 'utf8');
+
+                const restoreVersionData = {
+                    id: restoreVersionId,
+                    fileId: fileId,
+                    content: currentContent,
+                    createdAt: new Date().toISOString(),
+                    createdBy: userName,
+                    note: '恢复版本前的快照',
+                    checksum: crypto.createHash('sha256').update(currentContent).digest('hex')
+                };
+
+                fs.writeFileSync(restoreVersionFile, JSON.stringify(restoreVersionData, null, 2), 'utf8');
+
+                // 恢复版本内容到主文件
+                fs.writeFileSync(file.path, versionContent.content, 'utf8');
+
+                // 更新文件记录
+                file.updatedAt = new Date().toISOString();
+                file.size = Buffer.byteLength(versionContent.content, 'utf8');
+                file.restoreFrom = versionId;
+                records[fileIndex] = file;
+                fs.writeFileSync(recordFile, JSON.stringify(records, null, 2), 'utf8');
+
+                // 记录恢复操作日志
+                console.log(`版本恢复成功: ${fileId}, 恢复到版本: ${versionId}, 用户: ${userName}`);
+
+                res.json({
+                    success: true,
+                    message: '版本恢复成功',
+                    updatedAt: file.updatedAt,
+                    restoreVersionId: restoreVersionId
+                });
+
+                // 清理备份
+                fs.unlinkSync(backupFile);
+
+            } catch (restoreError) {
+                // 恢复失败，从备份恢复
+                if (fs.existsSync(backupFile)) {
+                    fs.copyFileSync(backupFile, recordFile);
+                }
+                if (fs.existsSync(backupFile)) {
+                    fs.unlinkSync(backupFile);
+                }
+                throw restoreError;
+            }
+
+        } catch (error) {
+            console.error('恢复文件版本错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '恢复文件版本失败: ' + error.message
+            });
+        }
+    });
+
+    // 删除文件版本
+    app.delete('/api/deleteFileVersion/:username/:fileId/:versionId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const { username, fileId, versionId } = req.params;
+
+            // 参数验证
+            if (!userName || !username || !fileId || !versionId) {
+                return res.status(400).json({
+                    success: false,
+                    message: '参数无效'
+                });
+            }
+
+            // 验证用户权限
+            if (userName !== username) {
+                return res.status(403).json({
+                    success: false,
+                    message: '无权删除其他用户的文件版本'
+                });
+            }
+
+            // 验证文件ID和版本ID格式
+            if (!/^[a-zA-Z0-9\-_]+$/.test(fileId) || !/^[a-zA-Z0-9\-_]+$/.test(versionId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: '文件ID或版本ID格式无效'
+                });
+            }
+
+            const versionFile = `storage/drive/${username}/versions/${fileId}/${versionId}.json`;
+
+            if (!fs.existsSync(versionFile)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '版本不存在'
+                });
+            }
+
+            // 检查是否是最新版本（防止误删）
+            const versionsDir = `storage/drive/${username}/versions/${fileId}`;
+            const versions = fs.readdirSync(versionsDir)
+                .filter(f => f.endsWith('.json'))
+                .sort((a, b) => {
+                    const getTimeFromVersion = (filename) => {
+                        const match = filename.match(/^(\d+)_/);
+                        return match ? parseInt(match[1]) : 0;
+                    };
+                    return getTimeFromVersion(b) - getTimeFromVersion(a);
+                });
+
+            if (versions[0] === `${versionId}.json`) {
+                return res.status(400).json({
+                    success: false,
+                    message: '不能删除最新版本，请先创建新版本'
+                });
+            }
+
+            // 创建删除备份
+            const backupFile = `${versionFile}.backup.${Date.now()}`;
+            fs.copyFileSync(versionFile, backupFile);
+
+            try {
+                // 删除版本文件
+                fs.unlinkSync(versionFile);
+
+                // 记录删除操作日志
+                console.log(`版本删除成功: ${versionId}, 文件: ${fileId}, 用户: ${userName}`);
+
+                res.json({
+                    success: true,
+                    message: '版本删除成功',
+                    deletedAt: new Date().toISOString()
+                });
+
+                // 清理备份
+                setTimeout(() => {
+                    if (fs.existsSync(backupFile)) {
+                        fs.unlinkSync(backupFile);
+                    }
+                }, 60000); // 1分钟后清理备份
+
+            } catch (deleteError) {
+                // 删除失败，从备份恢复
+                if (fs.existsSync(backupFile)) {
+                    fs.copyFileSync(backupFile, versionFile);
+                }
+                throw deleteError;
+            }
+
+        } catch (error) {
+            console.error('删除文件版本错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '删除文件版本失败: ' + error.message
             });
         }
     });
@@ -2167,16 +2649,135 @@ var mixioServer = async function() {
             }
             
             const file = records[fileIndex];
-            
+
+            // 读取当前文件内容
+            let currentContent = '';
+            try {
+                currentContent = fs.readFileSync(file.path, 'utf8');
+            } catch (error) {
+                console.error('读取文件内容失败:', error);
+            }
+
+            // 检查内容是否真的改变了
+            const contentChanged = currentContent !== content;
+            const contentChecksum = crypto.createHash('sha256').update(content).digest('hex');
+            const currentChecksum = currentContent ? crypto.createHash('sha256').update(currentContent).digest('hex') : '';
+
             // 保存文件内容
             fs.writeFileSync(file.path, content, 'utf8');
-            
+
+            // 只有在内容真正改变时才创建版本快照
+            if (contentChanged) {
+                setImmediate(async () => {
+                    try {
+                        const versionsDir = `storage/drive/${username}/versions/${fileId}`;
+                        if (!fs.existsSync(versionsDir)) {
+                            fs.mkdirSync(versionsDir, { recursive: true });
+                        }
+
+                        // 使用锁文件防止并发冲突
+                        const lockFile = `${versionsDir}/.lock`;
+                        const maxRetries = 5;
+                        let retryCount = 0;
+                        let acquiredLock = false;
+
+                        // 尝试获取锁
+                        while (retryCount < maxRetries && !acquiredLock) {
+                            try {
+                                // 创建空锁文件
+                                fs.writeFileSync(lockFile, 'locked', 'utf8');
+                                acquiredLock = true;
+                            } catch (lockError) {
+                                // 文件已存在，等待100ms后重试
+                                await new Promise(resolve => setTimeout(resolve, 100));
+                                retryCount++;
+                            }
+                        }
+
+                        if (!acquiredLock) {
+                            throw new Error('无法获取文件锁，可能有其他操作正在执行');
+                        }
+
+                        try {
+                            // 检查最新版本是否与当前内容相同，避免重复版本
+                            const latestVersion = getLatestVersion(versionsDir);
+                            const shouldCreateVersion = !latestVersion || latestVersion.checksum !== contentChecksum;
+
+                            if (shouldCreateVersion) {
+                                // 生成唯一版本ID
+                                const timestamp = Date.now();
+                                const randomSuffix = Math.random().toString(36).substring(2, 8);
+                                const versionId = `${timestamp}_${randomSuffix}`;
+
+                                const versionFile = `${versionsDir}/${versionId}.json`;
+                                const versionData = {
+                                    id: versionId,
+                                    fileId: fileId,
+                                    content: content,
+                                    createdAt: new Date().toISOString(),
+                                    createdBy: userName,
+                                    note: '自动保存版本',
+                                    checksum: contentChecksum
+                                };
+
+                                // 写入版本文件
+                                fs.writeFileSync(versionFile, JSON.stringify(versionData, null, 2), 'utf8');
+
+                                // 限制版本数量，保留最新的20个版本
+                                const versions = fs.readdirSync(versionsDir)
+                                    .filter(f => f.endsWith('.json'))
+                                    .sort((a, b) => {
+                                        // 解析版本ID中的时间戳进行比较
+                                        const getTimeFromVersion = (filename) => {
+                                            const match = filename.match(/^(\d+)_/);
+                                            return match ? parseInt(match[1]) : 0;
+                                        };
+                                        return getTimeFromVersion(b) - getTimeFromVersion(a);
+                                    });
+
+                                if (versions.length > 20) {
+                                    const versionsToDelete = versions.slice(20);
+                                    for (const version of versionsToDelete) {
+                                        const oldVersionFile = `${versionsDir}/${version}`;
+                                        if (fs.existsSync(oldVersionFile)) {
+                                            // 验证要删除的版本文件完整性
+                                            try {
+                                                const content = fs.readFileSync(oldVersionFile, 'utf8');
+                                                const data = JSON.parse(content);
+                                                // 如果文件完整，删除
+                                                fs.unlinkSync(oldVersionFile);
+                                            } catch (verifyError) {
+                                                console.warn(`版本文件损坏，跳过删除: ${version}`);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // 记录版本创建成功
+                                console.log(`版本创建成功: ${versionId}, 用户: ${userName}, 文件: ${fileId}`);
+                            } else {
+                                console.log(`内容未变化，跳过版本创建: ${fileId}`);
+                            }
+
+                        } finally {
+                            // 释放锁
+                            if (fs.existsSync(lockFile)) {
+                                fs.unlinkSync(lockFile);
+                            }
+                        }
+                    } catch (versionError) {
+                        console.error('创建文件版本失败:', versionError);
+                        // 版本创建失败不影响主保存功能
+                    }
+                });
+            }
+
             // 更新记录
             file.updatedAt = new Date().toISOString();
             file.size = Buffer.byteLength(content, 'utf8');
             records[fileIndex] = file;
             fs.writeFileSync(recordFile, JSON.stringify(records, null, 2), 'utf8');
-            
+
             res.json({
                 success: true,
                 message: '保存成功',

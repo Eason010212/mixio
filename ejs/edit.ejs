@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文档编辑 - MixIO CoDrive</title>
     <link rel="stylesheet" href="../../css/all.css">
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
     <link rel="stylesheet" href="../../js/libs/easymde.min.css">
     <style>
         * {
@@ -30,6 +31,36 @@
             position: sticky;
             top: 0;
             z-index: 100;
+        }
+
+        /* 连接状态指示器 */
+        .connection-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 12px;
+        }
+
+        .connection-status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .connection-status.connecting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .connection-status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .connection-status.synced {
+            background: #cce5ff;
+            color: #004085;
         }
         
         .navbar-left {
@@ -167,46 +198,397 @@
         .editor-toolbar {
             border-radius: 8px 8px 0 0;
         }
-        
+
+        /* 表格编辑器工具栏 */
+        #spreadsheetToolbar {
+            position: absolute;
+            bottom: 20px;
+            left: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            padding: 8px;
+            display: flex;
+            gap: 8px;
+            z-index: 50;
+        }
+
+        .toolbar-btn {
+            background: #f8f9fc;
+            border: 1px solid #e3e6f0;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #495057;
+        }
+
+        .toolbar-btn:hover {
+            background: #e3e6f0;
+            border-color: #d1d3e2;
+        }
+
+        .toolbar-btn:active {
+            background: #d1d3e2;
+        }
+
+        /* 版本管理样式 */
+        .versions-container {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .version-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .version-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            border: 1px solid #e3e6f0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .version-item:hover {
+            background: #f8f9fc;
+            border-color: #4e73df;
+        }
+
+        .version-item.current {
+            background: #e3f2fd;
+            border-color: #1976d2;
+        }
+
+        .version-timeline {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 15px;
+            min-width: 60px;
+        }
+
+        .version-timeline-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #4e73df;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            border: 3px solid #e3e6f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .version-item.current .version-timeline-number {
+            background: #1976d2;
+            border-color: #4e73df;
+            box-shadow: 0 0 0 4px #4e73df;
+        }
+
+        .version-dot {
+            display: none; /* 不再使用圆点，改用数字标识 */
+        }
+
+        .version-line {
+            width: 2px;
+            flex: 1;
+            background: #e3e6f0;
+            margin: 8px 0;
+        }
+
+        .version-info {
+            flex: 1;
+        }
+
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .version-time {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .version-author {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .version-note {
+            font-size: 13px;
+            color: #495057;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .version-btn {
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-view {
+            background: #e8f0fe;
+            color: #4e73df;
+        }
+
+        .btn-view:hover {
+            background: #d9e6ff;
+        }
+
+        .btn-restore {
+            background: #e8f5e9;
+            color: #27ae60;
+        }
+
+        .btn-restore:hover {
+            background: #c8e6c9;
+        }
+
+        .btn-delete {
+            background: #fee2df;
+            color: #e74a3b;
+        }
+
+        .btn-delete:hover {
+            background: #ffcdd2;
+        }
+
+        .version-current-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .empty-versions {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-versions i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #cbd5e0;
+        }
+
         /* 协同用户面板 */
         .collab-panel {
             position: fixed;
             right: 20px;
             top: 80px;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 12px;
-            min-width: 180px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            min-width: 200px;
             z-index: 99;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e3e6f0;
+            overflow: hidden;
         }
-        
+
+        .collab-panel.collapsed {
+            min-width: auto;
+        }
+
+        .collab-panel.collapsed .collab-title {
+            margin-bottom: 0;
+            padding-bottom: 12px;
+            border-bottom: none;
+        }
+
+        .collab-panel.collapsed .collab-users-container {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .collab-panel:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .collab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collab-header:hover {
+            background: #f8f9fc;
+        }
+
         .collab-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: #6c757d;
-            margin-bottom: 8px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #e3e6f0;
-        }
-        
-        .collab-users {
-            list-style: none;
-        }
-        
-        .collab-users li {
-            padding: 4px 0;
             font-size: 13px;
+            font-weight: 600;
+            color: #495057;
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-bottom: 0;
         }
-        
-        .user-dot {
+
+        .collab-count {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .collab-toggle {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            transition: transform 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .collab-toggle:hover {
+            background: #e9ecef;
+        }
+
+        .collab-panel.collapsed .collab-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .collab-users-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 0 8px 12px 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .collab-users {
+            list-style: none;
+            margin: 0;
+        }
+
+        .collab-users li {
+            padding: 8px 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .collab-users li:hover {
+            background: #f8f9fc;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .user-status {
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        .user-status.online {
+            color: #27ae60;
+        }
+
+        .user-status.typing {
+            color: #f39c12;
+        }
+
+        /* 滚动条样式 */
+        .collab-users-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .collab-users-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .collab-users-container::-webkit-scrollbar-thumb {
+            background: #d1d3e2;
+            border-radius: 2px;
+        }
+
+        .collab-users-container::-webkit-scrollbar-thumb:hover {
+            background: #b8b9c4;
+        }
+
+        /* 在线指示点 */
+        .online-indicator {
+            position: relative;
+        }
+
+        .online-indicator::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #4e73df;
+            background: #27ae60;
+            border: 2px solid white;
         }
         
         .toast-notify {
@@ -271,9 +653,15 @@
             </div>
         </div>
         <div class="navbar-right">
+            <button class="btn btn-secondary" id="versionsBtn">
+                <i class="fa fa-history"></i> 版本
+            </button>
             <div class="save-status" id="saveStatus">
                 <i class="fa fa-check-circle"></i>
                 <span>已保存</span>
+            </div>
+            <div class="connection-status disconnected" id="connectionStatus">
+                已断开
             </div>
             <button class="btn btn-primary" id="saveBtn">
                 <i class="fa fa-save"></i> 保存
@@ -284,16 +672,31 @@
     <!-- 编辑器容器 -->
     <div class="editor-container">
         <textarea id="editor"></textarea>
+        <!-- 表格编辑器工具栏（仅在表格模式显示） -->
+        <div id="spreadsheetToolbar" style="display: none;">
+            <button id="addRowBtn" class="toolbar-btn"><i class="fa fa-plus"></i> 添加行</button>
+            <button id="addColBtn" class="toolbar-btn"><i class="fa fa-plus"></i> 添加列</button>
+            <button id="formatCsvBtn" class="toolbar-btn"><i class="fa fa-magic"></i> 格式化CSV</button>
+        </div>
     </div>
     
     <!-- 协同用户面板 -->
-    <div class="collab-panel" id="collabPanel" style="display: none;">
-        <div class="collab-title">
-            <i class="fa fa-users"></i> 在线协同
+    <div class="collab-panel collapsed" id="collabPanel" style="display: none;">
+        <div class="collab-header" id="collabHeader">
+            <div class="collab-title">
+                <i class="fa fa-users"></i>
+                <span>在线协同</span>
+                <span class="collab-count" id="collabCount">0</span>
+            </div>
+            <div class="collab-toggle">
+                <i class="fa fa-chevron-down"></i>
+            </div>
         </div>
-        <ul class="collab-users" id="collabUsers">
-            <li><span class="user-dot"></span> 当前用户</li>
-        </ul>
+        <div class="collab-users-container">
+            <ul class="collab-users" id="collabUsers">
+                <!-- 用户列表动态生成 -->
+            </ul>
+        </div>
     </div>
     
     <!-- 加载遮罩 -->
@@ -306,9 +709,34 @@
     
     <!-- 轻提示 -->
     <div id="toastMsg" class="toast-notify"></div>
+
+    <!-- 版本历史模态框 -->
+    <div class="modal fade" id="versionsModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa fa-history"></i> 文件版本历史
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="versionsContainer" class="versions-container">
+                        <div class="text-center p-4">
+                            <i class="fa fa-spinner fa-spin fa-2x"></i>
+                            <p class="mt-2">加载中...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- 引入依赖 -->
     <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/bootstrap.bundle.min.js"></script>
     <script src="../../js/libs/easymde.min.js"></script>
     
     <script type="module">
@@ -335,12 +763,33 @@
         let saveTimer = null;
         let isDirty = false;
         let simplemde = null;
-        
+        let isEditorInitialized = false; // 防止重复初始化编辑器
+
         // Yjs 相关变量
         let ydoc = null;
         let provider = null;
         let ytext = null;
         let isYjsReady = false;
+
+        // 协同用户状态
+        let currentUser = '<%= userName %>';
+        let userColors = {
+            currentUser: '#4e73df',
+            colors: ['#e74a3b', '#f39c12', '#27ae60', '#9b59b6', '#34495e', '#16a085', '#d35400', '#7f8c8d']
+        };
+
+        // 防止Yjs循环更新
+        let isYjsUpdating = false;
+        let isEditorUpdating = false;
+
+        // 根据用户名生成颜色
+        
+
+        // 获取用户首字母
+        function getUserInitials(username) {
+            if (!username) return '?';
+            return username.charAt(0).toUpperCase();
+        }
         
         // 显示加载中
         function showLoading() {
@@ -360,10 +809,374 @@
             } else {
                 toast.css('background', '#2c3e50');
             }
-            setTimeout(() => { 
+            setTimeout(() => {
                 toast.css('opacity', '0');
                 toast.css('background', '#2c3e50');
             }, 3000);
+        }
+
+        // 更新协同用户列表
+        function updateCollabUsers() {
+            const states = provider.awareness.getStates();
+            const collabUsersEl = $('#collabUsers');
+            const collabCountEl = $('#collabCount');
+            const collabPanel = $('#collabPanel');
+
+            // 更新用户数量（至少显示1，即自己）
+            const userCount = states.size > 0 ? states.size : 1;
+            collabCountEl.text(userCount);
+
+            // 有协作者时自动展开面板
+            if (states.size > 1) {
+                collabPanel.removeClass('collapsed');
+            }
+
+            if (states.size === 0) {
+                // 如果没有状态数据，显示当前用户
+                collabUsersEl.empty();
+                const userColor = getUserColor(currentUser);
+                const initials = getUserInitials(currentUser);
+                const userHtml = `
+                    <li class="current-user">
+                        <div class="user-avatar online-indicator" style="background: ${userColor}">
+                            ${initials}
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">${escapeHtml(currentUser)}</span>
+                            <span class="user-status online">你</span>
+                        </div>
+                    </li>
+                `;
+                collabUsersEl.append(userHtml);
+                return;
+            }
+
+            // 清空现有列表
+            collabUsersEl.empty();
+
+            // 遍历所有用户状态
+            states.forEach((state, clientId) => {
+                const userData = state.user;
+                const userStatus = state.status || 'online';
+                const isCurrentUser = userData && userData.name === currentUser;
+
+                if (userData) {
+                    const userColor = getUserColor(userData.name);
+                    const initials = getUserInitials(userData.name);
+                    const statusText = isCurrentUser ? '你' : '在线编辑';
+
+                    const userHtml = `
+                        <li class="${isCurrentUser ? 'current-user' : ''}">
+                            <div class="user-avatar ${isCurrentUser ? 'online-indicator' : ''}" style="background: ${userColor}">
+                                ${initials}
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name">${escapeHtml(userData.name)}</span>
+                                <span class="user-status ${userStatus}">${statusText}</span>
+                            </div>
+                        </li>
+                    `;
+                    collabUsersEl.append(userHtml);
+                }
+            });
+        }
+
+        // 折叠/展开协同面板
+        function toggleCollabPanel() {
+            const panel = $('#collabPanel');
+            panel.toggleClass('collapsed');
+        }
+
+        // HTML 转义函数
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // 格式化日期
+        function formatDate(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            const now = new Date();
+            const diff = now - date;
+
+            // 如果是一天内的，显示相对时间
+            if (diff < 60000) { // 1分钟内
+                return '刚刚';
+            } else if (diff < 3600000) { // 1小时内
+                return Math.floor(diff / 60000) + '分钟前';
+            } else if (diff < 86400000) { // 1天内
+                return Math.floor(diff / 3600000) + '小时前';
+            } else if (diff < 604800000) { // 1周内
+                return Math.floor(diff / 86400000) + '天前';
+            } else {
+                // 超过一周的显示完整日期
+                return date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        // 版本管理相关函数
+        function loadFileVersions() {
+            showLoading();
+            $.ajax({
+                url: `/api/getFileVersions/${creator}/${fileId}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        renderVersionList(response.versions);
+                    } else {
+                        showToast(response.message || '加载版本列表失败', true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    hideLoading();
+                    console.error('加载版本列表失败:', error);
+                    showToast('加载版本列表失败: ' + error, true);
+                }
+            });
+        }
+
+        function renderVersionList(versions) {
+            const container = $('#versionsContainer');
+
+            if (!versions || versions.length === 0) {
+                container.html(`
+                    <div class="empty-versions">
+                        <i class="fa fa-history"></i>
+                        <h5>暂无版本历史</h5>
+                        <p>保存文档后，版本历史将自动记录</p>
+                    </div>
+                `);
+                return;
+            }
+
+            let html = '<ul class="version-list">';
+
+            versions.forEach((version, index) => {
+                const isFirst = index === 0; // 第一个版本是当前版本（最新版本）
+                const formattedDate = formatDate(version.createdAt);
+
+                html += `
+                    <li class="version-item ${isFirst ? 'current' : ''}" data-version-id="${version.id}">
+                        <div class="version-timeline">
+                            <div class="version-timeline-number">${index + 1}</div>
+                            ${index !== versions.length - 1 ? '<div class="version-line"></div>' : ''}
+                        </div>
+                        <div class="version-info">
+                            <div class="version-header">
+                                <span class="version-time">${formattedDate}</span>
+                                <span class="version-author">由 ${escapeHtml(version.createdBy)} 创建</span>
+                            </div>
+                            ${version.note ? `<div class="version-note">${escapeHtml(version.note)}</div>` : ''}
+                            <div class="version-actions">
+                                ${!isFirst ? `
+                                    <button class="version-btn btn-view" data-version-id="${version.id}">
+                                        <i class="fa fa-eye"></i> 查看
+                                    </button>
+                                    <button class="version-btn btn-restore" data-version-id="${version.id}">
+                                        <i class="fa fa-undo"></i> 恢复
+                                    </button>
+                                    <button class="version-btn btn-delete" data-version-id="${version.id}">
+                                        <i class="fa fa-trash"></i> 删除
+                                    </button>
+                                ` : `
+                                    <span class="version-current-badge"><i class="fa fa-check-circle"></i> 当前版本</span>
+                                `}
+                            </div>
+                        </div>
+                    </li>
+                `;
+            });
+
+            html += '</ul>';
+            container.html(html);
+
+            // 绑定版本按钮事件
+            $('.btn-view').on('click', function() {
+                const versionId = $(this).data('version-id');
+                viewVersion(versionId);
+            });
+
+            $('.btn-restore').on('click', function() {
+                const versionId = $(this).data('version-id');
+                restoreVersion(versionId);
+            });
+
+            $('.btn-delete').on('click', function() {
+                const versionId = $(this).data('version-id');
+                deleteVersion(versionId);
+            });
+        }
+
+        function viewVersion(versionId) {
+            showLoading();
+            $.ajax({
+                url: `/api/getFileVersion/${creator}/${fileId}/${versionId}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        // 创建预览模态框
+                        const previewModal = `
+                            <div class="modal fade" id="versionPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">
+                                                <i class="fa fa-eye"></i> 版本预览
+                                            </h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <textarea class="form-control" style="min-height: 300px; font-family: monospace;" readonly>${escapeHtml(response.version.content)}</textarea>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary preview-restore-btn" data-version-id="${versionId}">
+                                                <i class="fa fa-undo"></i> 恢复此版本
+                                            </button>
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        // 移除已存在的预览模态框
+                        if ($('#versionPreviewModal').length) {
+                            $('#versionPreviewModal').remove();
+                        }
+
+                        $('body').append(previewModal);
+                        $('#versionPreviewModal').modal('show');
+
+                        // 绑定预览模态框中的恢复按钮事件
+                        $('.preview-restore-btn').on('click', function() {
+                            const versionId = $(this).data('version-id');
+                            restoreVersion(versionId);
+                        });
+                    } else {
+                        showToast(response.message || '获取版本内容失败', true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    hideLoading();
+                    console.error('获取版本内容失败:', error);
+                    showToast('获取版本内容失败: ' + error, true);
+                }
+            });
+        }
+
+        function restoreVersion(versionId) {
+            if (!confirm('确定要恢复到此版本吗？当前的内容将被覆盖。')) {
+                return;
+            }
+
+            showLoading();
+            $.ajax({
+                url: `/api/restoreFileVersion/${creator}/${fileId}`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ versionId: versionId }),
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        showToast('版本恢复成功');
+                        // 关闭模态框
+                        $('#versionPreviewModal').modal('hide');
+                        $('#versionsModal').modal('hide');
+
+                        // 直接更新编辑器内容，不重新加载整个文档
+                        if (simplemde) {
+                            $.ajax({
+                                url: `/api/getFileVersion/${creator}/${fileId}/${versionId}`,
+                                type: 'GET',
+                                dataType: 'json',
+                                success: function(versionResponse) {
+                                    if (versionResponse.success) {
+                                        const newContent = versionResponse.version.content;
+                                        simplemde.value(newContent);
+
+                                        // 更新Yjs内容
+                                        if (isYjsReady && ytext) {
+                                            ydoc.transact(() => {
+                                                ytext.delete(0, ytext.length);
+                                                ytext.insert(0, newContent);
+                                            });
+                                        }
+
+                                        // 重置脏状态
+                                        isDirty = false;
+                                        updateSaveStatus('saved', '已保存');
+
+                                        // 清空自动保存定时器
+                                        if (saveTimer) {
+                                            clearTimeout(saveTimer);
+                                            saveTimer = null;
+                                        }
+
+                                        showToast('内容已更新');
+                                    } else {
+                                        showToast('获取版本内容失败', true);
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error('获取版本内容失败:', error);
+                                    showToast('获取版本内容失败', true);
+                                }
+                            });
+                        }
+                    } else {
+                        showToast(response.message || '恢复版本失败', true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    hideLoading();
+                    console.error('恢复版本失败:', error);
+                    showToast('恢复版本失败: ' + error, true);
+                }
+            });
+        }
+
+        function deleteVersion(versionId) {
+            if (!confirm('确定要删除此版本吗？此操作不可撤销。')) {
+                return;
+            }
+
+            showLoading();
+            $.ajax({
+                url: `/api/deleteFileVersion/${creator}/${fileId}/${versionId}`,
+                type: 'DELETE',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        showToast('版本删除成功');
+                        // 重新加载版本列表
+                        loadFileVersions();
+                    } else {
+                        showToast(response.message || '删除版本失败', true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    hideLoading();
+                    console.error('删除版本失败:', error);
+                    showToast('删除版本失败: ' + error, true);
+                }
+            });
         }
         
         // 更新保存状态
@@ -435,12 +1248,18 @@
                 showToast('文件名不能为空', true);
                 return false;
             }
-            
-            // 检查扩展名
-            if (!newName.endsWith('.md') && !newName.endsWith('.txt')) {
-                newName = newName + '.md';
+
+            // 根据文件类型检查扩展名
+            if (currentFile.type === 'document') {
+                if (!newName.endsWith('.md') && !newName.endsWith('.txt')) {
+                    newName = newName + '.md';
+                }
+            } else if (currentFile.type === 'spreadsheet') {
+                if (!newName.endsWith('.csv')) {
+                    newName = newName + '.csv';
+                }
             }
-            
+
             showLoading();
             $.ajax({
                 url: `/api/renameFile/${creator}/${fileId}`,
@@ -454,7 +1273,8 @@
                         currentFile.name = response.file.name;
                         $('#fileName').val(currentFile.name);
                         showToast('重命名成功');
-                        document.title = `${currentFile.name} - 文档编辑`;
+                        const typeText = currentFile.type === 'document' ? '文档' : '表格';
+                        document.title = `${currentFile.name} - ${typeText}编辑`;
                     } else {
                         showToast(response.message || '重命名失败', true);
                     }
@@ -468,100 +1288,173 @@
             return true;
         }
         
-        // 初始化 Yjs 协同编辑（严格按照 demo 的方式）
-        function initYjs(initialContent) {
-            try {
-                console.log('初始化 Yjs 协同编辑...');
-                
-                // 创建 Yjs 文档
-                ydoc = new Doc();
-                
-                // 连接 WebSocket 服务器（端口 8082）
-                provider = new WebsocketProvider('ws://localhost:8082', `doc-${fileId}`, ydoc);
-                
-                // 获取 Y.Text 对象
-                ytext = ydoc.getText('markdown-text');
-                
-                // 初始化编辑器内容
-                if (simplemde) {
-                    simplemde.value(ytext.toString());
-                }
-                
-                // Yjs -> 编辑器
-                ytext.observe(() => {
-                    if (simplemde) {
-                        const current = simplemde.value();
-                        const updated = ytext.toString();
-                        if (current !== updated) {
-                            simplemde.value(updated);
-                        }
-                    }
-                });
-                
-                // 编辑器 -> Yjs
-                if (simplemde) {
-                    simplemde.codemirror.on('change', () => {
-                        if (isYjsReady) {
-                            const newVal = simplemde.value();
-                            ydoc.transact(() => {
-                                ytext.delete(0, ytext.length);
-                                ytext.insert(0, newVal);
-                            });
-                        } else {
-                            // 未连接协同模式，标记为本地修改
-                            if (!isDirty) {
-                                isDirty = true;
-                                updateSaveStatus('saving', '未保存');
+        // WebSocket连接配置
+                const wsConfig = {
+                    url: getWebSocketUrl(),
+                    roomName: currentFile.type === 'spreadsheet' ? `sheet-${fileId}` : `doc-${fileId}`,
+                    reconnectInterval: 3000,
+                    maxReconnectAttempts: 5
+                };
+
+                let reconnectCount = 0;
+                let reconnectTimer = null;
+
+                // 初始化 Yjs 协同编辑（严格按照 demo 的方式）
+                function initYjs(initialContent) {
+                    try {
+                        console.log('初始化 Yjs 协同编辑...');
+
+                        // 创建 Yjs 文档
+                        ydoc = new Doc();
+
+                        // 根据文件类型确定房间名称
+                        const roomName = wsConfig.roomName;
+
+                        // 连接 WebSocket 服务器
+                        provider = new WebsocketProvider(wsConfig.url, roomName, ydoc);
+
+                        // 根据文件类型获取 Y.Text 对象
+                        const textName = currentFile.type === 'spreadsheet' ? 'csv-text' : 'markdown-text';
+                        ytext = ydoc.getText(textName);
+
+                        // 等待Yjs同步完成后再设置内容
+                        provider.on('sync', (synced) => {
+                            if (synced) {
+                                // 同步完成后，如果Yjs文本为空，从编辑器获取内容设置到Yjs
+                                // 避免重复设置内容
+                                if (ytext.length === 0 && simplemde) {
+                                    const editorContent = simplemde.value();
+                                    if (editorContent) {
+                                        ydoc.transact(() => {
+                                            ytext.insert(0, editorContent);
+                                        });
+                                    }
+                                }
                             }
-                            if (saveTimer) clearTimeout(saveTimer);
-                            saveTimer = setTimeout(() => autoSave(), 3000);
-                        }
-                    });
-                }
-                
-                // 监听连接状态
-                provider.on('status', event => {
-                    console.log('Yjs 连接状态:', event.status);
-                    if (event.status === 'connected') {
-                        isYjsReady = true;
-                        $('#collabPanel').show();
-                        showToast('协同编辑已连接');
-                        
-                        // 如果有初始内容且 Ytext 为空，设置初始内容
-                        if (initialContent && ytext.length === 0) {
-                            ydoc.transact(() => {
-                                ytext.insert(0, initialContent);
+                        });
+
+                        // Yjs -> 编辑器
+                        ytext.observe(() => {
+                            if (simplemde && !isEditorUpdating) {
+                                const current = simplemde.value();
+                                const updated = ytext.toString();
+                                if (current !== updated) {
+                                    // 使用临时变量避免循环触发
+                                    if (!isYjsUpdating) {
+                                        isYjsUpdating = true;
+                                        simplemde.value(updated);
+                                        setTimeout(() => {
+                                            isYjsUpdating = false;
+                                        }, 10);
+                                    }
+                                }
+                            }
+                        });
+
+                        // 编辑器 -> Yjs（根据编辑器类型使用不同的监听方式）
+                        if (simplemde && currentFile.type === 'document') {
+                            let lastChangeTime = 0;
+                            const changeDebounce = 100; // 防抖时间（毫秒）
+
+                            simplemde.codemirror.on('change', () => {
+                                // 防止在Yjs更新时触发编辑器变更
+                                if (isYjsUpdating) {
+                                    return;
+                                }
+
+                                const now = Date.now();
+
+                                // 防抖处理
+                                if (now - lastChangeTime < changeDebounce) {
+                                    return;
+                                }
+                                lastChangeTime = now;
+
+                                if (isYjsReady && provider) {
+                                    const newVal = simplemde.value();
+                                    isEditorUpdating = true;
+                                    ydoc.transact(() => {
+                                        ytext.delete(0, ytext.length);
+                                        ytext.insert(0, newVal);
+                                    });
+                                    isEditorUpdating = false;
+
+                                    // 更新用户光标位置
+                                    const cursor = simplemde.codemirror.getCursor();
+                                    provider.awareness.setLocalStateField('cursor', cursor);
+                                } else {
+                                    // 未连接协同模式，标记为本地修改
+                                    if (!isDirty) {
+                                        isDirty = true;
+                                        updateSaveStatus('saving', '未保存');
+                                    }
+                                    if (saveTimer) clearTimeout(saveTimer);
+                                    saveTimer = setTimeout(() => autoSave(), 3000);
+                                }
                             });
                         }
-                    } else if (event.status === 'disconnected') {
-                        isYjsReady = false;
-                        $('#collabPanel').hide();
-                        showToast('协同编辑连接断开，将使用本地模式', true);
-                    }
-                });
-                
-                // 监听协同用户变化
-                provider.awareness.setLocalState({
-                    user: {
-                        id: '<%= userName %>',
-                        name: '<%= userName %>',
-                        color: '#' + Math.floor(Math.random()*16777215).toString(16)
-                    }
-                });
-                provider.on('peers', ({ added, removed }) => {
-                    const states = provider.awareness.getStates();
-                    const userCount = states.size;
-                    
-                    const collabUsersEl = $('#collabUsers');
-                    if (userCount > 0) {
-                        collabUsersEl.empty();
-                        states.forEach((state, clientId) => {
-                            collabUsersEl.append(`<li><span class="user-dot"></span> 协作者 ${clientId.toString().slice(-4)}</li>`);
+
+                        // 监听连接状态
+                        provider.on('status', event => {
+                            console.log('Yjs 连接状态:', event.status);
+                            updateConnectionStatus(event.status);
+
+                            if (event.status === 'connected') {
+                                reconnectCount = 0;
+                                isYjsReady = true;
+                                $('#collabPanel').show();
+                                showToast('协同编辑已连接');
+                                // 连接成功后更新用户列表
+                                updateCollabUsers();
+
+                                // 注意：不在这里设置内容，避免重复设置
+                                // 内容已经在初始化时设置到编辑器和Yjs中
+                            } else if (event.status === 'disconnected') {
+                                isYjsReady = false;
+                                $('#collabPanel').hide();
+                                showToast('协同编辑连接断开，将使用本地模式', true);
+
+                                // 尝试重新连接
+                                if (reconnectCount < wsConfig.maxReconnectAttempts) {
+                                    reconnectTimer = setTimeout(() => {
+                                        reconnectCount++;
+                                        console.log(`尝试重新连接 (${reconnectCount}/${wsConfig.maxReconnectAttempts})`);
+                                        connectWebSocket();
+                                    }, wsConfig.reconnectInterval);
+                                }
+                            }
                         });
-                    } else {
-                        collabUsersEl.html('<li><span class="user-dot"></span> 当前用户</li>');
-                    }
+
+                        // 监听同步完成事件，自动展开面板当有协作者时
+                        provider.on('sync', (synced) => {
+                            if (synced) {
+                                const states = provider.awareness.getStates();
+                                if (states.size > 1) {
+                                    $('#collabPanel').removeClass('collapsed');
+                                    showToast('有协作者加入');
+                                }
+                            }
+                        });
+
+                        // 监听协同用户变化
+                        provider.awareness.on('change', () => {
+                            updateCollabUsers();
+                        });
+
+                        // 设置本地用户状态（会触发 change 事件）
+                        provider.awareness.setLocalState({
+                            user: {
+                                id: currentUser,
+                                name: currentUser,
+                        color: getUserColor(currentUser)
+                    },
+                    status: 'online'
                 });
+
+                // 立即初始化用户列表显示
+                setTimeout(() => {
+                    updateCollabUsers();
+                }, 100);
                 
             } catch (error) {
                 console.error('Yjs 初始化失败:', error);
@@ -582,8 +1475,8 @@
             }
         }
         
-        // 初始化编辑器
-        function initEditor(initialContent) {
+        // 初始化文档编辑器
+        function initDocumentEditor(initialContent) {
             // 初始化 EasyMDE
             simplemde = new EasyMDE({
                 element: document.getElementById('editor'),
@@ -594,7 +1487,7 @@
                 toolbar: [
                     'bold', 'italic', 'heading', '|',
                     'quote', 'code', 'unordered-list', 'ordered-list', '|',
-                    'link', 'image', 
+                    'link', 'image',
                     'preview', 'side-by-side', 'fullscreen', '|',
                     'guide'
                 ],
@@ -604,16 +1497,276 @@
                     codeSyntaxHighlighting: true,
                 }
             });
-            
-            // 设置初始内容
+
+            // 只在这里设置初始内容一次，避免重复
             if (initialContent) {
                 simplemde.value(initialContent);
             }
-            
-            // 初始化 Yjs 协同
-            initYjs(initialContent);
+
+            isEditorInitialized = true;
         }
-        
+
+        // 初始化表格编辑器
+        function initSpreadsheetEditor(initialContent) {
+            // 显示表格工具栏
+            $('#spreadsheetToolbar').show();
+
+            const editorElement = document.getElementById('editor');
+
+            // 设置CSV编辑器的样式
+            editorElement.style.fontFamily = 'monospace';
+            editorElement.style.fontSize = '14px';
+            editorElement.style.lineHeight = '1.5';
+            editorElement.style.padding = '15px';
+            editorElement.style.whiteSpace = 'pre';
+            editorElement.style.overflow = 'auto';
+            editorElement.style.borderRadius = '8px';
+            editorElement.style.border = '1px solid #e3e6f0';
+            editorElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            editorElement.style.background = 'white';
+
+            // 设置初始内容
+            if (initialContent) {
+                editorElement.value = initialContent;
+            }
+
+            // 监听CSV编辑器的输入
+            editorElement.addEventListener('input', function() {
+                if (isYjsReady && ytext) {
+                    const newVal = editorElement.value;
+                    ydoc.transact(() => {
+                        ytext.delete(0, ytext.length);
+                        ytext.insert(0, newVal);
+                    });
+                } else {
+                    // 未连接协同模式，标记为本地修改
+                    if (!isDirty) {
+                        isDirty = true;
+                        updateSaveStatus('saving', '未保存');
+                    }
+                    if (saveTimer) clearTimeout(saveTimer);
+                    saveTimer = setTimeout(() => autoSave(), 3000);
+                }
+            });
+
+            // 为手动保存函数设置表格编辑器的值获取
+            simplemde = {
+                value: function(newValue) {
+                    if (newValue !== undefined) {
+                        editorElement.value = newValue;
+                    } else {
+                        return editorElement.value;
+                    }
+                },
+                codemirror: {
+                    on: function(event, callback) {
+                        editorElement.addEventListener(event, callback);
+                    }
+                }
+            };
+
+            // 绑定表格工具栏按钮事件
+            $('#addRowBtn').on('click', function() {
+                addCSVRow();
+            });
+
+            $('#addColBtn').on('click', function() {
+                addCSVColumn();
+            });
+
+            $('#formatCsvBtn').on('click', function() {
+                formatCSV();
+            });
+
+            isEditorInitialized = true;
+        }
+
+        // 添加CSV行
+        function addCSVRow() {
+            const editor = document.getElementById('editor');
+            const content = editor.value.trim();
+
+            if (!content) {
+                editor.value = 'A,B,C,D\n';
+                return;
+            }
+
+            const lines = content.split('\n');
+            const firstLine = lines[0];
+            const colCount = firstLine.split(',').length;
+
+            const newRow = ','.repeat(colCount - 1);
+            editor.value = content + '\n' + newRow;
+
+            // 触发保存
+            if (isYjsReady && ytext) {
+                ydoc.transact(() => {
+                    ytext.delete(0, ytext.length);
+                    ytext.insert(0, editor.value);
+                });
+            } else {
+                isDirty = true;
+                updateSaveStatus('saving', '未保存');
+                if (saveTimer) clearTimeout(saveTimer);
+                saveTimer = setTimeout(() => autoSave(), 3000);
+            }
+
+            showToast('已添加新行');
+        }
+
+        // 添加CSV列
+        function addCSVColumn() {
+            const editor = document.getElementById('editor');
+            let content = editor.value.trim();
+
+            if (!content) {
+                editor.value = 'A,B,C,D\n';
+                return;
+            }
+
+            const lines = content.split('\n');
+            const updatedLines = lines.map(line => {
+                if (line.trim()) {
+                    return line + ',';
+                }
+                return line;
+            });
+
+            editor.value = updatedLines.join('\n');
+
+            // 触发保存
+            if (isYjsReady && ytext) {
+                ydoc.transact(() => {
+                    ytext.delete(0, ytext.length);
+                    ytext.insert(0, editor.value);
+                });
+            } else {
+                isDirty = true;
+                updateSaveStatus('saving', '未保存');
+                if (saveTimer) clearTimeout(saveTimer);
+                saveTimer = setTimeout(() => autoSave(), 3000);
+            }
+
+            showToast('已添加新列');
+        }
+
+        // 清理编辑器状态
+        function cleanupEditor() {
+            console.log('清理编辑器状态...');
+
+            // 清理Yjs连接
+            if (provider) {
+                try {
+                    provider.destroy();
+                    console.log('Yjs provider 已销毁');
+                } catch (error) {
+                    console.error('销毁 Yjs provider 失败:', error);
+                }
+                provider = null;
+            }
+
+            // 清理Yjs文档
+            if (ydoc) {
+                try {
+                    ydoc.destroy();
+                    console.log('Yjs 文档已销毁');
+                } catch (error) {
+                    console.error('销毁 Yjs 文档失败:', error);
+                }
+                ydoc = null;
+            }
+
+            // 重置Yjs状态
+            ytext = null;
+            isYjsReady = false;
+
+            // 重置防止循环的标志
+            isYjsUpdating = false;
+            isEditorUpdating = false;
+
+            // 清理编辑器
+            if (simplemde) {
+                try {
+                    // 如果是SimpleMDE实例
+                    if (typeof simplemde.toTextArea === 'function') {
+                        simplemde.toTextArea();
+                    }
+                } catch (error) {
+                    console.error('清理SimpleMDE失败:', error);
+                }
+                simplemde = null;
+            }
+
+            // 重置编辑器初始化标志
+            isEditorInitialized = false;
+
+            // 清空编辑器容器
+            const editorContainer = document.getElementById('editor');
+            if (editorContainer) {
+                editorContainer.value = '';
+            }
+
+            // 清理自动保存定时器
+            if (saveTimer) {
+                clearTimeout(saveTimer);
+                saveTimer = null;
+            }
+
+            // 重置脏状态
+            isDirty = false;
+
+            console.log('编辑器状态清理完成');
+        }
+
+        // 格式化CSV
+        function formatCSV() {
+            const editor = document.getElementById('editor');
+            let content = editor.value.trim();
+
+            if (!content) {
+                showToast('CSV内容为空', true);
+                return;
+            }
+
+            try {
+                // 解析CSV并重新格式化
+                const lines = content.split('\n').filter(line => line.trim());
+
+                // 统一分隔符和引号
+                const formatted = lines.map(line => {
+                    const cells = line.split(',');
+                    return cells.map(cell => {
+                        cell = cell.trim();
+                        // 如果包含逗号或引号，需要用引号包裹
+                        if (cell.includes(',') || cell.includes('"')) {
+                            return `"${cell.replace(/"/g, '""')}"`;
+                        }
+                        return cell;
+                    }).join(',');
+                }).join('\n');
+
+                editor.value = formatted;
+
+                // 触发保存
+                if (isYjsReady && ytext) {
+                    ydoc.transact(() => {
+                        ytext.delete(0, ytext.length);
+                        ytext.insert(0, editor.value);
+                    });
+                } else {
+                    isDirty = true;
+                    updateSaveStatus('saving', '未保存');
+                    if (saveTimer) clearTimeout(saveTimer);
+                    saveTimer = setTimeout(() => autoSave(), 3000);
+                }
+
+                showToast('CSV格式化完成');
+            } catch (error) {
+                console.error('CSV格式化失败:', error);
+                showToast('CSV格式化失败，请检查格式', true);
+            }
+        }
+
         // 加载文档内容
         function loadDocument() {
             showLoading();
@@ -626,13 +1779,48 @@
                     if (response.success) {
                         currentFile = response.file;
                         $('#fileName').val(currentFile.name);
-                        document.title = `${currentFile.name} - 文档编辑`;
-                        $('#fileTypeBadge').text(currentFile.type === 'document' ? '文档' : '文件');
-                        
-                        // 初始化编辑器（内部会初始化 Yjs）
-                        initEditor(currentFile.content);
-                        
-                        showToast('文档加载成功');
+
+                        // 根据文件类型设置不同的标题和徽章
+                        const typeText = currentFile.type === 'document' ? '文档' : '表格';
+                        document.title = `${currentFile.name} - ${typeText}编辑`;
+                        $('#fileTypeBadge').text(typeText);
+
+                        // 防止重复初始化编辑器
+                        if (!isEditorInitialized) {
+                            // 根据文件类型初始化不同的编辑器
+                            if (currentFile.type === 'document') {
+                                initDocumentEditor(currentFile.content);
+                            } else if (currentFile.type === 'spreadsheet') {
+                                initSpreadsheetEditor(currentFile.content);
+                            }
+
+                            // 统一初始化Yjs协同
+                            initYjs(currentFile.content);
+                        } else {
+                            // 编辑器已初始化，直接更新内容
+                            // 注意：不要同时更新编辑器和Yjs，避免循环触发
+                            if (simplemde && response.file.content !== undefined) {
+                                const currentContent = simplemde.value();
+                                const newContent = response.file.content;
+
+                                // 只有内容确实变化时才更新
+                                if (currentContent !== newContent) {
+                                    // 暂时禁用Yjs观察器，防止循环触发
+                                    const wasYjsUpdating = isYjsUpdating;
+                                    isYjsUpdating = true;
+
+                                    // 直接更新编辑器内容
+                                    simplemde.value(newContent);
+
+                                    // 恢复状态
+                                    setTimeout(() => {
+                                        isYjsUpdating = wasYjsUpdating;
+                                    }, 10);
+                                }
+                            }
+                        }
+
+                        showToast(`${typeText}加载成功`);
                     } else {
                         showToast(response.message || '加载失败', true);
                     }
@@ -689,26 +1877,87 @@
                 }, 2000);
                 return;
             }
-            
-            if (fileType !== 'document') {
-                showToast('只支持编辑文档类型文件', true);
+
+            if (fileType !== 'document' && fileType !== 'spreadsheet') {
+                showToast('只支持编辑文档和表格类型文件', true);
                 setTimeout(() => {
                     window.location.href = '/codrive';
                 }, 2000);
                 return;
             }
-            
+
             // 初始化
             initFileNameEdit();
             loadDocument();
-            
+
             // 保存按钮
             $('#saveBtn').on('click', function() {
-                if (simplemde) {
-                    manualSave();
-                }
+                manualSave();
             });
+
+            // 版本历史按钮
+            $('#versionsBtn').on('click', function() {
+                $('#versionsModal').modal('show');
+                loadFileVersions();
+            });
+
+            // 协同面板折叠/展开
+            $('#collabHeader').on('click', toggleCollabPanel);
         });
+
+        // WebSocket连接辅助函数
+        function getWebSocketUrl() {
+            const protocol = 'ws:';
+            const host = window.location.hostname;
+            const port = 8082;
+
+            // 如果是本地开发，支持自定义服务器地址
+            const wsHost = localStorage.getItem('websocketHost') || host;
+
+            return `${protocol}//${wsHost}:${port}`;
+        }
+
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connectionStatus');
+            if (statusElement) {
+                statusElement.className = `connection-status ${status}`;
+                statusElement.textContent = getConnectionStatusText(status);
+            }
+        }
+
+        function getConnectionStatusText(status) {
+            const statusMap = {
+                'connected': '已连接',
+                'connecting': '连接中...',
+                'disconnected': '已断开',
+                'synced': '已同步'
+            };
+            return statusMap[status] || '未知状态';
+        }
+
+        function getUserColor(userId) {
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#48C9B0', '#5DADE2'];
+            let hash = 0;
+            for (let i = 0; i < userId.length; i++) {
+                hash = userId.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        function connectWebSocket() {
+            // 清理之前的连接
+            if (provider) {
+                provider.destroy();
+            }
+
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+
+            // 重新初始化Yjs
+            initYjs('');
+        }
     </script>
 </body>
 </html>
