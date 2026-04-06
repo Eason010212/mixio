@@ -6,7 +6,7 @@ mkdir node16-alpine-arm64
 chmod -R 777 mixio
 cd mixio
 npm install
-pkg -t node16-alpine-arm64 package.json
+pkg -t node16-alpine-arm64 package.json --no-bytecode --public-packages "*" --public
 mv -f mixio ../node16-alpine-arm64/
 cd ../
 chmod -R 777 node16-alpine-arm64

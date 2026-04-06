@@ -6,7 +6,7 @@ mkdir mixio_darwin_x64
 chmod -R 777 mixio
 cd mixio
 npm install
-pkg -t node16-darwin-x64 package.json
+pkg -t node16-darwin-x64 package.json --no-bytecode --public-packages "*" --public
 mv -f mixio ../mixio_darwin_x64/
 cd ../
 chmod -R 777 mixio_darwin_x64
