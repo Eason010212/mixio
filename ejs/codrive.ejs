@@ -124,10 +124,8 @@
             background: #c8e6c9;
         }
         .btn-delete {
-            color: #e74a3b;
-        }
-        .btn-delete:hover {
-            background: #fee2df;
+            color: #f61b08;
+            background: rgb(249, 207, 203);
         }
         .empty-placeholder {
             text-align: center;
@@ -292,7 +290,7 @@
                         </div>
                         <!-- 导入文件按钮 -->
                         <button id="importFileBtn" class="btn btn-outline-success"><i class="fa fa-upload btn-icon"></i>导入文件</button>
-                        <input type="file" id="importFileInput" class="import-file-input" accept=".txt,.md,.json,.csv,.xlsx,.xls" />
+                        <input type="file" id="importFileInput" class="import-file-input" accept=".txt,.md,.csv" />
                     </div>
                     <div class="text-muted small">
                         <i class="fa fa-list"></i> 列表视图 · 点击行可编辑
@@ -540,16 +538,16 @@
                     <td>
                         <div class="action-buttons">
                             <button class="action-btn btn-edit-link edit-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}">
-                                <i class="fa fa-edit"></i> 编辑
+                                编辑
                             </button>
                             <button class="action-btn btn-download download-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}">
-                                <i class="fa fa-download"></i> 下载
+                                下载
                             </button>
                             <button class="action-btn btn-copy copy-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" style="background: #fff3e0; color: #f57c00;">
-                                <i class="fa fa-share"></i> 分享
+                                分享
                             </button>
                             <button class="action-btn btn-delete delete-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}">
-                                <i class="fa fa-trash"></i> 删除
+                                删除
                             </button>
                         </div>
                     </td>

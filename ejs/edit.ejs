@@ -1587,10 +1587,24 @@
             // 绑定表格工具栏按钮事件
             $('#addRowBtn').on('click', function() {
                 hot.alter('insert_row_below');
+                const csvData = hot.getData().map(row => row.join(',')).join('\n');
+                if (isYjsReady && ytext) {
+                    ydoc.transact(() => {
+                        ytext.delete(0, ytext.length);
+                        ytext.insert(0, csvData);
+                    });
+                }
             });
 
             $('#addColBtn').on('click', function() {
                 hot.alter('insert_col_end');
+                const csvData = hot.getData().map(row => row.join(',')).join('\n');
+                if (isYjsReady && ytext) {
+                    ydoc.transact(() => {
+                        ytext.delete(0, ytext.length);
+                        ytext.insert(0, csvData);
+                    });
+                }
             });
 
             $('#formatCsvBtn').on('click', function() {

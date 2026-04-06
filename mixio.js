@@ -6,7 +6,7 @@ const extract = require('extract-zip')
 const WebSocket = require('ws')
 const multer = require('multer');
 const iconv = require('iconv-lite');
-const { setupWSConnection } = require('./node_modules/y-websocket/bin/utils.js')
+const { setupWSConnection } = require('y-websocket/bin/utils');
 defaultCrt =
     `-----BEGIN CERTIFICATE-----
 MIID0TCCArmgAwIBAgICYxswDQYJKoZIhvcNAQELBQAwczELMAkGA1UEBhMCQ04x
@@ -2509,7 +2509,7 @@ var mixioServer = async function() {
         }
         
         // 使用 EJS 渲染
-        ejs.renderFile('ejs/edit.ejs', {
+        ejs.renderFile(__dirname + '/ejs/edit.ejs', {
             userName: userName,
             creator: creator,
             fileId: fileId,

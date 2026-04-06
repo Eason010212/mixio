@@ -40,7 +40,8 @@
       "icons/**/*",
       "img/**/*",
       "js/**/*",
-      "node_modules/sqlite3/**/*"
+      "node_modules/sqlite3/**/*",
+      "node_modules/lib0/**/*"
     ]
   },
   "scripts": {
