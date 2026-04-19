@@ -637,6 +637,19 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Handsontable 第一行表头样式 */
+        .header-row-cell {
+            background-color: #f0f0f0 !important;
+            color: black !important;
+            font-weight: 600 !important;
+            text-align: center !important;
+        }
+
+        .header-row-cell.current {
+            background-color: #dcdcdc !important;
+        }
+
     </style>
 </head>
 <body>
@@ -1532,11 +1545,19 @@
             const hot = new Handsontable(container, {
                 data: data,
                 rowHeaders: true,
-                colHeaders: true,
+                colHeaders: false,
                 height: '100%',
                 width: '100%',
                 licenseKey: 'non-commercial-and-evaluation',
                 stretchH: 'all',
+                cells: function(row, col) {
+                    // 第一行作为表头
+                    if (row === 0) {
+                        return {
+                            className: 'header-row-cell'
+                        };
+                    }
+                },
                 afterChange: function(changes, source) {
                     if (source !== 'loadData' && isYjsReady && ytext) {
                         // 转换为CSV

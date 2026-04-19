@@ -2502,7 +2502,7 @@ var mixioServer = async function() {
         const fileName = req.query.name;
         
         if (!userName) {
-            return res.redirect('/login');
+            return res.redirect('/');
         }
         
         if (!fileId || !fileType) {
