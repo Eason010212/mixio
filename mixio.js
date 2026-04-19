@@ -154,6 +154,7 @@ var defaultConfig = `{
     "MIXIO_WS_PORT": 8083,
     "MIXIO_WSS_PORT": 8084,
     "MIXIO_YJS_PORT": 8082,
+    "MIXIO_YJS_WSS_PORT": 8086,
     "HTTPS_CRT_FILE": "config/certs/file.crt",
     "HTTPS_PRIVATE_PEM": "config/certs/private.pem",
     "MAX_PROJECT_NUM_PER_USER": 20,
@@ -2516,7 +2517,8 @@ var mixioServer = async function() {
             fileId: fileId,
             fileType: fileType,
             fileName: decodeURIComponent(fileName || ''),
-            yjsPort: configs["MIXIO_YJS_PORT"] || 8082
+            yjsPort: configs["MIXIO_YJS_PORT"] || 8082,
+            yjsWssPort: configs["MIXIO_YJS_WSS_PORT"] || 8086
         }, function(err, html) {
             if (err) {
                 console.error('渲染文件错误:', err);
@@ -4538,14 +4540,26 @@ var mixioServer = async function() {
                                         db.run('delete from devices')
                                         console.log('[INFO] Storage Engine: SQLite')
                                         const njsserver = http.createServer(app)
-                                        const njswss = new WebSocket.Server({ 
+                                        const njswss = new WebSocket.Server({
                                             server: njsserver
                                         })
                                         njswss.on('connection', (conn, req) => {
                                             setupWSConnection(conn, req)
                                         })
                                         njsserver.listen(configs["MIXIO_YJS_PORT"], () => {
-                                            console.log('[INFO] Njs-WebSocket server listening on port', configs["MIXIO_YJS_PORT"])
+                                            console.log('[INFO] Njs-WebSocket server (ws) listening on port', configs["MIXIO_YJS_PORT"])
+                                        })
+
+                                        // 添加 HTTPS WebSocket 服务器支持
+                                        const njsserverHttps = https.createServer(credentials)
+                                        const njswssHttps = new WebSocket.Server({
+                                            server: njsserverHttps
+                                        })
+                                        njswssHttps.on('connection', (conn, req) => {
+                                            setupWSConnection(conn, req)
+                                        })
+                                        njsserverHttps.listen(configs["MIXIO_YJS_WSS_PORT"], () => {
+                                            console.log('[INFO] Njs-WebSocket server (wss) listening on port', configs["MIXIO_YJS_WSS_PORT"])
                                             console.log('[INFO] Database Connected!')
                                             resolve({
                                                 stop: stopFunction
@@ -4622,14 +4636,26 @@ var mixioServer = async function() {
                                                 db.query('delete from devices')
                                                 console.log('[INFO] Storage Engine: MySQL (' + MYSQL_HOST + ')')
                                                 const njsserver = http.createServer(app)
-                                                const njswss = new WebSocket.Server({ 
+                                                const njswss = new WebSocket.Server({
                                                     server: njsserver
                                                 })
                                                 njswss.on('connection', (conn, req) => {
                                                     setupWSConnection(conn, req)
                                                 })
                                                 njsserver.listen(configs["MIXIO_YJS_PORT"], () => {
-                                                    console.log('[INFO] Njs-WebSocket server listening on port', configs["MIXIO_YJS_PORT"])
+                                                    console.log('[INFO] Njs-WebSocket server (ws) listening on port', configs["MIXIO_YJS_PORT"])
+                                                })
+
+                                                // 添加 HTTPS WebSocket 服务器支持
+                                                const njsserverHttps = https.createServer(credentials)
+                                                const njswssHttps = new WebSocket.Server({
+                                                    server: njsserverHttps
+                                                })
+                                                njswssHttps.on('connection', (conn, req) => {
+                                                    setupWSConnection(conn, req)
+                                                })
+                                                njsserverHttps.listen(configs["MIXIO_YJS_WSS_PORT"], () => {
+                                                    console.log('[INFO] Njs-WebSocket server (wss) listening on port', configs["MIXIO_YJS_WSS_PORT"])
                                                     console.log('[INFO] Database Connected!')
                                                     resolve({
                                                         stop: stopFunction
@@ -4802,6 +4828,8 @@ init(function(res) {
             configs["FOOTER"] = ""
         if (!configs["MIXIO_YJS_PORT"])
             configs["MIXIO_YJS_PORT"] = 8082
+        if (!configs["MIXIO_YJS_WSS_PORT"])
+            configs["MIXIO_YJS_WSS_PORT"] = 8086
         STORAGE_ENGINE = configs["STORAGE_ENGINE"]
 
 
