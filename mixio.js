@@ -153,6 +153,7 @@ var defaultConfig = `{
     "MIXIO_MQTT_PORT": 1883,
     "MIXIO_WS_PORT": 8083,
     "MIXIO_WSS_PORT": 8084,
+    "MIXIO_YJS_PORT": 8082,
     "HTTPS_CRT_FILE": "config/certs/file.crt",
     "HTTPS_PRIVATE_PEM": "config/certs/private.pem",
     "MAX_PROJECT_NUM_PER_USER": 20,
@@ -2514,7 +2515,8 @@ var mixioServer = async function() {
             creator: creator,
             fileId: fileId,
             fileType: fileType,
-            fileName: decodeURIComponent(fileName || '')
+            fileName: decodeURIComponent(fileName || ''),
+            yjsPort: configs["MIXIO_YJS_PORT"] || 8082
         }, function(err, html) {
             if (err) {
                 console.error('渲染文件错误:', err);
@@ -4542,8 +4544,8 @@ var mixioServer = async function() {
                                         njswss.on('connection', (conn, req) => {
                                             setupWSConnection(conn, req)
                                         })
-                                        njsserver.listen(8082, () => {
-                                            console.log('[INFO] Njs-WebSocket server listening on port', 8082)
+                                        njsserver.listen(configs["MIXIO_YJS_PORT"], () => {
+                                            console.log('[INFO] Njs-WebSocket server listening on port', configs["MIXIO_YJS_PORT"])
                                             console.log('[INFO] Database Connected!')
                                             resolve({
                                                 stop: stopFunction
@@ -4626,8 +4628,8 @@ var mixioServer = async function() {
                                                 njswss.on('connection', (conn, req) => {
                                                     setupWSConnection(conn, req)
                                                 })
-                                                njsserver.listen(8082, () => {
-                                                    console.log('[INFO] Njs-WebSocket server listening on port', 8082)
+                                                njsserver.listen(configs["MIXIO_YJS_PORT"], () => {
+                                                    console.log('[INFO] Njs-WebSocket server listening on port', configs["MIXIO_YJS_PORT"])
                                                     console.log('[INFO] Database Connected!')
                                                     resolve({
                                                         stop: stopFunction
@@ -4798,6 +4800,8 @@ init(function(res) {
         configs = JSON.parse(configs.toString());
         if (!configs["FOOTER"])
             configs["FOOTER"] = ""
+        if (!configs["MIXIO_YJS_PORT"])
+            configs["MIXIO_YJS_PORT"] = 8082
         STORAGE_ENGINE = configs["STORAGE_ENGINE"]
 
 

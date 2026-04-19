@@ -688,9 +688,6 @@
                 <span>在线协同</span>
                 <span class="collab-count" id="collabCount">0</span>
             </div>
-            <div class="collab-toggle">
-                <i class="fa fa-chevron-down"></i>
-            </div>
         </div>
         <div class="collab-users-container">
             <ul class="collab-users" id="collabUsers">
@@ -823,62 +820,63 @@
             const collabCountEl = $('#collabCount');
             const collabPanel = $('#collabPanel');
 
-            // 更新用户数量（至少显示1，即自己）
-            const userCount = states.size > 0 ? states.size : 1;
-            collabCountEl.text(userCount);
-
-            // 有协作者时自动展开面板
-            if (states.size > 1) {
-                collabPanel.removeClass('collapsed');
-            }
+            // 去重：使用 Map 来存储唯一的用户
+            const uniqueUsers = new Map();
 
             if (states.size === 0) {
                 // 如果没有状态数据，显示当前用户
-                collabUsersEl.empty();
-                const userColor = getUserColor(currentUser);
-                const initials = getUserInitials(currentUser);
-                const userHtml = `
-                    <li class="current-user">
-                        <div class="user-avatar online-indicator" style="background: ${userColor}">
-                            ${initials}
-                        </div>
-                        <div class="user-info">
-                            <span class="user-name">${escapeHtml(currentUser)}</span>
-                            <span class="user-status online">你</span>
-                        </div>
-                    </li>
-                `;
-                collabUsersEl.append(userHtml);
-                return;
+                uniqueUsers.set(currentUser, {
+                    name: currentUser,
+                    status: 'online',
+                    isCurrentUser: true
+                });
+            } else {
+                // 遍历所有用户状态，去重
+                states.forEach((state, clientId) => {
+                    const userData = state.user;
+                    if (userData && userData.name) {
+                        // 如果用户已存在，跳过
+                        if (!uniqueUsers.has(userData.name)) {
+                            uniqueUsers.set(userData.name, {
+                                name: userData.name,
+                                status: state.status || 'online',
+                                isCurrentUser: userData.name === currentUser
+                            });
+                        }
+                    }
+                });
+            }
+
+            // 更新用户数量
+            const userCount = uniqueUsers.size;
+            collabCountEl.text(userCount);
+
+            // 有协作者时自动展开面板
+            if (userCount > 1) {
+                collabPanel.removeClass('collapsed');
             }
 
             // 清空现有列表
             collabUsersEl.empty();
 
-            // 遍历所有用户状态
-            states.forEach((state, clientId) => {
-                const userData = state.user;
-                const userStatus = state.status || 'online';
-                const isCurrentUser = userData && userData.name === currentUser;
+            // 渲染用户列表
+            uniqueUsers.forEach((user) => {
+                const userColor = getUserColor(user.name);
+                const initials = getUserInitials(user.name);
+                const statusText = user.isCurrentUser ? '你' : '在线编辑';
 
-                if (userData) {
-                    const userColor = getUserColor(userData.name);
-                    const initials = getUserInitials(userData.name);
-                    const statusText = isCurrentUser ? '你' : '在线编辑';
-
-                    const userHtml = `
-                        <li class="${isCurrentUser ? 'current-user' : ''}">
-                            <div class="user-avatar ${isCurrentUser ? 'online-indicator' : ''}" style="background: ${userColor}">
-                                ${initials}
-                            </div>
-                            <div class="user-info">
-                                <span class="user-name">${escapeHtml(userData.name)}</span>
-                                <span class="user-status ${userStatus}">${statusText}</span>
-                            </div>
-                        </li>
-                    `;
-                    collabUsersEl.append(userHtml);
-                }
+                const userHtml = `
+                    <li class="${user.isCurrentUser ? 'current-user' : ''}">
+                        <div class="user-avatar ${user.isCurrentUser ? 'online-indicator' : ''}" style="background: ${userColor}">
+                            ${initials}
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">${escapeHtml(user.name)}</span>
+                            <span class="user-status ${user.status}">${statusText}</span>
+                        </div>
+                    </li>
+                `;
+                collabUsersEl.append(userHtml);
             });
         }
 
@@ -1870,7 +1868,7 @@
         function getWebSocketUrl() {
             const protocol = 'ws:';
             const host = window.location.hostname;
-            const port = 8082;
+            const port = <%= yjsPort %>;
 
             // 如果是本地开发，支持自定义服务器地址
             const wsHost = localStorage.getItem('websocketHost') || host;
