@@ -1541,6 +1541,11 @@
                 data = lines.map(line => line.split(','));
             }
 
+            // IME（拼音输入法）兼容：追踪组字状态
+            let isComposing = false;
+            container.addEventListener('compositionstart', () => { isComposing = true; });
+            container.addEventListener('compositionend', () => { isComposing = false; });
+
             // 初始化handsontable
             const hot = new Handsontable(container, {
                 data: data,
@@ -1556,6 +1561,24 @@
                         return {
                             className: 'header-row-cell'
                         };
+                    }
+                },
+                afterOnCellMouseDown: function(event, coords, TD) {
+                    // 点击即进入编辑模式，避免首字母被 Handsontable 拦截导致 IME 无法组字
+                    if (coords.row >= 0 && coords.col >= 0) {
+                        setTimeout(function() {
+                            var activeEditor = hot.getActiveEditor();
+                            if (activeEditor && typeof activeEditor.isOpened === 'function' && !activeEditor.isOpened()) {
+                                activeEditor.beginEditing();
+                            }
+                        }, 50);
+                    }
+                },
+                beforeKeyDown: function(e) {
+                    // IME 组字期间阻止 Handsontable 拦截按键
+                    if (isComposing || e.isComposing || e.keyCode === 229) {
+                        e.stopImmediatePropagation();
+                        return false;
                     }
                 },
                 afterChange: function(changes, source) {

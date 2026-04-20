@@ -189,6 +189,7 @@
     <script src="js/mqtt.min.js"></script>
     <script src="js/jquery.dataTables.min.js"></script>
     <script src="js/dataTables.bootstrap4.min.js"></script>
+    <script src="js/xlsx.full.min.js"></script>
     <script src="js/tools.js"></script>
     <script src="js/sb-admin-2.min.js?v=2"></script>
 </head>
@@ -290,7 +291,7 @@
                         </div>
                         <!-- 导入文件按钮 -->
                         <button id="importFileBtn" class="btn btn-outline-success"><i class="fa fa-upload btn-icon"></i>导入文件</button>
-                        <input type="file" id="importFileInput" class="import-file-input" accept=".txt,.md,.csv" />
+                        <input type="file" id="importFileInput" class="import-file-input" accept=".txt,.md,.csv,.xls,.xlsx" />
                     </div>
                     <div class="text-muted small">
                         <i class="fa fa-list"></i> 列表视图 · 点击行可编辑
@@ -824,39 +825,88 @@
     function importFiles(fileInputEvent) {
         const file = fileInputEvent.target.files[0];
         if(!file) return;
-        
-        showLoading();
-        
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        $.ajax({
-            url: '/uploadFile',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            dataType: 'json',
-            success: function(response) {
-                hideLoading();
-                if (response.success) {
-                    showToast(`上传成功: ${file.name}`);
-                    loadFileList();
-                } else {
-                    showToast(response.message || '上传失败', true);
+
+        const ext = file.name.split('.').pop().toLowerCase();
+
+        if (ext === 'xls' || ext === 'xlsx') {
+            // Excel 文件：先转为 CSV 再上传
+            showLoading();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const csvContent = XLSX.utils.sheet_to_csv(firstSheet);
+                    const csvName = file.name.replace(/\.(xls|xlsx)$/i, '.csv');
+                    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8' });
+
+                    const formData = new FormData();
+                    formData.append('file', blob, csvName);
+
+                    $.ajax({
+                        url: '/uploadFile',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        dataType: 'json',
+                        success: function(response) {
+                            hideLoading();
+                            if (response.success) {
+                                showToast(`已转换并上传: ${csvName}`);
+                                loadFileList();
+                            } else {
+                                showToast(response.message || '上传失败', true);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            hideLoading();
+                            showToast('文件上传失败', true);
+                        }
+                    });
+                } catch (err) {
+                    hideLoading();
+                    console.error('Excel 转换失败:', err);
+                    showToast('Excel 文件转换失败，请检查文件格式', true);
                 }
-            },
-            error: function(xhr, status, error) {
-                hideLoading();
-                console.error('文件上传失败:', error);
-                let errorMsg = '文件上传失败';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMsg = xhr.responseJSON.message;
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            // 非 Excel 文件：直接上传
+            showLoading();
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            $.ajax({
+                url: '/uploadFile',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        showToast(`上传成功: ${file.name}`);
+                        loadFileList();
+                    } else {
+                        showToast(response.message || '上传失败', true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    hideLoading();
+                    console.error('文件上传失败:', error);
+                    let errorMsg = '文件上传失败';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    showToast(errorMsg, true);
                 }
-                showToast(errorMsg, true);
-            }
-        });
-        
+            });
+        }
+
         $('#importFileInput').val('');
     }
     
