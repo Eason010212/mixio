@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文档编辑 - MixIO CoDrive</title>
     <link rel="stylesheet" href="../../css/all.css">
-    <link rel="stylesheet" href="../../css/bootstrap.min.css">
     <link rel="stylesheet" href="../../js/libs/easymde.min.css">
     <link rel="stylesheet" href="../../css/handsontable.full.min.css">
     <style>
@@ -13,6 +12,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+        .table{
+            width: 30px !important;
+            color: black !important;
+            margin-bottom: 0 !important;
         }
         
         body {
@@ -188,6 +192,7 @@
         .editor-container {
             padding: 20px 30px;
             height: calc(100vh - 70px);
+            transform: translateY(0px);
         }
         
         .CodeMirror {
@@ -648,6 +653,63 @@
 
         .header-row-cell.current {
             background-color: #dcdcdc !important;
+        }
+
+        /* 颜色选择器样式 */
+        .color-picker {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 12px;
+            z-index: 1000;
+            min-width: 250px;
+        }
+
+        .color-picker-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .color-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .custom-color-div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .custom-color-input {
+            width: 50px;
+            height: 30px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 2px;
         }
 
     </style>
@@ -1499,9 +1561,133 @@
                 toolbar: [
                     'bold', 'italic', 'heading', '|',
                     'quote', 'code', 'unordered-list', 'ordered-list', '|',
-                    'link', 'image',
-                    'preview', 'side-by-side', 'fullscreen', '|',
-                    'guide'
+                    'link',
+                    {   // 自定义图片上传按钮
+                        name: "upload-image",
+                        action: function(editor) {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.onchange = async function() {
+                                const file = input.files[0];
+                                if (!file) return;
+
+                                const formData = new FormData();
+                                formData.append('file', file);
+
+                                try {
+                                    showToast('图片上传中...');
+                                    const response = await fetch('/uploadFile', {
+                                        method: 'POST',
+                                        body: formData
+                                    });
+                                    const result = await response.json();
+
+                                    if (result.success) {
+                                        // 获取图片访问URL（使用实际保存的文件名，包含时间戳）
+                                        const imageUrl = `/uploads/${encodeURIComponent(creator)}/${result.file.filename}`;
+                                        const cm = editor.codemirror;
+                                        const selection = cm.getSelection();
+                                        cm.replaceSelection(`![${selection || file.name}](${imageUrl})`);
+                                        showToast('图片上传成功');
+                                    } else {
+                                        showToast('图片上传失败', true);
+                                    }
+                                } catch (error) {
+                                    console.error('上传失败:', error);
+                                    showToast('图片上传失败', true);
+                                }
+                            };
+                            input.click();
+                        },
+                        className: "fa fa-image",
+                        title: "上传图片"
+                    },
+                    {   // 文字颜色按钮
+                        name: "text-color",
+                        action: function(editor) {
+                            // 创建颜色选择器
+                            const colors = ['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#008000', '#000080', '#800000'];
+                            const colorPicker = document.createElement('div');
+                            colorPicker.className = 'color-picker';
+                            colorPicker.innerHTML = '<div class="color-picker-title">选择文字颜色</div>';
+
+                            const colorGrid = document.createElement('div');
+                            colorGrid.className = 'color-grid';
+
+                            colors.forEach(color => {
+                                const colorBtn = document.createElement('div');
+                                colorBtn.className = 'color-btn';
+                                colorBtn.style.backgroundColor = color;
+                                colorBtn.onclick = function() {
+                                    const cm = editor.codemirror;
+                                    const selection = cm.getSelection();
+                                    if (selection) {
+                                        cm.replaceSelection(`<span style="color: ${color}">${selection}</span>`);
+                                    } else {
+                                        const cursor = cm.getCursor();
+                                        cm.replaceRange(`<span style="color: ${color}"> </span>`, cursor);
+                                    }
+                                    // 移除颜色选择器
+                                    if (document.querySelector('.color-picker')) {
+                                        document.querySelector('.color-picker').remove();
+                                    }
+                                };
+                                colorGrid.appendChild(colorBtn);
+                            });
+
+                            // 添加自定义颜色输入
+                            const customColorDiv = document.createElement('div');
+                            customColorDiv.className = 'custom-color-div';
+                            customColorDiv.innerHTML = '<span>自定义颜色:</span>';
+
+                            const colorInput = document.createElement('input');
+                            colorInput.type = 'color';
+                            colorInput.className = 'custom-color-input';
+                            colorInput.onchange = function() {
+                                const cm = editor.codemirror;
+                                const selection = cm.getSelection();
+                                if (selection) {
+                                    cm.replaceSelection(`<span style="color: ${this.value}">${selection}</span>`);
+                                } else {
+                                    const cursor = cm.getCursor();
+                                    cm.replaceRange(`<span style="color: ${this.value}"> </span>`, cursor);
+                                }
+                                // 移除颜色选择器
+                                if (document.querySelector('.color-picker')) {
+                                    document.querySelector('.color-picker').remove();
+                                }
+                            };
+
+                            customColorDiv.appendChild(colorInput);
+                            colorPicker.appendChild(colorGrid);
+                            colorPicker.appendChild(customColorDiv);
+
+                            // 将颜色选择器添加到页面
+                            document.body.appendChild(colorPicker);
+
+                            // 定位颜色选择器
+                            const toolbarButton = document.querySelector('.fa-dashboard') || document.querySelector('[title="文字颜色"]');
+                            if (toolbarButton) {
+                                const rect = toolbarButton.getBoundingClientRect();
+                                colorPicker.style.top = (rect.bottom + 5) + 'px';
+                                colorPicker.style.left = rect.left + 'px';
+                            }
+
+                            // 点击其他地方关闭颜色选择器
+                            setTimeout(() => {
+                                document.addEventListener('click', function closeColorPicker(e) {
+                                    if (!colorPicker.contains(e.target) && !e.target.closest('.fa-dashboard')) {
+                                        colorPicker.remove();
+                                        document.removeEventListener('click', closeColorPicker);
+                                    }
+                                });
+                            }, 0);
+                        },
+                        className: "fa fa-dashboard",
+                        title: "文字颜色"
+                    },
+                    'table'
                 ],
                 placeholder: '在此编写文档内容...',
                 status: ['lines', 'words', 'cursor'],
@@ -1514,7 +1700,7 @@
             if (initialContent) {
                 simplemde.value(initialContent);
             }
-
+            simplemde.toggleSideBySide();
             isEditorInitialized = true;
         }
 
@@ -1565,13 +1751,23 @@
                 },
                 afterOnCellMouseDown: function(event, coords, TD) {
                     // 点击即进入编辑模式，避免首字母被 Handsontable 拦截导致 IME 无法组字
+                    // 只在单元格为空时触发编辑，避免清空有内容的单元格
                     if (coords.row >= 0 && coords.col >= 0) {
-                        setTimeout(function() {
-                            var activeEditor = hot.getActiveEditor();
-                            if (activeEditor && typeof activeEditor.isOpened === 'function' && !activeEditor.isOpened()) {
-                                activeEditor.beginEditing();
-                            }
-                        }, 50);
+                        const hot = this;
+
+                        // 获取当前单元格的值
+                        const cellValue = hot.getDataAtCell(coords.row, coords.col);
+                        const isEmpty = !cellValue || (typeof cellValue === 'string' && cellValue.trim() === '');
+
+                        // 只有空单元格才自动进入编辑模式
+                        if (isEmpty) {
+                            setTimeout(function() {
+                                const activeEditor = hot.getActiveEditor();
+                                if (activeEditor && typeof activeEditor.isOpened === 'function' && !activeEditor.isOpened()) {
+                                    activeEditor.beginEditing();
+                                }
+                            }, 50);
+                        }
                     }
                 },
                 beforeKeyDown: function(e) {

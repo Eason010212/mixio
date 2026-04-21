@@ -89,6 +89,10 @@
             background: #e8f5e9;
             color: #388e3c;
         }
+        .type-image {
+            background: #fce4ec;
+            color: #c2185b;
+        }
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -126,6 +130,10 @@
         .btn-delete {
             color: #f61b08;
             background: rgb(249, 207, 203);
+        }
+        .btn-disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
         .empty-placeholder {
             text-align: center;
@@ -190,6 +198,8 @@
     <script src="js/jquery.dataTables.min.js"></script>
     <script src="js/dataTables.bootstrap4.min.js"></script>
     <script src="js/xlsx.full.min.js"></script>
+    <script src="js/html-docx.js"></script>
+    <script src="js/mammoth.browser.min.js"></script>
     <script src="js/tools.js"></script>
     <script src="js/sb-admin-2.min.js?v=2"></script>
 </head>
@@ -291,7 +301,7 @@
                         </div>
                         <!-- 导入文件按钮 -->
                         <button id="importFileBtn" class="btn btn-outline-success"><i class="fa fa-upload btn-icon"></i>导入文件</button>
-                        <input type="file" id="importFileInput" class="import-file-input" accept=".txt,.md,.csv,.xls,.xlsx" />
+                        <input type="file" id="importFileInput" class="import-file-input" accept=".txt,.md,.csv,.xls,.xlsx,.docx,image/*" />
                     </div>
                     <div class="text-muted small">
                         <i class="fa fa-list"></i> 列表视图 · 点击行可编辑
@@ -410,6 +420,7 @@
     function getTypeClass(type) {
         if(type === 'document') return 'type-document';
         if(type === 'spreadsheet') return 'type-spreadsheet';
+        if(type === 'image') return 'type-image';
         return 'type-document';
     }
     
@@ -417,6 +428,7 @@
     function getTypeDisplayName(type) {
         if(type === 'document') return '文档';
         if(type === 'spreadsheet') return '表格';
+        if(type === 'image') return '图片';
         return '文件';
     }
     
@@ -424,6 +436,7 @@
     function getFileIcon(type) {
         if(type === 'document') return 'fa-file';
         if(type === 'spreadsheet') return 'fa-table';
+        if(type === 'image') return 'fa-image';
         return 'fa-file';
     }
     
@@ -462,8 +475,275 @@
     }
     
     // 下载文件
-    function downloadFile(fileId, fileName) {
-        window.location.href = `/downloadFile/${fileId}`;
+    function downloadFile(fileId, fileName, fileType) {
+        // 如果是表格文件，下载时转换为 xlsx 格式
+        if (fileType === 'spreadsheet') {
+            showLoading();
+            $.ajax({
+                url: `/api/getFileContent/${fileId}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        try {
+                            // 使用 XLSX 库将 CSV 转换为 XLSX 并下载
+                            const workbook = XLSX.read(response.content, { type: 'string' });
+                            const xlsxFileName = fileName.replace(/\.csv$/i, '.xlsx');
+                            XLSX.writeFile(workbook, xlsxFileName);
+                            showToast(`下载成功: ${xlsxFileName}`);
+                        } catch (error) {
+                            console.error('转换 CSV 到 XLSX 失败:', error);
+                            showToast('文件下载失败', true);
+                        }
+                    } else {
+                        showToast(response.message || '文件下载失败', true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    hideLoading();
+                    console.error('下载文件失败:', error);
+                    showToast('文件下载失败', true);
+                }
+            });
+        } else if (fileType === 'document') {
+            // 文档文件，转换为 docx 格式
+            showLoading();
+            $.ajax({
+                url: `/api/getFileContent/${fileId}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        try {
+                            // 将 Markdown 转换为 HTML
+                            const htmlContent = convertMarkdownToHtml(response.content);
+
+                            // 使用 html-docx.js 转换为 docx
+                            const converted = htmlDocx.asBlob(htmlContent);
+                            const docxFileName = fileName.replace(/\.(txt|md)$/i, '.docx');
+
+                            // 创建下载链接
+                            const link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(converted);
+                            link.download = docxFileName;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+
+                            showToast(`下载成功: ${docxFileName}`);
+                        } catch (error) {
+                            console.error('转换文档到 DOCX 失败:', error);
+                            showToast('文件下载失败', true);
+                        }
+                    } else {
+                        showToast(response.message || '文件下载失败', true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    hideLoading();
+                    console.error('下载文件失败:', error);
+                    showToast('文件下载失败', true);
+                }
+            });
+        } else {
+            // 其他文件类型直接下载
+            window.location.href = `/downloadFile/${fileId}`;
+        }
+    }
+
+    // 将 Markdown 转换为 HTML（基础格式支持）
+    function convertMarkdownToHtml(markdown) {
+        if (!markdown) return '';
+
+        let html = markdown;
+
+        // 转义 HTML 特殊字符
+        html = html
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        // 处理表格（需要在其他转换之前处理）
+        html = html.replace(/((?:\|.*?\|\n)+)/g, function(match) {
+            return convertMarkdownTableToHtml(match);
+        });
+
+        // 处理代码块（```code```）
+        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
+            return `<pre><code>${code.trim()}</code></pre>`;
+        });
+
+        // 处理行内代码（`code`）
+        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        // 处理标题（# ### ******）
+        html = html.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>');
+        html = html.replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>');
+        html = html.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
+        html = html.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+        html = html.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+        html = html.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+
+        // 处理粗体（**text**）
+        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+        // 处理斜体（*text*）
+        html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+        // 处理删除线（~~text~~）
+        html = html.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+
+        // 处理图片（![alt](url)）- 转换为完整服务器链接（必须在链接之前处理）
+        const serverUrl = window.location.origin;
+        html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(match, alt, url) {
+            // 如果是相对路径（以 / 开头），转换为完整服务器链接
+            if (url.startsWith('/') && !url.startsWith('//')) {
+                const fullUrl = serverUrl + url;
+                return `<img src="${fullUrl}" alt="${alt}">`;
+            }
+            // 如果是相对路径但不是以 / 开头
+            if (!url.startsWith('http') && !url.startsWith('//')) {
+                const fullUrl = serverUrl + '/' + url;
+                return `<img src="${fullUrl}" alt="${alt}">`;
+            }
+            // 完整链接或 // 协议相对链接，保持不变
+            return `<img src="${url}" alt="${alt}">`;
+        });
+
+        // 处理链接（[text](url)）- 必须在图片之后处理
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+        // 处理无序列表（- item 或 * item）
+        html = html.replace(/^[\s]*[-*]\s+(.+)$/gm, '<li>$1</li>');
+        html = html.replace(/(<li>.*<\/li>)\n(?!<li>)/g, '$1</ul>\n');
+        html = html.replace(/(?<!<\/ul>\n)(<li>)/g, '<ul>$1');
+
+        // 处理有序列表（1. item）
+        html = html.replace(/^[\s]*\d+\.\s+(.+)$/gm, '<ol>$1</ol>');
+
+        // 处理引用（> text）
+        html = html.replace(/^>\s+(.+)$/gm, '<blockquote>$1</blockquote>');
+
+        // 处理分割线（---）
+        html = html.replace(/^---$/gm, '<hr>');
+
+        // 处理段落（空行分隔）
+        html = html.replace(/\n\n/g, '</p><p>');
+        html = '<p>' + html + '</p>';
+
+        // 清理空段落
+        html = html.replace(/<p>\s*<\/p>/g, '');
+
+        // 包装成完整的 HTML 文档
+        return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
+        h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 20px; }
+        code { background: #f4f4f4; padding: 2px 4px; border-radius: 3px; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        blockquote { border-left: 4px solid #ddd; margin: 10px 0; padding-left: 10px; color: #666; }
+        hr { border: none; border-top: 2px solid #eee; margin: 20px 0; }
+        img { max-width: 100%; height: auto; }
+        ul, ol { margin: 10px 0; padding-left: 20px; }
+        li { margin: 5px 0; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        tr:hover { background-color: #e9ecef; }
+    </style>
+</head>
+<body>
+    ${html}
+</body>
+</html>`;
+    }
+
+    // 将 Markdown 表格转换为 HTML 表格
+    function convertMarkdownTableToHtml(tableMarkdown) {
+        const rows = tableMarkdown.trim().split('\n').filter(row => row.trim() !== '');
+
+        if (rows.length < 2) return tableMarkdown; // 至少需要表头和分隔行
+
+        const headerRow = rows[0];
+        const separatorRow = rows[1];
+        const dataRows = rows.slice(2);
+
+        // 检查是否是有效的表格分隔行
+        if (!separatorRow.includes('|')) return tableMarkdown;
+
+        // 解析表头
+        const headers = parseTableRow(headerRow);
+
+        // 解析数据行
+        const data = dataRows.map(row => parseTableRow(row));
+
+        // 构建 HTML 表格
+        let html = '<table>\n';
+
+        // 表头
+        html += '  <thead>\n    <tr>\n';
+        headers.forEach(header => {
+            html += `      <th>${header}</th>\n`;
+        });
+        html += '    </tr>\n  </thead>\n';
+
+        // 表体
+        html += '  <tbody>\n';
+        data.forEach(row => {
+            html += '    <tr>\n';
+            row.forEach(cell => {
+                html += `      <td>${cell}</td>\n`;
+            });
+            html += '    </tr>\n';
+        });
+        html += '  </tbody>\n';
+
+        html += '</table>\n';
+
+        return html;
+    }
+
+    // 解析表格行
+    function parseTableRow(row) {
+        // 移除首尾的 |
+        let cleanedRow = row.trim();
+        if (cleanedRow.startsWith('|')) {
+            cleanedRow = cleanedRow.substring(1);
+        }
+        if (cleanedRow.endsWith('|')) {
+            cleanedRow = cleanedRow.substring(0, cleanedRow.length - 1);
+        }
+
+        // 分割单元格，处理包含 | 的内容
+        const cells = [];
+        let currentCell = '';
+        let inVerticalBar = false;
+
+        for (let i = 0; i < cleanedRow.length; i++) {
+            const char = cleanedRow[i];
+            if (char === '|' && !inVerticalBar) {
+                cells.push(currentCell.trim());
+                currentCell = '';
+            } else if (char === '\\') {
+                inVerticalBar = true;
+            } else {
+                currentCell += char;
+                inVerticalBar = false;
+            }
+        }
+
+        if (currentCell.trim()) {
+            cells.push(currentCell.trim());
+        }
+
+        return cells;
     }
     
     // 从后端加载文件列表
@@ -525,6 +805,12 @@
             const iconClass = getFileIcon(file.type);
             const sizeStr = formatSize(file.size);
             // 在 renderFileList 函数中，找到 action-buttons div，添加复制按钮
+            const isImage = file.type === 'image';
+            const editBtnClass = isImage ? 'action-btn btn-edit-link edit-btn btn-disabled disabled' : 'action-btn btn-edit-link edit-btn';
+            const copyBtnClass = isImage ? 'action-btn btn-copy copy-btn btn-disabled disabled' : 'action-btn btn-copy copy-btn';
+            const editBtnDisabled = isImage ? 'disabled' : '';
+            const copyBtnDisabled = isImage ? 'disabled' : '';
+
             html += `
                 <tr class="file-row" data-id="${file.id}" data-type="${file.type}" data-name="${escapeHtml(file.name)}">
                     <td class="file-name-cell">
@@ -538,13 +824,13 @@
                     <td class="text-muted small">${sizeStr}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="action-btn btn-edit-link edit-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}">
+                            <button class="${editBtnClass}" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" ${editBtnDisabled}>
                                 编辑
                             </button>
-                            <button class="action-btn btn-download download-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}">
+                            <button class="action-btn btn-download download-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}">
                                 下载
                             </button>
-                            <button class="action-btn btn-copy copy-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" style="background: #fff3e0; color: #f57c00;">
+                            <button class="${copyBtnClass}" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" style="background: #fff3e0; color: #f57c00;" ${copyBtnDisabled}>
                                 分享
                             </button>
                             <button class="action-btn btn-delete delete-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}">
@@ -558,16 +844,23 @@
         html += `</tbody></table>`;
         container.html(html);
         
-        // 绑定行点击事件（整行点击触发编辑）
+        // 绑定行点击事件（整行点击触发编辑或下载）
         $('.file-row').off('click').on('click', function(e) {
             if($(e.target).closest('.action-buttons').length) return;
             const fileId = $(this).data('id');
             const fileName = $(this).data('name');
             const fileType = $(this).data('type');
-            triggerEditJump(fileId, fileName, fileType);
+            // 图片文件触发下载，其他文件触发编辑
+            if (fileType === 'image') {
+                downloadFile(fileId, fileName, fileType);
+            } else {
+                triggerEditJump(fileId, fileName, fileType);
+            }
         });
         $('.copy-btn').off('click').on('click', function(e) {
             e.stopPropagation();
+            // 检查按钮是否被禁用
+            if ($(this).prop('disabled')) return;
             const fileId = $(this).data('id');
             const fileName = $(this).data('name');
             const fileType = $(this).data('type');
@@ -576,6 +869,8 @@
         // 绑定编辑按钮事件
         $('.edit-btn').off('click').on('click', function(e) {
             e.stopPropagation();
+            // 检查按钮是否被禁用
+            if ($(this).prop('disabled')) return;
             const fileId = $(this).data('id');
             const fileName = $(this).data('name');
             const fileType = $(this).data('type');
@@ -587,7 +882,8 @@
             e.stopPropagation();
             const fileId = $(this).data('id');
             const fileName = $(this).data('name');
-            downloadFile(fileId, fileName);
+            const fileType = $(this).data('type');
+            downloadFile(fileId, fileName, fileType);
         });
         
         // 绑定删除按钮事件
@@ -828,6 +1124,10 @@
 
         const ext = file.name.split('.').pop().toLowerCase();
 
+        // 检查是否为图片文件
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+        const isImage = imageExtensions.includes(ext);
+
         if (ext === 'xls' || ext === 'xlsx') {
             // Excel 文件：先转为 CSV 再上传
             showLoading();
@@ -872,12 +1172,65 @@
                 }
             };
             reader.readAsArrayBuffer(file);
+        } else if (ext === 'docx') {
+            // DOCX 文件：转换为 Markdown 再上传
+            showLoading();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    mammoth.convertToMarkdown({ arrayBuffer: e.target.result })
+                        .then(function(result) {
+                            const markdownContent = result.value;
+                            const mdName = file.name.replace(/\.docx$/i, '.md');
+                            const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8' });
+
+                            const formData = new FormData();
+                            formData.append('file', blob, mdName);
+
+                            $.ajax({
+                                url: '/uploadFile',
+                                type: 'POST',
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                dataType: 'json',
+                                success: function(response) {
+                                    hideLoading();
+                                    if (response.success) {
+                                        showToast(`已转换并上传: ${mdName}`);
+                                        loadFileList();
+                                    } else {
+                                        showToast(response.message || '上传失败', true);
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    hideLoading();
+                                    showToast('文件上传失败', true);
+                                }
+                            });
+                        })
+                        .catch(function(err) {
+                            hideLoading();
+                            console.error('DOCX 转换失败:', err);
+                            showToast('DOCX 文件转换失败，请检查文件格式', true);
+                        });
+                } catch (err) {
+                    hideLoading();
+                    console.error('DOCX 读取失败:', err);
+                    showToast('DOCX 文件读取失败，请检查文件格式', true);
+                }
+            };
+            reader.readAsArrayBuffer(file);
         } else {
             // 非 Excel 文件：直接上传
             showLoading();
 
             const formData = new FormData();
             formData.append('file', file);
+            // 如果是图片文件，添加类型标记
+            if (isImage) {
+                formData.append('type', 'image');
+            }
 
             $.ajax({
                 url: '/uploadFile',
@@ -889,7 +1242,8 @@
                 success: function(response) {
                     hideLoading();
                     if (response.success) {
-                        showToast(`上传成功: ${file.name}`);
+                        const fileTypeName = isImage ? '图片' : '文件';
+                        showToast(`上传成功: ${file.name} (${fileTypeName})`);
                         loadFileList();
                     } else {
                         showToast(response.message || '上传失败', true);

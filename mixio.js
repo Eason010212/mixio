@@ -1481,7 +1481,7 @@ var mixioServer = async function() {
             '.xml', '.html', '.htm', '.css', '.js', '.markdown'
         ];
         const spreadsheetTypes = ['.csv', '.xls', '.xlsx'];
-        const imageTypes = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+        const imageTypes = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
         
         if (imageTypes.includes(ext)) return 'image';
         if (spreadsheetTypes.includes(ext)) return 'spreadsheet';
@@ -2279,6 +2279,53 @@ var mixioServer = async function() {
             res.status(500).json({
                 success: false,
                 message: '下载失败: ' + error.message
+            });
+        }
+    });
+
+    // 获取文件内容（用于 CSV 转 XLSX 等转换操作）
+    app.get('/api/getFileContent/:fileId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const fileId = req.params.fileId;
+
+            if (!userName) {
+                return res.status(401).json({
+                    success: false,
+                    message: '未登录'
+                });
+            }
+
+            const records = getFileRecords(userName);
+            const file = records.find(f => f.id === fileId);
+
+            if (!file) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件不存在'
+                });
+            }
+
+            if (!fs.existsSync(file.path)) {
+                return res.status(404).json({
+                    success: false,
+                    message: '文件物理路径不存在'
+                });
+            }
+
+            // 读取文件内容
+            const content = fs.readFileSync(file.path, 'utf-8');
+            res.json({
+                success: true,
+                content: content,
+                file: file
+            });
+
+        } catch (error) {
+            console.error('获取文件内容错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '获取文件内容失败: ' + error.message
             });
         }
     });
@@ -4462,6 +4509,9 @@ var mixioServer = async function() {
     app.use('/icons', express.static(path.join(__dirname, 'icons')));
 
     app.use('/documentation', express.static(path.join(__dirname, 'documentation')));
+
+    // 添加上传文件的静态服务
+    app.use('/uploads', express.static('storage/drive'));
 
     var mixlyPath = "../mixly"
     if (fs.existsSync(mixlyPath)) {
