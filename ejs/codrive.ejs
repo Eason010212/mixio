@@ -559,14 +559,26 @@
 
         let html = markdown;
 
+        // 保护 HTML 标签，避免被转义（如编辑器插入的颜色 span 等）
+        const htmlTags = [];
+        html = html.replace(/<\/?[a-zA-Z][a-zA-Z0-9]*(\s[^>]*)?\/?>/g, function(match) {
+            htmlTags.push(match);
+            return `%%HTMLTAG_${htmlTags.length - 1}%%`;
+        });
+
         // 转义 HTML 特殊字符
         html = html
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
 
+        // 恢复 HTML 标签
+        html = html.replace(/%%HTMLTAG_(\d+)%%/g, function(match, index) {
+            return htmlTags[parseInt(index)];
+        });
+
         // 处理表格（需要在其他转换之前处理）
-        html = html.replace(/((?:\|.*?\|\n)+)/g, function(match) {
+        html = html.replace(/((?:[^\n]*\|[^\n]*(?:\n|$))+)/g, function(match) {
             return convertMarkdownTableToHtml(match);
         });
 
@@ -629,12 +641,38 @@
         // 处理分割线（---）
         html = html.replace(/^---$/gm, '<hr>');
 
-        // 处理段落（空行分隔）
-        html = html.replace(/\n\n/g, '</p><p>');
+        // 保护块级元素，避免内部换行符被错误转换
+        const protectedBlocks = [];
+        html = html.replace(/<(pre|table|ul|ol|blockquote)\b[^>]*>[\s\S]*?<\/\1>/g, function(match) {
+            protectedBlocks.push(match);
+            return '\n%%BLOCK_' + (protectedBlocks.length - 1) + '%%\n';
+        });
+
+        // 处理段落和换行
+        html = html.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        html = html.replace(/\n\n+/g, '</p><p>');
+        html = html.replace(/\n/g, '<br>');
         html = '<p>' + html + '</p>';
 
         // 清理空段落
         html = html.replace(/<p>\s*<\/p>/g, '');
+
+        // 清理标题、水平线等块级元素周围多余的 <p> 包裹
+        html = html.replace(/<p>\s*(<h[1-6]>)/g, '$1');
+        html = html.replace(/(<\/h[1-6]>)\s*<\/p>/g, '$1');
+        html = html.replace(/<p>\s*(<hr>)/g, '$1');
+        html = html.replace(/(<hr>)\s*<\/p>/g, '$1');
+
+        // 清理块级元素占位符周围多余的 <p> 包裹
+        html = html.replace(/<p>\s*%%BLOCK/g, '%%BLOCK');
+        html = html.replace(/%%BLOCK_\d+%%\s*<\/p>/g, function(match) {
+            return match.replace(/\s*<\/p>/, '');
+        });
+
+        // 恢复块级元素
+        html = html.replace(/%%BLOCK_(\d+)%%/g, function(match, index) {
+            return protectedBlocks[parseInt(index)];
+        });
 
         // 包装成完整的 HTML 文档
         return `<!DOCTYPE html>
@@ -676,7 +714,7 @@
         const dataRows = rows.slice(2);
 
         // 检查是否是有效的表格分隔行
-        if (!separatorRow.includes('|')) return tableMarkdown;
+        if (!/^[\s|:-]+$/.test(separatorRow.trim()) || !separatorRow.includes('-')) return tableMarkdown;
 
         // 解析表头
         const headers = parseTableRow(headerRow);

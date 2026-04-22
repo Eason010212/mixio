@@ -1585,7 +1585,7 @@
 
                                     if (result.success) {
                                         // 获取图片访问URL（使用实际保存的文件名，包含时间戳）
-                                        const imageUrl = `/uploads/${encodeURIComponent(creator)}/${result.file.filename}`;
+                                        const imageUrl = `/uploads/${encodeURIComponent(creator)}/${encodeURIComponent(result.file.filename)}`;
                                         const cm = editor.codemirror;
                                         const selection = cm.getSelection();
                                         cm.replaceSelection(`![${selection || file.name}](${imageUrl})`);
