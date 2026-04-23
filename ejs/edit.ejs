@@ -726,9 +726,19 @@
                     <input type="text" id="fileName" class="file-name" readonly value="加载中...">
                 </div>
                 <span class="file-type-badge" id="fileTypeBadge">文档</span>
+                <% if (creator !== userName) { %>
+                <span class="file-type-badge" style="background: #fff3e0; color: #f57c00; margin-left: 8px;">
+                    <i class="fa fa-share-alt"></i> 来自 <%= creator %>
+                </span>
+                <% } %>
             </div>
         </div>
         <div class="navbar-right">
+            <% if (creator !== userName) { %>
+            <button class="btn btn-secondary" id="saveToMyDriveBtn" style="background: #fff3e0; color: #f57c00;">
+                <i class="fa fa-bookmark"></i> 收藏到我的云盘
+            </button>
+            <% } %>
             <button class="btn btn-secondary" id="versionsBtn">
                 <i class="fa fa-history"></i> 版本
             </button>
@@ -2092,6 +2102,37 @@
             // 保存按钮
             $('#saveBtn').on('click', function() {
                 manualSave();
+            });
+
+            // 收藏到我的云盘按钮
+            $('#saveToMyDriveBtn').on('click', function() {
+                showLoading();
+                $.ajax({
+                    url: '/api/saveSharedLink',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        creator: creator,
+                        fileId: fileId,
+                        name: fileName,
+                        type: fileType
+                    }),
+                    dataType: 'json',
+                    success: function(response) {
+                        hideLoading();
+                        if (response.success) {
+                            showToast('已收藏到我的云盘');
+                            $('#saveToMyDriveBtn').html('<i class="fa fa-check"></i> 已收藏').prop('disabled', true).css('opacity', '0.6');
+                        } else {
+                            showToast(response.message || '收藏失败', true);
+                        }
+                    },
+                    error: function(xhr) {
+                        hideLoading();
+                        const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : '收藏失败';
+                        showToast(msg, true);
+                    }
+                });
             });
 
             // 版本历史按钮

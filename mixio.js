@@ -1530,6 +1530,34 @@ var mixioServer = async function() {
         }
     }
 
+    function getSharedLinks(userName) {
+        const linksFile = `storage/drive/${userName}/sharedLinks.json`;
+        if (!fs.existsSync(linksFile)) {
+            return [];
+        }
+        try {
+            const content = fs.readFileSync(linksFile, 'utf8');
+            return JSON.parse(content);
+        } catch (e) {
+            console.error('读取共享链接文件错误:', e);
+            return [];
+        }
+    }
+
+    function saveSharedLinks(userName, links) {
+        const linksFile = `storage/drive/${userName}/sharedLinks.json`;
+        const recordDir = path.dirname(linksFile);
+        if (!fs.existsSync(recordDir)) {
+            fs.mkdirSync(recordDir, { recursive: true });
+        }
+        try {
+            fs.writeFileSync(linksFile, JSON.stringify(links, null, 2), 'utf8');
+        } catch (e) {
+            console.error('保存共享链接文件错误:', e);
+            throw e;
+        }
+    }
+
     function getLatestVersion(versionsDir) {
         if (!fs.existsSync(versionsDir)) {
             return null;
@@ -1726,18 +1754,107 @@ var mixioServer = async function() {
             const files = getFileRecords(userName);
             
             files.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
-            
+
+            // 加载收藏的共享链接并检查可用性
+            let sharedLinks = getSharedLinks(userName);
+            sharedLinks = sharedLinks.map(link => {
+                const creatorRecords = getFileRecords(link.creator);
+                const originalFile = creatorRecords.find(f => f.id === link.fileId);
+                link.available = !!originalFile;
+                if (originalFile) {
+                    link.name = originalFile.name;
+                }
+                return link;
+            });
+            saveSharedLinks(userName, sharedLinks);
+            sharedLinks.sort((a, b) => new Date(b.addedTime) - new Date(a.addedTime));
+
             res.json({
                 success: true,
-                files: files
+                files: files,
+                sharedLinks: sharedLinks
             });
-            
+
         } catch (error) {
             console.error('获取文件列表错误:', error);
             res.status(500).json({
                 success: false,
                 message: '获取文件列表失败: ' + error.message
             });
+        }
+    });
+
+    // 收藏共享链接到我的云盘
+    app.post('/api/saveSharedLink', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            if (!userName) {
+                return res.status(401).json({ success: false, message: '未登录' });
+            }
+
+            const { creator, fileId, name, type } = req.body;
+            if (!creator || !fileId || !name || !type) {
+                return res.status(400).json({ success: false, message: '缺少必要参数' });
+            }
+
+            if (creator === userName) {
+                return res.status(400).json({ success: false, message: '不能收藏自己的文件' });
+            }
+
+            const creatorRecords = getFileRecords(creator);
+            const fileExists = creatorRecords.find(f => f.id === fileId);
+            if (!fileExists) {
+                return res.status(404).json({ success: false, message: '原文件不存在' });
+            }
+
+            let links = getSharedLinks(userName);
+            const alreadySaved = links.find(l => l.creator === creator && l.fileId === fileId);
+            if (alreadySaved) {
+                return res.status(409).json({ success: false, message: '该链接已收藏' });
+            }
+
+            const linkRecord = {
+                id: generateId(),
+                creator: creator,
+                fileId: fileId,
+                name: name,
+                type: type,
+                addedTime: new Date().toISOString(),
+                available: true
+            };
+
+            links.push(linkRecord);
+            saveSharedLinks(userName, links);
+
+            res.json({ success: true, message: '链接已收藏到我的云盘', link: linkRecord });
+        } catch (error) {
+            console.error('保存共享链接错误:', error);
+            res.status(500).json({ success: false, message: '保存失败: ' + error.message });
+        }
+    });
+
+    // 取消收藏共享链接
+    app.delete('/api/removeSharedLink/:linkId', function(req, res) {
+        try {
+            const userName = req.session.userName;
+            const linkId = req.params.linkId;
+            if (!userName) {
+                return res.status(401).json({ success: false, message: '未登录' });
+            }
+
+            let links = getSharedLinks(userName);
+            const linkIndex = links.findIndex(l => l.id === linkId);
+            if (linkIndex === -1) {
+                return res.status(404).json({ success: false, message: '链接不存在' });
+            }
+
+            links.splice(linkIndex, 1);
+            saveSharedLinks(userName, links);
+
+            res.json({ success: true, message: '已取消收藏' });
+        } catch (error) {
+            console.error('删除共享链接错误:', error);
+            res.status(500).json({ success: false, message: '删除失败: ' + error.message });
         }
     });
 

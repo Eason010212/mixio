@@ -186,6 +186,46 @@
             color: #6c757d;
             margin-top: 5px;
         }
+        /* 共享链接样式 */
+        .shared-section-header {
+            padding: 12px 16px;
+            background: #fff8f0;
+            border-top: 1px solid #ffe0b2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .shared-link-row {
+            background: #fffbf5 !important;
+        }
+        .shared-link-row:hover {
+            background: #fff5e6 !important;
+        }
+        .shared-link-badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 500;
+            background: #fff3e0;
+            color: #f57c00;
+            margin-left: 8px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .shared-link-unavailable {
+            opacity: 0.5;
+        }
+        .shared-link-unavailable .file-name-cell span {
+            text-decoration: line-through;
+            color: #999;
+        }
+        .btn-unsave {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+        .btn-unsave:hover {
+            background: #f8bbd0;
+        }
     </style>
     <!-- 脚本资源 -->
     <script src="js/jquery.min.js"></script>
@@ -794,25 +834,25 @@
             success: function(response) {
                 hideLoading();
                 if (response.success) {
-                    renderFileList(response.files || []);
+                    renderFileList(response.files || [], response.sharedLinks || []);
                 } else {
                     showToast(response.message || '加载文件列表失败', true);
-                    renderFileList([]);
+                    renderFileList([], []);
                 }
             },
             error: function(xhr, status, error) {
                 hideLoading();
                 console.error('加载文件列表失败:', error);
                 showToast('加载文件列表失败，请检查网络连接', true);
-                renderFileList([]);
+                renderFileList([], []);
             }
         });
     }
     
     // 渲染列表视图
-    function renderFileList(files) {
+    function renderFileList(files, sharedLinks) {
         const container = $('#fileListContainer');
-        if(!files || files.length === 0) {
+        if((!files || files.length === 0) && (!sharedLinks || sharedLinks.length === 0)) {
             container.html(`
                 <div class="empty-placeholder">
                     <i class="fa fa-cloud-upload-alt fa-3x text-gray-300 mb-3"></i>
@@ -822,8 +862,12 @@
             `);
             return;
         }
-        
-        let html = `
+
+        let html = '';
+
+        // 自有文件区域
+        if (files && files.length > 0) {
+            html += `
             <table class="file-table">
                 <thead>
                     <tr>
@@ -835,60 +879,131 @@
                     </tr>
                 </thead>
                 <tbody>
-        `;
-        
-        files.forEach(file => {
-            const typeClass = getTypeClass(file.type);
-            const typeName = getTypeDisplayName(file.type);
-            const iconClass = getFileIcon(file.type);
-            const sizeStr = formatSize(file.size);
-            // 在 renderFileList 函数中，找到 action-buttons div，添加复制按钮
-            const isImage = file.type === 'image';
-            const editBtnClass = isImage ? 'action-btn btn-edit-link edit-btn btn-disabled disabled' : 'action-btn btn-edit-link edit-btn';
-            const copyBtnClass = isImage ? 'action-btn btn-copy copy-btn btn-disabled disabled' : 'action-btn btn-copy copy-btn';
-            const editBtnDisabled = isImage ? 'disabled' : '';
-            const copyBtnDisabled = isImage ? 'disabled' : '';
+            `;
 
+            files.forEach(file => {
+                const typeClass = getTypeClass(file.type);
+                const typeName = getTypeDisplayName(file.type);
+                const iconClass = getFileIcon(file.type);
+                const sizeStr = formatSize(file.size);
+                const isImage = file.type === 'image';
+                const editBtnClass = isImage ? 'action-btn btn-edit-link edit-btn btn-disabled disabled' : 'action-btn btn-edit-link edit-btn';
+                const copyBtnClass = isImage ? 'action-btn btn-copy copy-btn btn-disabled disabled' : 'action-btn btn-copy copy-btn';
+                const editBtnDisabled = isImage ? 'disabled' : '';
+                const copyBtnDisabled = isImage ? 'disabled' : '';
+
+                html += `
+                    <tr class="file-row" data-id="${file.id}" data-type="${file.type}" data-name="${escapeHtml(file.name)}">
+                        <td class="file-name-cell">
+                            <i class="fa ${iconClass}"></i>
+                            <span>${escapeHtml(file.name)}</span>
+                        </td>
+                        <td>
+                            <span class="type-badge ${typeClass}">${typeName}</span>
+                        </td>
+                        <td class="text-muted small">${formatDate(file.uploadTime || file.updatedAt)}</td>
+                        <td class="text-muted small">${sizeStr}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="${editBtnClass}" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" ${editBtnDisabled}>
+                                    编辑
+                                </button>
+                                <button class="action-btn btn-download download-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}">
+                                    下载
+                                </button>
+                                <button class="${copyBtnClass}" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" style="background: #fff3e0; color: #f57c00;" ${copyBtnDisabled}>
+                                    分享
+                                </button>
+                                <button class="action-btn btn-delete delete-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}">
+                                    删除
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+        }
+
+        // 收藏的共享文件区域
+        if (sharedLinks && sharedLinks.length > 0) {
             html += `
-                <tr class="file-row" data-id="${file.id}" data-type="${file.type}" data-name="${escapeHtml(file.name)}">
-                    <td class="file-name-cell">
-                        <i class="fa ${iconClass}"></i>
-                        <span>${escapeHtml(file.name)}</span>
-                    </td>
-                    <td>
-                        <span class="type-badge ${typeClass}">${typeName}</span>
-                    </td>
-                    <td class="text-muted small">${formatDate(file.uploadTime || file.updatedAt)}</td>
-                    <td class="text-muted small">${sizeStr}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="${editBtnClass}" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" ${editBtnDisabled}>
-                                编辑
-                            </button>
-                            <button class="action-btn btn-download download-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}">
-                                下载
-                            </button>
-                            <button class="${copyBtnClass}" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" style="background: #fff3e0; color: #f57c00;" ${copyBtnDisabled}>
-                                分享
-                            </button>
-                            <button class="action-btn btn-delete delete-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}">
-                                删除
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;})
-        
-        html += `</tbody></table>`;
+                <div class="shared-section-header">
+                    <i class="fa fa-share-alt" style="color: #f57c00;"></i>
+                    <strong style="color: #f57c00; font-size: 0.85rem;">收藏的共享文件</strong>
+                    <span class="text-muted small" style="font-size: 0.75rem;">（来自他人的分享链接）</span>
+                </div>
+                <table class="file-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%">文件名</th>
+                            <th style="width: 10%">类型</th>
+                            <th style="width: 12%">来自</th>
+                            <th style="width: 16%">收藏时间</th>
+                            <th style="width: 10%">状态</th>
+                            <th style="width: 22%">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            sharedLinks.forEach(link => {
+                const typeClass = getTypeClass(link.type);
+                const typeName = getTypeDisplayName(link.type);
+                const iconClass = getFileIcon(link.type);
+                const isImage = link.type === 'image';
+                const isAvailable = link.available;
+                const rowClass = isAvailable ? 'shared-link-row' : 'shared-link-row shared-link-unavailable';
+
+                html += `
+                    <tr class="${rowClass}" data-creator="${escapeHtml(link.creator)}"
+                        data-file-id="${escapeHtml(link.fileId)}" data-type="${link.type}"
+                        data-name="${escapeHtml(link.name)}" data-available="${isAvailable}">
+                        <td class="file-name-cell">
+                            <i class="fa ${iconClass}"></i>
+                            <span>${escapeHtml(link.name)}</span>
+                            <span class="shared-link-badge"><i class="fa fa-share-alt"></i> 共享</span>
+                        </td>
+                        <td>
+                            <span class="type-badge ${typeClass}">${typeName}</span>
+                        </td>
+                        <td class="text-muted small">${escapeHtml(link.creator)}</td>
+                        <td class="text-muted small">${formatDate(link.addedTime)}</td>
+                        <td>
+                            ${isAvailable
+                                ? '<span style="color: #27ae60; font-size: 0.75rem;"><i class="fa fa-check-circle"></i> 可用</span>'
+                                : '<span style="color: #e74a3b; font-size: 0.75rem;"><i class="fa fa-exclamation-circle"></i> 已失效</span>'}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                ${isAvailable && !isImage ? `
+                                    <button class="action-btn btn-edit-link edit-shared-btn"
+                                        data-creator="${escapeHtml(link.creator)}" data-file-id="${escapeHtml(link.fileId)}"
+                                        data-name="${escapeHtml(link.name)}" data-type="${link.type}">
+                                        编辑
+                                    </button>
+                                ` : ''}
+                                <button class="action-btn btn-unsave unsave-btn" data-link-id="${link.id}" data-name="${escapeHtml(link.name)}">
+                                    取消收藏
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+        }
+
         container.html(html);
-        
-        // 绑定行点击事件（整行点击触发编辑或下载）
+
+        // 绑定自有文件行点击事件
         $('.file-row').off('click').on('click', function(e) {
             if($(e.target).closest('.action-buttons').length) return;
             const fileId = $(this).data('id');
             const fileName = $(this).data('name');
             const fileType = $(this).data('type');
-            // 图片文件触发下载，其他文件触发编辑
             if (fileType === 'image') {
                 downloadFile(fileId, fileName, fileType);
             } else {
@@ -897,7 +1012,6 @@
         });
         $('.copy-btn').off('click').on('click', function(e) {
             e.stopPropagation();
-            // 检查按钮是否被禁用
             if ($(this).prop('disabled')) return;
             const fileId = $(this).data('id');
             const fileName = $(this).data('name');
@@ -907,14 +1021,13 @@
         // 绑定编辑按钮事件
         $('.edit-btn').off('click').on('click', function(e) {
             e.stopPropagation();
-            // 检查按钮是否被禁用
             if ($(this).prop('disabled')) return;
             const fileId = $(this).data('id');
             const fileName = $(this).data('name');
             const fileType = $(this).data('type');
             triggerEditJump(fileId, fileName, fileType);
         });
-        
+
         // 绑定下载按钮事件
         $('.download-btn').off('click').on('click', function(e) {
             e.stopPropagation();
@@ -923,13 +1036,52 @@
             const fileType = $(this).data('type');
             downloadFile(fileId, fileName, fileType);
         });
-        
+
         // 绑定删除按钮事件
         $('.delete-btn').off('click').on('click', function(e) {
             e.stopPropagation();
             const fileId = $(this).data('id');
             const fileName = $(this).data('name');
             showDeleteConfirm(fileId, fileName);
+        });
+
+        // 共享链接行点击 → 打开编辑页
+        $('.shared-link-row').off('click').on('click', function(e) {
+            if ($(e.target).closest('.action-buttons').length) return;
+            const creator = $(this).data('creator');
+            const fileId = $(this).data('file-id');
+            const fileName = $(this).data('name');
+            const fileType = $(this).data('type');
+            const isAvailable = $(this).data('available');
+            if (!isAvailable) {
+                showToast('原文件已失效，无法编辑', true);
+                return;
+            }
+            if (fileType === 'image') {
+                showToast('图片文件不支持在线编辑', true);
+                return;
+            }
+            window.location.href = `/editFile/${creator}/${fileId}?type=${fileType}&name=${encodeURIComponent(fileName)}`;
+        });
+
+        // 编辑共享文件按钮
+        $('.edit-shared-btn').off('click').on('click', function(e) {
+            e.stopPropagation();
+            const creator = $(this).data('creator');
+            const fileId = $(this).data('file-id');
+            const fileName = $(this).data('name');
+            const fileType = $(this).data('type');
+            window.location.href = `/editFile/${creator}/${fileId}?type=${fileType}&name=${encodeURIComponent(fileName)}`;
+        });
+
+        // 取消收藏按钮
+        $('.unsave-btn').off('click').on('click', function(e) {
+            e.stopPropagation();
+            const linkId = $(this).data('link-id');
+            const fileName = $(this).data('name');
+            if (confirm(`确定要取消收藏 "${fileName}" 吗？`)) {
+                removeSharedLink(linkId);
+            }
         });
     }
     
@@ -1033,7 +1185,31 @@
         showShareDialog(fileId, fileName, fileType);
     }
 
-    
+    // 取消收藏共享链接
+    function removeSharedLink(linkId) {
+        showLoading();
+        $.ajax({
+            url: `/api/removeSharedLink/${linkId}`,
+            type: 'DELETE',
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    showToast('已取消收藏');
+                    loadFileList();
+                } else {
+                    showToast(response.message || '取消收藏失败', true);
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                console.error('取消收藏失败:', error);
+                showToast('取消收藏失败', true);
+            }
+        });
+    }
+
+
     // 执行删除
     function executeDelete() {
         if(!pendingDeleteId) return;
