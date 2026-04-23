@@ -242,6 +242,19 @@
             background: #d1d3e2;
         }
 
+        .toolbar-btn.toolbar-btn-danger {
+            color: #e74a3b;
+        }
+
+        .toolbar-btn.toolbar-btn-danger:hover {
+            background: #fee2df;
+            border-color: #f5c6cb;
+        }
+
+        .toolbar-btn.toolbar-btn-danger:active {
+            background: #ffcdd2;
+        }
+
         /* 版本管理样式 */
         .versions-container {
             max-height: 500px;
@@ -762,6 +775,8 @@
         <div id="spreadsheetToolbar" style="display: none;">
             <button id="addRowBtn" class="toolbar-btn"><i class="fa fa-plus"></i> 添加行</button>
             <button id="addColBtn" class="toolbar-btn"><i class="fa fa-plus"></i> 添加列</button>
+            <button id="delRowBtn" class="toolbar-btn toolbar-btn-danger"><i class="fa fa-minus"></i> 删除行</button>
+            <button id="delColBtn" class="toolbar-btn toolbar-btn-danger"><i class="fa fa-minus"></i> 删除列</button>
         </div>
     </div>
     
@@ -1737,6 +1752,10 @@
                 data = lines.map(line => line.split(','));
             }
 
+            // 记录最后选中的单元格坐标
+            let lastSelectedRow = 0;
+            let lastSelectedCol = 0;
+
             // IME（拼音输入法）兼容：追踪组字状态
             let isComposing = false;
             container.addEventListener('compositionstart', () => { isComposing = true; });
@@ -1758,6 +1777,10 @@
                             className: 'header-row-cell'
                         };
                     }
+                },
+                afterSelectionEnd: function(row, col) {
+                    if (row >= 0) lastSelectedRow = row;
+                    if (col >= 0) lastSelectedCol = col;
                 },
                 afterOnCellMouseDown: function(event, coords, TD) {
                     // 点击即进入编辑模式，避免首字母被 Handsontable 拦截导致 IME 无法组字
@@ -1846,6 +1869,47 @@
 
             $('#addColBtn').on('click', function() {
                 hot.alter('insert_col_end');
+                const csvData = hot.getData().map(row => row.join(',')).join('\n');
+                if (isYjsReady && ytext) {
+                    ydoc.transact(() => {
+                        ytext.delete(0, ytext.length);
+                        ytext.insert(0, csvData);
+                    });
+                }
+            });
+
+            // 工具栏按钮防止抢焦点
+            $('#spreadsheetToolbar').on('mousedown', '.toolbar-btn', function(e) {
+                e.preventDefault();
+            });
+
+            $('#delRowBtn').on('click', function() {
+                if (hot.countRows() <= 1) {
+                    showToast('至少保留一行', true);
+                    return;
+                }
+                hot.alter('remove_row', lastSelectedRow);
+                if (lastSelectedRow >= hot.countRows()) {
+                    lastSelectedRow = Math.max(0, hot.countRows() - 1);
+                }
+                const csvData = hot.getData().map(row => row.join(',')).join('\n');
+                if (isYjsReady && ytext) {
+                    ydoc.transact(() => {
+                        ytext.delete(0, ytext.length);
+                        ytext.insert(0, csvData);
+                    });
+                }
+            });
+
+            $('#delColBtn').on('click', function() {
+                if (hot.countCols() <= 1) {
+                    showToast('至少保留一列', true);
+                    return;
+                }
+                hot.alter('remove_col', lastSelectedCol);
+                if (lastSelectedCol >= hot.countCols()) {
+                    lastSelectedCol = Math.max(0, hot.countCols() - 1);
+                }
                 const csvData = hot.getData().map(row => row.join(',')).join('\n');
                 if (isYjsReady && ytext) {
                     ydoc.transact(() => {
