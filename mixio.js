@@ -112,6 +112,7 @@ const cors = require('cors');
 const axios = require('axios');
 var globalQPSControl = {}
 const os = require('os');
+const net = require('net');
 const arch = os.arch(); // 或者 process.arch
 // 获取操作系统平台（如win32, linux, darwin）
 function isOpenWrt() {
@@ -383,10 +384,10 @@ async function daemon_start() {
     });
     nserver.listen(123, err => {
         if(err){
-            console.log("[INFO] NTP server failed to start");
+            console.log("[INFO] NTP 服务器启动失败。 / NTP server failed to start");
         }
         else{
-            console.log("[INFO] NTP server is listening on port", 123);
+            console.log("[INFO] NTP 服务器已启动，端口: 123 / NTP server is listening on port", 123);
         }
     });
     if (keyPath.indexOf("http") == 0) {
@@ -632,11 +633,11 @@ async function daemon_start() {
         if (newConfig) {
             fs.writeFileSync(configPath, newConfig)
             configs = JSON.parse(newConfig)
-            console.log("[INFO] Shutting down MixIO Server...")
+            console.log("[INFO] 正在关闭 MixIO 服务器... / Shutting down MixIO Server...")
             await mixio.stop();
             serverStatus = false;
-            console.log("[INFO] MixIO Server is already shut down.")
-            console.log("[INFO] Starting MixIO Server...")
+            console.log("[INFO] MixIO 服务器已关闭。 / MixIO Server is already shut down.")
+            console.log("[INFO] 正在启动 MixIO 服务器... / Starting MixIO Server...")
             mixio = await mixioServer();
             serverStatus = true;
             res.send('1')
@@ -646,9 +647,9 @@ async function daemon_start() {
 
     app.get('/stop', async function(req, res) {
         if (serverStatus) {
-            console.log("[INFO] Shutting down MixIO Server...")
+            console.log("[INFO] 正在关闭 MixIO 服务器... / Shutting down MixIO Server...")
             await mixio.stop();
-            console.log("[INFO] MixIO Server is already shut down.")
+            console.log("[INFO] MixIO 服务器已关闭。 / MixIO Server is already shut down.")
             serverStatus = false
             res.send('1')
         } else {
@@ -814,7 +815,7 @@ async function daemon_start() {
     })
     app.get('/start', async function(req, res) {
         if (!serverStatus) {
-            console.log("[INFO] Starting MixIO Server...")
+            console.log("[INFO] 正在启动 MixIO 服务器... / Starting MixIO Server...")
             mixio = await mixioServer();
             serverStatus = true
             res.send('1')
@@ -1064,7 +1065,7 @@ del "%~f0"`;
     app.use('/documentation', express.static(path.join(__dirname, 'documentation')));
     backServer = https.createServer(credentials, app)
     backServer.listen(18084, function() {
-        console.log("[INFO] MixIO Admin server listening on port", 18084)
+        console.log("[INFO] MixIO 管理服务器已启动，端口: " + 18084 + " / MixIO Admin server listening on port", 18084)
     })
 }
 
@@ -4657,36 +4658,36 @@ var mixioServer = async function() {
 
     return new Promise(resolve => {
         plainServer.listen(configs["MIXIO_MQTT_PORT"], function() {
-            console.log('[INFO] Plain MQTT server listening on port', configs["MIXIO_MQTT_PORT"])
+            console.log('[INFO] MQTT 服务器已启动，端口: ' + configs["MIXIO_MQTT_PORT"] + ' / Plain MQTT server listening on port ' + configs["MIXIO_MQTT_PORT"])
             httpServer.listen(configs["MIXIO_WS_PORT"], function() {
-                console.log('[INFO] WebSocket MQTT server listening on port', configs["MIXIO_WS_PORT"])
+                console.log('[INFO] WebSocket MQTT 服务器已启动，端口: ' + configs["MIXIO_WS_PORT"] + ' / WebSocket MQTT server listening on port ' + configs["MIXIO_WS_PORT"])
                 httpsServer.listen(configs["MIXIO_WSS_PORT"], function() {
-                    console.log('[INFO] WebSocketS MQTT server listening on port', configs["MIXIO_WSS_PORT"])
+                    console.log('[INFO] WebSocketS MQTT 服务器已启动，端口: ' + configs["MIXIO_WSS_PORT"] + ' / WebSocketS MQTT server listening on port ' + configs["MIXIO_WSS_PORT"])
                     httpServer2 = http.createServer(app)
                     httpServer2.listen(configs['MIXIO_HTTP_PORT'], function() {
                         if (configs['MIXIO_HTTP_PORT'] != 0)
-                            console.log("[INFO] MixIO server listening on port", configs['MIXIO_HTTP_PORT'])
+                            console.log("[INFO] MixIO 服务器 (HTTP) 已启动，端口: " + configs['MIXIO_HTTP_PORT'] + " / MixIO server (HTTP) listening on port " + configs['MIXIO_HTTP_PORT'])
                         httpsServer2 = https.createServer(credentials, app)
                         httpsServer2.listen(configs['MIXIO_HTTPS_PORT'], function() {
                             if (configs['MIXIO_HTTPS_PORT'] != 0)
-                                console.log("[INFO] MixIO server (HTTPS) listening on port", configs['MIXIO_HTTPS_PORT'])
+                                console.log("[INFO] MixIO 服务器 (HTTPS) 已启动，端口: " + configs['MIXIO_HTTPS_PORT'] + " / MixIO server (HTTPS) listening on port " + configs['MIXIO_HTTPS_PORT'])
                             var stopFunction = function() {
                                 return new Promise(resolve => {
                                     //MQTT
                                     plainServer.close(function() {
-                                        console.log("[INFO] Plain MQTT server closed")
+                                        console.log("[INFO] MQTT 服务器已关闭。 / Plain MQTT server closed")
                                             //MQTT Websocket
                                         httpServer.close(function() {
-                                            console.log("[INFO] WebSocket MQTT server closed")
+                                            console.log("[INFO] WebSocket MQTT 服务器已关闭。 / WebSocket MQTT server closed")
                                                 //MixIO HTTP
                                             httpServer2.close(function() {
-                                                console.log("[INFO] MixIO server closed")
+                                                console.log("[INFO] MixIO 服务器已关闭。 / MixIO server closed")
                                                     //MQTT WebsocketS
                                                 httpsServer.close(function() {
-                                                    console.log("[INFO] WebSocketS MQTT server closed")
+                                                    console.log("[INFO] WebSocketS MQTT 服务器已关闭。 / WebSocketS MQTT server closed")
                                                         //MixIO HTTPS
                                                     httpsServer2.close(function() {
-                                                        console.log("[INFO] MixIO server (HTTPS) closed")
+                                                        console.log("[INFO] MixIO 服务器 (HTTPS) 已关闭。 / MixIO server (HTTPS) closed")
                                                         resolve("1")
                                                     })
                                                 })
@@ -4705,7 +4706,7 @@ var mixioServer = async function() {
                                             console.log(err.message)
                                         }
                                         db.run('delete from devices')
-                                        console.log('[INFO] Storage Engine: SQLite')
+                                        console.log('[INFO] 存储引擎: SQLite / Storage Engine: SQLite')
                                         const njsserver = http.createServer(app)
                                         const njswss = new WebSocket.Server({
                                             server: njsserver
@@ -4714,7 +4715,7 @@ var mixioServer = async function() {
                                             setupWSConnection(conn, req)
                                         })
                                         njsserver.listen(configs["MIXIO_YJS_PORT"], () => {
-                                            console.log('[INFO] Njs-WebSocket server (ws) listening on port', configs["MIXIO_YJS_PORT"])
+                                            console.log('[INFO] Njs-WebSocket 服务器 (ws) 已启动，端口: ' + configs["MIXIO_YJS_PORT"] + ' / Njs-WebSocket server (ws) listening on port ' + configs["MIXIO_YJS_PORT"])
                                         })
 
                                         // 添加 HTTPS WebSocket 服务器支持
@@ -4726,8 +4727,9 @@ var mixioServer = async function() {
                                             setupWSConnection(conn, req)
                                         })
                                         njsserverHttps.listen(configs["MIXIO_YJS_WSS_PORT"], () => {
-                                            console.log('[INFO] Njs-WebSocket server (wss) listening on port', configs["MIXIO_YJS_WSS_PORT"])
-                                            console.log('[INFO] Database Connected!')
+                                            console.log('[INFO] Njs-WebSocket 服务器 (wss) 已启动，端口: ' + configs["MIXIO_YJS_WSS_PORT"] + ' / Njs-WebSocket server (wss) listening on port ' + configs["MIXIO_YJS_WSS_PORT"])
+                                            console.log('[INFO] 数据库已连接！ / Database Connected!')
+                                            printStartupBanner()
                                             resolve({
                                                 stop: stopFunction
                                             })
@@ -4799,9 +4801,9 @@ var mixioServer = async function() {
                                             if (status == "error")
                                                 console.log(reason)
                                             else if (status == "success") {
-                                                console.log("[INFO] Database Initialized!")
+                                                console.log("[INFO] 数据库已初始化！ / Database Initialized!")
                                                 db.query('delete from devices')
-                                                console.log('[INFO] Storage Engine: MySQL (' + MYSQL_HOST + ')')
+                                                console.log('[INFO] 存储引擎: MySQL (' + MYSQL_HOST + ') / Storage Engine: MySQL (' + MYSQL_HOST + ')')
                                                 const njsserver = http.createServer(app)
                                                 const njswss = new WebSocket.Server({
                                                     server: njsserver
@@ -4810,7 +4812,7 @@ var mixioServer = async function() {
                                                     setupWSConnection(conn, req)
                                                 })
                                                 njsserver.listen(configs["MIXIO_YJS_PORT"], () => {
-                                                    console.log('[INFO] Njs-WebSocket server (ws) listening on port', configs["MIXIO_YJS_PORT"])
+                                                    console.log('[INFO] Njs-WebSocket 服务器 (ws) 已启动，端口: ' + configs["MIXIO_YJS_PORT"] + ' / Njs-WebSocket server (ws) listening on port ' + configs["MIXIO_YJS_PORT"])
                                                 })
 
                                                 // 添加 HTTPS WebSocket 服务器支持
@@ -4822,8 +4824,9 @@ var mixioServer = async function() {
                                                     setupWSConnection(conn, req)
                                                 })
                                                 njsserverHttps.listen(configs["MIXIO_YJS_WSS_PORT"], () => {
-                                                    console.log('[INFO] Njs-WebSocket server (wss) listening on port', configs["MIXIO_YJS_WSS_PORT"])
-                                                    console.log('[INFO] Database Connected!')
+                                                    console.log('[INFO] Njs-WebSocket 服务器 (wss) 已启动，端口: ' + configs["MIXIO_YJS_WSS_PORT"] + ' / Njs-WebSocket server (wss) listening on port ' + configs["MIXIO_YJS_WSS_PORT"])
+                                                    console.log('[INFO] 数据库已连接！ / Database Connected!')
+                                                    printStartupBanner()
                                                     resolve({
                                                         stop: stopFunction
                                                     })
@@ -4929,6 +4932,129 @@ function init_mysql(cb) {
 }
 
 
+function checkPort(port) {
+    return new Promise(function(resolve) {
+        var server = net.createServer()
+        server.once('error', function() {
+            resolve(false)
+        })
+        server.once('listening', function() {
+            server.close()
+            resolve(true)
+        })
+        server.listen(port)
+    })
+}
+
+async function checkSystemEnv() {
+    var ports = [
+        { name: 'HTTP', port: configs['MIXIO_HTTP_PORT'] },
+        { name: 'HTTPS', port: configs['MIXIO_HTTPS_PORT'] },
+        { name: 'MQTT', port: configs['MIXIO_MQTT_PORT'] },
+        { name: 'MQTT WS', port: configs['MIXIO_WS_PORT'] },
+        { name: 'MQTT WSS', port: configs['MIXIO_WSS_PORT'] },
+        { name: 'YJS WS', port: configs['MIXIO_YJS_PORT'] },
+        { name: 'YJS WSS', port: configs['MIXIO_YJS_WSS_PORT'] },
+        { name: 'Admin (后台管理)', port: 18084 },
+        { name: 'NTP', port: 123 }
+    ]
+
+    var sep = '='.repeat(56)
+    console.log('')
+    console.log(sep)
+    console.log('  系统环境检查 / System Environment Check')
+    console.log(sep)
+    console.log('  操作系统 / Platform: ' + os.type() + ' ' + os.release() + ' (' + os.arch() + ')')
+    console.log('  主机名 / Hostname: ' + os.hostname())
+    console.log('  用户目录 / Home: ' + os.homedir())
+    console.log('  Node.js: ' + process.version)
+    console.log('')
+    console.log('  端口占用检查 / Port Check:')
+    console.log('')
+
+    for (var i = 0; i < ports.length; i++) {
+        var p = ports[i]
+        if (!p.port || p.port == 0) {
+            console.log('  [  -  ] ' + p.name + ' (' + (p.port || 'N/A') + ') - 未配置 / Not configured')
+            continue
+        }
+        var available = await checkPort(p.port)
+        if (available) {
+            console.log('  [  OK ] ' + p.name + ' (' + p.port + ') - 可用 / Available')
+        } else {
+            console.log('  [ OCC ] ' + p.name + ' (' + p.port + ') - 已占用 / Occupied')
+        }
+    }
+
+    console.log('')
+
+    if (os.platform() == 'linux') {
+        console.log('  Linux 提示 / Linux Notice:')
+        console.log('  如需访问串口设备进行 Mixly 编程，请执行以下命令:')
+        console.log('  To access serial devices for Mixly, run:')
+        console.log('')
+        console.log('    sudo usermod -a -G dialout ' + '用户名')
+        console.log('')
+        console.log('  执行后需重新登录才能生效 / Re-login required after execution.')
+    } else if (os.platform() == 'win32') {
+        console.log('  Windows 系统，可直接访问串口 / Windows, serial access is direct.')
+    } else if (os.platform() == 'darwin') {
+        console.log('  macOS 系统，可直接访问串口 / macOS, serial access is direct.')
+    }
+
+    console.log(sep)
+    console.log('')
+}
+
+function printStartupBanner() {
+    var interfaces = os.networkInterfaces()
+    var ips = []
+    for (var iface in interfaces) {
+        interfaces[iface].forEach(function(addr) {
+            if (addr.family == 'IPv4' && !addr.internal) {
+                ips.push(addr.address)
+            }
+        })
+    }
+    var httpPort = configs['MIXIO_HTTP_PORT']
+    var httpsPort = configs['MIXIO_HTTPS_PORT']
+    var sep = '='.repeat(56)
+
+    console.log(sep)
+    console.log('  MixIO 服务 / MixIO Service')
+    console.log(sep)
+    if (ips.length > 0) {
+        console.log('  系统启动成功，可通过以下地址访问 / System started, access via:')
+        console.log('')
+        ips.forEach(function(ip) {
+            if (httpPort && httpPort != 0)
+                console.log('  HTTP:  http://' + ip + ':' + httpPort)
+            if (httpsPort && httpsPort != 0)
+                console.log('  HTTPS: https://' + ip + ':' + httpsPort)
+        })
+        console.log('')
+        console.log('  Mixly 在线编程 / Mixly Online Programming:')
+        console.log('')
+        ips.forEach(function(ip) {
+            if (httpPort && httpPort != 0)
+                console.log('  http://' + ip + ':' + httpPort + '/mixly')
+            if (httpsPort && httpsPort != 0)
+                console.log('  https://' + ip + ':' + httpsPort + '/mixly')
+        })
+        console.log('')
+        console.log('  后台管理服务 / Admin Service:')
+        console.log('')
+        ips.forEach(function(ip) {
+            console.log('  https://' + ip + ':18084')
+        })
+    } else {
+        console.log('  系统启动成功 / System started successfully')
+    }
+    console.log('')
+    console.log('  默认用户名/密码 / Default Username/Password: admin / public')
+    console.log(sep)
+}
+
 async function startOnce() {
     mixio = await mixioServer()
 }
@@ -4946,12 +5072,12 @@ var startMixIO = function() {
                 if (data != "")
                     console.log(data)
                 if (data.toString().indexOf("Database Connected!") != -1) {
-                    console.log("MixIO server is running now.")
+                    console.log("MixIO 服务器已成功启动。 / MixIO server is running now.")
                     child.unref()
                     for (var t = Date.now(); Date.now() - t <= 2000;);
                     process.exit()
                 } else if (data.toString().indexOf("Error") != -1) {
-                    console.error("An error occured while initializing MixIO server. Log file: " + process.cwd() + logFileName)
+                    console.error("MixIO 服务器初始化时发生错误，日志文件: " + process.cwd() + logFileName + " / An error occured while initializing MixIO server. Log file: " + process.cwd() + logFileName)
                     child.unref()
                     for (var t = Date.now(); Date.now() - t <= 2000;);
                     process.exit()
@@ -4977,12 +5103,12 @@ var stopMixIO = function() {
             // convert to int
             pid = parseInt(pid)
             process.kill(pid, 'SIGTERM')
-            console.log("MixIO server with PID " + pid + " is stopped.")
+            console.log("MixIO 服务器 (PID " + pid + ") 已停止。 / MixIO server with PID " + pid + " is stopped.")
         } else {
-            console.log("MixIO server is not running.")
+            console.log("MixIO 服务器未运行。 / MixIO server is not running.")
         }
     } catch (e) {
-        console.log("MixIO server is not running.")
+        console.log("MixIO 服务器未运行。 / MixIO server is not running.")
     }
 }
 
@@ -5011,27 +5137,36 @@ init(function(res) {
         HTTPS_CRT_FILE = configs["HTTPS_CRT_FILE"]
         HTTPS_PRIVATE_PEM = configs["HTTPS_PRIVATE_PEM"]
         if (args.length > 1 || (args.length == 0 && process.platform != "win32")) {
-            console.log("Invalid parameter(s). Use \"mixio help\" for help.")
+            console.log("无效参数，使用 \"mixio help\" 查看帮助。 / Invalid parameter(s). Use \"mixio help\" for help.")
         } else {
             var show = function() {
                 if (args.length == 0) {
-                    // wait for user input, 1 for start, 2 for stop, 3 for autoStart, 4 for remove autoStart
-                    console.log("1. Start MixIO server")
-                    console.log("2. Stop MixIO server")
-                    console.log("3. Set MixIO server to auto start")
-                    console.log("4. Remove MixIO server from auto start")
-                    console.log("5. Exit")
+                    // wait for user input
+                    console.log("1. 终端模式启动 (前台运行) / Start in terminal mode (debug)")
+                    console.log("2. 后台模式启动 (后台运行) / Start in background mode (start)")
+                    console.log("3. 停止服务器 / Stop MixIO server")
+                    console.log("4. 设置开机自启 / Set MixIO server to auto start")
+                    console.log("5. 取消开机自启 / Remove MixIO server from auto start")
+                    console.log("6. 检查系统环境 / Check System Environment")
+                    console.log("7. 退出 / Exit")
                     var rl = readline.createInterface({
                         input: process.stdin,
                         output: process.stdout
                     })
-                    rl.question("Please select an option: ", function(answer) {
+                    rl.question("请选择选项 / Please select an option: ", function(answer) {
                         rl.close()
                         if (answer == "1") {
-                            startMixIO()
+                            // debug mode: run in foreground
+                            console.log("[INFO] 以终端模式启动 MixIO 服务器... / Starting MixIO server in terminal mode...")
+                            fs.writeFileSync("pid.info", "" + process.pid)
+                            daemon_start().then(() => {
+                                startOnce()
+                            })
                         } else if (answer == "2") {
-                            stopMixIO()
+                            startMixIO()
                         } else if (answer == "3") {
+                            stopMixIO()
+                        } else if (answer == "4") {
                             var child = spawn("schtasks", ["/create", "/sc", "onlogon", "/tn", "MixIO", "/tr", process.execPath + " start", "/rl", "highest", "/f"])
                             child.stdout.on('data', function(data) {
                                 // encode to ANSI
@@ -5046,7 +5181,7 @@ init(function(res) {
                             })
 
 
-                        } else if (answer == "4") {
+                        } else if (answer == "5") {
                             var child = spawn("schtasks", ["/delete", "/tn", "MixIO", "/f"])
                             child.stdout.on('data', function(data) {
                                 // encode to ANSI
@@ -5059,15 +5194,17 @@ init(function(res) {
                             child.on("close", function() {
                                 show();
                             })
-                        } else if (answer == "5") {
+                        } else if (answer == "6") {
+                            checkSystemEnv().then(function() { show(); })
+                        } else if (answer == "7") {
                             process.exit()
                         } else {
-                            console.log("Invalid option.")
+                            console.log("无效选项，请重试。 / Invalid option, please try again.")
                         }
                     })
                 } else if (args[0] == "debug") {
                     // 记录当前的进程ID
-                    console.log("[INFO] MixIO server is running with PID " + process.pid)
+                    console.log("[INFO] MixIO 服务器正在运行，PID: " + process.pid + " / MixIO server is running with PID " + process.pid)
                         // 输出到当前目录下的pid.info文件
                     fs.writeFileSync("pid.info", "" + process.pid)
                     if (res) {
@@ -5114,15 +5251,15 @@ init(function(res) {
                         }
                     })
                 } else if (args[0] == "help") {
-                    console.log("MixIO server help:")
-                    console.log("mixio start: start MixIO server in background.")
-                    console.log("mixio stop: stop MixIO server.")
-                    console.log("mixio debug: start MixIO server in foreground.")
-                    console.log("mixio version: show MixIO server version.")
+                    console.log("MixIO 服务器帮助 / MixIO server help:")
+                    console.log("  mixio debug:   终端模式启动 (前台运行) / Start in terminal mode (foreground)")
+                    console.log("  mixio start:   后台模式启动 (后台运行) / Start in background mode (background)")
+                    console.log("  mixio stop:    停止服务器 / Stop MixIO server")
+                    console.log("  mixio version: 显示版本号 / Show MixIO server version")
                     if (process.platform == "linux")
-                        console.log("mixio install: install MixIO service.")
+                        console.log("  mixio install: 安装系统服务 / Install MixIO service")
                 } else {
-                    console.log("Invalid parameter(s). Use \"mixio help\" for help.")
+                    console.log("无效参数，使用 \"mixio help\" 查看帮助。 / Invalid parameter(s). Use \"mixio help\" for help.")
                 }
             }
             show();
