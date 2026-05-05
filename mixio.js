@@ -1,4 +1,4 @@
-var VERSION = "1.10.6.0115"
+var VERSION = "1.10.6.0505"
 require('events').EventEmitter.defaultMaxListeners = 50;
 
 const crypto = require('crypto')
