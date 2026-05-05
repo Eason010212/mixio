@@ -5136,7 +5136,7 @@ init(function(res) {
         MAX_MESSAGE_PER_SECOND = configs["MAX_MESSAGE_PER_SECOND"]
         HTTPS_CRT_FILE = configs["HTTPS_CRT_FILE"]
         HTTPS_PRIVATE_PEM = configs["HTTPS_PRIVATE_PEM"]
-        if (args.length > 1 || (args.length == 0 && process.platform != "win32")) {
+        if (args.length > 1) {
             console.log("无效参数，使用 \"mixio help\" 查看帮助。 / Invalid parameter(s). Use \"mixio help\" for help.")
         } else {
             var show = function() {
