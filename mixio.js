@@ -1,4 +1,4 @@
-var VERSION = "1.10.6.0510"
+var VERSION = "1.10.6.0527"
 require('events').EventEmitter.defaultMaxListeners = 50;
 
 const crypto = require('crypto')
@@ -138,6 +138,16 @@ if(isOpenWrt())
 }
 
 const platformString = `${arch}-${platform}`;
+
+var mixlyPath = path.join(path.dirname(process.execPath), '../mixly')
+var mixaiPath = path.join(path.dirname(process.execPath), '../mixai')
+var mixntPath = path.join(path.dirname(process.execPath), '../mixnt')
+if (process.argv[0].indexOf("node") != -1) {
+    mixlyPath = "../mixly"
+    mixaiPath = "../mixai"
+    mixntPath = "../mixnt"
+}
+
 
 function init(cb) {
     if (!fs.existsSync("logs")) {
@@ -827,7 +837,7 @@ async function daemon_start() {
     function getLocalVersion(product, platform) {
         if(product == "mixly")
         {
-            if(fs.existsSync("../mixly"))
+            if(fs.existsSync(mixlyPath))
             {
                 try {
                     if (fs.existsSync(VERSION_FILE)) {
@@ -920,12 +930,11 @@ async function daemon_start() {
             }
             else
             {
-                filePath = "../mixly"
-                if(fs.existsSync(filePath)){
-                    deleteFolderRecursive(filePath)
+                if(fs.existsSync(mixlyPath)){
+                    deleteFolderRecursive(mixlyPath)
                 }
-                fs.mkdirSync("../mixly")
-                fileStream = fs.createWriteStream(filePath + "/mixly.zip")
+                fs.mkdirSync(mixlyPath)
+                fileStream = fs.createWriteStream(path.join(mixlyPath, "mixly.zip"))
             }
             // 设置响应头
             res.setHeader('Content-Type', 'text/event-stream');
@@ -969,7 +978,7 @@ async function daemon_start() {
                 {
                     saveVersionInfo(cloudVersion);
                     res.write('data:' + JSON.stringify({ type: 'unzip'}) + '\n\n');
-                    extract("../mixly/mixly.zip", { dir: path.join(path.dirname(process.execPath), '../mixly') }).then(()=>{
+                    extract(path.join(mixlyPath, 'mixly.zip'), { dir: mixlyPath }).then(()=>{
                         sendComplete("mixly");
                     })
                 }
@@ -1389,9 +1398,9 @@ var mixioServer = async function() {
     app.get('/', function(req, res) {
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
             'footer': configs["FOOTER"],
-            'mixly': fs.existsSync("../mixly"),
-            'mixai': fs.existsSync("../mixai"),
-            'mixnt': fs.existsSync("../mixnt"),
+            'mixly': fs.existsSync(mixlyPath),
+            'mixai': fs.existsSync(mixaiPath),
+            'mixnt': fs.existsSync(mixntPath),
         }, function(err, data) {
             res.send(data)
         })
@@ -1426,9 +1435,9 @@ var mixioServer = async function() {
     app.get('/index', function(req, res) {
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
             'main': fs.existsSync("config/certs/chain.crt"),
-            'mixly': fs.existsSync("../mixly"),
-            'mixai': fs.existsSync("../mixai"),
-            'mixnt': fs.existsSync("../mixnt"),
+            'mixly': fs.existsSync(mixlyPath),
+            'mixai': fs.existsSync(mixaiPath),
+            'mixnt': fs.existsSync(mixntPath),
             'configs': configs
         }, function(err, data) {
             res.send(data)
@@ -4631,15 +4640,12 @@ var mixioServer = async function() {
     // 添加上传文件的静态服务
     app.use('/uploads', express.static('storage/drive'));
 
-    var mixlyPath = "../mixly"
     if (fs.existsSync(mixlyPath)) {
         app.use('/mixly', express.static(mixlyPath));
     }
-    var mixaiPath = "../mixai"
     if (fs.existsSync(mixaiPath)) {
         app.use('/mixai', express.static(mixaiPath));
     }
-    var mixntPath = "../mixnt"
     if (fs.existsSync(mixntPath)) {
         app.use('/mixnt', express.static(mixntPath));
     }
