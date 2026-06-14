@@ -1441,7 +1441,26 @@
                                     // 使用临时变量避免循环触发
                                     if (!isYjsUpdating) {
                                         isYjsUpdating = true;
+
+                                        // 保存当前光标和滚动位置，防止被远程更新重置
+                                        const cm = simplemde.codemirror;
+                                        let cursor = null, scrollInfo = null;
+                                        if (cm && cm.getCursor) {
+                                            cursor = cm.getCursor();
+                                            scrollInfo = cm.getScrollInfo();
+                                        }
+
                                         simplemde.value(updated);
+
+                                        // 恢复光标位置（限制在新内容范围内）
+                                        if (cursor && cm.setCursor) {
+                                            const safeLine = Math.min(cursor.line, cm.lineCount() - 1);
+                                            const lineContent = cm.getLine(safeLine) || '';
+                                            const safeCh = Math.min(cursor.ch, lineContent.length);
+                                            cm.setCursor({line: safeLine, ch: safeCh});
+                                            cm.scrollTo(scrollInfo.left, scrollInfo.top);
+                                        }
+
                                         setTimeout(() => {
                                             isYjsUpdating = false;
                                         }, 10);
@@ -1834,6 +1853,10 @@
             simplemde = {
                 value: function(newValue) {
                     if (newValue !== undefined) {
+                        // 保存当前选中的单元格位置
+                        const selected = hot.getSelected() || [[0, 0, 0, 0]];
+                        const [selRow, selCol] = selected[0];
+
                         // 解析CSV数据
                         if (newValue && newValue.trim()) {
                             const lines = newValue.split('\n').filter(line => line.trim());
@@ -1842,6 +1865,11 @@
                         } else {
                             hot.loadData([['']]);
                         }
+
+                        // 恢复选中单元格（限制在新数据范围内）
+                        const safeRow = Math.min(selRow, hot.countRows() - 1);
+                        const safeCol = Math.min(selCol, hot.countCols() - 1);
+                        hot.selectCell(safeRow, safeCol);
                     } else {
                         // 返回CSV格式
                         return hot.getData().map(row => row.join(',')).join('\n');

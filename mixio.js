@@ -1,4 +1,4 @@
-var VERSION = "1.10.6.0527"
+var VERSION = "1.10.6.0614"
 require('events').EventEmitter.defaultMaxListeners = 50;
 
 const crypto = require('crypto')
@@ -7,6 +7,7 @@ const WebSocket = require('ws')
 const multer = require('multer');
 const iconv = require('iconv-lite');
 const { setupWSConnection } = require('y-websocket/bin/utils');
+var compression = require('compression');
 defaultCrt =
     `-----BEGIN CERTIFICATE-----
 MIID0TCCArmgAwIBAgICYxswDQYJKoZIhvcNAQELBQAwczELMAkGA1UEBhMCQ04x
@@ -1058,6 +1059,7 @@ del "%~f0"`;
         }
     });
 
+    app.use(compression());
 
     app.use('/js', express.static(path.join(__dirname, 'js')));
 
@@ -4620,6 +4622,7 @@ var mixioServer = async function() {
             res.send('-1')
     })
 
+    app.use(compression());
 
     app.use('/js', express.static(path.join(__dirname, 'js')));
 
