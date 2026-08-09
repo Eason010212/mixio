@@ -115,6 +115,18 @@ var globalQPSControl = {}
 const os = require('os');
 const net = require('net');
 const arch = os.arch(); // 或者 process.arch
+
+const RESERVE_DATABASE_COUNT = 8
+
+function getReserveDatabaseIndex(userName) {
+    var hash = 0
+    for (var i = 0; i < userName.length; i++) {
+        hash = ((hash << 5) - hash) + userName.charCodeAt(i)
+        hash |= 0
+    }
+    return Math.abs(hash) % RESERVE_DATABASE_COUNT
+}
+
 // 获取操作系统平台（如win32, linux, darwin）
 function isOpenWrt() {
     try {
@@ -571,14 +583,7 @@ async function daemon_start() {
         if (req.session.admin) {
             var userName = req.query.userName
             if (userName) {
-                var hash = 0,
-                    i, chr;
-                for (i = 0; i < userName.length; i++) {
-                    chr = userName.charCodeAt(i);
-                    hash = ((hash << 5) - hash) + chr;
-                    hash |= 0;
-                }
-                var targetDB = reserveDBs[Math.abs(hash) % 8]
+                var targetDB = reserveDBs[getReserveDatabaseIndex(userName)]
                 targetDB.run("delete from `reserve` where userName=?", [userName, ], function(err) {
                     if (err) {
                         console.log(err.message)
@@ -1327,14 +1332,7 @@ var mixioServer = async function() {
             } else if (configs["ALLOW_HOOK"] && reserveJSON[topic[0]] && topic[0] != "$SYS") {
                 var userName = topic[0]
                 var reserveTopic = topic[1] + "/" + topic[2]
-                var hash = 0,
-                    i, chr;
-                for (i = 0; i < userName.length; i++) {
-                    chr = userName.charCodeAt(i);
-                    hash = ((hash << 5) - hash) + chr;
-                    hash |= 0;
-                }
-                var targetDB = reserveDBs[Math.abs(hash) % 8]
+                var targetDB = reserveDBs[getReserveDatabaseIndex(userName)]
                 targetDB.get("select count(*) from `reserve` where userName = ? and topic not like '$%'", [userName, ], function(err, row) {
                     if (err) {
                         console.log(err.message)
@@ -3105,14 +3103,7 @@ var mixioServer = async function() {
             return;
         }
         const { user, action, tag, value } = req.body;
-        var hash = 0,
-        i, chr;
-        for (i = 0; i < user.length; i++) {
-            chr = user.charCodeAt(i);
-            hash = ((hash << 5) - hash) + chr;
-            hash |= 0;
-        }
-        hash = Math.abs(hash) % 8
+        var hash = getReserveDatabaseIndex(user)
         switch (action) {
             case 'update':
                 handleUpdate(req, res, hash);
@@ -3827,14 +3818,7 @@ var mixioServer = async function() {
     app.get('/getData', function(req, res) {
         if (req.session.userName) {
             var userName = req.session.userName
-            var hash = 0,
-                i, chr;
-            for (i = 0; i < userName.length; i++) {
-                chr = userName.charCodeAt(i);
-                hash = ((hash << 5) - hash) + chr;
-                hash |= 0;
-            }
-            reserveDBs[Math.abs(hash) % 8].all("select * from `reserve` where userName=? and topic not like '$%'", [req.session.userName], function(err, rows) {
+            reserveDBs[getReserveDatabaseIndex(userName)].all("select * from `reserve` where userName=? and topic not like '$%'", [req.session.userName], function(err, rows) {
                 if (err) {
                     console.log(err)
                 } else {
@@ -4593,14 +4577,7 @@ var mixioServer = async function() {
         if (req.session.userName) {
             var condition = req.query.condition
             var userName = req.session.userName
-            var hash = 0,
-                i, chr;
-            for (i = 0; i < userName.length; i++) {
-                chr = userName.charCodeAt(i);
-                hash = ((hash << 5) - hash) + chr;
-                hash |= 0;
-            }
-            reserveDBs[Math.abs(hash) % 8].run("delete from `reserve` where userName = ? and " + condition, [userName, ], function(err) {
+            reserveDBs[getReserveDatabaseIndex(userName)].run("delete from `reserve` where userName = ? and " + condition, [userName, ], function(err) {
                 if (err) {
                     console.log(err.message)
                     res.send('-1')
