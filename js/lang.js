@@ -1958,7 +1958,7 @@ var lang = "en";
 
 function normalizeLanguage(languageCode) {
     var code = String(languageCode || "").replace("_", "-").toLowerCase();
-    if (code === "tw" || code === "zh-tw" || code === "zh-hk" || code === "zh-mo") return "tw";
+    if (code === "tw" || code === "zh-tw" || code === "zh-hk" || code === "zh-mo" || code.indexOf("zh-hant") === 0) return "tw";
     if (code === "zh" || code.indexOf("zh-") === 0) return "zh";
     return code === "en" || code.indexOf("en-") === 0 ? "en" : "en";
 }

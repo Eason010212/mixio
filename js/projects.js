@@ -638,9 +638,16 @@ function view_project(projectName, projectType) {
             var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + i18n('loadingLogicEngine') + "</p></div>")
             $.getScript("js/codemirror.min.js", function(){
             $.getScript("blockly/blockly_compressed.js", function() {
+                var blocklyLanguage = typeof getCurrentLanguage === "function" ? getCurrentLanguage() : lang
+                var blocklyLocaleFiles = { zh: "zh-hans", tw: "zh-hant", en: "en" }
+                var blocklyLocaleFile = blocklyLocaleFiles[blocklyLanguage] || blocklyLocaleFiles.en
+                $.getScript("blockly/msg/js/" + blocklyLocaleFile + ".js", function() {
+                $.getScript("blockly/iot/lang.js?v=1", function() {
+                    BlocklyI18n.apply(blocklyLanguage)
+                    BlocklyI18n.translateToolbox(document.getElementById('toolbox'))
                 $.getScript("blockly/blocks_compressed.js", function() {
                     $.getScript("blockly/javascript_compressed.js", function() {
-                        $.getScript("blockly/iot/IOT_Blocks.js?v=1", function() {
+                        $.getScript("blockly/iot/IOT_Blocks.js?v=2", function() {
                             var currentProjectType = globalProjectType
                             globalProjectType = LOGIC_MODE
                             switch_mode()
@@ -783,6 +790,8 @@ function view_project(projectName, projectType) {
                             resolve();
                         },true);
                     }, true);
+                }, true);
+                }, true);
                 }, true);
             }, true);
         }, true);
