@@ -46,75 +46,11 @@ function init_table(rows) {
     }
 
 
-    if (lang == 'zh')
-        datatable = $("#apps_table").DataTable({
-            "order": [
-                [2, "asc"]
-            ],
-            language: {
-                "sProcessing": "处理中...",
-                "sLengthMenu": " _MENU_ 项/页",
-                "sZeroRecords": "没有匹配结果",
-                "sInfo": "显示第 _START_ 项至 第 _END_ 项结果，共 _TOTAL_ 项",
-                "sInfoEmpty": "显示第 0 项至 0 项结果，共 0 项",
-                "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
-                "sInfoPostFix": "",
-                "sSearch": "搜索:",
-                "sUrl": "",
-                "sEmptyTable": "表中数据为空",
-                "sLoadingRecords": "载入中...",
-                "sInfoThousands": ",",
-                "oPaginate": {
-                    "sFirst": "首页",
-                    "sPrevious": "上页",
-                    "sNext": "下页",
-                    "sLast": "末页"
-                },
-                "oAria": {
-                    "sSortAscending": ": 以升序排列此列",
-                    "sSortDescending": ": 以降序排列此列"
-                }
-            },
-            dom: 'lBrtip'
-        });
-    else if (lang == 'tw')
-        datatable = $("#apps_table").DataTable({
-            "order": [
-                [2, "asc"]
-            ],
-            language: {
-                "sProcessing": "處理中...",
-                "sLengthMenu": "每頁 _MENU_ 項",
-                "sZeroRecords": "沒有匹配結果",
-                "sInfo": "顯示第 _START_ 項至 第 _END_ 項結果，共 _TOTAL_ 項",
-                "sInfoEmpty": "顯示第 0 項至 0 項結果，共 0 項",
-                "sInfoFiltered": "(由 _MAX_ 項結果過濾)",
-                "sInfoPostFix": "",
-                "sSearch": "搜索:",
-                "sUrl": "",
-                "sEmptyTable": "表中數據為空",
-                "sLoadingRecords": "載入中...",
-                "sInfoThousands": ",",
-                "oPaginate": {
-                    "sFirst": "首頁",
-                    "sPrevious": "上頁",
-                    "sNext": "下頁",
-                    "sLast": "末頁"
-                },
-                "oAria": {
-                    "sSortAscending": ": 以升序排列此列",
-                    "sSortDescending": ": 以降序排列此列"
-                }
-            },
-            dom: 'lBrtip'
-        });
-    else
-        datatable = $("#apps_table").DataTable({
-            "order": [
-                [2, "asc"]
-            ],
-            dom: 'lBrtip'
-        });
+    datatable = $("#apps_table").DataTable({
+        "order": [[2, "asc"]],
+        language: getDataTableLanguage(),
+        dom: 'lBrtip'
+    });
     datatable.on("page", sync_chart)
     datatable.on("length", sync_chart)
     datatable.on("search", sync_chart)

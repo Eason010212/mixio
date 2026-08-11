@@ -44,7 +44,7 @@
         <nav class="navbar navbar-expand navbar-light bg-white topbar static-top shadow" style="display:flex;justify-content:space-between" id="project_nav">
             <div id="top_titles" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;width:100%">
                 <h1 id="prjName" class="h3 mb-0 text-gray-800" style="display:inline-block;font-weight:bold;font-size:1.25rem;"></h1>
-                <a class="btn btn-primary" onclick="open_storage()">存储空间</a>
+                <a class="btn btn-primary lang" key="storageSpace" onclick="open_storage()">存储空间</a>
             </div>
         </nav>
             <div class="container-fluid" id="project_detail">
@@ -53,8 +53,8 @@
             </div>
     </div>
         <div style="display:flex;align-items:center;justify-content:center;padding:5px;z-index:999;position:absolute;bottom:0;right:0;background-color:white;box-shadow:0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important;border-radius:40px 0 0 0;padding-left:15px;padding-top:10px" id="bottom_2" hidden>
-            <a class="btn btn-primary btn-block" id="dataMode" style="margin:5px;border:solid #4e73df 1px;font-size:1.2rem;display:flex;align-items:center;justify-content:space-around;width:105px;padding:5px 10px 5px 10px"><i class="fa fa-table" style="font-size:2rem;"></i>数据</a>
-            <a class="btn btn-light btn-block" id="projMode" style="margin:5px;border:solid #4e73df 1px;color:#4e73df;font-size:1.2rem;display:flex;align-items:center;justify-content:space-around;width:105px;padding:5px 10px 5px 10px"><i class="fa fa-cube" style="font-size:2rem"></i>组件</a>
+            <a class="btn btn-primary btn-block" id="dataMode" style="margin:5px;border:solid #4e73df 1px;font-size:1.2rem;display:flex;align-items:center;justify-content:space-around;width:105px;padding:5px 10px 5px 10px"><i class="fa fa-table" style="font-size:2rem;"></i><span class="lang" key="dataView">数据</span></a>
+            <a class="btn btn-light btn-block" id="projMode" style="margin:5px;border:solid #4e73df 1px;color:#4e73df;font-size:1.2rem;display:flex;align-items:center;justify-content:space-around;width:105px;padding:5px 10px 5px 10px"><i class="fa fa-cube" style="font-size:2rem"></i><span class="lang" key="componentView">组件</span></a>
         </div>
     <div id="trashbin" style="width:0;height:0;overflow:hidden">
 

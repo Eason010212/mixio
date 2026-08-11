@@ -6,7 +6,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>MixIO管理后台</title>
+    <title class="lang" key="managePageTitle">MixIO 管理后台</title>
     <link rel="shortcut icon" href="img/shortcut.png"/>
     <link rel="stylesheet" href="css/all.css">
     <script src="js/jquery.min.js"></script>
@@ -69,8 +69,7 @@
                                         <div class="card-body">
                                             <div class="row no-gutters align-items-center">
                                                 <div class="col mr-2">
-                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                        平台类型</div>
+                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1 lang" key="platformType">平台类型</div>
                                                     <div class="h5 mb-0 font-weight-bold text-gray-800" id="platform"><%=platform%></div>
                                                 </div>
                                                 <div class="col-auto">
@@ -83,8 +82,7 @@
                                         <div class="card-body">
                                             <div class="row no-gutters align-items-center">
                                                 <div class="col mr-2">
-                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                        MixIO版本号</div>
+                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1 lang" key="mixioVersion">MixIO 版本号</div>
                                                     <div class="h5 mb-0 font-weight-bold text-gray-800"><%=version%></div>
                                                 </div>
                                                 <div class="col-auto">
@@ -97,8 +95,7 @@
                                         <div class="card-body">
                                             <div class="row no-gutters align-items-center">
                                                 <div class="col mr-2">
-                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                        Mixly编程服务器版本号</div>
+                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1 lang" key="mixlyServerVersion">Mixly 编程服务器版本号</div>
                                                     <div class="h5 mb-0 font-weight-bold text-gray-800"><%=versionmixly%></div>
                                                 </div>
                                                 <div class="col-auto">
@@ -111,8 +108,7 @@
                                         <div class="card-body">
                                             <div class="row no-gutters align-items-center">
                                                 <div class="col mr-2">
-                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                        服务器时钟</div>
+                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1 lang" key="serverClock">服务器时钟</div>
                                                     <div class="h5 mb-0 font-weight-bold text-gray-800" id="time"></div>
                                                 </div>
                                                 <div class="col-auto">
@@ -122,10 +118,10 @@
                                         </div>
                                     </div>
                                     <div class="row" style="display:flex;align-items:center;justify-content:center">
-                                        <button class="btn btn-lg btn-primary" style="margin-top:20px;margin-right:10px"  onclick="fresh('mixio', '<%=platform%>')"><i class="fa fa-refresh"></i> 更新MixIO服务器</button>            
+                                        <button class="btn btn-lg btn-primary" style="margin-top:20px;margin-right:10px"  onclick="fresh('mixio', '<%=platform%>')"><i class="fa fa-refresh"></i> <span class="lang" key="updateMixioServer">更新 MixIO 服务器</span></button>
                                     </div>
                                     <div class="row" style="display:flex;align-items:center;justify-content:center">
-                                        <button class="btn btn-lg btn-primary" style="margin-top:20px;margin-right:10px"  onclick="fresh('mixly', 'all')"><i class="fa fa-refresh"></i> 更新Mixly编程服务器</button>           
+                                        <button class="btn btn-lg btn-primary" style="margin-top:20px;margin-right:10px"  onclick="fresh('mixly', 'all')"><i class="fa fa-refresh"></i> <span class="lang" key="updateMixlyServer">更新 Mixly 编程服务器</span></button>
                                         <!--                   
                                         <% if (status=="运行中") { %>
                                             <button class="btn btn-lg btn-danger" style="margin-top:20px;margin-left:10px"  onclick="stopServer()"><i class="fa fa-ban"></i> 暂停服务器</button>
@@ -144,17 +140,17 @@
                                     <table id="configTable">
                                         <thead>
                                             <tr>
-                                                <th scope="col" width="30%">配置项</th>
-                                                <th scope="col" width="30%">含义</th>
-                                                <th scope="col" width="10%">数据类型</th>
-                                                <th scope="col" width="30%">值</th>
+                                                <th scope="col" width="30%" class="lang" key="configItem">配置项</th>
+                                                <th scope="col" width="30%" class="lang" key="description">含义</th>
+                                                <th scope="col" width="10%" class="lang" key="dataType">数据类型</th>
+                                                <th scope="col" width="30%" class="lang" key="value">值</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             
                                         </tbody>
                                     </table>
-                                    <button class="btn btn-lg btn-success" style="margin-top:20px;"  onclick="saveAndRestart()" id="saveAndRestart"><i class="fa fa-check"></i> 保存设置并重新启动</button>
+                                    <button class="btn btn-lg btn-success" style="margin-top:20px;"  onclick="saveAndRestart()" id="saveAndRestart"><i class="fa fa-check"></i> <span class="lang" key="saveSettingsRestart">保存设置并重新启动</span></button>
                                 </div>
                             </div>
                             
@@ -164,10 +160,10 @@
                         <div class="col-xl-8 col-md-6 mb-4">
                             <div class="card shadow" style="margin-top:1.5rem;border-radius:10px">
                                 <div class="card-body" style="display: flex;align-items: center;justify-content: center;flex-direction: column;">
-                                    <p>格式（每个账号一行）: 账号,密码,密保问题,问题答案</p>
+                                    <p class="lang" key="batchAccountFormat">格式（每个账号一行）：账号,密码,密保问题,问题答案</p>
                                     <textarea name="" id="acc" rows="10" style="margin-bottom: 20px;width:95%">12345@mixly.com,123456,你就读的班级是？,三年二班</textarea>
                                     <div>
-                                        <button class="btn btn-lg btn-success" onclick="addAcc()"><i class="fa fa-check"></i> 确定添加</button>
+                                        <button class="btn btn-lg btn-success" onclick="addAcc()"><i class="fa fa-check"></i> <span class="lang" key="addAccounts">确认添加</span></button>
                                     </div>
                                 </div>
                             </div>
@@ -180,16 +176,16 @@
                                     <table id="table">
                                         <thead>
                                             <td style="min-width:100px">
-                                                用户
+                                                <span class="lang" key="user">用户</span>
                                             </td>
                                             <td style="min-width:100px">
-                                                项目数
+                                                <span class="lang" key="projectCount">项目数</span>
                                             </td>
                                             <td style="min-width:100px">
-                                                消息量
+                                                <span class="lang" key="messageCount">消息量</span>
                                             </td>
                                             <td style="min-width:300px">
-                                                执行操作
+                                                <span class="lang" key="actions">操作</span>
                                             </td>
                                         </thead>
                                         <tbody id="tbody">
@@ -274,22 +270,22 @@
             },function(res){
                 if(res == 1)
                 {
-                    showtext("操作成功！")
+                    showtext(i18n('actionSuccess'))
                     setTimeout(function(){
                         window.location.href = window.location.href.split("?")[0] + "?page=user"
                     },1000)
                 }
                 else
                 {
-                    showtext("操作失败")
+                    showtext(i18n('actionFailed'))
                 }
             })
         }
         var resetPassword = function(userName){
-            if (!confirm(`确定要重置用户 ${userName} 的密码吗？新密码将设置为 "123456"`)) {
+            if (!confirm(i18n('resetUserPasswordConfirm', { user: userName }))) {
                 return;
             }
-            const modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>重置密码中...</p></div>");
+            const modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + i18n('resettingPassword') + "</p></div>");
             $.get('resetf',{
                 "username":userName,
                 "password":"123456"
@@ -297,7 +293,7 @@
                 if(res == 1)
                 {
                     modald.close()
-                    showtext("操作成功！")
+                    showtext(i18n('actionSuccess'))
                     setTimeout(function(){
                         window.location.href = window.location.href.split("?")[0] + "?page=user"
                     },1000)
@@ -305,22 +301,22 @@
                 else
                 {
                     modald.close()
-                    showtext("操作失败")
+                    showtext(i18n('actionFailed'))
                 }
             })
         }
         var removeUser = function(userName){
-            if (!confirm(`确定要删除用户 ${userName} 的账号吗？此操作将不可恢复！`)) {
+            if (!confirm(i18n('deleteUserConfirm', { user: userName }))) {
                 return;
             }
-            const modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>重置密码中...</p></div>");
+            const modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + i18n('processing') + "</p></div>");
             $.get('deletef',{
                 "username":userName
             },function(res){
                 if(res == 1)
                 {
                     modald.close()
-                    showtext("操作成功！")
+                    showtext(i18n('actionSuccess'))
                     setTimeout(function(){
                         window.location.href = window.location.href.split("?")[0] + "?page=user"
                     },1000)
@@ -328,7 +324,7 @@
                 else
                 {
                     modald.close()
-                    showtext("操作失败")
+                    showtext(i18n('actionFailed'))
                 }
             })
         }
@@ -351,34 +347,34 @@
         })
         var loadConfig = function(){
             var mapping = {
-                "MIXIO_HTTP_PORT": "HTTP端口",
-                "MIXIO_HTTPS_PORT": "HTTPS端口",
-                "HTTPS_PRIVATE_PEM": "私钥链接(本地或在线地址)",
-                "HTTPS_CRT_FILE": "证书链接(本地或在线地址)",
-                "MIXIO_MQTT_PORT": "MQTT端口",
-                "MIXIO_WS_PORT": "MQTT-ws端口",
-                "MIXIO_WSS_PORT": "MQTT-wss端口",
-                "MIXIO_YJS_PORT": "协同编辑WebSocket端口(ws)",
-                "MIXIO_YJS_WSS_PORT": "协同编辑WebSocket端口(wss)",
-                "MAX_PROJECT_NUM_PER_USER": "用户的最大项目数",
-                "MAX_MESSAGE_PER_USER": "用户的最大离线消息存储数",
-                "MAX_MESSAGE_PER_SECOND": "用户每秒的最大消息数",
-                "ALLOW_REGISTER": "是否允许自主注册",
-                "ALLOW_HOOK": "是否允许离线存储消息",
-                "OFFLINE_MODE": "是否禁用天气/地图数据",
-                "BAIDU_MAP_AK": "百度地图客户端应用AK",
-                "BAIDU_MAP_SERVER_AK": "百度地图服务端应用AK",
-                "TENCENT_MAP_KEY": "腾讯地图key",
-                "BAIDU_STAT_LINK": "百度统计链接",
-                "ADMIN_USERNAME": "管理后台用户名",
-                "ADMIN_PASSWORD": "管理后台密码",
-                "STORAGE_ENGINE": "数据库引擎",
-                "MYSQL_HOST": "mysql地址",
-                "MYSQL_PORT": "mysql端口",
-                "MYSQL_USER": "mysql用户名",
-                "MYSQL_PASS": "mysql密码",
-                "MYSQL_DB": "mysql数据库名",
-                "FOOTER": "显示在首页的备案信息"
+                "MIXIO_HTTP_PORT": i18n('configHttpPort'),
+                "MIXIO_HTTPS_PORT": i18n('configHttpsPort'),
+                "HTTPS_PRIVATE_PEM": i18n('configPrivateKey'),
+                "HTTPS_CRT_FILE": i18n('configCertificate'),
+                "MIXIO_MQTT_PORT": i18n('configMqttPort'),
+                "MIXIO_WS_PORT": i18n('configMqttWsPort'),
+                "MIXIO_WSS_PORT": i18n('configMqttWssPort'),
+                "MIXIO_YJS_PORT": i18n('configYjsWsPort'),
+                "MIXIO_YJS_WSS_PORT": i18n('configYjsWssPort'),
+                "MAX_PROJECT_NUM_PER_USER": i18n('configMaxProjects'),
+                "MAX_MESSAGE_PER_USER": i18n('configMaxOfflineMessages'),
+                "MAX_MESSAGE_PER_SECOND": i18n('configMaxMessagesPerSecond'),
+                "ALLOW_REGISTER": i18n('configAllowRegister'),
+                "ALLOW_HOOK": i18n('configAllowOfflineStorage'),
+                "OFFLINE_MODE": i18n('configOfflineMode'),
+                "BAIDU_MAP_AK": i18n('configBaiduClientAk'),
+                "BAIDU_MAP_SERVER_AK": i18n('configBaiduServerAk'),
+                "TENCENT_MAP_KEY": i18n('configTencentKey'),
+                "BAIDU_STAT_LINK": i18n('configAnalyticsLink'),
+                "ADMIN_USERNAME": i18n('configAdminUser'),
+                "ADMIN_PASSWORD": i18n('configAdminPassword'),
+                "STORAGE_ENGINE": i18n('configStorageEngine'),
+                "MYSQL_HOST": i18n('configMysqlHost'),
+                "MYSQL_PORT": i18n('configMysqlPort'),
+                "MYSQL_USER": i18n('configMysqlUser'),
+                "MYSQL_PASS": i18n('configMysqlPassword'),
+                "MYSQL_DB": i18n('configMysqlDatabase'),
+                "FOOTER": i18n('configFooter')
             }
             const tbody = document.querySelector('#configTable tbody');
             tbody.innerHTML = '';
@@ -408,8 +404,8 @@
                     inputElement = document.createElement('select');
                     inputElement.className = 'form-control';
                     inputElement.innerHTML = `
-                        <option value="true" ${value ? 'selected' : ''}>是 (true)</option>
-                        <option value="false" ${!value ? 'selected' : ''}>否 (false)</option>
+                        <option value="true" ${value ? 'selected' : ''}>${i18n('yes')} (true)</option>
+                        <option value="false" ${!value ? 'selected' : ''}>${i18n('no')} (false)</option>
                     `;
                 } else if (type === 'number') {
                     inputElement = document.createElement('input');
@@ -420,7 +416,7 @@
                 } else {
                     console.log(key)
                     inputElement = document.createElement('input');
-                    inputElement.type = (mapping[key].indexOf('密码')==-1?'text':'password');
+                    inputElement.type = (/PASSWORD|PASS/.test(key) ? 'password' : 'text');
                     inputElement.className = 'form-control';
                     inputElement.value = value;
                 }
@@ -465,15 +461,15 @@
                 success: function(res){
                     if(res=="1")
                     {
-                        showtext('保存成功, 正在重新启动服务器。')
+                        showtext(i18n('settingsSavedRestarting'))
                     }
                     else
-                        showtext('保存失败')
+                        showtext(i18n('saveFailed'))
                     modald.close()
                 },
                 error: function(res){
                     modald.close()
-                    showtext('保存失败')
+                    showtext(i18n('saveFailed'))
                 }
             })
         }
@@ -486,7 +482,7 @@
                     window.location.href = window.location.href
                 }
                 else
-                    showtext('状态异常')
+                    showtext(i18n('abnormalStatus'))
             })
         }
         var startServer = function(){
@@ -510,7 +506,7 @@
                 content: textarea
             });
             d.showModal();
-            add_text("发送更新请求中...")
+            add_text(i18n('sendingUpdateRequest'))
             fetch('/api/check-update', {
                 method: 'POST',
                 headers: {
@@ -523,9 +519,9 @@
             })
             .then((response) => response.json())
             .then((result) => {
-                add_text("本地版本：" + result["localVersion"])
-                add_text("云端版本：" + result["cloudVersion"])
-                add_text("需要更新：" + result["cloudVersion"] && result["needsUpdate"])
+                add_text(i18n('localVersion', { version: result["localVersion"] }))
+                add_text(i18n('cloudVersion', { version: result["cloudVersion"] }))
+                add_text(i18n('updateRequired', { value: result["needsUpdate"] }))
                 var url = result["cloudFile"]
                 var error = result["error"]
                 if(error)
@@ -535,37 +531,37 @@
                 if(result["cloudVersion"] && result["needsUpdate"])
                 {
                     const eventSource = new EventSource(`/api/download?url=${encodeURIComponent(url)}&cloudVersion=${result["cloudVersion"]}`);
-                    add_text("下载开始...")
+                    add_text(i18n('downloadStarted'))
                     eventSource.onmessage = function(event) {
                         console.log(event)
                         const data = JSON.parse(event.data);
                         console.log(data)
                         if (data.type === 'progress') {
-                            add_text(`下载中: ${data.progress}%`)
+                            add_text(i18n('downloadingProgress', { progress: data.progress }))
                         } 
                         else if (data.type === 'unzip') {
-                            add_text(`解压中...`)
+                            add_text(i18n('extracting'))
                         } 
                         else if (data.type === 'complete') {
                             eventSource.close();
                             if(data.version == "mixio"){
-                                add_text(`${data.version}解压完成，等待系统清理缓存，大约需要30秒...`);
+                                add_text(i18n('extractionCompleteWait', { version: data.version }));
                                 setTimeout(
                                     function(){
-                                        alert("更新已完成，请务必手动重启MIXIO服务，请务必手动重启MIXIO服务，如果是支持自动启动，那么请直接重启服务器机器即可！！！")
+                                        alert(i18n('updateCompletedRestart'))
                                         window.location.reload()
                                     }
                                 , 30000)
                             }
                             else{
-                                alert("更新已完成！")
+                                alert(i18n('updateCompleted'))
                                 window.location.reload()
                             }
                         }
                     };
                     eventSource.onerror = function(error) {
                         console.log(error)
-                        add_text('下载失败！5秒后自动退出...');
+                        add_text(i18n('downloadFailedExit'));
                             setTimeout(function(){
                             d.close()
                         }, 5000)
@@ -574,7 +570,7 @@
                 }
                 else
                 {
-                    add_text("已经是最新版本！5秒后自动退出...")
+                    add_text(i18n('upToDateExit'))
                     setTimeout(function(){
                         d.close()
                     }, 5000)
@@ -628,7 +624,7 @@
                     failCount+=1
                     failInfo.push({
                         'account':info[0],
-                        'reason':'格式不正确'
+                        'reason':i18n('invalidFormat')
                     })
                 }
                 else
@@ -642,7 +638,7 @@
                             failCount+=1
                             failInfo.push({
                                 'account':info[0],
-                                'reason':'用户已存在'
+                                'reason':i18n('userAlreadyExists')
                             })
                         }
                         else if(res=='3')
@@ -650,10 +646,10 @@
                             failCount+=1
                             failInfo.push({
                                 'account':info[0],
-                                'reason':'连接失败'
+                                'reason':i18n('connectionFailed')
                             })
                         }
-                        var s = "成功个数："+successCount+"; 失败个数："+failCount+"; 失败原因："+JSON.stringify(failInfo)
+                        var s = i18n('batchResult', { success: successCount, failed: failCount, reasons: JSON.stringify(failInfo) })
                         showtext(s)
                     })
                 }

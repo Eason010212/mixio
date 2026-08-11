@@ -1560,7 +1560,7 @@ function add_mic(user_title, user_topic, user_content, user_style, title_style) 
                 sendIcon.children().addClass("fa-stop")
                 // start recording, use web speech api
                 recognition = new webkitSpeechRecognition();
-                recognition.lang = 'zh-CN';
+                recognition.lang = lang === 'tw' ? 'zh-TW' : (lang === 'zh' ? 'zh-CN' : 'en-US');
                 recognition.continuous = true;
                 recognition.interimResults = true;
                 recognition.start();
@@ -1596,7 +1596,7 @@ function add_mic(user_title, user_topic, user_content, user_style, title_style) 
                 sendIcon.children().addClass("fa-stop")
                 // start recording, use web speech api
                 recognition = new webkitSpeechRecognition();
-                recognition.lang = 'zh-CN';
+                recognition.lang = lang === 'tw' ? 'zh-TW' : (lang === 'zh' ? 'zh-CN' : 'en-US');
                 recognition.continuous = true;
                 recognition.interimResults = true;
                 recognition.start();
@@ -2513,8 +2513,8 @@ async function add_timer(user_title, user_topic, user_content, user_style, title
     editForm.append(topic_input_div)
     editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerMessage + '</h5>'))
     var moreButtonDiv = $('<div style="display:flex;flex-direction:row;align-items:center;justify-content:center"></div>')
-    var currTimeBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">实时时间</a>')
-    var ranNumBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">随机整数（1-99）</a>')
+    var currTimeBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">' + i18n('realTime') + '</a>')
+    var ranNumBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">' + i18n('randomInteger') + '</a>')
     moreButtonDiv.append(currTimeBtn)
     moreButtonDiv.append(ranNumBtn)
     editForm.append(moreButtonDiv)
@@ -2803,12 +2803,12 @@ async function add_trigger(user_title, user_topic, user_content, user_style, tit
     editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].condition + '1</h5>'))
     var condition1_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
     var condition1_input1 = $("<select class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-right:5px'/>")
-    condition1_input1.append($("<option value='gt'>大于</option>"))
-    condition1_input1.append($("<option value='gte'>大于等于</option>"))
-    condition1_input1.append($("<option value='lt'>小于</option>"))
-    condition1_input1.append($("<option value='lte'>小于等于</option>"))
-    condition1_input1.append($("<option value='eq'>等于</option>"))
-    condition1_input1.append($("<option value='neq'>不等于</option>"))
+    condition1_input1.append($("<option value='gt'>" + i18n('greaterThan') + "</option>"))
+    condition1_input1.append($("<option value='gte'>" + i18n('greaterThanOrEqual') + "</option>"))
+    condition1_input1.append($("<option value='lt'>" + i18n('lessThan') + "</option>"))
+    condition1_input1.append($("<option value='lte'>" + i18n('lessThanOrEqual') + "</option>"))
+    condition1_input1.append($("<option value='eq'>" + i18n('equal') + "</option>"))
+    condition1_input1.append($("<option value='neq'>" + i18n('notEqual') + "</option>"))
     var condition1_input2 = $("<input class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-left:5px'/>")
     condition1_input_div.append(condition1_input1)
     condition1_input_div.append(condition1_input2)
@@ -2817,12 +2817,12 @@ async function add_trigger(user_title, user_topic, user_content, user_style, tit
     var condition2_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
     var condition2_input1 = $("<select class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-right:5px'/>")
     condition2_input1.append($("<option value='--'>--</option>"))
-    condition2_input1.append($("<option value='gt'>大于</option>"))
-    condition2_input1.append($("<option value='gte'>大于等于</option>"))
-    condition2_input1.append($("<option value='lt'>小于</option>"))
-    condition2_input1.append($("<option value='lte'>小于等于</option>"))
-    condition2_input1.append($("<option value='eq'>等于</option>"))
-    condition2_input1.append($("<option value='neq'>不等于</option>"))
+    condition2_input1.append($("<option value='gt'>" + i18n('greaterThan') + "</option>"))
+    condition2_input1.append($("<option value='gte'>" + i18n('greaterThanOrEqual') + "</option>"))
+    condition2_input1.append($("<option value='lt'>" + i18n('lessThan') + "</option>"))
+    condition2_input1.append($("<option value='lte'>" + i18n('lessThanOrEqual') + "</option>"))
+    condition2_input1.append($("<option value='eq'>" + i18n('equal') + "</option>"))
+    condition2_input1.append($("<option value='neq'>" + i18n('notEqual') + "</option>"))
     var condition2_input2 = $("<input disabled class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-left:5px'/>")
     condition2_input_div.append(condition2_input1)
     condition2_input_div.append(condition2_input2)
@@ -3816,7 +3816,7 @@ function add_dashboard(user_title, user_topic, user_content, user_style, title_s
 }
 
 function add_map(user_title, user_topic, user_content, user_style, title_style) {
-    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载地图引擎...</p></div>")
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + i18n('loadingMapEngine') + "</p></div>")
     if(baidu_ak!='')
     {
         $.getScript("//api.map.baidu.com/getscript?type=webgl&v=3.0&ak="+baidu_ak, function() {
@@ -6375,7 +6375,7 @@ function add_camera(user_title, user_topic, user_content, user_style, title_styl
 
 //0312
 function add_coco(user_title, user_topic, user_content, user_style, title_style) {
-    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载AI引擎...</p></div>")
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + i18n('loadingAiEngine') + "</p></div>")
     $.getScript("js/tf.min.js", function() {
         $.getScript("js/coco-ssd.js", async function() {
             var model = await cocoSsd.load({ 
@@ -6584,7 +6584,7 @@ function add_coco(user_title, user_topic, user_content, user_style, title_style)
 }
 
 function add_face(user_title, user_topic, user_content, user_style, title_style) {
-    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载AI引擎...</p></div>")
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + i18n('loadingAiEngine') + "</p></div>")
     $.getScript("js/tf.min.js", function() {
         $.getScript("js/faceapi.min.js", function() {
             modald.close().remove()
@@ -6605,7 +6605,7 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
             // floating canvas on top of the video
             var canvas = $("<canvas style='position:absolute;top:0;left:0'/>")
             cameraDiv.append(canvas)
-            var addFacialDataButton = $('<a class="btn btn-sm btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> 新增当前人脸数据</a>')
+            var addFacialDataButton = $('<a class="btn btn-sm btn-primary facial" style="position:absolute;bottom:10px;right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-plus"></i> ' + i18n('addCurrentFace') + '</a>')
             cameraDiv.append(addFacialDataButton)
             // stopPropagation
             addFacialDataButton.bind('mousedown', function(event) {
@@ -6641,15 +6641,15 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                     var user_data = JSON.parse(user_content)
                     user_data.push({"name": "", "landmarks": data})
                     title.parent().parent().attr('user-content', JSON.stringify(user_data))
-                    showtext("人脸数据已保存。")
+                    showtext(i18n('faceSaved'))
                 }
                 else
                 {
-                    showtext("未检测到人脸")
+                    showtext(i18n('noFaceDetected'))
                 }
                 sync_table_info()
             })
-            var addFaceByPicButton = $('<a class="btn btn-sm btn-success facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #1cc88a"><i class="fa fa-photo"></i> 上传一张人脸图片</a>')
+            var addFaceByPicButton = $('<a class="btn btn-sm btn-success facial" style="position:absolute;bottom:10px;left:10px;box-shadow:1px 1px 5px #1cc88a"><i class="fa fa-photo"></i> ' + i18n('uploadFaceImage') + '</a>')
             cameraDiv.append(addFaceByPicButton)
             addFaceByPicButton.bind('mousedown', function(event) {
                 event.stopPropagation()
@@ -6671,13 +6671,13 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                 // 弹出上传图片对话框
                 var uploadForm = $('<div class="nnt"/>')
                 uploadForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/decorate_pic.svg" style="width:45px;"></div>'))
-                uploadForm.append($('<h5 style="text-align:center">上传一张人脸图片</h5>'))
+                uploadForm.append($('<h5 style="text-align:center">' + i18n('uploadFaceImage') + '</h5>'))
                 var upload_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
                 var upload_input = $("<input type='file' class='form-control form-control-user'  style='text-align:center;width:250px'/>")
                 upload_input_div.append(upload_input)
                 uploadForm.append(upload_input_div)
                 // 人物命名
-                uploadForm.append($('<h5 style="margin-top:15px;text-align:center">人物命名</h5>'))
+                uploadForm.append($('<h5 style="margin-top:15px;text-align:center">' + i18n('personName') + '</h5>'))
                 var name_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
                 var name_input = $("<input class='form-control form-control-user'  style='text-align:center;width:250px'/>")
                 name_input_div.append(name_input)
@@ -6740,14 +6740,14 @@ function add_face(user_title, user_topic, user_content, user_style, title_style)
                                 user_data.push({"name": name_input.val(), "landmarks": data})
                                 title.parent().parent().attr('user-content', JSON.stringify(user_data))
                                 modald.close().remove()
-                                showtext("人脸数据已保存。")
+                                showtext(i18n('faceSaved'))
                                 sync_table_info()
                                 dia.close().remove()
                             }
                             else
                             {
                                 modald.close().remove()
-                                showtext("未检测到人脸")
+                                showtext(i18n('noFaceDetected'))
                             }
                         })
                     }
@@ -7214,9 +7214,9 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
     editForm.append(topic_input_div)
     editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].beepAudio + '</h5>'))
     var beep_select = $('<select class="form-control form-control-user" style="margin-top:15px;text-align:center"/>')
-    beep_select.append($('<option value="weak">弱提示</option>'))
-    beep_select.append($('<option value="strong">强提示</option>'))
-    beep_select.append($('<option value="alarm">警报音</option>'))
+    beep_select.append($('<option value="weak">' + i18n('weakAlert') + '</option>'))
+    beep_select.append($('<option value="strong">' + i18n('strongAlert') + '</option>'))
+    beep_select.append($('<option value="alarm">' + i18n('alarmSound') + '</option>'))
     editForm.append(beep_select)
     var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
     var confirmEdit = $('<a class="btn btn-primary btn-circle" style="margin-right:10px;box-shadow:1px 1px 5px #4e73df"><i class="fa fa-check"></i></a>')
@@ -7346,7 +7346,7 @@ function add_ocr(user_title, user_topic, user_content, user_style, title_style) 
         itemdiv.attr('style', user_style)
 }
 function add_qr(user_title, user_topic, user_content, user_style, title_style) {
-    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载AI引擎...</p></div>")
+    var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + i18n('loadingAiEngine') + "</p></div>")
     $.getScript("js/jsqr.js", function() {
         modald.close().remove()
         var isAlive = true
@@ -7426,7 +7426,7 @@ function add_qr(user_title, user_topic, user_content, user_style, title_style) {
                             }
                         }
                         else
-                            bottomDiv11.text("无二维码或条形码")
+                            bottomDiv11.text(i18n('noCodeDetected'))
                     }) 
                 }
             }, 2000)
@@ -7601,7 +7601,7 @@ styleButton.click(function() {
     var editForm = $('<div class="nnt" />')
     editForm.css("width", "250px")
     editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><i class="fa fa-paint-brush" style="color:#4e73df;font-size:45px"></i></div>'))
-    editForm.append($('<h5 style="text-align:center">组件标题</h5>'))
+    editForm.append($('<h5 style="text-align:center">' + i18n('unitTitle') + '</h5>'))
     // add a switch like "modeButton" to choose the style
     var modeButton = $("<label class='switch' style='margin-bottom:0'></label>")
     var modeCheckbox = $("<input type='checkbox'>")
@@ -7626,12 +7626,12 @@ styleButton.click(function() {
     modeButton.append(modeCheckbox)
     modeButton.append(modeCheckDiv)
     var modeDiv = $("<div style='display:flex;margin-top:10px;flex-direction:row;align-items:center;justify-content:center'/>")
-    modeDiv.append($("<span style='font-size:1rem;margin-right:10px;color:#4e73df;font-weight:bold'>" + "显示"+"</span>"))
+    modeDiv.append($("<span style='font-size:1rem;margin-right:10px;color:#4e73df;font-weight:bold'>" + JSLang[lang].show + "</span>"))
     modeDiv.append(modeButton)
-    modeDiv.append($("<span style='font-size:1rem;margin-left:10px;color:#e74a3b;font-weight:bold'>" + "隐藏" + "</span>"))
+    modeDiv.append($("<span style='font-size:1rem;margin-left:10px;color:#e74a3b;font-weight:bold'>" + JSLang[lang].hide + "</span>"))
     editForm.append(modeDiv)
     // background color
-    editForm.append($('<h5 style="margin-top:15px;text-align:center">背景颜色</h5>'))
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + i18n('backgroundColor') + '</h5>'))
     var colorDiv = $("<div style='display:flex;flex-direction:row;align-items:center;justify-content:center'/>")
     var colorInput = $("<input class='form-control form-control-user'  style='text-align:center;width:250px;min-width:250px'/>")
     colorInput.val(itemdiv.css("background-color"))
@@ -7641,7 +7641,7 @@ styleButton.click(function() {
         itemdiv.css("background-color", colorInput.val())
     })
     // title color
-    editForm.append($('<h5 style="margin-top:15px;text-align:center">标题颜色</h5>'))
+    editForm.append($('<h5 style="margin-top:15px;text-align:center">' + i18n('titleColor') + '</h5>'))
     var titleColorDiv = $("<div style='display:flex;flex-direction:row;align-items:center;justify-content:center'/>")
     var titleColorInput = $("<input class='form-control form-control-user'  style='text-align:center;width:250px;min-width:250px'/>")
     titleColorInput.val(itemdiv.find("h4").css("color"))

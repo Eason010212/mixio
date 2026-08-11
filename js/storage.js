@@ -1,64 +1,8 @@
 $(function(){
-    if(lang=='zh')
-        $("#apps_table").DataTable({
-            order: [[ 1, "desc" ]],
-            language: {
-                "sProcessing": "处理中...",
-                "sLengthMenu": "每页 _MENU_ 项",
-                "sZeroRecords": "没有匹配结果",
-                "sInfo": "显示第 _START_ 项至 第 _END_ 项结果，共 _TOTAL_ 项",
-                "sInfoEmpty": "显示第 0 项至 0 项结果，共 0 项",
-                "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
-                "sInfoPostFix": "",
-                "sSearch": "搜索:",
-                "sUrl": "",
-                "sEmptyTable": "表中数据为空",
-                "sLoadingRecords": "载入中...",
-                "sInfoThousands": ",",
-                "oPaginate": {
-                    "sFirst": "首页",
-                    "sPrevious": "上页",
-                    "sNext": "下页",
-                    "sLast": "末页"
-                },
-                "oAria": {
-                    "sSortAscending": ": 以升序排列此列",
-                    "sSortDescending": ": 以降序排列此列"
-                }
-            }
-        });
-    else if(lang=='tw')
-        $("#apps_table").DataTable({
-            order: [[ 1, "desc" ]],
-            language: {
-                "sProcessing": "处理中...",
-                "sLengthMenu": "每页 _MENU_ 项",
-                "sZeroRecords": "没有匹配结果",
-                "sInfo": "显示第 _START_ 项至 第 _END_ 项结果，共 _TOTAL_ 项",
-                "sInfoEmpty": "显示第 0 项至 0 项结果，共 0 项",
-                "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
-                "sInfoPostFix": "",
-                "sSearch": "搜索:",
-                "sUrl": "",
-                "sEmptyTable": "表中数据为空",
-                "sLoadingRecords": "载入中...",
-                "sInfoThousands": ",",
-                "oPaginate": {
-                    "sFirst": "首页",
-                    "sPrevious": "上页",
-                    "sNext": "下页",
-                    "sLast": "末页"
-                },
-                "oAria": {
-                    "sSortAscending": ": 以升序排列此列",
-                    "sSortDescending": ": 以降序排列此列"
-                }
-            }
-        });
-    else
-        $("#apps_table").DataTable({
-            order: [[ 1, "desc" ]]
-        });
+    $("#apps_table").DataTable({
+        order: [[ 1, "desc" ]],
+        language: getDataTableLanguage()
+    });
 })
 var delete_data = function(prjid,msgcount){
     var editForm = $('<div class="nnt"/>')

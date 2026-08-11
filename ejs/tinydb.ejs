@@ -171,7 +171,7 @@
                         <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                             <i class="fa fa-bars"></i>
                         </button> 
-                        <h1 class="d-sm-inline-block h3 mb-0 text-gray-800" style="margin-left:10px;font-size:1.5rem;display:inline-block;cursor:pointer">TinyDB 数据管理</h1>
+                        <h1 class="d-sm-inline-block h3 mb-0 text-gray-800 lang" key="tinydbManagement" style="margin-left:10px;font-size:1.5rem;display:inline-block;cursor:pointer">TinyDB 数据管理</h1>
                     </div>
                 </nav>
 
@@ -179,10 +179,10 @@
                 <div class="container-fluid">
                     <!-- 警告信息 -->
                     <div class="alert alert-success" id="successAlert" role="alert">
-                        操作成功！
+                        <span class="lang" key="actionSuccess">操作成功</span>
                     </div>
                     <div class="alert alert-danger" id="errorAlert" role="alert">
-                        操作失败！
+                        <span class="lang" key="actionFailed">操作失败</span>
                     </div>
 
                     <div class="row">
@@ -190,16 +190,16 @@
                         <div class="col-xl-12">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h6 class="m-0 font-weight-bold text-primary">数据列表</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary lang" key="dataList">数据列表</h6>
                                     <div>
                                         <button class="btn btn-success btn-sm" id="refreshData">
-                                            <i class="fa fa-sync-alt"></i> 刷新
+                                            <i class="fa fa-sync-alt"></i> <span class="lang" key="refresh">刷新</span>
                                         </button>
                                         <button class="btn btn-primary btn-sm" id="addNewRow">
-                                            <i class="fa fa-plus"></i> 新增
+                                            <i class="fa fa-plus"></i> <span class="lang" key="add">新增</span>
                                         </button>
                                         <button class="btn btn-info btn-sm" id="searchBtn" data-toggle="modal" data-target="#searchModal">
-                                            <i class="fa fa-search"></i> 搜索
+                                            <i class="fa fa-search"></i> <span class="lang" key="search">搜索</span>
                                         </button>
                                     </div>
                                 </div>
@@ -208,9 +208,9 @@
                                         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                             <thead>
                                                 <tr>
-                                                    <th width="25%">标签</th>
-                                                    <th width="60%">值</th>
-                                                    <th width="15%">操作</th>
+                                                    <th width="25%" class="lang" key="tag">标签</th>
+                                                    <th width="60%" class="lang" key="value">值</th>
+                                                    <th width="15%" class="lang" key="actions">操作</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="dataTableBody">
@@ -221,7 +221,10 @@
                                     <!-- 分页控件 -->
                                     <div class="d-flex justify-content-between align-items-center mt-3">
                                         <div class="page-info">
-                                            显示第 <span id="startItem">0</span> 到 <span id="endItem">0</span> 条，共 <span id="totalItems">0</span> 条记录
+                                            <span class="lang" key="showingFrom">显示第</span> <span id="startItem">0</span>
+                                            <span class="lang" key="to">到</span> <span id="endItem">0</span>
+                                            <span class="lang" key="totalRecords">条，共</span> <span id="totalItems">0</span>
+                                            <span class="lang" key="records">条记录</span>
                                         </div>
                                         <nav>
                                             <ul class="pagination" id="pagination">
@@ -261,7 +264,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="searchModalLabel">搜索数据</h5>
+                    <h5 class="modal-title lang" key="searchData" id="searchModalLabel">搜索数据</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -269,26 +272,26 @@
                 <div class="modal-body">
                     <form id="searchForm">
                         <div class="form-group">
-                            <label for="searchTag">标签关键字</label>
-                            <input type="text" class="form-control" id="searchTag" placeholder="输入标签关键字">
+                            <label for="searchTag" class="lang" key="tagKeyword">标签关键字</label>
+                            <input type="text" class="form-control lang" key="enterTagKeyword" id="searchTag" placeholder="输入标签关键字">
                         </div>
                         <div class="form-group">
-                            <label for="searchType">返回类型</label>
+                            <label for="searchType" class="lang" key="returnType">返回类型</label>
                             <select class="form-control" id="searchType">
-                                <option value="both">标签和值</option>
-                                <option value="tag">仅标签</option>
-                                <option value="value">仅值</option>
+                                <option value="both" class="lang" key="tagAndValue">标签和值</option>
+                                <option value="tag" class="lang" key="tagsOnly">仅标签</option>
+                                <option value="value" class="lang" key="valuesOnly">仅值</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="searchCount">返回数量</label>
+                            <label for="searchCount" class="lang" key="resultLimit">返回数量</label>
                             <input type="number" class="form-control" id="searchCount" value="10" min="1" max="100">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" id="performSearch">搜索</button>
+                    <button type="button" class="btn btn-secondary lang" key="cancel" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary lang" key="search" id="performSearch">搜索</button>
                 </div>
             </div>
         </div>
@@ -329,17 +332,17 @@
                 
                 // 检查是否已经存在新行
                 if ($('.new-row').length > 0) {
-                    showAlert('请先保存或取消当前新增的数据', 'error');
+                    showAlert(i18n('unsavedNewData'), 'error');
                     return;
                 }
                 
                 const newRow = $('<tr class="new-row">');
-                newRow.append($('<td>').append($('<input type="text" class="form-control form-control-sm" placeholder="输入标签">')));
-                newRow.append($('<td>').append($('<textarea class="form-control form-control-sm" rows="2" placeholder="输入值"></textarea>')));
+                newRow.append($('<td>').append($('<input type="text" class="form-control form-control-sm">').attr('placeholder', i18n('inputTag'))));
+                newRow.append($('<td>').append($('<textarea class="form-control form-control-sm" rows="2"></textarea>').attr('placeholder', i18n('inputValue'))));
                 
                 const actions = $('<td class="action-buttons">');
-                actions.append($('<button class="btn btn-sm btn-success mr-1 save-new-btn">').html('<i class="fa fa-check"></i> 保存'));
-                actions.append($('<button class="btn btn-sm btn-secondary cancel-new-btn">').html('<i class="fa fa-times"></i> 取消'));
+                actions.append($('<button class="btn btn-sm btn-success mr-1 save-new-btn">').html('<i class="fa fa-check"></i> ' + i18n('save')));
+                actions.append($('<button class="btn btn-sm btn-secondary cancel-new-btn">').html('<i class="fa fa-times"></i> ' + i18n('cancel')));
                 
                 newRow.append(actions);
                 tbody.prepend(newRow);
@@ -355,13 +358,13 @@
                 const value = valueInput.val().trim();
                 
                 if (!tag) {
-                    showAlert('标签不能为空', 'error');
+                    showAlert(i18n('tagRequired'), 'error');
                     tagInput.focus();
                     return;
                 }
                 
                 if (!value) {
-                    showAlert('值不能为空', 'error');
+                    showAlert(i18n('valueRequired'), 'error');
                     valueInput.focus();
                     return;
                 }
@@ -381,14 +384,14 @@
                     },
                     success: function(response) {
                         if (response.status === 'success') {
-                            showAlert('数据添加成功', 'success');
+                            showAlert(i18n('dataAddSuccess'), 'success');
                             loadData();
                         } else {
-                            showAlert('添加失败: ' + response.message, 'error');
+                            showAlert(i18n('addFailed', { message: response.message }), 'error');
                         }
                     },
                     error: function() {
-                        showAlert('网络错误，请稍后重试', 'error');
+                        showAlert(i18n('networkError'), 'error');
                     }
                 });
             });
@@ -403,7 +406,7 @@
                 const userInfo = getUserInfo();
                 console.log(userInfo)
                 if (!userInfo.user || !userInfo.secret) {
-                    showAlert('未找到用户信息，请重新登录', 'error');
+                    showAlert(i18n('userInfoMissing'), 'error');
                     return;
                 }
                 
@@ -425,11 +428,11 @@
                             renderDataTable(currentData);
                             updatePagination();
                         } else {
-                            showAlert('加载数据失败: ' + response.message, 'error');
+                            showAlert(i18n('loadDataFailed', { message: response.message }), 'error');
                         }
                     },
                     error: function() {
-                        showAlert('网络错误，请稍后重试', 'error');
+                        showAlert(i18n('networkError'), 'error');
                     }
                 });
             }
@@ -440,7 +443,7 @@
                 tbody.empty();
                 
                 if (data.length === 0) {
-                    tbody.append('<tr><td colspan="3" class="text-center">暂无数据</td></tr>');
+                    tbody.append($('<tr>').append($('<td colspan="3" class="text-center">').text(i18n('noData'))));
                     return;
                 }
                 
@@ -480,8 +483,8 @@
                     row.append($('<td>').append($('<textarea class="form-control form-control-sm" rows="2">' + value + '</textarea>')));
                     
                     const actions = $('<td class="action-buttons">');
-                    actions.append($('<button class="btn btn-sm btn-success mr-1 save-edit-btn">').html('<i class="fa fa-check"></i> 保存'));
-                    actions.append($('<button class="btn btn-sm btn-secondary cancel-edit-btn">').html('<i class="fa fa-times"></i> 取消'));
+                    actions.append($('<button class="btn btn-sm btn-success mr-1 save-edit-btn">').html('<i class="fa fa-check"></i> ' + i18n('save')));
+                    actions.append($('<button class="btn btn-sm btn-secondary cancel-edit-btn">').html('<i class="fa fa-times"></i> ' + i18n('cancel')));
                     
                     row.append(actions);
                 });
@@ -497,13 +500,13 @@
                     const oldTag = $(this).data('old-tag'); // 如果需要保留原标签用于更新
                     
                     if (!newTag) {
-                        showAlert('标签不能为空', 'error');
+                        showAlert(i18n('tagRequired'), 'error');
                         tagInput.focus();
                         return;
                     }
                     
                     if (!newValue) {
-                        showAlert('值不能为空', 'error');
+                        showAlert(i18n('valueRequired'), 'error');
                         valueInput.focus();
                         return;
                     }
@@ -523,14 +526,14 @@
                         },
                         success: function(response) {
                             if (response.status === 'success') {
-                                showAlert('数据更新成功', 'success');
+                                showAlert(i18n('dataUpdateSuccess'), 'success');
                                 loadData();
                             } else {
-                                showAlert('更新失败: ' + response.message, 'error');
+                                showAlert(i18n('updateFailed', { message: response.message }), 'error');
                             }
                         },
                         error: function() {
-                            showAlert('网络错误，请稍后重试', 'error');
+                            showAlert(i18n('networkError'), 'error');
                         }
                     });
                 });
@@ -544,7 +547,7 @@
                 $('.delete-btn').on('click', function() {
                     const tag = $(this).data('tag');
                     
-                    if (confirm(`确定要删除标签为 "${tag}" 的数据吗？`)) {
+                    if (confirm(i18n('deleteTagConfirm', { tag: tag }))) {
                         deleteData(tag);
                     }
                 });
@@ -560,7 +563,7 @@
                 const prevLi = $('<li class="page-item">').addClass(currentPage === 1 ? 'disabled' : '');
                 const prevLink = $('<a class="page-link" href="#" aria-label="Previous">')
                     .append($('<span aria-hidden="true">').html('&laquo;'))
-                    .append($('<span class="sr-only">上一页</span>'));
+                    .append($('<span class="sr-only">').text(i18n('previousPage')));
                 
                 if (currentPage > 1) {
                     prevLink.on('click', function(e) {
@@ -604,7 +607,7 @@
                 const nextLi = $('<li class="page-item">').addClass(currentPage === totalPages ? 'disabled' : '');
                 const nextLink = $('<a class="page-link" href="#" aria-label="Next">')
                     .append($('<span aria-hidden="true">').html('&raquo;'))
-                    .append($('<span class="sr-only">下一页</span>'));
+                    .append($('<span class="sr-only">').text(i18n('nextPage')));
                 
                 if (currentPage < totalPages) {
                     nextLink.on('click', function(e) {
@@ -634,14 +637,14 @@
                     },
                     success: function(response) {
                         if (response.status === 'success') {
-                            showAlert('数据删除成功', 'success');
+                            showAlert(i18n('dataDeleteSuccess'), 'success');
                             loadData();
                         } else {
-                            showAlert('删除失败: ' + response.message, 'error');
+                            showAlert(i18n('deleteFailedWithMessage', { message: response.message }), 'error');
                         }
                     },
                     error: function() {
-                        showAlert('网络错误，请稍后重试', 'error');
+                        showAlert(i18n('networkError'), 'error');
                     }
                 });
             }
@@ -671,13 +674,13 @@
                             renderDataTable(currentData);
                             updatePagination();
                             $('#searchModal').modal('hide');
-                            showAlert('搜索完成', 'success');
+                            showAlert(i18n('searchComplete'), 'success');
                         } else {
-                            showAlert('搜索失败: ' + response.message, 'error');
+                            showAlert(i18n('searchFailed', { message: response.message }), 'error');
                         }
                     },
                     error: function() {
-                        showAlert('网络错误，请稍后重试', 'error');
+                        showAlert(i18n('networkError'), 'error');
                     }
                 });
             });

@@ -41,7 +41,7 @@ $(function() {
             document.execCommand('copy');
         }
         document.body.removeChild(input);
-        showtext("密钥信息已复制到剪贴板")
+        showtext(i18n('credentialsCopied'))
     })
 })
 $(function() {
@@ -453,13 +453,13 @@ function sync_connect_status() {
             var hardName = $("<p style='margin:0;color:#1cc88a;font-size:0.8rem'>" + "<i class='fa fa-"+iconName+"' style='margin-right:3px'></i>" + connected_hardwares[hardware] + "</p>")
             contentDiv.append(hardName)
         }
-        contentDiv.append("<p style='font-weight:bold;margin-top:10px;margin-bottom:5px;font-size:1rem'>私有凭证 Private Key</p>")
+        contentDiv.append("<p style='font-weight:bold;margin-top:10px;margin-bottom:5px;font-size:1rem'>" + i18n('privateCredential') + " (Private Key)</p>")
         contentDiv.append("<p style='margin:0;font-size:0.6rem'><i class='fa fa-user' style='margin-right:3px'></i>" + globalUserName + "</p>")
         contentDiv.append("<p style='margin:0;font-size:0.6rem'><i class='fa fa-lock' style='margin-right:3px'></i>" + globalProjectPass + "</p>")
-        contentDiv.append("<div style='margin-top:5px;margin-bottom:0px;display:flex;flex-direction:row;align-items:center'><span style='font-weight:bold;font-size:1rem;margin-right:6px'>项目授权码 Share Key</span><a id='shareKey' onclick='shareKey()' class='btn btn-sm btn-secondary' style='padding:3px;padding-left:6px;padding-right:6px;font-size:0.8rem;border-radius:3px'>OFF</a><br></div>")
+        contentDiv.append("<div style='margin-top:5px;margin-bottom:0px;display:flex;flex-direction:row;align-items:center'><span style='font-weight:bold;font-size:1rem;margin-right:6px'>" + i18n('projectAuthorizationCode') + " (Share Key)</span><a id='shareKey' onclick='shareKey()' class='btn btn-sm btn-secondary' style='padding:3px;padding-left:6px;padding-right:6px;font-size:0.8rem;border-radius:3px'>OFF</a><br></div>")
         sharekey = $("<span style='color:#1cc88a;font-weight:bold;font-size:2rem'></span>")
         contentDiv.append(sharekey)
-        contentDiv.append("<p style='font-weight:bold;margin-top:5px;margin-bottom:5px;font-size:1rem'>共享链接 Share Link</p>")
+        contentDiv.append("<p style='font-weight:bold;margin-top:5px;margin-bottom:5px;font-size:1rem'>" + i18n('shareLink') + " (Share Link)</p>")
         sharelink = $("<a style='font-size:1rem'></a>")
         // hover sharelink, show QR code
         sharelink.hover(function() {
@@ -496,7 +496,7 @@ function check_share_key() {
         $("#shareKey").removeClass('btn-success')
         $("#shareKey").html("OFF")
         sharekey.html("")
-        sharelink.html("项目未共享授权")
+        sharelink.html(i18n('projectNotShared'))
         sharelink.removeAttr("href")
         sharelink.css("color","#858796")
     } else {
@@ -541,7 +541,7 @@ function shareKey() {
                 $("#shareKey").html("OFF")
                 sharekey.html("")
                 globalShareKey = undefined
-                sharelink.html("项目未共享授权")
+                sharelink.html(i18n('projectNotShared'))
                 sharelink.removeAttr("href")
                 sharelink.css("color","#858796")
             } else
@@ -635,7 +635,7 @@ function workspaceToDom() {
 function view_project(projectName, projectType) {
     init_codemirror = function() {
         return new Promise(function(resolve, reject) {
-            var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>加载逻辑引擎...</p></div>")
+            var modald = showmodaltext("<div style='text-align:center'><i class='fa fa-spin fa-cog' style='font-size:2rem;color:#4e73df'></i><p style='margin-top:6px;margin-bottom:0;color:#4e73df;font-size:1rem;font-weight:bold'>" + i18n('loadingLogicEngine') + "</p></div>")
             $.getScript("js/codemirror.min.js", function(){
             $.getScript("blockly/blockly_compressed.js", function() {
                 $.getScript("blockly/blocks_compressed.js", function() {
@@ -775,7 +775,7 @@ function view_project(projectName, projectType) {
                                     jTa2.scrollTop(jTa2[0].scrollHeight)
                                 }
                                 MixIO.log("Version: " + globalVer)
-                                MixIO.log("入门指南：<a target='_blank' href='devAPI'>dev-api</a>")
+                                MixIO.log(i18n('guideLabel') + "：<a target='_blank' href='devAPI'>dev-api</a>")
                             }
                             globalProjectType = currentProjectType
                             switch_mode()
@@ -1293,13 +1293,13 @@ function view_project(projectName, projectType) {
             var clearButton = $('<a class="btn btn-success btn-sm" style="padding:0 5px 0 5px;margin-left:8px">' + JSLang[lang].clear + '</a>')
             var clearAllButton = $('<a class="btn btn-warning btn-sm" style="padding:0 5px 0 5px;margin-left:8px">' + JSLang[lang].clearAll + '</a>')
             httpAPIButton.click(function() {
-                var text = "URL: " + window.location.href.replace("projects-mixly", "").replace("projects", "") + "api/v1/getData?user=" + globalUserName + "&password=" + globalProjectPass + "&project=" + globalProjectName + "&topic=" + "[想要获取的主题]" + "&num=" + "[想要获取的最新消息数量]"
+                var text = "URL: " + window.location.href.replace("projects-mixly", "").replace("projects", "") + "api/v1/getData?user=" + globalUserName + "&password=" + globalProjectPass + "&project=" + globalProjectName + "&topic=" + "[" + i18n('desiredTopic') + "]" + "&num=" + "[" + i18n('desiredMessageCount') + "]"
                 var text = "Method: GET<br>" + text
-                var text = text + "<br>" + "一般情况下，数据更新频率为30秒/次，手动保存项目会立即更新数据。"
+                var text = text + "<br>" + i18n('apiRefreshHint')
                 // dialog, 自动换行
                 var text = "<div style='word-wrap:break-word;word-break:break-all;'>" + text + "</div>"
                 var dia = dialog({
-                    title: "通过HTTP API获取数据",
+                    title: i18n('httpApiDataTitle'),
                     content: text,
                     okValue: JSLang[lang].close,
                     ok: function() {
@@ -1398,7 +1398,7 @@ function view_project(projectName, projectType) {
                         if (rightCardGroupChildren[i].value != rightCardGroup.val())
                         {
                             if(rightCardGroupChildren[i].value == '')
-                                rightCardLabel.append($("<option value=''>无</option>"))
+                                rightCardLabel.append($("<option value=''>" + i18n('none') + "</option>"))
                             else
                                 rightCardLabel.append($("<option value='" + rightCardGroupChildren[i].value + "'>" + rightCardGroupChildren[i].value + "</option>"))
                         }
@@ -1410,9 +1410,9 @@ function view_project(projectName, projectType) {
                 }
             })
             var rightGroupDiv = $('<div style="display:flex;align-items:center"></div>')
-            rightGroupDiv.append("<span style='font-weight:bold'>&nbsp;&nbsp;按&nbsp;</span>")
+            rightGroupDiv.append("<span style='font-weight:bold'>&nbsp;&nbsp;" + i18n('by') + "&nbsp;</span>")
             rightGroupDiv.append(rightCardGroup)
-            rightGroupDiv.append("<span style='font-weight:bold'>&nbsp;分组显示&nbsp;</span>")
+            rightGroupDiv.append("<span style='font-weight:bold'>&nbsp;" + i18n('groupedDisplay') + "&nbsp;</span>")
             rightGroupDiv.append(rightCardLabel)
             rightCardTitle.append(rightGroupDiv)
             var leftCardBody = $('<div class="card-body" style="height:400px;padding:0">')
@@ -1582,7 +1582,7 @@ function view_project(projectName, projectType) {
                 {
                     rightCardGroup.empty()
                     rightCardLabel.empty()
-                    rightCardGroup.append($("<option value=''>无</option>"))
+                    rightCardGroup.append($("<option value=''>" + i18n('none') + "</option>"))
                     rightCardGroup.removeAttr("disabled")
                     rightCardLabel.attr("disabled","disabled")
                     for (tableField in tableFields) {
@@ -1726,7 +1726,7 @@ function view_project(projectName, projectType) {
             var bottomCardTitle = $('<div class="card-header py-3" style="display:flex">')
             bottomCard.append(bottomCardTitle)
             bottomCardTitle.append($('<h6 class="m-0 font-weight-bold text-primary">' + JSLang[lang].sendString + '</h6>'))
-            bottomCardTitle.append($('<input type="checkbox" id="sendClear" style="min-width:0px!important;margin-left:20px;margin-right:3px"/><label style="margin:0;padding:0;font-size:small">发送后清空</label>'))
+            bottomCardTitle.append($('<input type="checkbox" id="sendClear" style="min-width:0px!important;margin-left:20px;margin-right:3px"/><label style="margin:0;padding:0;font-size:small">' + i18n('clearAfterSend') + '</label>'))
             var bottomCardBody = $('<div class="card-body">')
             bottomCard.append(bottomCardBody)
             var bottomCardBodyDiv = $('<div style="display:flex;align-items:center"></div>')
@@ -2217,9 +2217,9 @@ function add_widget() {
         editForm.append(topic_input_div)
         editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].beepAudio + '</h5>'))
         var beep_select = $('<select class="form-control form-control-user" style="margin-top:15px;text-align:center"/>')
-        beep_select.append($('<option value="weak">弱提示</option>'))
-        beep_select.append($('<option value="strong">强提示</option>'))
-        beep_select.append($('<option value="alarm">警报音</option>'))
+        beep_select.append($('<option value="weak">' + i18n('weakAlert') + '</option>'))
+        beep_select.append($('<option value="strong">' + i18n('strongAlert') + '</option>'))
+        beep_select.append($('<option value="alarm">' + i18n('alarmSound') + '</option>'))
         editForm.append(beep_select)
         beep_select.val("weak")
         var bottomDiv = $('<div style="width:100%;margin-top:15px;display:flex;flex-direction:row;align-items:center;justify-content:space-around"/>')
@@ -3079,8 +3079,8 @@ function add_widget() {
         editForm.append(topic_input_div)
         editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].triggerMessage + '</h5>'))
         var moreButtonDiv = $('<div style="display:flex;flex-direction:row;align-items:center;justify-content:center"></div>')
-        var currTimeBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">实时时间</a>')
-        var ranNumBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">随机整数（1-99）</a>')
+        var currTimeBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">' + i18n('realTime') + '</a>')
+        var ranNumBtn = $('<a class="btn btn-sm btn-light" style="margin:1px 4px">' + i18n('randomInteger') + '</a>')
         moreButtonDiv.append(currTimeBtn)
         moreButtonDiv.append(ranNumBtn)
         editForm.append(moreButtonDiv)
@@ -3164,12 +3164,12 @@ function add_widget() {
         editForm.append($('<h5 style="margin-top:15px;text-align:center">' + JSLang[lang].condition + '1</h5>'))
         var condition1_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
         var condition1_input1 = $("<select class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-right:5px'/>")
-        condition1_input1.append($("<option value='gt'>大于</option>"))
-        condition1_input1.append($("<option value='gte'>大于等于</option>"))
-        condition1_input1.append($("<option value='lt'>小于</option>"))
-        condition1_input1.append($("<option value='lte'>小于等于</option>"))
-        condition1_input1.append($("<option value='eq'>等于</option>"))
-        condition1_input1.append($("<option value='neq'>不等于</option>"))
+        condition1_input1.append($("<option value='gt'>" + i18n('greaterThan') + "</option>"))
+        condition1_input1.append($("<option value='gte'>" + i18n('greaterThanOrEqual') + "</option>"))
+        condition1_input1.append($("<option value='lt'>" + i18n('lessThan') + "</option>"))
+        condition1_input1.append($("<option value='lte'>" + i18n('lessThanOrEqual') + "</option>"))
+        condition1_input1.append($("<option value='eq'>" + i18n('equal') + "</option>"))
+        condition1_input1.append($("<option value='neq'>" + i18n('notEqual') + "</option>"))
         var condition1_input2 = $("<input class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-left:5px'/>")
         condition1_input_div.append(condition1_input1)
         condition1_input_div.append(condition1_input2)
@@ -3178,12 +3178,12 @@ function add_widget() {
         var condition2_input_div = $('<div style="display:flex;flex-direction:row;align-items:center"/>')
         var condition2_input1 = $("<select class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-right:5px'/>")
         condition2_input1.append($("<option value='--'>--</option>"))
-        condition2_input1.append($("<option value='gt'>大于</option>"))
-        condition2_input1.append($("<option value='gte'>大于等于</option>"))
-        condition2_input1.append($("<option value='lt'>小于</option>"))
-        condition2_input1.append($("<option value='lte'>小于等于</option>"))
-        condition2_input1.append($("<option value='eq'>等于</option>"))
-        condition2_input1.append($("<option value='neq'>不等于</option>"))
+        condition2_input1.append($("<option value='gt'>" + i18n('greaterThan') + "</option>"))
+        condition2_input1.append($("<option value='gte'>" + i18n('greaterThanOrEqual') + "</option>"))
+        condition2_input1.append($("<option value='lt'>" + i18n('lessThan') + "</option>"))
+        condition2_input1.append($("<option value='lte'>" + i18n('lessThanOrEqual') + "</option>"))
+        condition2_input1.append($("<option value='eq'>" + i18n('equal') + "</option>"))
+        condition2_input1.append($("<option value='neq'>" + i18n('notEqual') + "</option>"))
         var condition2_input2 = $("<input disabled class='form-control form-control-user'  style='text-align:center;width:120px!important;min-width:120px!important;margin-left:5px'/>")
         condition2_input_div.append(condition2_input1)
         condition2_input_div.append(condition2_input2)
@@ -3884,8 +3884,8 @@ function listen_project(projectName) {
 function listenerr_project(projectName, projectType, reason) {
     var editForm = $('<div class="nnt" style="width:294px"/>')
     editForm.append($('<div style="margin-top:-63px;margin-left:105px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/crash.svg" style="width:45px;"></div>'))
-    editForm.append($('<h3 style="text-align:center;margin-bottom:5px">出错了</h3>'))
-    editForm.append($('<h6 style="text-align:center;margin-bottom:10px">项目于后台运行期间，发生了如下错误</h6>'))
+    editForm.append($('<h3 style="text-align:center;margin-bottom:5px">' + i18n('errorOccurred') + '</h3>'))
+    editForm.append($('<h6 style="text-align:center;margin-bottom:10px">' + i18n('backgroundRunErrorDetails') + '</h6>'))
     var p = $("<p></p>")
     p.html(reason)
     editForm.append(p)
@@ -4272,7 +4272,7 @@ storDia = false
 function prepare_storDia(){
     var editForm = $('<div class="nnt" style="width:80vw;height:80vh;display:flex;flex-direction:column"/>')
     editForm.append($('<div style="margin-top:-63px;margin-left:calc(40vw - 43px);margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/store.svg" style="width:45px;"></div>'))
-    editForm.append($('<h3 style="text-align:center;margin-bottom:15px">所有前缀为<span style="color:#4e73df;font-weight:bold">$</span>主题下的消息和图片会被自动保存</h3>'))
+    editForm.append($('<h3 style="text-align:center;margin-bottom:15px">' + i18n('autoSaveStorageHint').replace('$', '<span style="color:#4e73df;font-weight:bold">$</span>') + '</h3>'))
     
     // Create table structure
     var tableContainer = $('<div style="flex:1;overflow-y:auto;padding:10px;background-color:#f8f9fc;border-radius:5px"/>')
@@ -4285,10 +4285,10 @@ function prepare_storDia(){
     var th = $('<th width="40"></th>')
     th.append(selectAll)
     tr.append(th)
-    tr.append('<th>文件名</th>')
-    tr.append('<th width="150">类型</th>')
-    tr.append('<th width="180">日期</th>')
-    tr.append('<th width="180">操作</th>')
+    tr.append('<th>' + i18n('fileName') + '</th>')
+    tr.append('<th width="150">' + i18n('type') + '</th>')
+    tr.append('<th width="180">' + i18n('date') + '</th>')
+    tr.append('<th width="180">' + i18n('actions') + '</th>')
     var tableBody = $('<tbody></tbody>')
     fileTable.append(tableBody)
     
@@ -4298,9 +4298,9 @@ function prepare_storDia(){
     // Add action buttons
     var actionBar = $('<div style="margin-bottom:15px;display:flex;justify-content:space-between;align-items:center">')
     var buttonDiv = $('<div style="display:flex;align-items:center"/>')
-    var deleteSelected = $('<button id="deleteSelected" class="btn btn-danger btn-sm" disabled><i class="fa fa-trash"></i> 删除选中</button>')
-    var downloadSelected = $('<button id="downloadSelected" class="btn btn-primary btn-sm" style="margin-left:5px" disabled><i class="fa fa-download"></i> 下载选中</button>')
-    var toggleViewBtn = $('<button id="toggleViewBtn" class="btn btn-secondary btn-sm" style="margin-left:5px"><i class="fa fa-th-large"></i> 平铺视图</button>')
+    var deleteSelected = $('<button id="deleteSelected" class="btn btn-danger btn-sm" disabled><i class="fa fa-trash"></i> ' + i18n('deleteSelected') + '</button>')
+    var downloadSelected = $('<button id="downloadSelected" class="btn btn-primary btn-sm" style="margin-left:5px" disabled><i class="fa fa-download"></i> ' + i18n('downloadSelected') + '</button>')
+    var toggleViewBtn = $('<button id="toggleViewBtn" class="btn btn-secondary btn-sm" style="margin-left:5px"><i class="fa fa-th-large"></i> ' + i18n('tileView') + '</button>')
     buttonDiv.append(deleteSelected)
     buttonDiv.append(downloadSelected)
     buttonDiv.append(toggleViewBtn)
@@ -4336,12 +4336,12 @@ function prepare_storDia(){
     toggleViewBtn.click(function() {
         if(currentView === 'list') {
             currentView = 'grid';
-            toggleViewBtn.html('<i class="fa fa-list"></i> 列表视图');
+            toggleViewBtn.html('<i class="fa fa-list"></i> ' + i18n('listView'));
             tableContainer.hide();
             gridContainer.show();
         } else {
             currentView = 'list';
-            toggleViewBtn.html('<i class="fa fa-th-large"></i> 平铺视图');
+            toggleViewBtn.html('<i class="fa fa-th-large"></i> ' + i18n('tileView'));
             gridContainer.hide();
             tableContainer.show();
         }
@@ -4357,7 +4357,7 @@ function prepare_storDia(){
     deleteSelected.click(function() {
         if(selectedFiles.length === 0) return;
         
-        if(confirm('确定要删除选中的 ' + selectedFiles.length + ' 个文件吗？')) {
+        if(confirm(i18n('confirmDeleteSelected', { count: selectedFiles.length }))) {
             let deletePromises = selectedFiles.map(filename => {
                 return $.getJSON('deleteImgStore', {
                     'projectName': globalProjectName,
@@ -4404,8 +4404,8 @@ function prepare_storDia(){
             'isMixly': isMixly
         }, function(res) {
             if(res.length == 0) {
-                tableBody.append('<tr><td colspan="6" style="text-align:center;padding:20px">暂无存储文件</td></tr>')
-                gridContainer.append('<div style="width:100%;text-align:center;padding:20px">暂无存储文件</div>')
+                tableBody.append('<tr><td colspan="6" style="text-align:center;padding:20px">' + i18n('noStoredFiles') + '</td></tr>')
+                gridContainer.append('<div style="width:100%;text-align:center;padding:20px">' + i18n('noStoredFiles') + '</div>')
                 return;
             }
             var sortedRes = res.sort(function(a, b) {
@@ -4478,7 +4478,7 @@ function prepare_storDia(){
                         timeString = new Date(timeStamp).toLocaleString();
                     }
                 }
-                let fileType = isText ? '文本' : '图片';
+                let fileType = isText ? i18n('textFile') : i18n('image');
                 
                 // List view row
                 let row = $('<tr></tr>');
@@ -4499,14 +4499,14 @@ function prepare_storDia(){
                 let actionCell = $('<td></td>');
                 
                 // Download button (added for each file)
-                let downloadBtn = $('<button class="btn btn-success btn-xs" style="margin-right:5px" title="下载"><i class="fa fa-download"></i></button>');
+                let downloadBtn = $('<button class="btn btn-success btn-xs" style="margin-right:5px"><i class="fa fa-download"></i></button>').attr('title', i18n('download'));
                 downloadBtn.click(function() {
                     downloadFile(filename);
                 });
                 actionCell.append(downloadBtn);
                 
                 if (isText) {
-                    let viewBtn = $('<button class="btn btn-primary btn-xs" style="margin-right:5px" title="查看"><i class="fa fa-eye"></i></button>');
+                    let viewBtn = $('<button class="btn btn-primary btn-xs" style="margin-right:5px"><i class="fa fa-eye"></i></button>').attr('title', i18n('view'));
                     viewBtn.click(function() {
                         let contentDiv = $('<div style="width:50vw;height:50vh;overflow:auto"></div>')
                         $.ajax({
@@ -4514,9 +4514,9 @@ function prepare_storDia(){
                             success: function(content) {
                                 contentDiv.append($('<pre style="white-space:pre-wrap">' + content + '</pre>'))
                                 let bottomDiv = $('<div style="position:absolute;top:0;right:0;padding:10px;border-radius:10px;background-color:rgba(0,0,0,0.5)"></div>')
-                                let closeBtn2 = $('<button class="btn btn-primary btn-xs" title="关闭"><i class="fa fa-close"></i></button>');
-                                let deleteBtn2 = $('<button class="btn btn-danger btn-xs" title="删除" style="margin-right:5px"><i class="fa fa-trash"></i></button>');
-                                let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px" title="下载"><i class="fa fa-download"></i></button>');
+                                let closeBtn2 = $('<button class="btn btn-primary btn-xs"><i class="fa fa-close"></i></button>').attr('title', i18n('close'));
+                                let deleteBtn2 = $('<button class="btn btn-danger btn-xs" style="margin-right:5px"><i class="fa fa-trash"></i></button>').attr('title', i18n('delete'));
+                                let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px"><i class="fa fa-download"></i></button>').attr('title', i18n('download'));
                                 let fileNameSpan = $('<span style="margin-right:5px;color:white">' + filename + '</span>')
                                 bottomDiv.append(fileNameSpan);
                                 bottomDiv.append(downloadBtn2);
@@ -4531,7 +4531,7 @@ function prepare_storDia(){
                                     textDialog.close().remove()
                                 })
                                 deleteBtn2.click(function() {
-                                    if(confirm('确定要删除此文件吗？')) {
+                                    if(confirm(i18n('confirmDeleteFile'))) {
                                         $.getJSON('deleteImgStore', {
                                             'projectName': globalProjectName,
                                             'filename': filename,
@@ -4550,14 +4550,14 @@ function prepare_storDia(){
                     });
                     actionCell.append(viewBtn);
                 } else {
-                    let viewBtn = $('<button class="btn btn-primary btn-xs" style="margin-right:5px" title="查看"><i class="fa fa-eye"></i></button>');
+                    let viewBtn = $('<button class="btn btn-primary btn-xs" style="margin-right:5px"><i class="fa fa-eye"></i></button>').attr('title', i18n('view'));
                     viewBtn.click(function() {
                         let contentDiv = $('<div style="height:50vh;text-align:center;overflow:auto"></div>')
                         contentDiv.append($('<img src="' + url + '" style="height:100%"/>'))
                         let bottomDiv = $('<div style="position:absolute;top:0;right:0;padding:10px;border-radius:10px;background-color:rgba(0,0,0,0.5)"></div>')
-                        let closeBtn2 = $('<button class="btn btn-primary btn-xs" title="关闭"><i class="fa fa-close"></i></button>');
-                        let deleteBtn2 = $('<button class="btn btn-danger btn-xs" title="删除" style="margin-right:5px"><i class="fa fa-trash"></i></button>');
-                        let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px" title="下载"><i class="fa fa-download"></i></button>');
+                        let closeBtn2 = $('<button class="btn btn-primary btn-xs"><i class="fa fa-close"></i></button>').attr('title', i18n('close'));
+                        let deleteBtn2 = $('<button class="btn btn-danger btn-xs" style="margin-right:5px"><i class="fa fa-trash"></i></button>').attr('title', i18n('delete'));
+                        let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px"><i class="fa fa-download"></i></button>').attr('title', i18n('download'));
                         let fileNameSpan = $('<span style="margin-right:5px;color:white">' + filename + '</span>')
                         bottomDiv.append(fileNameSpan);
                         bottomDiv.append(downloadBtn2);
@@ -4573,7 +4573,7 @@ function prepare_storDia(){
                             fullDialog.close().remove()
                         })
                         deleteBtn2.click(function() {
-                            if(confirm('确定要删除此文件吗？')) {
+                            if(confirm(i18n('confirmDeleteFile'))) {
                                 $.getJSON('deleteImgStore', {
                                     'projectName': globalProjectName,
                                     'filename': filename,
@@ -4591,9 +4591,9 @@ function prepare_storDia(){
                     actionCell.append(viewBtn);
                 }
                 
-                let deleteBtn = $('<button class="btn btn-danger btn-xs" title="删除"><i class="fa fa-trash"></i></button>');
+                let deleteBtn = $('<button class="btn btn-danger btn-xs"><i class="fa fa-trash"></i></button>').attr('title', i18n('delete'));
                 deleteBtn.click(function() {
-                    if(confirm('确定要删除此文件吗？')) {
+                    if(confirm(i18n('confirmDeleteFile'))) {
                         $.getJSON('deleteImgStore', {
                             'projectName': globalProjectName,
                             'filename': filename,
@@ -4628,9 +4628,9 @@ function prepare_storDia(){
                             success: function(content) {
                                 contentDiv.append($('<pre style="white-space:pre-wrap">' + content + '</pre>'))
                                 let bottomDiv = $('<div style="position:absolute;top:0;right:0;padding:10px;border-radius:10px;background-color:rgba(0,0,0,0.5)"></div>')
-                                let closeBtn2 = $('<button class="btn btn-primary btn-xs" title="关闭"><i class="fa fa-close"></i></button>');
-                                let deleteBtn2 = $('<button class="btn btn-danger btn-xs" title="删除" style="margin-right:5px"><i class="fa fa-trash"></i></button>');
-                                let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px" title="下载"><i class="fa fa-download"></i></button>');
+                                let closeBtn2 = $('<button class="btn btn-primary btn-xs"><i class="fa fa-close"></i></button>').attr('title', i18n('close'));
+                                let deleteBtn2 = $('<button class="btn btn-danger btn-xs" style="margin-right:5px"><i class="fa fa-trash"></i></button>').attr('title', i18n('delete'));
+                                let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px"><i class="fa fa-download"></i></button>').attr('title', i18n('download'));
                                 let fileNameSpan = $('<span style="margin-right:5px;color:white">' + filename + '</span>')
                                 bottomDiv.append(fileNameSpan);
                                 bottomDiv.append(downloadBtn2);
@@ -4645,7 +4645,7 @@ function prepare_storDia(){
                                     textDialog.close().remove()
                                 })
                                 deleteBtn2.click(function() {
-                                    if(confirm('确定要删除此文件吗？')) {
+                                    if(confirm(i18n('confirmDeleteFile'))) {
                                         $.getJSON('deleteImgStore', {
                                             'projectName': globalProjectName,
                                             'filename': filename,
@@ -4665,9 +4665,9 @@ function prepare_storDia(){
                         let contentDiv = $('<div style="height:50vh;text-align:center;overflow:auto"></div>')
                         contentDiv.append($('<img src="' + url + '" style="height:100%"/>'))
                         let bottomDiv = $('<div style="position:absolute;top:0;right:0;padding:10px;border-radius:10px;background-color:rgba(0,0,0,0.5)"></div>')
-                        let closeBtn2 = $('<button class="btn btn-primary btn-xs" title="关闭"><i class="fa fa-close"></i></button>');
-                        let deleteBtn2 = $('<button class="btn btn-danger btn-xs" title="删除" style="margin-right:5px"><i class="fa fa-trash"></i></button>');
-                        let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px" title="下载"><i class="fa fa-download"></i></button>');
+                        let closeBtn2 = $('<button class="btn btn-primary btn-xs"><i class="fa fa-close"></i></button>').attr('title', i18n('close'));
+                        let deleteBtn2 = $('<button class="btn btn-danger btn-xs" style="margin-right:5px"><i class="fa fa-trash"></i></button>').attr('title', i18n('delete'));
+                        let downloadBtn2 = $('<button class="btn btn-success btn-xs" style="margin-right:5px"><i class="fa fa-download"></i></button>').attr('title', i18n('download'));
                         let fileNameSpan = $('<span style="margin-right:5px;color:white">' + filename + '</span>')
                         bottomDiv.append(fileNameSpan);
                         bottomDiv.append(downloadBtn2);
@@ -4683,7 +4683,7 @@ function prepare_storDia(){
                             fullDialog.close().remove()
                         })
                         deleteBtn2.click(function() {
-                            if(confirm('确定要删除此文件吗？')) {
+                            if(confirm(i18n('confirmDeleteFile'))) {
                                 $.getJSON('deleteImgStore', {
                                     'projectName': globalProjectName,
                                     'filename': filename,
@@ -4718,22 +4718,22 @@ function prepare_storDia(){
                 let actionsDiv = $('<div style="padding:10px;border-top:1px solid #eee;display:flex;justify-content:space-between">');
                 
                 // Checkbox
-                actionsDiv.append('<div><input type="checkbox" class="fileCheckbox" style="min-width:0!important" data-filename="' + filename + '"> 选择</div>');
+                actionsDiv.append('<div><input type="checkbox" class="fileCheckbox" style="min-width:0!important" data-filename="' + filename + '"> ' + i18n('selectItem') + '</div>');
                 
                 // Buttons
                 let btnGroup = $('<div style="display:flex;gap:5px">');
                 
-                let gridDownloadBtn = $('<button class="btn btn-success btn-xs" title="下载"><i class="fa fa-download"></i></button>');
+                let gridDownloadBtn = $('<button class="btn btn-success btn-xs"><i class="fa fa-download"></i></button>').attr('title', i18n('download'));
                 gridDownloadBtn.click(function(e) {
                     e.stopPropagation();
                     downloadFile(filename);
                 });
                 btnGroup.append(gridDownloadBtn);
                 
-                let gridDeleteBtn = $('<button class="btn btn-danger btn-xs" title="删除"><i class="fa fa-trash"></i></button>');
+                let gridDeleteBtn = $('<button class="btn btn-danger btn-xs"><i class="fa fa-trash"></i></button>').attr('title', i18n('delete'));
                 gridDeleteBtn.click(function(e) {
                     e.stopPropagation();
-                    if(confirm('确定要删除此文件吗？')) {
+                    if(confirm(i18n('confirmDeleteFile'))) {
                         $.getJSON('deleteImgStore', {
                             'projectName': globalProjectName,
                             'filename': filename,

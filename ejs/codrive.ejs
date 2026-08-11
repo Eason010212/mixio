@@ -332,26 +332,26 @@
                         <!-- 新建文件下拉菜单 -->
                         <div class="dropdown">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="newFileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fa fa-plus-circle btn-icon"></i>新建文件
+                                <i class="fa fa-plus-circle btn-icon"></i><span class="lang" key="newFile">新建文件</span>
                             </button>
                             <div class="dropdown-menu" aria-labelledby="newFileDropdown">
-                                <a class="dropdown-item" href="#" data-type="document"><i class="fa fa-file"></i> 文档</a>
-                                <a class="dropdown-item" href="#" data-type="spreadsheet"><i class="fa fa-table"></i> 表格</a>
+                                <a class="dropdown-item" href="#" data-type="document"><i class="fa fa-file"></i> <span class="lang" key="document">文档</span></a>
+                                <a class="dropdown-item" href="#" data-type="spreadsheet"><i class="fa fa-table"></i> <span class="lang" key="spreadsheet">表格</span></a>
                             </div>
                         </div>
                         <!-- 导入文件按钮 -->
-                        <button id="importFileBtn" class="btn btn-outline-success"><i class="fa fa-upload btn-icon"></i>导入文件</button>
+                        <button id="importFileBtn" class="btn btn-outline-success"><i class="fa fa-upload btn-icon"></i><span class="lang" key="importFile">导入文件</span></button>
                         <input type="file" id="importFileInput" class="import-file-input" accept=".txt,.md,.csv,.xls,.xlsx,.docx,image/*" />
                     </div>
                     <div class="text-muted small">
-                        <i class="fa fa-list"></i> 列表视图 · 点击行可编辑
+                        <i class="fa fa-list"></i> <span class="lang" key="listViewHint">列表视图 · 点击行可编辑</span>
                     </div>
                 </div>
 
                 <!-- 文件列表展示区 -->
                 <div id="fileListContainer" class="file-table-container">
                     <!-- 动态渲染表格 -->
-                    <div class="text-center p-5">加载中...</div>
+                    <div class="text-center p-5 lang" key="loading">加载中...</div>
                 </div>
             </div>
         </div>
@@ -372,21 +372,21 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-custom" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="newFileModalTitle">新建文件</h5>
+                <h5 class="modal-title lang" key="newFile" id="newFileModalTitle">新建文件</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>文件名</label>
-                    <input type="text" class="form-control" id="newFileName" placeholder="请输入文件名">
+                    <label class="lang" key="fileName">文件名</label>
+                    <input type="text" class="form-control lang" key="enterFileName" id="newFileName" placeholder="请输入文件名">
                     <div class="extension-hint" id="extensionHint"></div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" id="confirmCreateBtn">创建</button>
+                <button type="button" class="btn btn-secondary lang" key="cancel" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary lang" key="create" id="confirmCreateBtn">创建</button>
             </div>
         </div>
     </div>
@@ -397,18 +397,18 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">确认删除</h5>
+                <h5 class="modal-title lang" key="confirmDelete">确认删除</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>确定要删除文件 <strong id="deleteFileName"></strong> 吗？</p>
-                <p class="text-muted small">此操作不可撤销</p>
+                <p id="deleteFileQuestion"></p>
+                <p class="text-muted small lang" key="irreversible">此操作无法撤销</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+                <button type="button" class="btn btn-secondary lang" key="cancel" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger lang" key="confirmDelete" id="confirmDeleteBtn">确认删除</button>
             </div>
         </div>
     </div>
@@ -418,7 +418,7 @@
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner">
         <i class="fa fa-spinner fa-spin fa-2x"></i>
-        <p class="mt-2">处理中...</p>
+        <p class="mt-2 lang" key="processing">处理中...</p>
     </div>
 </div>
 
@@ -466,10 +466,10 @@
     
     // 获取文件类型显示名称
     function getTypeDisplayName(type) {
-        if(type === 'document') return '文档';
-        if(type === 'spreadsheet') return '表格';
-        if(type === 'image') return '图片';
-        return '文件';
+        if(type === 'document') return i18n('document');
+        if(type === 'spreadsheet') return i18n('spreadsheet');
+        if(type === 'image') return i18n('image');
+        return i18n('file');
     }
     
     // 获取文件图标
@@ -482,7 +482,7 @@
     
     // 格式化日期
     function formatDate(iso) {
-        if(!iso) return '未知';
+        if(!iso) return i18n('unknown');
         const d = new Date(iso);
         return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
     }
@@ -531,19 +531,19 @@
                             const workbook = XLSX.read(response.content, { type: 'string' });
                             const xlsxFileName = fileName.replace(/\.csv$/i, '.xlsx');
                             XLSX.writeFile(workbook, xlsxFileName);
-                            showToast(`下载成功: ${xlsxFileName}`);
+                            showToast(i18n('downloadSuccess', { name: xlsxFileName }));
                         } catch (error) {
                             console.error('转换 CSV 到 XLSX 失败:', error);
-                            showToast('文件下载失败', true);
+                            showToast(i18n('fileDownloadFailed'), true);
                         }
                     } else {
-                        showToast(response.message || '文件下载失败', true);
+                        showToast(response.message || i18n('fileDownloadFailed'), true);
                     }
                 },
                 error: function(xhr, status, error) {
                     hideLoading();
                     console.error('下载文件失败:', error);
-                    showToast('文件下载失败', true);
+                    showToast(i18n('fileDownloadFailed'), true);
                 }
             });
         } else if (fileType === 'document') {
@@ -572,19 +572,19 @@
                             link.click();
                             document.body.removeChild(link);
 
-                            showToast(`下载成功: ${docxFileName}`);
+                            showToast(i18n('downloadSuccess', { name: docxFileName }));
                         } catch (error) {
                             console.error('转换文档到 DOCX 失败:', error);
-                            showToast('文件下载失败', true);
+                            showToast(i18n('fileDownloadFailed'), true);
                         }
                     } else {
-                        showToast(response.message || '文件下载失败', true);
+                        showToast(response.message || i18n('fileDownloadFailed'), true);
                     }
                 },
                 error: function(xhr, status, error) {
                     hideLoading();
                     console.error('下载文件失败:', error);
-                    showToast('文件下载失败', true);
+                    showToast(i18n('fileDownloadFailed'), true);
                 }
             });
         } else {
@@ -836,14 +836,14 @@
                 if (response.success) {
                     renderFileList(response.files || [], response.sharedLinks || []);
                 } else {
-                    showToast(response.message || '加载文件列表失败', true);
+                    showToast(response.message || i18n('loadFileListFailed'), true);
                     renderFileList([], []);
                 }
             },
             error: function(xhr, status, error) {
                 hideLoading();
                 console.error('加载文件列表失败:', error);
-                showToast('加载文件列表失败，请检查网络连接', true);
+                showToast(i18n('loadFileListNetworkFailed'), true);
                 renderFileList([], []);
             }
         });
@@ -856,8 +856,8 @@
             container.html(`
                 <div class="empty-placeholder">
                     <i class="fa fa-cloud-upload-alt fa-3x text-gray-300 mb-3"></i>
-                    <h5 class="text-gray-500">暂无文件</h5>
-                    <p class="text-muted small">点击"新建文件"或"导入文件"开始使用协同云盘</p>
+                    <h5 class="text-gray-500">${i18n('noFiles')}</h5>
+                    <p class="text-muted small">${i18n('noFilesHint')}</p>
                 </div>
             `);
             return;
@@ -871,11 +871,11 @@
             <table class="file-table">
                 <thead>
                     <tr>
-                        <th style="width: 35%">文件名</th>
-                        <th style="width: 12%">类型</th>
-                        <th style="width: 20%">修改时间</th>
-                        <th style="width: 10%">大小</th>
-                        <th style="width: 23%">操作</th>
+                        <th style="width: 35%">${i18n('fileName')}</th>
+                        <th style="width: 12%">${i18n('type')}</th>
+                        <th style="width: 20%">${i18n('modifiedAt')}</th>
+                        <th style="width: 10%">${i18n('size')}</th>
+                        <th style="width: 23%">${i18n('actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -906,16 +906,16 @@
                         <td>
                             <div class="action-buttons">
                                 <button class="${editBtnClass}" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" ${editBtnDisabled}>
-                                    编辑
+                                    ${i18n('edit')}
                                 </button>
                                 <button class="action-btn btn-download download-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}">
-                                    下载
+                                    ${i18n('download')}
                                 </button>
                                 <button class="${copyBtnClass}" data-id="${file.id}" data-name="${escapeHtml(file.name)}" data-type="${file.type}" style="background: #fff3e0; color: #f57c00;" ${copyBtnDisabled}>
-                                    分享
+                                    ${i18n('share')}
                                 </button>
                                 <button class="action-btn btn-delete delete-btn" data-id="${file.id}" data-name="${escapeHtml(file.name)}">
-                                    删除
+                                    ${i18n('delete')}
                                 </button>
                             </div>
                         </td>
@@ -931,18 +931,18 @@
             html += `
                 <div class="shared-section-header">
                     <i class="fa fa-share-alt" style="color: #f57c00;"></i>
-                    <strong style="color: #f57c00; font-size: 0.85rem;">收藏的共享文件</strong>
-                    <span class="text-muted small" style="font-size: 0.75rem;">（来自他人的分享链接）</span>
+                    <strong style="color: #f57c00; font-size: 0.85rem;">${i18n('favoriteSharedFiles')}</strong>
+                    <span class="text-muted small" style="font-size: 0.75rem;">${i18n('favoriteSharedFilesHint')}</span>
                 </div>
                 <table class="file-table">
                     <thead>
                         <tr>
-                            <th style="width: 30%">文件名</th>
-                            <th style="width: 10%">类型</th>
-                            <th style="width: 12%">来自</th>
-                            <th style="width: 16%">收藏时间</th>
-                            <th style="width: 10%">状态</th>
-                            <th style="width: 22%">操作</th>
+                            <th style="width: 30%">${i18n('fileName')}</th>
+                            <th style="width: 10%">${i18n('type')}</th>
+                            <th style="width: 12%">${i18n('from')}</th>
+                            <th style="width: 16%">${i18n('favoritedAt')}</th>
+                            <th style="width: 10%">${i18n('status')}</th>
+                            <th style="width: 22%">${i18n('actions')}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -963,7 +963,7 @@
                         <td class="file-name-cell">
                             <i class="fa ${iconClass}"></i>
                             <span>${escapeHtml(link.name)}</span>
-                            <span class="shared-link-badge"><i class="fa fa-share-alt"></i> 共享</span>
+                            <span class="shared-link-badge"><i class="fa fa-share-alt"></i> ${i18n('shared')}</span>
                         </td>
                         <td>
                             <span class="type-badge ${typeClass}">${typeName}</span>
@@ -972,8 +972,8 @@
                         <td class="text-muted small">${formatDate(link.addedTime)}</td>
                         <td>
                             ${isAvailable
-                                ? '<span style="color: #27ae60; font-size: 0.75rem;"><i class="fa fa-check-circle"></i> 可用</span>'
-                                : '<span style="color: #e74a3b; font-size: 0.75rem;"><i class="fa fa-exclamation-circle"></i> 已失效</span>'}
+                                ? '<span style="color: #27ae60; font-size: 0.75rem;"><i class="fa fa-check-circle"></i> ' + i18n('available') + '</span>'
+                                : '<span style="color: #e74a3b; font-size: 0.75rem;"><i class="fa fa-exclamation-circle"></i> ' + i18n('unavailable') + '</span>'}
                         </td>
                         <td>
                             <div class="action-buttons">
@@ -981,11 +981,11 @@
                                     <button class="action-btn btn-edit-link edit-shared-btn"
                                         data-creator="${escapeHtml(link.creator)}" data-file-id="${escapeHtml(link.fileId)}"
                                         data-name="${escapeHtml(link.name)}" data-type="${link.type}">
-                                        编辑
+                                        ${i18n('edit')}
                                     </button>
                                 ` : ''}
                                 <button class="action-btn btn-unsave unsave-btn" data-link-id="${link.id}" data-name="${escapeHtml(link.name)}">
-                                    取消收藏
+                                    ${i18n('unfavorite')}
                                 </button>
                             </div>
                         </td>
@@ -1054,11 +1054,11 @@
             const fileType = $(this).data('type');
             const isAvailable = $(this).data('available');
             if (!isAvailable) {
-                showToast('原文件已失效，无法编辑', true);
+                showToast(i18n('sourceFileUnavailable'), true);
                 return;
             }
             if (fileType === 'image') {
-                showToast('图片文件不支持在线编辑', true);
+                showToast(i18n('imageOnlineEditUnsupported'), true);
                 return;
             }
             window.location.href = `/editFile/${creator}/${fileId}?type=${fileType}&name=${encodeURIComponent(fileName)}`;
@@ -1079,7 +1079,7 @@
             e.stopPropagation();
             const linkId = $(this).data('link-id');
             const fileName = $(this).data('name');
-            if (confirm(`确定要取消收藏 "${fileName}" 吗？`)) {
+            if (confirm(i18n('confirmUnfavorite', { name: fileName }))) {
                 removeSharedLink(linkId);
             }
         });
@@ -1088,7 +1088,7 @@
     // 显示删除确认弹窗
     function showDeleteConfirm(fileId, fileName) {
         pendingDeleteId = fileId;
-        $('#deleteFileName').text(fileName);
+        $('#deleteFileQuestion').text(i18n('deleteFileQuestion', { name: fileName }));
         $('#deleteConfirmModal').modal('show');
     }
 
@@ -1104,29 +1104,29 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">
-                                <i class="fa fa-share-alt" style="color: #f57c00;"></i> 分享链接
+                                <i class="fa fa-share-alt" style="color: #f57c00;"></i> ${i18n('shareLink')}
                             </h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body">
-                            <p>分享以下链接给他人，即可协同编辑文档 <strong>${escapeHtml(fileName)}</strong></p>
+                            <p>${i18n('shareLinkHelp', { name: escapeHtml(fileName) })}</p>
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" id="shareUrlInput" value="${shareUrl}" readonly>
                                 <div class="input-group-append">
                                     <button class="btn btn-primary" id="copyShareUrlBtn" type="button">
-                                        <i class="fa fa-copy"></i> 复制
+                                        <i class="fa fa-copy"></i> ${i18n('copy')}
                                     </button>
                                 </div>
                             </div>
                             <div class="alert alert-info small mt-2">
                                 <i class="fa fa-info-circle"></i> 
-                                任何人拥有此链接都可以查看和编辑文档
+                                ${i18n('anyoneCanEdit')}
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">${i18n('close')}</button>
                         </div>
                     </div>
                 </div>
@@ -1159,18 +1159,18 @@
                 // 显示复制成功提示
                 const copyBtn = $(this);
                 const originalHtml = copyBtn.html();
-                copyBtn.html('<i class="fa fa-check"></i> 已复制');
+                copyBtn.html('<i class="fa fa-check"></i> ' + i18n('copied'));
                 setTimeout(() => {
                     copyBtn.html(originalHtml);
                 }, 2000);
                 
                 // 同时显示 toast 提示
-                showToast('链接已复制到剪贴板');
+                showToast(i18n('copiedToClipboard'));
             }).catch(err => {
                 console.error('复制失败:', err);
                 // 降级方案
                 document.execCommand('copy');
-                showToast('链接已复制', true);
+                showToast(i18n('copied'), true);
             });
         });
         
@@ -1195,16 +1195,16 @@
             success: function(response) {
                 hideLoading();
                 if (response.success) {
-                    showToast('已取消收藏');
+                    showToast(i18n('unfavoriteSuccess'));
                     loadFileList();
                 } else {
-                    showToast(response.message || '取消收藏失败', true);
+                    showToast(response.message || i18n('unfavoriteFailed'), true);
                 }
             },
             error: function(xhr, status, error) {
                 hideLoading();
                 console.error('取消收藏失败:', error);
-                showToast('取消收藏失败', true);
+                showToast(i18n('unfavoriteFailed'), true);
             }
         });
     }
@@ -1222,16 +1222,16 @@
             success: function(response) {
                 hideLoading();
                 if (response.success) {
-                    showToast('文件删除成功');
+                    showToast(i18n('fileDeleteSuccess'));
                     loadFileList();
                 } else {
-                    showToast(response.message || '删除失败', true);
+                    showToast(response.message || i18n('deleteFail'), true);
                 }
             },
             error: function(xhr, status, error) {
                 hideLoading();
                 console.error('删除文件失败:', error);
-                showToast('删除文件失败，请稍后重试', true);
+                showToast(i18n('fileDeleteFailed'), true);
             }
         });
         
@@ -1247,13 +1247,13 @@
         let hint = '';
 
         if(type === 'document') {
-            title = '新建文档';
+            title = i18n('newDocument');
             extension = '.md';
-            hint = '文件名将自动添加 .md 扩展名';
+            hint = i18n('markdownExtensionHint');
         } else if(type === 'spreadsheet') {
-            title = '新建表格';
+            title = i18n('newSpreadsheet');
             extension = '.csv';
-            hint = '文件中将自动添加 .csv 扩展名';
+            hint = i18n('csvExtensionHint');
         }
 
         $('#newFileModalTitle').text(title);
@@ -1267,7 +1267,7 @@
         let fileName = $('#newFileName').val().trim();
         
         if (!fileName) {
-            showToast('请输入文件名', true);
+            showToast(i18n('enterFileName'), true);
             return;
         }
         
@@ -1315,17 +1315,17 @@
                 hideLoading();
                 $('#newFileModal').modal('hide');
                 if (response.success) {
-                    showToast(`已创建${getTypeDisplayName(pendingCreateType)}: ${fullFileName}`);
+                    showToast(i18n('fileCreated', { type: getTypeDisplayName(pendingCreateType), name: fullFileName }));
                     loadFileList();
                     // 不自动跳转编辑
                 } else {
-                    showToast(response.message || '创建文件失败', true);
+                    showToast(response.message || i18n('createFileFailed'), true);
                 }
             },
             error: function(xhr, status, error) {
                 hideLoading();
                 console.error('创建文件失败:', error);
-                showToast('创建文件失败，请稍后重试', true);
+                showToast(i18n('createFileRetry'), true);
             }
         });
     }
@@ -1368,21 +1368,21 @@
                         success: function(response) {
                             hideLoading();
                             if (response.success) {
-                                showToast(`已转换并上传: ${csvName}`);
+                                showToast(i18n('convertedAndUploaded', { name: csvName }));
                                 loadFileList();
                             } else {
-                                showToast(response.message || '上传失败', true);
+                                showToast(response.message || i18n('uploadFailed'), true);
                             }
                         },
                         error: function(xhr, status, error) {
                             hideLoading();
-                            showToast('文件上传失败', true);
+                            showToast(i18n('fileUploadFailed'), true);
                         }
                     });
                 } catch (err) {
                     hideLoading();
                     console.error('Excel 转换失败:', err);
-                    showToast('Excel 文件转换失败，请检查文件格式', true);
+                    showToast(i18n('excelConversionFailed'), true);
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -1411,27 +1411,27 @@
                                 success: function(response) {
                                     hideLoading();
                                     if (response.success) {
-                                        showToast(`已转换并上传: ${mdName}`);
+                                        showToast(i18n('convertedAndUploaded', { name: mdName }));
                                         loadFileList();
                                     } else {
-                                        showToast(response.message || '上传失败', true);
+                                        showToast(response.message || i18n('uploadFailed'), true);
                                     }
                                 },
                                 error: function(xhr, status, error) {
                                     hideLoading();
-                                    showToast('文件上传失败', true);
+                                    showToast(i18n('fileUploadFailed'), true);
                                 }
                             });
                         })
                         .catch(function(err) {
                             hideLoading();
                             console.error('DOCX 转换失败:', err);
-                            showToast('DOCX 文件转换失败，请检查文件格式', true);
+                            showToast(i18n('docxConversionFailed'), true);
                         });
                 } catch (err) {
                     hideLoading();
                     console.error('DOCX 读取失败:', err);
-                    showToast('DOCX 文件读取失败，请检查文件格式', true);
+                    showToast(i18n('docxReadFailed'), true);
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -1456,17 +1456,17 @@
                 success: function(response) {
                     hideLoading();
                     if (response.success) {
-                        const fileTypeName = isImage ? '图片' : '文件';
-                        showToast(`上传成功: ${file.name} (${fileTypeName})`);
+                        const fileTypeName = isImage ? i18n('image') : i18n('file');
+                        showToast(i18n('uploadSuccess', { name: file.name, type: fileTypeName }));
                         loadFileList();
                     } else {
-                        showToast(response.message || '上传失败', true);
+                        showToast(response.message || i18n('uploadFailed'), true);
                     }
                 },
                 error: function(xhr, status, error) {
                     hideLoading();
                     console.error('文件上传失败:', error);
-                    let errorMsg = '文件上传失败';
+                    let errorMsg = i18n('fileUploadFailed');
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMsg = xhr.responseJSON.message;
                     }
