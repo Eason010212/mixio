@@ -154,10 +154,12 @@ const platformString = `${arch}-${platform}`;
 
 var mixlyPath = path.join(path.dirname(process.execPath), '../mixly')
 var mixaiPath = path.join(path.dirname(process.execPath), '../mixai')
+var mixcoPath = path.join(path.dirname(process.execPath), '../mixco')
 var mixntPath = path.join(path.dirname(process.execPath), '../mixnt')
 if (process.argv[0].indexOf("node") != -1) {
     mixlyPath = "../mixly"
     mixaiPath = "../mixai"
+    mixcoPath = "../mixco"
     mixntPath = "../mixnt"
 }
 
@@ -1400,6 +1402,7 @@ var mixioServer = async function() {
             'footer': configs["FOOTER"],
             'mixly': fs.existsSync(mixlyPath),
             'mixai': fs.existsSync(mixaiPath),
+            'mixco': fs.existsSync(mixcoPath),
             'mixnt': fs.existsSync(mixntPath),
         }, function(err, data) {
             res.send(data)
@@ -1437,6 +1440,7 @@ var mixioServer = async function() {
             'main': fs.existsSync("config/certs/chain.crt"),
             'mixly': fs.existsSync(mixlyPath),
             'mixai': fs.existsSync(mixaiPath),
+            'mixco': fs.existsSync(mixcoPath),
             'mixnt': fs.existsSync(mixntPath),
             'configs': configs
         }, function(err, data) {
@@ -4625,6 +4629,9 @@ var mixioServer = async function() {
     }
     if (fs.existsSync(mixaiPath)) {
         app.use('/mixai', express.static(mixaiPath));
+    }
+    if (fs.existsSync(mixcoPath)) {
+        app.use('/mixco', express.static(mixcoPath));
     }
     if (fs.existsSync(mixntPath)) {
         app.use('/mixnt', express.static(mixntPath));
