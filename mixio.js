@@ -163,6 +163,14 @@ if (process.argv[0].indexOf("node") != -1) {
     mixntPath = "../mixnt"
 }
 
+/** 无 ../mixly 时，回退到 MixCO 内嵌 MixVM（须 mixco 已存在） */
+function getMixlyEntryHref() {
+    if (fs.existsSync(mixlyPath)) return '/mixly';
+    var vmIndex = path.join(mixcoPath, 'vendor', 'mixly', 'mixvm', 'index.html');
+    if (fs.existsSync(vmIndex)) return '/mixco/vendor/mixly/mixvm/index.html';
+    return '';
+}
+
 
 function init(cb) {
     if (!fs.existsSync("logs")) {
@@ -1398,9 +1406,11 @@ var mixioServer = async function() {
     app.use(cors())
 
     app.get('/', function(req, res) {
+        var mixlyHref = getMixlyEntryHref();
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
             'footer': configs["FOOTER"],
-            'mixly': fs.existsSync(mixlyPath),
+            'mixly': !!mixlyHref,
+            'mixlyHref': mixlyHref || '/mixly',
             'mixai': fs.existsSync(mixaiPath),
             'mixco': fs.existsSync(mixcoPath),
             'mixnt': fs.existsSync(mixntPath),
@@ -1436,9 +1446,11 @@ var mixioServer = async function() {
     })
 
     app.get('/index', function(req, res) {
+        var mixlyHref = getMixlyEntryHref();
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
             'main': fs.existsSync("config/certs/chain.crt"),
-            'mixly': fs.existsSync(mixlyPath),
+            'mixly': !!mixlyHref,
+            'mixlyHref': mixlyHref || '/mixly',
             'mixai': fs.existsSync(mixaiPath),
             'mixco': fs.existsSync(mixcoPath),
             'mixnt': fs.existsSync(mixntPath),
@@ -4626,6 +4638,11 @@ var mixioServer = async function() {
 
     if (fs.existsSync(mixlyPath)) {
         app.use('/mixly', express.static(mixlyPath));
+    } else if (getMixlyEntryHref()) {
+        // 无独立 mixly 目录时，/mixly 跳到 MixCO 内嵌 MixVM
+        app.get(['/mixly', '/mixly/'], function(req, res) {
+            res.redirect(getMixlyEntryHref());
+        });
     }
     if (fs.existsSync(mixaiPath)) {
         app.use('/mixai', express.static(mixaiPath));

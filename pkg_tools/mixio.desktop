@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=MixIO
+Comment=MixIO IoT Server
+Terminal=true
+Categories=Development;Education;
+Exec=./mixio
+Icon=./mixio.png
+Path=
+StartupNotify=false
