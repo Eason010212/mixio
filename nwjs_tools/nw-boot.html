@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>MixlyServer</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #0f172a; color: #e2e8f0; font-family: "Segoe UI", system-ui, sans-serif; }
+    .wrap { height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+    .t { font-size: 22px; letter-spacing: 0.04em; }
+    .s { opacity: 0.7; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="t">MixlyServer</div>
+    <div class="s" id="st">正在启动本地 HTTPS 服务…</div>
+  </div>
+  <script>
+    (function () {
+      var st = document.getElementById('st');
+      var httpsUrl = 'https://localhost:8443/';
+      var n = 0;
+      function tick() {
+        n += 1;
+        st.textContent = '正在启动本地 HTTPS 服务… (' + n + ')';
+        fetch(httpsUrl, { mode: 'no-cors', cache: 'no-store' })
+          .then(function () { location.replace(httpsUrl); })
+          .catch(function () {
+            if (n > 120) st.textContent = '启动超时，请检查端口 8443';
+            else setTimeout(tick, 100);
+          });
+      }
+      setTimeout(tick, 50);
+    })();
+  </script>
+</body>
+</html>

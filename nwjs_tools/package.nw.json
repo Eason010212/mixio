@@ -1,0 +1,35 @@
+{
+  "name": "MixlyServer",
+  "version": "1.10.0",
+  "description": "MixlyServer NW.js shell (MixIO backend, HTTPS only)",
+  "node-main": "./nw-main.js",
+  "main": "nw-boot.html",
+  "inject_js_end": "nw-inject-end.js",
+  "node-remote": [
+    "https://localhost:8443",
+    "https://127.0.0.1:8443",
+    "https://localhost:8443/*",
+    "https://127.0.0.1:8443/*",
+    "https://localhost:18084",
+    "https://127.0.0.1:18084",
+    "https://localhost:18084/*",
+    "https://127.0.0.1:18084/*"
+  ],
+  "user-agent": "Mozilla/5.0 (%osinfo) AppleWebKit/%webkit_ver (KHTML, like Gecko, Chrome, Safari) NWjs/%nwver MixlyServer",
+  "chromium-args": "--disk-cache-size=0 --media-cache-size=0 --user-data-dir=./user-data --ignore-certificate-errors",
+  "webkit": {
+    "page-cache": false
+  },
+  "window": {
+    "title": "MixlyServer",
+    "icon": "blockly/media/mark/mixio.png",
+    "width": 1280,
+    "height": 800,
+    "min_width": 960,
+    "min_height": 600,
+    "position": "center"
+  },
+  "author": "Mixly TEAM",
+  "license": "MPL-2.0",
+  "dependencies": {}
+}
