@@ -162,6 +162,11 @@ if (process.argv[0].indexOf("node") != -1) {
     mixcoPath = "../mixco"
     mixntPath = "../mixnt"
 }
+// 无独立 mixnt 时回退到 mixly/mixvm/mixnt
+if (!fs.existsSync(mixntPath)) {
+    var mixntInMixly = path.join(mixlyPath, 'mixvm', 'mixnt')
+    if (fs.existsSync(mixntInMixly)) mixntPath = mixntInMixly
+}
 
 /** 无 ../mixly 时，回退到 MixCO 内嵌 MixVM（须 mixco 已存在） */
 function getMixlyEntryHref() {

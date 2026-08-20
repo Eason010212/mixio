@@ -1651,6 +1651,10 @@ var arrLang = {
     "en": {
         "OPENSRC": "Open Repo",
         "ADMINDASH": "Admin Dashboard",
+        "FOOTER_MIXLY": "Mixly_Coding",
+        "FOOTER_MIXAI": "MixAI_AIExp",
+        "FOOTER_MIXNT": "MixNT_NetSIM",
+        "FOOTER_MIXCO": "MixCO_Lessons",
         "TOPIC": "Topic",
         "MESSAGE": "Message",
         "TIME": "Time",
@@ -1719,6 +1723,10 @@ var arrLang = {
     "zh": {
         "OPENSRC": "开源仓库",
         "ADMINDASH": "管理后台",
+        "FOOTER_MIXLY": "Mixly图文编程",
+        "FOOTER_MIXAI": "MixAI交互体验",
+        "FOOTER_MIXNT": "MixNT网络仿真",
+        "FOOTER_MIXCO": "MixCO自学课程",
         "TOPIC": "主题",
         "MESSAGE": "消息",
         "TIME": "时间",
@@ -1787,6 +1795,10 @@ var arrLang = {
     "tw": {
         "OPENSRC": "開源倉庫",
         "ADMINDASH": "管理後台",
+        "FOOTER_MIXLY": "Mixly圖文編程",
+        "FOOTER_MIXAI": "MixAI交互體驗",
+        "FOOTER_MIXNT": "MixNT網絡仿真",
+        "FOOTER_MIXCO": "MixCO自學課程",
         "TOPIC": "主題",
         "MESSAGE": "消息",
         "TIME": "時間",
@@ -1909,6 +1921,10 @@ Object.assign(arrLang.tw, {
 Object.assign(arrLang.en, {
     "OPENSRC": "Open-source Repository",
     "ADMINDASH": "Admin Console",
+    "FOOTER_MIXLY": "Mixly_Coding",
+    "FOOTER_MIXAI": "MixAI_AIExp",
+    "FOOTER_MIXNT": "MixNT_NetSIM",
+    "FOOTER_MIXCO": "MixCO_Lessons",
     "DATAMANAGE": "Data Management",
     "CODRIVE": "CoDrive",
     "BASICADMIN": "General Settings",
@@ -1954,6 +1970,13 @@ Object.assign(arrLang.en, {
     "CFMSET": "Save Security Question"
 });
 standardizeTraditionalChineseDictionary(arrLang.tw);
+// 页脚产品名：保留「編程/仿真」等用词，避免被全局繁化成「程式設計」
+Object.assign(arrLang.tw, {
+    "FOOTER_MIXLY": "Mixly圖文編程",
+    "FOOTER_MIXAI": "MixAI交互體驗",
+    "FOOTER_MIXNT": "MixNT網絡仿真",
+    "FOOTER_MIXCO": "MixCO自學課程"
+});
 var lang = "en";
 
 function normalizeLanguage(languageCode) {
