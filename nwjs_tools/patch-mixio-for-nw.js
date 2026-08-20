@@ -21,45 +21,6 @@ function applyOnce(text, marker, needle, replacement, label) {
   return { text: text.replace(needle, replacement), changed: true };
 }
 
-const PATH_NEEDLE = `var mixlyPath = path.join(path.dirname(process.execPath), '../mixly')
-var mixaiPath = path.join(path.dirname(process.execPath), '../mixai')
-var mixcoPath = path.join(path.dirname(process.execPath), '../mixco')
-var mixntPath = path.join(path.dirname(process.execPath), '../mixnt')
-if (process.argv[0].indexOf("node") != -1) {
-    mixlyPath = "../mixly"
-    mixaiPath = "../mixai"
-    mixcoPath = "../mixco"
-    mixntPath = "../mixnt"
-}
-// 无独立 mixnt 时回退到 mixly/mixvm/mixnt
-if (!fs.existsSync(mixntPath)) {
-    var mixntInMixly = path.join(mixlyPath, 'mixvm', 'mixnt')
-    if (fs.existsSync(mixntInMixly)) mixntPath = mixntInMixly
-}
-`;
-const PATH_REPLACEMENT = `// NW: 旁路目录在 package.nw 上一级（与 MixlyServer.exe 同级）
-var mixlyPath = path.join(__dirname, '..', 'mixly')
-var mixaiPath = path.join(__dirname, '..', 'mixai')
-var mixcoPath = path.join(__dirname, '..', 'mixco')
-var mixntPath = path.join(__dirname, '..', 'mixnt')
-// NW: 无独立 mixnt 时回退到 mixly/mixvm/mixnt（与 mixly 旁路类似）
-if (!fs.existsSync(mixntPath)) {
-    var __mixntInMixly = path.join(mixlyPath, 'mixvm', 'mixnt')
-    if (fs.existsSync(__mixntInMixly)) mixntPath = __mixntInMixly
-}
-`;
-
-/** 已打过 sibling-paths、但尚未含 mixnt 回退时补一刀 */
-const MIXNT_FALLBACK_NEEDLE = `var mixntPath = path.join(__dirname, '..', 'mixnt')
-`;
-const MIXNT_FALLBACK_REPLACEMENT = `var mixntPath = path.join(__dirname, '..', 'mixnt')
-// NW: 无独立 mixnt 时回退到 mixly/mixvm/mixnt（与 mixly 旁路类似）
-if (!fs.existsSync(mixntPath)) {
-    var __mixntInMixly = path.join(mixlyPath, 'mixvm', 'mixnt')
-    if (fs.existsSync(__mixntInMixly)) mixntPath = __mixntInMixly
-}
-`;
-
 const LAZY_DOM_NEEDLE = `const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 var jq = require("jquery");
@@ -277,11 +238,7 @@ function patchMixioJs(mixioJsPath) {
   let n = 0;
 
   let r;
-  r = applyOnce(text, "path.join(__dirname, '..', 'mixly')", PATH_NEEDLE, PATH_REPLACEMENT, 'sibling-paths');
-  text = r.text; if (r.changed) n++;
-
-  r = applyOnce(text, '__mixntInMixly', MIXNT_FALLBACK_NEEDLE, MIXNT_FALLBACK_REPLACEMENT, 'mixnt-fallback');
-  text = r.text; if (r.changed) n++;
+  // 旁路路径 / MixNT 回退已在 mixio.js 源码处理（MIXIO_NW_SPAWN），此处不再改路径
 
   r = applyOnce(text, '__mixioEnsureDom', LAZY_DOM_NEEDLE, LAZY_DOM_REPLACEMENT, 'lazy-dom-require');
   text = r.text; if (r.changed) n++;

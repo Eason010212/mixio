@@ -152,20 +152,36 @@ if(isOpenWrt())
 
 const platformString = `${arch}-${platform}`;
 
-var mixlyPath = path.join(path.dirname(process.execPath), '../mixly')
-var mixaiPath = path.join(path.dirname(process.execPath), '../mixai')
-var mixcoPath = path.join(path.dirname(process.execPath), '../mixco')
-var mixntPath = path.join(path.dirname(process.execPath), '../mixnt')
-if (process.argv[0].indexOf("node") != -1) {
-    mixlyPath = "../mixly"
-    mixaiPath = "../mixai"
-    mixcoPath = "../mixco"
-    mixntPath = "../mixnt"
+// 旁路目录：pkg / node CLI / NW(MIXIO_NW_SPAWN) 统一在此解析（不依赖 nwjs_tools 改路径）
+var mixlyPath
+var mixaiPath
+var mixcoPath
+var mixntPath
+if (process.env.MIXIO_NW_SPAWN === '1') {
+    var __sidecarRoot = path.join(__dirname, '..')
+    mixlyPath = path.join(__sidecarRoot, 'mixly')
+    mixaiPath = path.join(__sidecarRoot, 'mixai')
+    mixcoPath = path.join(__sidecarRoot, 'mixco')
+    mixntPath = path.join(__sidecarRoot, 'mixnt')
+} else if (process.argv[0].indexOf("node") != -1) {
+    mixlyPath = path.join("..", "mixly")
+    mixaiPath = path.join("..", "mixai")
+    mixcoPath = path.join("..", "mixco")
+    mixntPath = path.join("..", "mixnt")
+} else {
+    mixlyPath = path.join(path.dirname(process.execPath), '..', 'mixly')
+    mixaiPath = path.join(path.dirname(process.execPath), '..', 'mixai')
+    mixcoPath = path.join(path.dirname(process.execPath), '..', 'mixco')
+    mixntPath = path.join(path.dirname(process.execPath), '..', 'mixnt')
 }
-// 无独立 mixnt 时回退到 mixly/mixvm/mixnt
+// MixNT：独立目录 → mixly/mixvm/mixnt → mixco/vendor/mixly/mixvm/mixnt
 if (!fs.existsSync(mixntPath)) {
     var mixntInMixly = path.join(mixlyPath, 'mixvm', 'mixnt')
     if (fs.existsSync(mixntInMixly)) mixntPath = mixntInMixly
+}
+if (!fs.existsSync(mixntPath)) {
+    var mixntInMixco = path.join(mixcoPath, 'vendor', 'mixly', 'mixvm', 'mixnt')
+    if (fs.existsSync(mixntInMixco)) mixntPath = mixntInMixco
 }
 
 /** 无 ../mixly 时，回退到 MixCO 内嵌 MixVM（须 mixco 已存在） */
@@ -174,6 +190,19 @@ function getMixlyEntryHref() {
     var vmIndex = path.join(mixcoPath, 'vendor', 'mixly', 'mixvm', 'index.html');
     if (fs.existsSync(vmIndex)) return '/mixco/vendor/mixly/mixvm/index.html';
     return '';
+}
+
+function getMixaiEntryHref() {
+    return fs.existsSync(mixaiPath) ? '/mixai' : '';
+}
+
+function getMixcoEntryHref() {
+    return fs.existsSync(mixcoPath) ? '/mixco' : '';
+}
+
+/** MixNT 静态始终挂在 /mixnt（路径可能已回退到 mixly/mixco 内） */
+function getMixntEntryHref() {
+    return fs.existsSync(mixntPath) ? '/mixnt' : '';
 }
 
 
@@ -1412,13 +1441,19 @@ var mixioServer = async function() {
 
     app.get('/', function(req, res) {
         var mixlyHref = getMixlyEntryHref();
+        var mixaiHref = getMixaiEntryHref();
+        var mixcoHref = getMixcoEntryHref();
+        var mixntHref = getMixntEntryHref();
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
             'footer': configs["FOOTER"],
             'mixly': !!mixlyHref,
             'mixlyHref': mixlyHref || '/mixly',
-            'mixai': fs.existsSync(mixaiPath),
-            'mixco': fs.existsSync(mixcoPath),
-            'mixnt': fs.existsSync(mixntPath),
+            'mixai': !!mixaiHref,
+            'mixaiHref': mixaiHref || '/mixai',
+            'mixco': !!mixcoHref,
+            'mixcoHref': mixcoHref || '/mixco',
+            'mixnt': !!mixntHref,
+            'mixntHref': mixntHref || '/mixnt',
         }, function(err, data) {
             res.send(data)
         })
@@ -1452,13 +1487,19 @@ var mixioServer = async function() {
 
     app.get('/index', function(req, res) {
         var mixlyHref = getMixlyEntryHref();
+        var mixaiHref = getMixaiEntryHref();
+        var mixcoHref = getMixcoEntryHref();
+        var mixntHref = getMixntEntryHref();
         ejs.renderFile(__dirname + '/ejs/index.ejs', {
             'main': fs.existsSync("config/certs/chain.crt"),
             'mixly': !!mixlyHref,
             'mixlyHref': mixlyHref || '/mixly',
-            'mixai': fs.existsSync(mixaiPath),
-            'mixco': fs.existsSync(mixcoPath),
-            'mixnt': fs.existsSync(mixntPath),
+            'mixai': !!mixaiHref,
+            'mixaiHref': mixaiHref || '/mixai',
+            'mixco': !!mixcoHref,
+            'mixcoHref': mixcoHref || '/mixco',
+            'mixnt': !!mixntHref,
+            'mixntHref': mixntHref || '/mixnt',
             'configs': configs
         }, function(err, data) {
             res.send(data)
