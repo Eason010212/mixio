@@ -1,6 +1,7 @@
 'use strict';
 /**
  * NW.js 入口：cwd → 仅 HTTPS 配置 → 启动 mixio debug，并登记可被壳层杀掉的后端进程。
+ * 每次退出时清空 Chromium user-data，下次启动相当于全新环境（跨平台，不依赖 bat）。
  */
 var path = require('path');
 var fs = require('fs');
@@ -11,6 +12,47 @@ try {
 } catch (_e) {}
 
 var PID_FILE = path.join(__dirname, 'runtime', 'mixio-backend.pid');
+
+/** package.json chromium-args: --user-data-dir=./user-data（相对 exe 目录） */
+function resolveUserDataDir() {
+  try {
+    return path.join(path.dirname(process.execPath), 'user-data');
+  } catch (_e) {
+    return path.join(process.cwd(), 'user-data');
+  }
+}
+
+function rmrfSync(target) {
+  if (!target || !fs.existsSync(target)) return;
+  try {
+    fs.rmSync(target, { recursive: true, force: true, maxRetries: 3, retryDelay: 50 });
+  } catch (_e) {
+    try {
+      var walk = function (p) {
+        if (!fs.existsSync(p)) return;
+        var st = fs.lstatSync(p);
+        if (st.isDirectory()) {
+          fs.readdirSync(p).forEach(function (name) {
+            walk(path.join(p, name));
+          });
+          try {
+            fs.rmdirSync(p);
+          } catch (_e2) {}
+        } else {
+          try {
+            fs.unlinkSync(p);
+          } catch (_e3) {}
+        }
+      };
+      walk(target);
+    } catch (_e4) {}
+  }
+}
+
+/** 退出时清空 user-data，保证下次冷启动无 SW / Cache Storage 残留 */
+function wipeUserDataOnExit() {
+  rmrfSync(resolveUserDataDir());
+}
 
 function ensureHttpsOnlyConfig() {
   var configDir = path.join(__dirname, 'config');
@@ -136,6 +178,11 @@ function killBackend() {
   backendChild = null;
 }
 
+function shutdown() {
+  killBackend();
+  wipeUserDataOnExit();
+}
+
 ensureHttpsOnlyConfig();
 killStaleBackend();
 
@@ -156,8 +203,9 @@ backendChild.on('exit', function () {
 
 global.__mixioBackendPid = backendChild.pid;
 global.__mixioKillBackend = killBackend;
+global.__mixioWipeUserData = wipeUserDataOnExit;
 global.__mixioSidecarWins = global.__mixioSidecarWins || {};
 
-process.on('exit', killBackend);
-process.on('SIGTERM', killBackend);
-process.on('SIGINT', killBackend);
+process.on('exit', shutdown);
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

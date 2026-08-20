@@ -458,6 +458,7 @@ async function main() {
   }
 
   const finalExe = findExe(finalOut);
+
   console.log('');
   console.log('[build-mixio-nw] Finished.');
   console.log('  Output:', finalOut);

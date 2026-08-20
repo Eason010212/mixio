@@ -149,6 +149,12 @@
           } catch (_e) {}
         }
         closeAllOtherWindows(self);
+        // 关主窗后尽量清 user-data（跨平台；若仍占用则依赖 process exit 再清）
+        if (typeof global.__mixioWipeUserData === 'function') {
+          try {
+            global.__mixioWipeUserData();
+          } catch (_eWipe) {}
+        }
       }
       self.close(true);
     });

@@ -20,6 +20,48 @@
       var st = document.getElementById('st');
       var httpsUrl = 'https://localhost:8443/';
       var n = 0;
+
+      /** 跨平台：用 Chromium API 清本会话缓存（含 Cache Storage / SW），不依赖 bat */
+      function clearSessionCaches(done) {
+        var pending = 1;
+        function step() {
+          pending -= 1;
+          if (pending <= 0) done();
+        }
+        try {
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            pending += 1;
+            navigator.serviceWorker.getRegistrations().then(function (regs) {
+              return Promise.all(regs.map(function (r) { return r.unregister(); }));
+            }).catch(function () {}).then(step);
+          }
+        } catch (_eSw) {}
+        try {
+          if (typeof caches !== 'undefined' && caches.keys) {
+            pending += 1;
+            caches.keys().then(function (keys) {
+              return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+            }).catch(function () {}).then(step);
+          }
+        } catch (_eCa) {}
+        try {
+          if (typeof chrome !== 'undefined' && chrome.browsingData && chrome.browsingData.remove) {
+            pending += 1;
+            chrome.browsingData.remove(
+              {},
+              {
+                appcache: true,
+                cache: true,
+                cacheStorage: true,
+                serviceWorkers: true
+              },
+              function () { step(); }
+            );
+          }
+        } catch (_eBd) {}
+        step();
+      }
+
       function tick() {
         n += 1;
         st.textContent = '正在启动本地 HTTPS 服务… (' + n + ')';
@@ -30,7 +72,10 @@
             else setTimeout(tick, 100);
           });
       }
-      setTimeout(tick, 50);
+
+      clearSessionCaches(function () {
+        setTimeout(tick, 50);
+      });
     })();
   </script>
 </body>
