@@ -149,6 +149,25 @@ function cleanup_widget_data_on_clear(widget) {
     cleanup_orphaned_widget_topics([widget], [widget])
 }
 
+function clear_widget_records_for_topics(topics) {
+    var actionTags = {
+        'output_chart': MixIO.actionTags.LINE_CHART_CLEAR,
+        'output_bar': MixIO.actionTags.BAR_CHART_CLEAR,
+        'table': MixIO.actionTags.DATA_TABLE_CLEAR
+    }
+    $('#grid .item').each(function() {
+        var widget = $(this)
+        var actionTag = actionTags[widget.attr('user-type')]
+        if (!actionTag)
+            return
+        var usesClearedTopic = get_widget_topics(this).some(function(topic) {
+            return topics.indexOf(topic) != -1
+        })
+        if (usesClearedTopic)
+            widget.trigger(actionTag, ['data-view'])
+    })
+}
+
 function watch_widget_topic_deletions() {
     if (!window.MutationObserver || !grid || !grid[0])
         return
@@ -1410,6 +1429,9 @@ function view_project(projectName, projectType) {
                 isChanged = true
                 
                 if (globalTableProjectInfo.currentTp != "$") {
+                    var clearedTopics = globalTableProjectInfo.currentTp.split(",,").filter(function(topic) {
+                        return topic != '$'
+                    })
                     if (globalTableProjectInfo.currentTp.split(",,").length == 1)
                         delete globalTableProjectInfo.received[globalTableProjectInfo.currentTp]
                     else {
@@ -1435,6 +1457,7 @@ function view_project(projectName, projectType) {
                     globalTableProjectInfo.currentTp = '$'
                     dataset = []
                     init_table()
+                    clear_widget_records_for_topics(clearedTopics)
                 }
             })
             leftCardTitle.append(httpAPIButton)
@@ -1443,6 +1466,9 @@ function view_project(projectName, projectType) {
             leftCardTitle.append(clearAllButton)
             clearButton.click(function() {
                 isChanged = true
+                var clearedTopics = globalTableProjectInfo.currentTp.split(",,").filter(function(topic) {
+                    return topic != '$'
+                })
                 if (globalTableProjectInfo.currentTp.split(",,").length == 1)
                     globalTableProjectInfo.received[globalTableProjectInfo.currentTp] = []
                 else {
@@ -1453,6 +1479,7 @@ function view_project(projectName, projectType) {
                     }
                 }
                 fresh()
+                clear_widget_records_for_topics(clearedTopics)
             })
             var sync_export = function() {
                 var fields = globalTable.data().JSGrid.fields

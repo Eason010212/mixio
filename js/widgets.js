@@ -3395,8 +3395,8 @@ function add_bar(user_title, user_topic, user_content, user_style, title_style) 
     itemdiv.bind(MixIO.actionTags.BAR_CHART_CHANGE, function(event, message) {
         MixIO.publish(topic.text(), message)
     })
-    itemdiv.bind(MixIO.actionTags.BAR_CHART_CLEAR, function() {
-        clearButton.click()
+    itemdiv.bind(MixIO.actionTags.BAR_CHART_CLEAR, function(event, clearSource) {
+        clearButton.trigger('click', [clearSource])
     })
     itemdiv.addClass("moveDiv")
     var editForm = $('<div class="nnt"/>')
@@ -3499,7 +3499,7 @@ function add_bar(user_title, user_topic, user_content, user_style, title_style) 
     var deleteButton = $('<a class="btn btn-danger btn-circle bbbt"><i class="fa fa-trash"></i></a>')
     var clearButton = $('<a class="btn btn-warning btn-circle bbbt"><i class="fa fa-eraser"></i></a>')
     var exportButton = $('<a class="btn btn-info btn-circle bbbt" download="data.csv"><i class="fa fa-download"></i></a>')
-    clearButton.click(function() {
+    clearButton.click(function(event, clearSource) {
         var prevX = chartTarget.getOption().xAxis[0]
         var prevY = chartTarget.getOption().series[0]
         prevY.data = []
@@ -3523,7 +3523,8 @@ function add_bar(user_title, user_topic, user_content, user_style, title_style) 
         var usrContent = titleDiv.parent().parent().attr('user-content').substring(0, 2)
         titleDiv.parent().parent().attr('user-content', usrContent + mixstr)
         sync_export()
-        cleanup_widget_data_on_clear(itemdiv[0])
+        if (clearSource != 'data-view')
+            cleanup_widget_data_on_clear(itemdiv[0])
     })
     editButton.click(edit_on_click)
     deleteButton.click(delete_on_click)
@@ -4787,8 +4788,8 @@ function add_table(user_title, user_topic, user_content, user_style, title_style
     itemdiv.bind(MixIO.actionTags.DATA_TABLE_CHANGE, function(event, message) {
         MixIO.publish(topic.text(), message)
     })
-    itemdiv.bind(MixIO.actionTags.DATA_TABLE_CLEAR, function() {
-        clear_on_click()
+    itemdiv.bind(MixIO.actionTags.DATA_TABLE_CLEAR, function(event, clearSource) {
+        clear_on_click(clearSource)
     })
     itemdiv.addClass("moveDiv")
 
@@ -4803,12 +4804,13 @@ function add_table(user_title, user_topic, user_content, user_style, title_style
         if (tbd)
             tbd.remove()
     }
-    var clear_on_click = function() {
+    var clear_on_click = function(clearSource) {
         dataset = []
         init_table()
         setContent()
         sync_export()
-        cleanup_widget_data_on_clear(itemdiv[0])
+        if (clearSource != 'data-view')
+            cleanup_widget_data_on_clear(itemdiv[0])
     }
     var editForm = $('<div class="nnt"/>')
     editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/table.svg" style="width:45px;"></div>'))
@@ -5670,8 +5672,8 @@ function add_chart(user_title, user_topic, user_content, user_style, title_style
     itemdiv.bind(MixIO.actionTags.LINE_CHART_CHANGE, function(event, value) {
         MixIO.publish(topic.text(), value)
     })
-    itemdiv.bind(MixIO.actionTags.LINE_CHART_CLEAR, function() {
-        clearButton.click()
+    itemdiv.bind(MixIO.actionTags.LINE_CHART_CLEAR, function(event, clearSource) {
+        clearButton.trigger('click', [clearSource])
     })
     var editForm = $('<div class="nnt"/>')
     editForm.append($('<div style="margin-top:-63px;margin-left:82.5px;margin-bottom:15px;box-shadow: 1px 1px 20px #4e73df;background-color:white;width:75px;height:75px;padding:40px;border-radius:80px;border:solid #4e73df 3px;display:flex;align-items:center;justify-content:center"><img src="icons/output_chart.svg" style="width:45px;"></div>'))
@@ -5742,12 +5744,13 @@ function add_chart(user_title, user_topic, user_content, user_style, title_style
     var clearButton = $('<a class="btn btn-warning btn-circle bbbt"><i class="fa fa-eraser"></i></a>')
     var convertButton = $('<a class="btn btn-secondary btn-circle bbbt""><i class="fa fa-exchange"></i></a>')
     var exportButton = $('<a class="btn btn-info btn-circle bbbt" download="data.csv"><i class="fa fa-download"></i></a>')
-    clearButton.click(function() {
+    clearButton.click(function(event, clearSource) {
         chartTarget.setOption(chartOption, true)
         titleDiv.parent().parent().attr('user-content', titleDiv.parent().parent().attr('user-content').substring(0, 2))
         sync_export()
         sync_table()
-        cleanup_widget_data_on_clear(itemdiv[0])
+        if (clearSource != 'data-view')
+            cleanup_widget_data_on_clear(itemdiv[0])
     })
     editButton.click(edit_on_click)
     convertButton.click(convert_on_click)
