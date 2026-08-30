@@ -96,7 +96,7 @@ function get_widget_topics(widget) {
     })
 }
 
-function cleanup_orphaned_widget_topics(removedWidgets) {
+function cleanup_orphaned_widget_topics(removedWidgets, ignoredWidgets) {
     if (!globalTableProjectInfo || !globalTableProjectInfo.received)
         return
 
@@ -110,6 +110,8 @@ function cleanup_orphaned_widget_topics(removedWidgets) {
 
     var orphanedTopics = removedTopics.filter(function(topic) {
         var isStillUsed = $('#grid .item').toArray().some(function(widget) {
+            if (ignoredWidgets && ignoredWidgets.indexOf(widget) != -1)
+                return false
             return get_widget_topics(widget).indexOf(topic) != -1
         })
         return !isStillUsed
@@ -139,6 +141,12 @@ function cleanup_orphaned_widget_topics(removedWidgets) {
     isChanged = true
     if (typeof fresh == 'function')
         fresh(true)
+}
+
+function cleanup_widget_data_on_clear(widget) {
+    // A clear keeps the widget visible, but its stored records should be
+    // treated as removed. Ignore that widget while checking shared topics.
+    cleanup_orphaned_widget_topics([widget], [widget])
 }
 
 function watch_widget_topic_deletions() {
