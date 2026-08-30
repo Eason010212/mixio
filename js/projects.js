@@ -81,6 +81,85 @@ var connected_hardwares = [];
 var connected = SERVER_CONNECTING;
 var globalCode = ''
 
+function get_widget_topics(widget) {
+    var topic = $(widget).attr('user-topic')
+    if (!topic)
+        return []
+
+    // BLE widgets use a comma-separated read/write topic pair. Other widgets
+    // keep their topic as a single value, so commas in their topic stay intact.
+    var topics = $(widget).attr('user-type') == 'ble' ? topic.split(',') : [topic]
+    return topics.map(function(topic) {
+        return stringendecoder.encodeHtml(topic.trim())
+    }).filter(function(topic) {
+        return topic != ''
+    })
+}
+
+function cleanup_orphaned_widget_topics(removedWidgets) {
+    if (!globalTableProjectInfo || !globalTableProjectInfo.received)
+        return
+
+    var removedTopics = []
+    $(removedWidgets).each(function() {
+        get_widget_topics(this).forEach(function(topic) {
+            if (removedTopics.indexOf(topic) == -1)
+                removedTopics.push(topic)
+        })
+    })
+
+    var orphanedTopics = removedTopics.filter(function(topic) {
+        var isStillUsed = $('#grid .item').toArray().some(function(widget) {
+            return get_widget_topics(widget).indexOf(topic) != -1
+        })
+        return !isStillUsed
+    })
+    if (orphanedTopics.length == 0)
+        return
+
+    orphanedTopics.forEach(function(topic) {
+        delete globalTableProjectInfo.received[topic]
+    })
+
+    // Keep the persisted selection and every data-view selector valid.
+    var currentTopics = (globalTableProjectInfo.currentTp || '$').split(',,').filter(function(topic) {
+        return topic != '$' && orphanedTopics.indexOf(topic) == -1
+    })
+    globalTableProjectInfo.currentTp = currentTopics.length ? currentTopics.join(',,') : '$'
+    $('.data-topic-select').each(function() {
+        var select = $(this)
+        orphanedTopics.forEach(function(topic) {
+            select.find('option').filter(function() {
+                return $(this).val() == topic
+            }).remove()
+        })
+        if (orphanedTopics.indexOf(select.val()) != -1)
+            select.val('$')
+    })
+    isChanged = true
+    if (typeof fresh == 'function')
+        fresh(true)
+}
+
+function watch_widget_topic_deletions() {
+    if (!window.MutationObserver || !grid || !grid[0])
+        return
+    if (window.widgetTopicDeletionObserver)
+        window.widgetTopicDeletionObserver.disconnect()
+    window.widgetTopicDeletionObserver = new MutationObserver(function(mutations) {
+        var removedWidgets = []
+        mutations.forEach(function(mutation) {
+            $(mutation.removedNodes).each(function() {
+                if (this.nodeType == 1 && $(this).hasClass('item'))
+                    removedWidgets.push(this)
+            })
+        })
+        if (removedWidgets.length)
+            cleanup_orphaned_widget_topics(removedWidgets)
+    })
+    window.widgetTopicDeletionObserver.observe(grid[0], { childList: true })
+}
+
 var dataManage = function() {
     window.location.href = 'storage'
 }
@@ -811,6 +890,7 @@ function view_project(projectName, projectType) {
             $("#connect_span").removeAttr("hidden")
             $("#storage_space").removeAttr("hidden")
             init_layout()
+            watch_widget_topic_deletions()
             $("#projMode").click(function() {
                 if (globalProjectType != PROJ_MODE) {
                     globalProjectType = PROJ_MODE
@@ -1167,7 +1247,7 @@ function view_project(projectName, projectType) {
             }
             var topicOuterDiv = $("<div style='width:100%;display:flex;align-items:center;'></div>")
             var topicDiv = $("<div style='z-index:1000;margin:0;display:flex;flex-direction:row;align-items:center;justify-content:center;margin-bottom:20px;width:320px;background-color:white;border-radius:0 0 40px 0;padding-left:10px;padding-right:10px;padding-top:5px;padding-bottom:10px;box-shadow:0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important;flex-wrap:wrap'></div>")
-            var topicSelect = $("<select class='form-control' style='width:150px;'></select>")
+            var topicSelect = $("<select class='form-control data-topic-select' style='width:150px;'></select>")
             var topicSelects = []
             topicSelects.push(topicSelect)
             topicDiv.append($("<span style='font-weight:bold'>" + JSLang[lang].listener + "&nbsp;</span>"))
@@ -1253,7 +1333,7 @@ function view_project(projectName, projectType) {
             var addTopicButton = $('<a class="btn btn-primary btn-circle btn-sm" style="margin-left:8px"><i class="fa fa-plus"></i></a>')
             topicDiv.append(addTopicButton)
             var addBind = function(){
-                var newtopicSelect = $("<select class='form-control' style='width:150px; margin-top:5px'></select>")
+                var newtopicSelect = $("<select class='form-control data-topic-select' style='width:150px; margin-top:5px'></select>")
                 newtopicSelect.append($("<option value='$'>" + JSLang[lang].select + "</option>"))
                 for (var tp in globalTableProjectInfo.received) {
                     newtopicSelect.append($("<option value='" + tp + "'>" + tp + "</option>"))
