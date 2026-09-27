@@ -443,20 +443,29 @@ async function daemon_start() {
     var crtPath = HTTPS_CRT_FILE
     var privateKey = ""
     var certificate = ""
-    const NTPServer = require('ntp-time').Server;
-    const nserver = new NTPServer();
-    nserver.handle((message, response) => {
-        message.transmitTimestamp = Math.floor(Date.now() / 1000);
-        response(message);
-    });
-    nserver.listen(123, err => {
-        if(err){
-            console.log("[INFO] NTP 服务器启动失败。 / NTP server failed to start");
-        }
-        else{
+    // ntp-time Server.listen(port, address) — 第二参数是 address，不是 err 回调。
+    // bind 失败（如 Android 无特权绑 123）会以 socket 'error' 抛出未捕获异常并拖垮进程。
+    try {
+        const NTPServer = require('ntp-time').Server;
+        const nserver = new NTPServer();
+        nserver.handle((message, response) => {
+            message.transmitTimestamp = Math.floor(Date.now() / 1000);
+            response(message);
+        });
+        nserver.socket.on('error', (err) => {
+            console.log("[INFO] NTP 服务器启动失败。 / NTP server failed to start", err && err.message ? err.message : err);
+        });
+        nserver.socket.on('listening', () => {
             console.log("[INFO] NTP 服务器已启动，端口: 123 / NTP server is listening on port", 123);
+        });
+        if (process.platform === 'android' || process.env.MIXIO_DISABLE_NTP === '1') {
+            console.log("[INFO] 跳过 NTP(123)：当前环境无法绑定特权端口。 / Skip NTP(123) on this platform");
+        } else {
+            nserver.listen(123);
         }
-    });
+    } catch (e) {
+        console.log("[INFO] NTP 服务器启动失败。 / NTP server failed to start", e && e.message ? e.message : e);
+    }
     if (keyPath.indexOf("http") == 0) {
         try {
             var privateKeyFileName = keyPath.split("/").pop()
